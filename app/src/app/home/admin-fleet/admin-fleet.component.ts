@@ -140,6 +140,7 @@ export class AdminFleetComponent implements OnInit {
   private validateBoat(): void {
     if (!String(this.form.boatName || '').trim()) throw new Error('Le nom du bateau est obligatoire.');
     if (!String(this.form.boatType || '').trim()) throw new Error('Le type de bateau est obligatoire.');
+    if (!String(this.form.ownerId || '').trim()) throw new Error('L’identifiant du propriétaire est obligatoire.');
     if (this.form.clickAndBoatUrl && !/^https?:\/\//i.test(this.form.clickAndBoatUrl)) throw new Error('Le lien Click&Boat doit commencer par http:// ou https://.');
     if (this.form.samBoatUrl && !/^https?:\/\//i.test(this.form.samBoatUrl)) throw new Error('Le lien SamBoat doit commencer par http:// ou https://.');
     if (this.form.websiteUrl && !/^https?:\/\//i.test(this.form.websiteUrl)) throw new Error('Le lien site web doit commencer par http:// ou https://.');

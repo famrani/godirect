@@ -39,10 +39,14 @@ import { AdminFleetComponent } from './admin-fleet/admin-fleet.component';
 import { SeaToysComponent } from './sea-toys/sea-toys.component';
 import { AdminSiteContentComponent } from './admin-site-content/admin-site-content.component';
 import { AdminBoatCalendarComponent } from './admin-boat-calendar/admin-boat-calendar.component';
+import { AdminStripeConnectComponent } from './admin-stripe-connect/admin-stripe-connect.component';
+import { PlatformHomeComponent } from './platform-home/platform-home.component';
+import { BoatContextGuard } from './boat-context.guard';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'home', component: HomeComponent },
+  { path: '', component: PlatformHomeComponent },
+  { path: 'boats/:boatId', component: HomeComponent, canActivate: [BoatContextGuard] },
+  { path: 'home', redirectTo: 'boats/alegria', pathMatch: 'full' },
   { path: 'sorties', component: OutingsComponent },
   { path: 'sorties/journee-en-mer', component: FullDayComponent },
   { path: 'sorties/coucher-de-soleil', component: SunsetCruiseComponent },
@@ -93,6 +97,7 @@ const routes: Routes = [
   { path: 'admin/content', component: AdminSiteContentComponent },
   { path: 'admin/pricing-model', component: AdminPricingModelComponent },
   { path: 'admin/fleet', component: AdminFleetComponent },
+  { path: 'admin/stripe-connect', component: AdminStripeConnectComponent },
   { path: 'admin/external-bookings', component: BookingsComponent },
   { path: 'admin/new-reservation', component: BookingsComponent },
   { path: 'my-external-bookings', component: AdminExternalBookingsComponent },

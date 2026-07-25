@@ -47,6 +47,7 @@ export class SiteContentService {
   private readonly defaultTenantId = 'alegria';
 
   private cached?: Record<SiteLanguage, SiteContent>;
+  private cachedBoatId?: string;
   private rawSiteContent?: SiteContentRoot | null;
 
   constructor(private http: HttpClient, private boatContext: BoatContextService) {}
@@ -63,7 +64,8 @@ export class SiteContentService {
    * The service no longer reads /alegria_v2 for translations.
    */
   async getContent(forceRefresh = false): Promise<Record<SiteLanguage, SiteContent>> {
-    if (this.cached && !forceRefresh) {
+    const boatId = this.boatContext.boatId;
+    if (this.cached && this.cachedBoatId === boatId && !forceRefresh) {
       return this.cached;
     }
 
@@ -78,6 +80,7 @@ export class SiteContentService {
         if (normalized) {
           this.rawSiteContent = raw;
           this.cached = this.normalizeFirebaseLanguages(normalized);
+          this.cachedBoatId = boatId;
           return this.cached;
         }
       } catch {
@@ -87,6 +90,7 @@ export class SiteContentService {
 
     this.rawSiteContent = SITE_CONTENT as any;
     this.cached = this.mergeAll(SITE_CONTENT as any);
+    this.cachedBoatId = boatId;
     return this.cached;
   }
 

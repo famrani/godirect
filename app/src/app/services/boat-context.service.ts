@@ -14,6 +14,11 @@ export class BoatContextService {
     return this.currentBoatId;
   }
 
+  clearBoatId(): void {
+    this.currentBoatId = 'alegria';
+    try { localStorage.removeItem(this.storageKey); } catch {}
+  }
+
   setBoatId(value: string): string {
     this.currentBoatId = this.normalize(value);
     try { localStorage.setItem(this.storageKey, this.currentBoatId); } catch {}

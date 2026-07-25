@@ -28,6 +28,9 @@
           <label>{{ 'auto.home.admin-fleet.admin-fleet.component.identifiant_bateau' | siteText }}<input type="text" [(ngModel)]="form.boatId" [placeholder]="'auto.home.admin-fleet.admin-fleet.component.alegria' | siteText" />
           </label>
 
+          <label>Identifiant propriétaire<input type="text" [(ngModel)]="form.ownerId" placeholder="owner-id" required />
+          </label>
+
           <label>{{ 'auto.home.admin-fleet.admin-fleet.component.nom_du_bateau' | siteText }}<input type="text" [(ngModel)]="form.boatName" [placeholder]="'auto.home.admin-fleet.admin-fleet.component.alegria' | siteText" required />
           </label>
 
@@ -98,6 +101,26 @@
           </label>
 
           <label>{{ 'auto.home.admin-fleet.admin-fleet.component.image_url_photo' | siteText }}<input type="url" [(ngModel)]="form.imageUrl" />
+          </label>
+
+          <label>Photo principale marketplace<input type="text" [(ngModel)]="form.coverImageUrl" placeholder="assets/img/boat/..." />
+          </label>
+
+          <label>Lieu affiché<input type="text" [(ngModel)]="form.location" placeholder="Antibes · Côte d’Azur" />
+          </label>
+
+          <label>Prix d’appel<input type="number" min="0" step="1" [(ngModel)]="form.startingPrice" />
+          </label>
+
+          <label class="full-width">Description courte marketplace<textarea rows="3" [(ngModel)]="form.shortDescription"></textarea>
+          </label>
+
+          <label class="checkbox-line">
+            <input type="checkbox" [(ngModel)]="form.marketplaceVisible" />Publié sur la marketplace
+          </label>
+
+          <label class="checkbox-line">
+            <input type="checkbox" [(ngModel)]="form.featured" />Bateau mis en avant
           </label>
 
           <label class="checkbox-line">

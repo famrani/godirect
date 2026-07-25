@@ -1,0 +1,17 @@
+.connect-page { padding: 3rem 1rem 5rem; background: #f7fafc; min-height: 70vh; }
+.connect-shell { max-width: 980px; margin: 0 auto; }
+.eyebrow { color: #087a9b; text-transform: uppercase; letter-spacing: .12em; font-weight: 700; }
+h1 { color: #082f49; margin: .5rem 0; }
+header p { max-width: 760px; color: #475569; }
+.connect-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin-top: 2rem; }
+.connect-card { background: white; border: 1px solid #dbe7ef; border-radius: 18px; padding: 1.5rem; box-shadow: 0 12px 30px rgba(8, 47, 73, .08); }
+dl, dd { margin: 0; }
+dl > div, .status-row { display: flex; justify-content: space-between; gap: 1rem; padding: .75rem 0; border-bottom: 1px solid #edf2f7; }
+dt, .status-row span { color: #64748b; }
+dd, .status-row strong { color: #0f172a; text-align: right; }
+.ok { color: #15803d !important; }
+.actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.danger { color: #b91c1c; border-color: #fecaca; background: #fff; }
+.error { color: #b91c1c; background: #fef2f2; padding: 1rem; border-radius: 12px; }
+small { display: block; color: #64748b; margin-top: 1rem; line-height: 1.5; }
+@media (max-width: 720px) { .connect-grid { grid-template-columns: 1fr; } }

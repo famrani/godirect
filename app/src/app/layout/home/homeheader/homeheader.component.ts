@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ServicesService } from 'godigital-lib';
 import { SITE_CONTENT, SiteContent } from '../../../home/site-content';
@@ -20,6 +20,8 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
 
   private languageSub?: Subscription;
   private accountSub?: Subscription;
+  private routerSub?: Subscription;
+  isMarketplace = true;
 
   private readonly headerText: Record<SiteLanguage, Record<string, string>> = {
     fr: {
@@ -327,7 +329,14 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.currentLanguage = this.languageService.currentLanguage || 'fr';
+    this.updateRouteContext(this.router.url);
     this.loadSiteContent();
+    this.routerSub = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.updateRouteContext(event.urlAfterRedirects);
+        if (!this.isMarketplace) this.loadSiteContent(true);
+      }
+    });
     this.languageSub = this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
       this.content = this.allSiteContent[language] || SITE_CONTENT[language] || SITE_CONTENT.fr;
@@ -349,9 +358,9 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async loadSiteContent(): Promise<void> {
+  private async loadSiteContent(forceRefresh = false): Promise<void> {
     try {
-      this.allSiteContent = await this.siteContentService.getContent();
+      this.allSiteContent = await this.siteContentService.getContent(forceRefresh);
       this.content = this.allSiteContent[this.currentLanguage] || SITE_CONTENT[this.currentLanguage] || SITE_CONTENT.fr;
     } catch {
       this.allSiteContent = SITE_CONTENT;
@@ -362,6 +371,29 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.languageSub?.unsubscribe();
     this.accountSub?.unsubscribe();
+    this.routerSub?.unsubscribe();
+  }
+
+  private updateRouteContext(url: string): void {
+    const path = String(url || '/').split('?')[0].replace(/\/+$/, '') || '/';
+    this.isMarketplace = path === '/';
+  }
+
+  get platformBrand(): string {
+    return 'Boat Marketplace';
+  }
+
+  get platformTagline(): string {
+    const values: Record<string, string> = {
+      fr: 'Bateaux et expériences en mer',
+      en: 'Boats and sea experiences',
+      es: 'Barcos y experiencias en el mar',
+      it: 'Barche ed esperienze in mare',
+      de: 'Boote und Erlebnisse auf See',
+      nl: 'Boten en ervaringen op zee',
+      ru: 'Суда и морские прогулки',
+    };
+    return values[this.currentLanguage] || values.en;
   }
 
   t(key: string, fallback = ''): string {

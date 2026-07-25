@@ -30,6 +30,13 @@ export interface AlegriaBoatResource {
   draft?: string;
   engines?: string;
   imageUrl?: string;
+  coverImageUrl?: string;
+  shortDescription?: string;
+  location?: string;
+  startingPrice?: number;
+  marketplaceVisible?: boolean;
+  featured?: boolean;
+  gallery?: string[];
   extraServices?: Record<string, any>;
   active?: boolean;
   createdTS?: number;
@@ -77,6 +84,12 @@ export class FleetService {
       draft: '',
       engines: '',
       imageUrl: 'assets/img/logo-Alegria.png',
+      coverImageUrl: 'assets/img/boat/bali4.1/bali-41-2.jpg',
+      shortDescription: '',
+      location: 'Marina Baie des Anges',
+      startingPrice: 600,
+      marketplaceVisible: true,
+      featured: false,
       extraServices: {},
       active: true,
       createdTS: now,
@@ -121,6 +134,9 @@ export class FleetService {
       maxGuests: Number(boat.maxGuests ?? 12),
       cabins: Number(boat.cabins ?? 0),
       bathrooms: Number(boat.bathrooms ?? 0),
+      startingPrice: Number(boat.startingPrice ?? 0),
+      marketplaceVisible: boat.marketplaceVisible !== false,
+      featured: boat.featured === true,
       active: boat.active !== false,
       createdTS: boat.createdTS || now,
       modifiedTS: now,
@@ -131,14 +147,23 @@ export class FleetService {
   }
 
   private async readPath(path: string): Promise<any> {
+    // The marketplace has one canonical public database. Read it first so an
+    // obsolete Firebase app initialized by godigital-lib cannot shadow bnFleet
+    // with an empty snapshot from another project.
+    try {
+      const restValue = await this.http.get<any>(`${this.firebaseUrl}/${path}.json`).toPromise();
+      if (restValue !== null && restValue !== undefined) return restValue;
+    } catch {}
+
     for (const db of this.getRealtimeDatabaseCandidates()) {
       try {
         const snap = await db.ref(path).once('value');
-        return snap && typeof snap.val === 'function' ? snap.val() : null;
+        const value = snap && typeof snap.val === 'function' ? snap.val() : null;
+        if (value !== null && value !== undefined) return value;
       } catch {}
     }
 
-    return this.http.get<any>(`${this.firebaseUrl}/${path}.json`).toPromise();
+    return null;
   }
 
   private async writePath(path: string, payload: any): Promise<void> {

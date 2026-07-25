@@ -3,8 +3,8 @@
     <a class="brand" routerLink="/" (click)="closeMenu()">
       <img class="brand-logo" src="assets/img/logo-Alegria.png" [alt]="t('brand')" />
       <span class="brand-text">
-        <strong>{{ t('brand') }}</strong>
-        <small>{{ t('brandTagline') }}</small>
+        <strong>{{ isMarketplace ? platformBrand : t('brand') }}</strong>
+        <small>{{ isMarketplace ? platformTagline : t('brandTagline') }}</small>
       </span>
     </a>
 
@@ -13,7 +13,7 @@
     </button>
 
     <nav class="main-nav" [class.open]="menuOpen">
-      <details class="nav-dropdown" (toggle)="onDropdownToggle($event)">
+      <details class="nav-dropdown" *ngIf="!isMarketplace" (toggle)="onDropdownToggle($event)">
         <summary>{{ t('nav.outings') }}</summary>
         <div class="dropdown-panel">
           <a routerLink="/sorties" routerLinkActive="active" (click)="closeMenu()">{{ allOutingsLabel }}</a>
@@ -24,7 +24,7 @@
         </div>
       </details>
 
-      <details class="nav-dropdown" (toggle)="onDropdownToggle($event)">
+      <details class="nav-dropdown" *ngIf="!isMarketplace" (toggle)="onDropdownToggle($event)">
         <summary>{{ t('nav.boat') }}</summary>
         <div class="dropdown-panel">
           <a routerLink="/bateau" routerLinkActive="active" (click)="closeMenu()">{{ boatPresentationLabel }}</a>
@@ -36,7 +36,7 @@
       </details>
 
 
-      <details class="nav-dropdown" (toggle)="onDropdownToggle($event)">
+      <details class="nav-dropdown" *ngIf="!isMarketplace" (toggle)="onDropdownToggle($event)">
         <summary>{{ practicalInfoLabel }}</summary>
         <div class="dropdown-panel">
           <a routerLink="/booking-process" routerLinkActive="active" (click)="closeMenu()">{{ bookingProcessLabel }}</a>
@@ -47,7 +47,7 @@
         </div>
       </details>
 
-      <a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">{{ contactLabel }}</a>
+      <a *ngIf="!isMarketplace" routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">{{ contactLabel }}</a>
 
       <div class="language-switcher">
         <select [value]="currentLanguage" (change)="changeLanguage($any($event.target).value)" [attr.aria-label]="t('nav.languageSelector')">
@@ -79,6 +79,7 @@
           <a routerLink="/admin/calendar" routerLinkActive="active" (click)="closeMenu()">{{ calendarLabel }}</a>
           <a routerLink="/admin/outings" routerLinkActive="active" (click)="closeMenu()">{{ boatLogManagerLabel }}</a>
           <a routerLink="/admin/fleet" routerLinkActive="active" (click)="closeMenu()">{{ fleetLabel }}</a>
+          <a routerLink="/admin/stripe-connect" routerLinkActive="active" (click)="closeMenu()">Stripe Connect</a>
           <a routerLink="/admin/manage-outings" routerLinkActive="active" (click)="closeMenu()">{{ managePublicOutingsLabel }}</a>
           <a routerLink="/admin/pricing-model" routerLinkActive="active" (click)="closeMenu()">{{ pricingModelLabel }}</a>
           <a routerLink="/admin/feedbacks" routerLinkActive="active" (click)="closeMenu()">{{ adminFeedbacksLabel }}</a>

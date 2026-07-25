@@ -1,0 +1,43 @@
+<section class="connect-page">
+  <div class="container connect-shell">
+    <header>
+      <span class="eyebrow">{{ t('eyebrow') }}</span>
+      <h1>{{ t('title') }}</h1>
+      <p>{{ t('intro') }}</p>
+    </header>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <p *ngIf="loading">{{ t('loading') }}</p>
+
+    <div class="connect-grid" *ngIf="!loading">
+      <article class="connect-card identity-card">
+        <dl>
+          <div><dt>{{ t('boat') }}</dt><dd>{{ boatName }}</dd></div>
+          <div><dt>{{ t('owner') }}</dt><dd>{{ ownerId }}</dd></div>
+          <div>
+            <dt>{{ t('status') }}</dt>
+            <dd [class.ok]="operational">
+              {{ operational ? t('operational') : (status?.connected ? t('actionRequired') : t('notConnected')) }}
+            </dd>
+          </div>
+          <div><dt>{{ t('commission') }}</dt><dd>{{ (status?.commissionPercent || 0) | number:'1.0-2' }} %</dd></div>
+        </dl>
+      </article>
+
+      <article class="connect-card status-card">
+        <div class="status-row"><span>{{ t('charges') }}</span><strong [class.ok]="status?.chargesEnabled">{{ status?.chargesEnabled ? t('enabled') : t('disabled') }}</strong></div>
+        <div class="status-row"><span>{{ t('payouts') }}</span><strong [class.ok]="status?.payoutsEnabled">{{ status?.payoutsEnabled ? t('enabled') : t('disabled') }}</strong></div>
+        <div class="status-row"><span>{{ t('mode') }}</span><strong>{{ status?.livemode ? t('live') : t('test') }}</strong></div>
+        <small>{{ t('note') }}</small>
+      </article>
+    </div>
+
+    <div class="actions" *ngIf="!loading">
+      <button class="btn btn-primary" type="button" (click)="connect()">
+        {{ status?.connected ? t('continue') : t('connect') }}
+      </button>
+      <button class="btn btn-secondary" type="button" (click)="refresh()">{{ t('refresh') }}</button>
+      <button class="btn danger" type="button" *ngIf="status?.connected" [disabled]="disconnecting" (click)="disconnect()">{{ t('disconnect') }}</button>
+    </div>
+  </div>
+</section>

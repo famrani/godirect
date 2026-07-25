@@ -72,6 +72,84 @@ class StripeService {
     constructor(stbDbSvc) {
         this.stbDbSvc = stbDbSvc;
     }
+    /**
+     * Resolve the commercial context on the server. The browser can suggest an
+     * owner, but a booking's stored boat/owner relationship is authoritative.
+     */
+    async resolveConnectPaymentContext(requestedOwnerId, bookingId, amount, paymentType, requestedBoatId = 'alegria') {
+        let booking = null;
+        if (bookingId) {
+            const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+            booking = bookingSnap.val() || null;
+        }
+        const boatId = String(booking?.boatId || requestedBoatId || 'alegria');
+        const boatSnap = await this.stbDbSvc.db.ref(`/bnFleet/${boatId}`).once('value');
+        const boat = boatSnap.val() || {};
+        const ownerId = String(booking
+            ? (booking.ownerId || boat.ownerId || requestedOwnerId || 'alegria')
+            : (boat.ownerId || requestedOwnerId || 'alegria'));
+        const ownerSnap = await this.stbDbSvc.db.ref(`/backendowners/${ownerId}`).once('value');
+        const owner = ownerSnap.val() || {};
+        const platformConnectSnap = await this.stbDbSvc.db.ref('/platformSettings/stripeConnect').once('value');
+        const platformConnect = platformConnectSnap.val() || {};
+        const stripeStandard = owner.stripeStandard || {};
+        const connect = owner.connect || owner.stripeConnect || {};
+        const commissionBps = Math.max(0, Math.min(5000, Math.round(Number(connect.commissionBps ??
+            owner.commissionBps ??
+            platformConnect.defaultCommissionBps ??
+            0) || 0)));
+        const commissionableTypes = Array.isArray(connect.commissionablePaymentTypes)
+            ? connect.commissionablePaymentTypes.map((value) => String(value).toLowerCase())
+            : Array.isArray(platformConnect.commissionablePaymentTypes)
+                ? platformConnect.commissionablePaymentTypes.map((value) => String(value).toLowerCase())
+                : ['deposit', 'deposit_authorization', 'balance', 'extra_service', 'ad_hoc'];
+        const normalizedPaymentType = String(paymentType || '').toLowerCase();
+        const isCommissionable = commissionableTypes.includes(normalizedPaymentType);
+        const connectedAccountId = stripeStandard.stripe_user_id || connect.accountId || null;
+        const connectEnabled = ownerId !== 'alegria' &&
+            ownerId !== 'platform' &&
+            connect.enabled !== false &&
+            !!connectedAccountId;
+        const applicationFeeAmount = connectEnabled && isCommissionable
+            ? Math.max(0, Math.min(amount, Math.round((amount * commissionBps) / 10000)))
+            : 0;
+        return {
+            ownerId,
+            boatId,
+            boatName: String(boat.boatName || booking?.boatName || 'Boat'),
+            connectedAccountId,
+            commissionBps,
+            applicationFeeAmount,
+            ownerNetAmount: Math.max(0, amount - applicationFeeAmount),
+            connectEnabled,
+        };
+    }
+    paymentIntentDataWithCommission(base, context) {
+        return context.applicationFeeAmount > 0
+            ? { ...base, application_fee_amount: context.applicationFeeAmount }
+            : base;
+    }
+    safeConnectReturnUrl(candidate, fallback) {
+        const value = String(candidate || '').trim();
+        if (!value)
+            return fallback;
+        if (value.startsWith('/') && !value.startsWith('//'))
+            return value;
+        try {
+            const candidateUrl = new URL(value);
+            const allowedOrigins = String(process.env.CONNECT_ALLOWED_RETURN_ORIGINS || '')
+                .split(',')
+                .map((origin) => origin.trim())
+                .filter(Boolean);
+            if (/^https?:\/\//i.test(fallback)) {
+                allowedOrigins.push(new URL(fallback).origin);
+            }
+            return allowedOrigins.includes(candidateUrl.origin) ? candidateUrl.toString() : fallback;
+        }
+        catch {
+            return fallback;
+        }
+    }
     // ---------------------------------------------------------------------------
     // 1) OAUTH (Standard accounts)
     // ---------------------------------------------------------------------------
@@ -136,12 +214,18 @@ class StripeService {
                 livemode,
                 connectedAt: Date.now(),
             });
+            if (accountType === 'owner') {
+                await this.stbDbSvc.db.ref(`/backendowners/${ownerId}/connect`).update({
+                    enabled: true,
+                    accountId: stripe_user_id,
+                    onboardingStatus: 'connected',
+                    connectedAt: Date.now(),
+                    modifiedTS: Date.now(),
+                });
+            }
             // Fallback to old behavior if we don't have a returnUrl
             const fallback = process.env.CONNECT_DONE_REDIRECT || '/owner/stripe/connected';
-            // Optional: basic safety — allow only relative URLs or same-origin
-            const target = returnUrl && returnUrl.startsWith('http')
-                ? returnUrl
-                : fallback;
+            const target = this.safeConnectReturnUrl(returnUrl, fallback);
             res.redirect(target);
         }
         catch (err) {
@@ -166,6 +250,15 @@ class StripeService {
                 stripe_user_id: data.stripe_user_id,
             });
             await this.stbDbSvc.db.ref(`/backendowners/${ownerId}/stripeStandard`).remove();
+            await this.stbDbSvc.db.ref(`/backendowners/${ownerId}/connect`).update({
+                enabled: false,
+                accountId: null,
+                onboardingStatus: 'disconnected',
+                chargesEnabled: false,
+                payoutsEnabled: false,
+                detailsSubmitted: false,
+                modifiedTS: Date.now(),
+            });
             res.json({ ok: true });
         }
         catch (e) {
@@ -663,7 +756,7 @@ class StripeService {
     async createOutingDepositCheckout(req, res) {
         try {
             const body = req.body || {};
-            const ownerId = body.ownerId || 'alegria';
+            let ownerId = body.ownerId || 'alegria';
             const bookingId = body.bookingId || body.offerId || body.id;
             const rawDepositAmount = body.depositAmount ?? body.amount ?? body.deposit ?? body.totalDeposit;
             const currency = String(body.currency || 'eur').toLowerCase();
@@ -706,6 +799,8 @@ class StripeService {
                     received: { successUrl, cancelUrl, returnUrl: body.returnUrl }
                 });
             }
+            const connectContext = await this.resolveConnectPaymentContext(ownerId, bookingId, amount, isDepositAuthorizationOnly ? 'deposit_authorization' : 'deposit');
+            ownerId = connectContext.ownerId;
             const stripe = await this.getStripeForOwner(ownerId);
             const customer = customerEmail
                 ? await stripe.customers.create({
@@ -733,7 +828,7 @@ class StripeService {
                             currency,
                             unit_amount: amount,
                             product_data: {
-                                name: 'Alegria outing deposit',
+                                name: `${connectContext.boatName} outing deposit`,
                                 description: outingType || 'Boat outing deposit',
                             },
                         },
@@ -741,7 +836,7 @@ class StripeService {
                 ],
                 success_url: this.appendCheckoutParams(successUrl, { session_id: '{CHECKOUT_SESSION_ID}', bookingId, paymentType: 'deposit', payment: 'success' }),
                 cancel_url: this.appendCheckoutParams(cancelUrl, { bookingId, paymentType: 'deposit', payment: 'cancelled' }),
-                payment_intent_data: {
+                payment_intent_data: this.paymentIntentDataWithCommission({
                     setup_future_usage: 'off_session',
                     capture_method: isDepositAuthorizationOnly ? 'manual' : 'automatic',
                     metadata: {
@@ -751,8 +846,11 @@ class StripeService {
                         paymentType: isDepositAuthorizationOnly ? 'deposit_authorization' : 'deposit',
                         outingType: outingType || '',
                         outingDate: outingDate || '',
+                        boatId: connectContext.boatId,
+                        commissionBps: String(connectContext.commissionBps),
+                        applicationFeeAmount: String(connectContext.applicationFeeAmount),
                     },
-                },
+                }, connectContext),
                 metadata: {
                     paymentId,
                     bookingId,
@@ -760,15 +858,24 @@ class StripeService {
                     paymentType: isDepositAuthorizationOnly ? 'deposit_authorization' : 'deposit',
                     outingType: outingType || '',
                     outingDate: outingDate || '',
+                    boatId: connectContext.boatId,
+                    commissionBps: String(connectContext.commissionBps),
+                    applicationFeeAmount: String(connectContext.applicationFeeAmount),
                 },
             });
             const now = Date.now();
             const payload = {
                 paymentId,
                 ownerId,
+                boatId: connectContext.boatId,
                 bookingId,
                 paymentType: isDepositAuthorizationOnly ? 'deposit_authorization' : 'deposit',
                 amount,
+                grossAmount: amount,
+                commissionBps: connectContext.commissionBps,
+                applicationFeeAmount: connectContext.applicationFeeAmount,
+                ownerNetAmount: connectContext.ownerNetAmount,
+                stripeConnectedAccountId: connectContext.connectedAccountId,
                 currency,
                 status: isDepositAuthorizationOnly ? 'authorization_checkout_created' : 'checkout_created',
                 captureMethod: isDepositAuthorizationOnly ? 'manual' : 'automatic',
@@ -784,6 +891,16 @@ class StripeService {
             };
             await paymentRef.set(payload);
             await this.stbDbSvc.db.ref(this.buildBookingPaymentPath(bookingId, 'deposit')).set(payload);
+            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/connectFinancials/${paymentId}`).set({
+                paymentType: payload.paymentType,
+                grossAmount: payload.grossAmount,
+                commissionBps: payload.commissionBps,
+                applicationFeeAmount: payload.applicationFeeAmount,
+                ownerNetAmount: payload.ownerNetAmount,
+                stripeConnectedAccountId: payload.stripeConnectedAccountId,
+                currency,
+                createdTS: now,
+            });
             return res.json({ ok: true, url: session.url, id: session.id, paymentId });
         }
         catch (e) {
@@ -2310,21 +2427,65 @@ class StripeService {
                 .ref(`/backendowners/${ownerId}/stripeStandard`)
                 .once('value');
             const data = snap.val();
+            const ownerSnap = await this.stbDbSvc.db.ref(`/backendowners/${ownerId}/connect`).once('value');
+            const connect = ownerSnap.val() || {};
+            const platformConnectSnap = await this.stbDbSvc.db.ref('/platformSettings/stripeConnect').once('value');
+            const platformConnect = platformConnectSnap.val() || {};
+            const commissionBps = Math.max(0, Math.min(5000, Number(connect.commissionBps ?? platformConnect.defaultCommissionBps ?? 0)));
+            if (ownerId === 'alegria' || ownerId === 'platform') {
+                const platformAccount = await PLATFORM.accounts.retrieve().catch(() => null);
+                return res.json({
+                    connected: true,
+                    enabled: true,
+                    accountId: 'platform',
+                    onboardingStatus: platformAccount?.details_submitted ? 'complete' : 'action_required',
+                    chargesEnabled: !!platformAccount?.charges_enabled,
+                    payoutsEnabled: !!platformAccount?.payouts_enabled,
+                    detailsSubmitted: !!platformAccount?.details_submitted,
+                    commissionBps: 0,
+                    commissionPercent: 0,
+                    livemode: String(process.env.STRIPE_SECRET_KEY || '').startsWith('sk_live_'),
+                    connectedAt: connect.connectedAt || null,
+                });
+            }
             if (!data) {
                 // Not connected
                 return res.json({
                     connected: false,
-                    stripe_user_id: null,
+                    enabled: connect.enabled !== false,
+                    accountId: null,
+                    onboardingStatus: 'not_connected',
+                    chargesEnabled: false,
+                    payoutsEnabled: false,
+                    detailsSubmitted: false,
+                    commissionBps,
+                    commissionPercent: commissionBps / 100,
                     livemode: false,
                     connectedAt: null,
                 });
             }
+            let account = null;
+            if (data.stripe_user_id) {
+                account = await PLATFORM.accounts.retrieve(data.stripe_user_id).catch(() => null);
+            }
+            const statusPayload = {
+                enabled: connect.enabled !== false,
+                accountId: data.stripe_user_id || connect.accountId || null,
+                onboardingStatus: account?.details_submitted ? 'complete' : 'action_required',
+                chargesEnabled: !!account?.charges_enabled,
+                payoutsEnabled: !!account?.payouts_enabled,
+                detailsSubmitted: !!account?.details_submitted,
+                commissionBps,
+                commissionPercent: commissionBps / 100,
+                livemode: !!data.livemode,
+                connectedAt: data.connectedAt || connect.connectedAt || null,
+                modifiedTS: Date.now(),
+            };
+            await this.stbDbSvc.db.ref(`/backendowners/${ownerId}/connect`).update(statusPayload);
             // Return only safe fields
             return res.json({
                 connected: true,
-                stripe_user_id: data.stripe_user_id || null,
-                livemode: !!data.livemode,
-                connectedAt: data.connectedAt || null,
+                ...statusPayload,
             });
         }
         catch (err) {
@@ -2423,7 +2584,7 @@ class StripeService {
     async createOutingBalanceCheckout(req, res) {
         try {
             const body = req.body || {};
-            const ownerId = body.ownerId || 'alegria';
+            let ownerId = body.ownerId || 'alegria';
             const bookingId = body.bookingId || body.offerId || body.id;
             const rawBalanceAmount = body.balanceAmount ?? body.remainingAmount ?? body.amount ?? body.balance ?? body.remaining;
             const currency = String(body.currency || 'eur').toLowerCase();
@@ -2455,6 +2616,8 @@ class StripeService {
                     received: { successUrl, cancelUrl, returnUrl: body.returnUrl }
                 });
             }
+            const connectContext = await this.resolveConnectPaymentContext(ownerId, bookingId, amount, 'balance');
+            ownerId = connectContext.ownerId;
             const stripe = await this.getStripeForOwner(ownerId);
             const customer = customerEmail
                 ? await stripe.customers.create({
@@ -2482,7 +2645,7 @@ class StripeService {
                             currency,
                             unit_amount: amount,
                             product_data: {
-                                name: 'Alegria remaining balance',
+                                name: `${connectContext.boatName} remaining balance`,
                                 description: outingType || 'Boat outing remaining balance',
                             },
                         },
@@ -2490,7 +2653,7 @@ class StripeService {
                 ],
                 success_url: this.appendCheckoutParams(successUrl, { session_id: '{CHECKOUT_SESSION_ID}', bookingId, paymentType: 'balance', payment: 'success' }),
                 cancel_url: this.appendCheckoutParams(cancelUrl, { bookingId, paymentType: 'balance', payment: 'cancelled' }),
-                payment_intent_data: {
+                payment_intent_data: this.paymentIntentDataWithCommission({
                     metadata: {
                         paymentId,
                         bookingId,
@@ -2498,8 +2661,11 @@ class StripeService {
                         paymentType: 'balance',
                         outingType: outingType || '',
                         outingDate: outingDate || '',
+                        boatId: connectContext.boatId,
+                        commissionBps: String(connectContext.commissionBps),
+                        applicationFeeAmount: String(connectContext.applicationFeeAmount),
                     },
-                },
+                }, connectContext),
                 metadata: {
                     paymentId,
                     bookingId,
@@ -2507,15 +2673,24 @@ class StripeService {
                     paymentType: 'balance',
                     outingType: outingType || '',
                     outingDate: outingDate || '',
+                    boatId: connectContext.boatId,
+                    commissionBps: String(connectContext.commissionBps),
+                    applicationFeeAmount: String(connectContext.applicationFeeAmount),
                 },
             });
             const now = Date.now();
             const payload = {
                 paymentId,
                 ownerId,
+                boatId: connectContext.boatId,
                 bookingId,
                 paymentType: 'balance',
                 amount,
+                grossAmount: amount,
+                commissionBps: connectContext.commissionBps,
+                applicationFeeAmount: connectContext.applicationFeeAmount,
+                ownerNetAmount: connectContext.ownerNetAmount,
+                stripeConnectedAccountId: connectContext.connectedAccountId,
                 currency,
                 status: 'checkout_created',
                 stripeCheckoutSessionId: session.id,
@@ -2531,6 +2706,16 @@ class StripeService {
             await paymentRef.set(payload);
             await this.stbDbSvc.db.ref(this.buildBookingPaymentPath(bookingId, 'balance')).set(payload);
             await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/balance`).set(payload);
+            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/connectFinancials/${paymentId}`).set({
+                paymentType: 'balance',
+                grossAmount: payload.grossAmount,
+                commissionBps: payload.commissionBps,
+                applicationFeeAmount: payload.applicationFeeAmount,
+                ownerNetAmount: payload.ownerNetAmount,
+                stripeConnectedAccountId: payload.stripeConnectedAccountId,
+                currency,
+                createdTS: now,
+            });
             return res.json({ ok: true, url: session.url, id: session.id, paymentId });
         }
         catch (e) {
@@ -2545,7 +2730,7 @@ class StripeService {
     async createOutingExtraServiceCheckout(req, res) {
         try {
             const body = req.body || {};
-            const ownerId = body.ownerId || 'alegria';
+            let ownerId = body.ownerId || 'alegria';
             const bookingId = body.bookingId || body.offerId || '';
             const standalonePayment = body.standalonePayment === true || body.standalonePayment === 'true' || !bookingId;
             const extraServiceId = body.extraServiceId || body.adhocPaymentId || body.serviceId || body.id || `extra_${Date.now()}`;
@@ -2584,6 +2769,8 @@ class StripeService {
                     received: { successUrl, cancelUrl, returnUrl: body.returnUrl }
                 });
             }
+            const connectContext = await this.resolveConnectPaymentContext(ownerId, bookingId, amount, normalizedPaymentType, body.boatId || 'alegria');
+            ownerId = connectContext.ownerId;
             const stripe = await this.getStripeForOwner(ownerId);
             const customer = customerEmail
                 ? await stripe.customers.create({
@@ -2613,7 +2800,7 @@ class StripeService {
                             unit_amount: amount,
                             product_data: {
                                 name: description,
-                                description: 'Alegria Boat additional payment',
+                                description: `${connectContext.boatName} additional payment`,
                             },
                         },
                     },
@@ -2633,11 +2820,12 @@ class StripeService {
                     adhocPaymentId: isAdHocPayment ? extraServiceId : '',
                     payment: 'cancelled'
                 }),
-                payment_intent_data: {
+                payment_intent_data: this.paymentIntentDataWithCommission({
                     metadata: {
                         paymentId,
                         bookingId: bookingId || '',
                         ownerId,
+                        boatId: connectContext.boatId,
                         paymentType: normalizedPaymentType,
                         standalonePayment: standalonePayment ? 'true' : 'false',
                         customerUserId,
@@ -2645,12 +2833,15 @@ class StripeService {
                         extraServiceId,
                         adhocPaymentId: isAdHocPayment ? extraServiceId : '',
                         description,
+                        commissionBps: String(connectContext.commissionBps),
+                        applicationFeeAmount: String(connectContext.applicationFeeAmount),
                     },
-                },
+                }, connectContext),
                 metadata: {
                     paymentId,
                     bookingId: bookingId || '',
                     ownerId,
+                    boatId: connectContext.boatId,
                     paymentType: normalizedPaymentType,
                     standalonePayment: standalonePayment ? 'true' : 'false',
                     customerUserId,
@@ -2658,12 +2849,15 @@ class StripeService {
                     extraServiceId,
                     adhocPaymentId: isAdHocPayment ? extraServiceId : '',
                     description,
+                    commissionBps: String(connectContext.commissionBps),
+                    applicationFeeAmount: String(connectContext.applicationFeeAmount),
                 },
             });
             const now = Date.now();
             const payload = {
                 paymentId,
                 ownerId,
+                boatId: connectContext.boatId,
                 bookingId: bookingId || '',
                 standalonePayment,
                 customerUserId,
@@ -2673,6 +2867,11 @@ class StripeService {
                 adhocPaymentId: isAdHocPayment ? extraServiceId : '',
                 description,
                 amount,
+                grossAmount: amount,
+                commissionBps: connectContext.commissionBps,
+                applicationFeeAmount: connectContext.applicationFeeAmount,
+                ownerNetAmount: connectContext.ownerNetAmount,
+                stripeConnectedAccountId: connectContext.connectedAccountId,
                 currency,
                 status: 'checkout_created',
                 paid: false,
@@ -2685,6 +2884,18 @@ class StripeService {
                 modifiedTS: now,
             };
             await paymentRef.set(payload);
+            if (bookingId) {
+                await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/connectFinancials/${paymentId}`).set({
+                    paymentType: normalizedPaymentType,
+                    grossAmount: payload.grossAmount,
+                    commissionBps: payload.commissionBps,
+                    applicationFeeAmount: payload.applicationFeeAmount,
+                    ownerNetAmount: payload.ownerNetAmount,
+                    stripeConnectedAccountId: payload.stripeConnectedAccountId,
+                    currency,
+                    createdTS: now,
+                });
+            }
             if (isSkipperFeePayment && bookingId) {
                 await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/skipper`).set(payload);
             }

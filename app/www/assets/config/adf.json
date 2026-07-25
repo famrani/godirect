@@ -5,17 +5,18 @@
     "stripeplatform": "test",
     "stripepublickey": "pk_test_ksDl8VQ7yCT2HDpDGN0hBUXe",
     "3words": "G49UQZCC",
-    "release": "0.1"
+    "release": "0.2"
   },
   "dev": {
     "firebaseMasterConfig": {
-      "apiKey": "AIzaSyCbv9jnuUTPFUaNDh_hXcRUzHBRKSE3dpE",
-      "authDomain": "adn-dev-4d05d.firebaseapp.com",
-      "databaseURL": "https://adn-dev-4d05d.firebaseio.com",
-      "projectId": "adn-dev-4d05d",
-      "storageBucket": "adn-dev-4d05d.appspot.com",
-      "messagingSenderId": "627524094448",
-      "appId": "1:627524094448:web:0be403126c5497c8173535"
+      "apiKey": "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      "authDomain": "ailla-poc.firebaseapp.com",
+      "databaseURL": "https://ailla-poc.firebaseapp.com",
+      "projectId": "ailla-poc",
+      "storageBucket": "ailla-poc.appspot.com",
+      "messagingSenderId": "483464582410",
+      "appId": "1:483464582410:web:010d025e452b5a9b4b16f3",
+      "measurementId": "G-BVM7KGJTRY"
     },
     "firebaseStorageConfig": {
       "apiKey": "AIzaSyCbv9jnuUTPFUaNDh_hXcRUzHBRKSE3dpE",
@@ -32,13 +33,14 @@
   },
   "test": {
     "firebaseMasterConfig": {
-      "apiKey": "AIzaSyCbv9jnuUTPFUaNDh_hXcRUzHBRKSE3dpE",
-      "authDomain": "adn-dev-4d05d.firebaseapp.com",
-      "databaseURL": "https://adn-dev-4d05d.firebaseio.com",
-      "projectId": "adn-dev-4d05d",
-      "storageBucket": "adn-dev-4d05d.appspot.com",
-      "messagingSenderId": "627524094448",
-      "appId": "1:627524094448:web:0be403126c5497c8173535"
+      "apiKey": "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      "authDomain": "ailla-poc.firebaseapp.com",
+      "databaseURL": "https://ailla-poc.firebaseapp.com",
+      "projectId": "ailla-poc",
+      "storageBucket": "ailla-poc.appspot.com",
+      "messagingSenderId": "483464582410",
+      "appId": "1:483464582410:web:010d025e452b5a9b4b16f3",
+      "measurementId": "G-BVM7KGJTRY"
     },
     "firebaseStorageConfig": {
       "apiKey": "AIzaSyDu1uePnrDqNCgDtaSqoGldbeG117-UVBk",
@@ -55,13 +57,14 @@
   },
   "prod": {
     "firebaseMasterConfig": {
-      "apiKey": "AIzaSyCbv9jnuUTPFUaNDh_hXcRUzHBRKSE3dpE",
-      "authDomain": "adn-dev-4d05d.firebaseapp.com",
-      "databaseURL": "https://adn-dev-4d05d.firebaseio.com",
-      "projectId": "adn-dev-4d05d",
-      "storageBucket": "adn-dev-4d05d.appspot.com",
-      "messagingSenderId": "627524094448",
-      "appId": "1:627524094448:web:0be403126c5497c8173535"
+      "apiKey": "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      "authDomain": "ailla-poc.firebaseapp.com",
+      "databaseURL": "https://ailla-poc.firebaseapp.com",
+      "projectId": "ailla-poc",
+      "storageBucket": "ailla-poc.appspot.com",
+      "messagingSenderId": "483464582410",
+      "appId": "1:483464582410:web:010d025e452b5a9b4b16f3",
+      "measurementId": "G-BVM7KGJTRY"
     },
     "firebaseStorageConfig": {
       "apiKey": "AIzaSyBERTBNIIacNDFK2OEt1wVBdIFimM05j-o",

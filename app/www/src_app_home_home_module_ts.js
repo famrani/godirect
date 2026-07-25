@@ -152,6 +152,17 @@ module.exports = "\n<section class=\"page-hero\">\n  <div class=\"container narr
 
 /***/ }),
 
+/***/ 1154:
+/*!****************************************************************************!*\
+  !*** ./src/app/home/platform-home/platform-home.component.html?ngResource ***!
+  \****************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<section class=\"marketplace-hero\">\n  <div class=\"container marketplace-hero-grid\">\n    <div class=\"hero-copy\">\n      <span class=\"eyebrow\">{{ texts.eyebrow }}</span>\n      <h1>{{ texts.title }}</h1>\n      <p>{{ texts.intro }}</p>\n      <div class=\"hero-actions\">\n        <a href=\"#boats\" class=\"btn btn-primary\">{{ texts.boatsTitle }}</a>\n      </div>\n    </div>\n    <div class=\"hero-collage\" *ngIf=\"boats.length\">\n      <img [src]=\"imageFor(boats[0])\" [alt]=\"boats[0].boatName\" />\n      <div class=\"hero-boat-caption\">\n        <span>{{ locationFor(boats[0]) }}</span>\n        <strong>{{ boats[0].boatName }}</strong>\n      </div>\n    </div>\n  </div>\n</section>\n\n<section class=\"section fleet-section\" id=\"boats\">\n  <div class=\"container\">\n    <div class=\"fleet-head\">\n      <div>\n        <span class=\"eyebrow\">{{ texts.boatsEyebrow }}</span>\n        <h2>{{ texts.boatsTitle }}</h2>\n      </div>\n      <p>{{ texts.boatsIntro }}</p>\n    </div>\n\n    <p class=\"loading\" *ngIf=\"loading\">…</p>\n    <p class=\"empty\" *ngIf=\"!loading && !boats.length\">{{ texts.noBoats }}</p>\n\n    <div class=\"boat-grid\" [class.single-boat]=\"boats.length === 1\" *ngIf=\"!loading && boats.length\">\n      <article class=\"boat-card\" *ngFor=\"let boat of boats; trackBy: trackBoat\" (click)=\"openBoat(boat)\" tabindex=\"0\" (keyup.enter)=\"openBoat(boat)\">\n        <div class=\"boat-image\">\n          <img [src]=\"imageFor(boat)\" [alt]=\"boat.boatName\" />\n          <span class=\"featured\" *ngIf=\"boat.featured\">★</span>\n          <span class=\"boat-type\">{{ boat.boatType }}</span>\n        </div>\n        <div class=\"boat-body\">\n          <span class=\"location\">{{ locationFor(boat) }}</span>\n          <h3>{{ boat.boatName }}</h3>\n          <p class=\"boat-model\">{{ boat.manufacturer }} {{ boat.model }}</p>\n          <div class=\"boat-meta\">\n            <span *ngIf=\"boat.maxGuests\">👥 {{ boat.maxGuests }} {{ texts.guests }}</span>\n            <span *ngIf=\"boat.cabins\">◫ {{ boat.cabins }} {{ texts.cabins }}</span>\n            <span *ngIf=\"boat.length\">↔ {{ boat.length }} m</span>\n          </div>\n          <div class=\"boat-footer\">\n            <div class=\"price-block\" *ngIf=\"boat.startingPrice\">\n              <small>{{ texts.from }}</small>\n              <strong>{{ boat.startingPrice | number:'1.0-0' }} {{ boat.currency || 'EUR' }}</strong>\n              <small>{{ texts.perDay }}</small>\n            </div>\n            <button type=\"button\" class=\"text-link\">{{ texts.discover }} →</button>\n          </div>\n        </div>\n      </article>\n    </div>\n  </div>\n</section>\n\n<section class=\"section trust-section\">\n  <div class=\"container\">\n    <div class=\"trust-heading\"><span>{{ texts.eyebrow }}</span><h2>{{ texts.trustTitle }}</h2></div>\n    <div class=\"trust-grid\">\n      <article *ngFor=\"let item of texts.trustItems; let i = index\"><span>0{{ i + 1 }}</span><p>{{ item }}</p></article>\n    </div>\n  </div>\n</section>\n\n<section class=\"section owner-section\">\n  <div class=\"container owner-panel\">\n    <div><span class=\"eyebrow\">Stripe Connect</span><h2>{{ texts.ownerTitle }}</h2><p>{{ texts.ownerText }}</p></div>\n    <a routerLink=\"/contact\" class=\"btn btn-primary\">{{ texts.ownerCta }}</a>\n  </div>\n</section>\n";
+
+/***/ }),
+
 /***/ 3248:
 /*!**********************************************************************!*\
   !*** ./src/app/home/my-profile/my-profile.component.scss?ngResource ***!
@@ -1429,11 +1440,15 @@ label {
   color: #082b3f;
 }
 
-input {
+input, textarea {
   border: 1px solid rgba(8, 43, 63, 0.16);
   border-radius: 12px;
   padding: 0.75rem 0.85rem;
   font: inherit;
+}
+
+.full-width {
+  grid-column: 1/-1;
 }
 
 .checkbox-line {
@@ -1459,7 +1474,7 @@ input {
   .fleet-layout {
     grid-template-columns: 1fr;
   }
-}`, "",{"version":3,"sources":["webpack://./src/app/home/admin-fleet/admin-fleet.component.scss"],"names":[],"mappings":"AAAA;EACE,eAAA;AACF;;AACA;EACE,aAAA;EACA,gCAAA;EACA,WAAA;AAEF;;AAAA;EACE,gBAAA;EACA,sCAAA;EACA,mBAAA;EACA,aAAA;EACA,6CAAA;AAGF;;AADA;EACE,aAAA;EACA,sBAAA;EACA,YAAA;EACA,iBAAA;AAIF;;AAFA;EACE,uCAAA;EACA,mBAAA;EACA,gBAAA;EACA,gBAAA;EACA,gBAAA;EACA,eAAA;AAKF;;AAHA;EACE,qBAAA;EACA,mBAAA;AAMF;;AAJA;EACE,cAAA;AAOF;;AALA;EACE,cAAA;AAQF;;AANA;EACE,aAAA;EACA,2DAAA;EACA,SAAA;AASF;;AAPA;EACE,aAAA;EACA,sBAAA;EACA,YAAA;EACA,gBAAA;EACA,cAAA;AAUF;;AARA;EACE,uCAAA;EACA,mBAAA;EACA,wBAAA;EACA,aAAA;AAWF;;AATA;EACE,mBAAA;EACA,mBAAA;AAYF;;AAVA;EACE,mBAAA;AAaF;;AAXA;EAAW,cAAA;EAAgB,gBAAA;AAgB3B;;AAfA;EAAS,cAAA;EAAgB,gBAAA;AAoBzB;;AAnBA;EACE;IAAgB,0BAAA;EAuBhB;AACF","sourcesContent":[".fleet-page {\n  padding: 3rem 0;\n}\n.fleet-layout {\n  display: grid;\n  grid-template-columns: 260px 1fr;\n  gap: 1.5rem;\n}\n.fleet-list, .fleet-card {\n  background: #fff;\n  border: 1px solid rgba(8,43,63,.1);\n  border-radius: 22px;\n  padding: 1rem;\n  box-shadow: 0 16px 40px rgba(8,43,63,.06);\n}\n.fleet-list {\n  display: flex;\n  flex-direction: column;\n  gap: .75rem;\n  align-self: start;\n}\n.fleet-list-item {\n  border: 1px solid rgba(8,43,63,.12);\n  border-radius: 14px;\n  padding: .85rem;\n  background: #fff;\n  text-align: left;\n  cursor: pointer;\n}\n.fleet-list-item.active {\n  border-color: #bf8b40;\n  background: #fff8ef;\n}\n.fleet-list-item strong, .fleet-list-item small {\n  display: block;\n}\n.fleet-list-item small {\n  color: #6d7887;\n}\n.form-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n  gap: 1rem;\n}\nlabel {\n  display: flex;\n  flex-direction: column;\n  gap: .35rem;\n  font-weight: 600;\n  color: #082b3f;\n}\ninput {\n  border: 1px solid rgba(8,43,63,.16);\n  border-radius: 12px;\n  padding: .75rem .85rem;\n  font: inherit;\n}\n.checkbox-line {\n  flex-direction: row;\n  align-items: center;\n}\n.actions {\n  margin-top: 1.25rem;\n}\n.success { color: #17633a; font-weight: 700; }\n.error { color: #b42318; font-weight: 700; }\n@media (max-width: 900px) {\n  .fleet-layout { grid-template-columns: 1fr; }\n}\n"],"sourceRoot":""}]);
+}`, "",{"version":3,"sources":["webpack://./src/app/home/admin-fleet/admin-fleet.component.scss"],"names":[],"mappings":"AAAA;EACE,eAAA;AACF;;AACA;EACE,aAAA;EACA,gCAAA;EACA,WAAA;AAEF;;AAAA;EACE,gBAAA;EACA,sCAAA;EACA,mBAAA;EACA,aAAA;EACA,6CAAA;AAGF;;AADA;EACE,aAAA;EACA,sBAAA;EACA,YAAA;EACA,iBAAA;AAIF;;AAFA;EACE,uCAAA;EACA,mBAAA;EACA,gBAAA;EACA,gBAAA;EACA,gBAAA;EACA,eAAA;AAKF;;AAHA;EACE,qBAAA;EACA,mBAAA;AAMF;;AAJA;EACE,cAAA;AAOF;;AALA;EACE,cAAA;AAQF;;AANA;EACE,aAAA;EACA,2DAAA;EACA,SAAA;AASF;;AAPA;EACE,aAAA;EACA,sBAAA;EACA,YAAA;EACA,gBAAA;EACA,cAAA;AAUF;;AARA;EACE,uCAAA;EACA,mBAAA;EACA,wBAAA;EACA,aAAA;AAWF;;AATA;EAAc,iBAAA;AAad;;AAZA;EACE,mBAAA;EACA,mBAAA;AAeF;;AAbA;EACE,mBAAA;AAgBF;;AAdA;EAAW,cAAA;EAAgB,gBAAA;AAmB3B;;AAlBA;EAAS,cAAA;EAAgB,gBAAA;AAuBzB;;AAtBA;EACE;IAAgB,0BAAA;EA0BhB;AACF","sourcesContent":[".fleet-page {\n  padding: 3rem 0;\n}\n.fleet-layout {\n  display: grid;\n  grid-template-columns: 260px 1fr;\n  gap: 1.5rem;\n}\n.fleet-list, .fleet-card {\n  background: #fff;\n  border: 1px solid rgba(8,43,63,.1);\n  border-radius: 22px;\n  padding: 1rem;\n  box-shadow: 0 16px 40px rgba(8,43,63,.06);\n}\n.fleet-list {\n  display: flex;\n  flex-direction: column;\n  gap: .75rem;\n  align-self: start;\n}\n.fleet-list-item {\n  border: 1px solid rgba(8,43,63,.12);\n  border-radius: 14px;\n  padding: .85rem;\n  background: #fff;\n  text-align: left;\n  cursor: pointer;\n}\n.fleet-list-item.active {\n  border-color: #bf8b40;\n  background: #fff8ef;\n}\n.fleet-list-item strong, .fleet-list-item small {\n  display: block;\n}\n.fleet-list-item small {\n  color: #6d7887;\n}\n.form-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n  gap: 1rem;\n}\nlabel {\n  display: flex;\n  flex-direction: column;\n  gap: .35rem;\n  font-weight: 600;\n  color: #082b3f;\n}\ninput, textarea {\n  border: 1px solid rgba(8,43,63,.16);\n  border-radius: 12px;\n  padding: .75rem .85rem;\n  font: inherit;\n}\n.full-width { grid-column: 1 / -1; }\n.checkbox-line {\n  flex-direction: row;\n  align-items: center;\n}\n.actions {\n  margin-top: 1.25rem;\n}\n.success { color: #17633a; font-weight: 700; }\n.error { color: #b42318; font-weight: 700; }\n@media (max-width: 900px) {\n  .fleet-layout { grid-template-columns: 1fr; }\n}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -2238,7 +2253,7 @@ module.exports = "<section class=\"page-hero\">\n  <div class=\"container narrow
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<section class=\"fleet-page\">\n  <div class=\"container fleet-shell\">\n    <div class=\"section-head\">\n      <span class=\"eyebrow\">{{ 'auto.home.admin-fleet.admin-fleet.component.ressources' | siteText }}</span>\n      <h1>{{ 'auto.home.admin-fleet.admin-fleet.component.flotte_bateaux' | siteText }}</h1>\n      <p>{{ 'auto.home.admin-fleet.admin-fleet.component.configurez_les_informations_des_bateaux_utilis_es_' | siteText }}</p>\n    </div>\n\n    <div class=\"fleet-layout\">\n      <aside class=\"fleet-list\">\n        <button class=\"btn btn-secondary\" type=\"button\" (click)=\"newBoat()\">{{ 'auto.home.admin-fleet.admin-fleet.component.nouveau_bateau' | siteText }}</button>\n\n        <button\n          class=\"fleet-list-item\"\n          type=\"button\"\n          *ngFor=\"let boat of boats\"\n          [class.active]=\"boat.boatId === selectedBoatId\"\n          (click)=\"selectBoat(boat.boatId)\">\n          <strong>{{ boat.boatName }}</strong>\n          <small>{{ boat.manufacturer }} {{ boat.model }}</small>\n        </button>\n      </aside>\n\n      <article class=\"fleet-card\">\n        <p *ngIf=\"loading\">{{ 'auto.home.admin-fleet.admin-fleet.component.chargement' | siteText }}</p>\n\n        <div class=\"form-grid\">\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.identifiant_bateau' | siteText }}<input type=\"text\" [(ngModel)]=\"form.boatId\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.alegria' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.nom_du_bateau' | siteText }}<input type=\"text\" [(ngModel)]=\"form.boatName\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.alegria' | siteText\" required />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.type_de_bateau' | siteText }}<input type=\"text\" [(ngModel)]=\"form.boatType\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.catamaran' | siteText\" required />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.constructeur' | siteText }}<input type=\"text\" [(ngModel)]=\"form.manufacturer\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.bali_catana' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.mod_le' | siteText }}<input type=\"text\" [(ngModel)]=\"form.model\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.bali_4_1' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.ann_e' | siteText }}<input type=\"number\" [(ngModel)]=\"form.year\" min=\"1900\" max=\"2100\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.immatriculation' | siteText }}<input type=\"text\" [(ngModel)]=\"form.registrationNumber\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.marina_de_d_part_par_d_faut' | siteText }}<input type=\"text\" [(ngModel)]=\"form.defaultDepartureMarina\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.marina_baie_des_anges' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.lien_click_boat' | siteText }}<input type=\"url\" [(ngModel)]=\"form.clickAndBoatUrl\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.https_www_clickandboat_com' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.id_annonce_click_boat' | siteText }}<input type=\"text\" [(ngModel)]=\"form.clickAndBoatListingId\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.lien_samboat' | siteText }}<input type=\"url\" [(ngModel)]=\"form.samBoatUrl\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.id_annonce_samboat' | siteText }}<input type=\"text\" [(ngModel)]=\"form.samBoatListingId\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.lien_site_alegria' | siteText }}<input type=\"url\" [(ngModel)]=\"form.websiteUrl\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.caution_par_d_faut' | siteText }}<input type=\"number\" min=\"0\" step=\"0.01\" [(ngModel)]=\"form.defaultWarranty\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.skipper_par_d_faut' | siteText }}<input type=\"number\" min=\"0\" step=\"0.01\" [(ngModel)]=\"form.defaultSkipperPrice\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.nettoyage_carburant_par_d_faut' | siteText }}<input type=\"number\" min=\"0\" step=\"0.01\" [(ngModel)]=\"form.defaultCleaningPrice\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.devise' | siteText }}<input type=\"text\" [(ngModel)]=\"form.currency\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.eur' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.passagers_maximum' | siteText }}<input type=\"number\" min=\"0\" step=\"1\" [(ngModel)]=\"form.maxGuests\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.cabines' | siteText }}<input type=\"number\" min=\"0\" step=\"1\" [(ngModel)]=\"form.cabins\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.salles_de_bain' | siteText }}<input type=\"number\" min=\"0\" step=\"1\" [(ngModel)]=\"form.bathrooms\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.longueur' | siteText }}<input type=\"text\" [(ngModel)]=\"form.length\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.12_37_m' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.largeur' | siteText }}<input type=\"text\" [(ngModel)]=\"form.beam\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.tirant_d_eau' | siteText }}<input type=\"text\" [(ngModel)]=\"form.draft\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.moteurs' | siteText }}<input type=\"text\" [(ngModel)]=\"form.engines\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.image_url_photo' | siteText }}<input type=\"url\" [(ngModel)]=\"form.imageUrl\" />\n          </label>\n\n          <label class=\"checkbox-line\">\n            <input type=\"checkbox\" [(ngModel)]=\"form.active\" />{{ 'auto.home.admin-fleet.admin-fleet.component.bateau_actif' | siteText }}</label>\n        </div>\n\n        <div class=\"actions\">\n          <button class=\"btn btn-primary\" type=\"button\" [disabled]=\"saving\" (click)=\"saveBoat()\">\n            {{ saving ? 'Enregistrement...' : 'Enregistrer le bateau' }}\n          </button>\n        </div>\n\n        <p class=\"success\" *ngIf=\"message\">{{ message }}</p>\n        <p class=\"error\" *ngIf=\"error\">{{ error }}</p>\n      </article>\n    </div>\n\n    <article class=\"fleet-card\" style=\"margin-top: 2rem\">\n      <div class=\"section-head\">\n        <span class=\"eyebrow\">Équipage</span>\n        <h2>Skippers</h2>\n        <p>Un skipper peut être rattaché à un ou plusieurs bateaux.</p>\n      </div>\n      <div class=\"fleet-layout\">\n        <aside class=\"fleet-list\">\n          <button class=\"btn btn-secondary\" type=\"button\" (click)=\"newSkipper()\">Nouveau skipper</button>\n          <button class=\"fleet-list-item\" type=\"button\" *ngFor=\"let skipper of skippers\" (click)=\"editSkipper(skipper)\">\n            <strong>{{ skipper.displayName }}</strong>\n            <small>{{ skipper.email }}</small>\n          </button>\n        </aside>\n        <div class=\"form-grid\">\n          <label>Identifiant<input [(ngModel)]=\"skipperForm.skipperId\" placeholder=\"jean-dupont\"></label>\n          <label>Nom affiché<input [(ngModel)]=\"skipperForm.displayName\" required></label>\n          <label>Propriétaire<input [(ngModel)]=\"skipperForm.ownerId\"></label>\n          <label>Email<input type=\"email\" [(ngModel)]=\"skipperForm.email\"></label>\n          <label>Téléphone<input [(ngModel)]=\"skipperForm.phone\"></label>\n          <label>Numéro de brevet<input [(ngModel)]=\"skipperForm.licenseNumber\"></label>\n          <label>Tarif journalier<input type=\"number\" min=\"0\" [(ngModel)]=\"skipperForm.dailyRate\"></label>\n          <label class=\"checkbox-line\"><input type=\"checkbox\" [(ngModel)]=\"skipperForm.active\">Skipper actif</label>\n          <label class=\"checkbox-line\" *ngIf=\"selectedBoatId\">\n            <input type=\"checkbox\" [(ngModel)]=\"skipperAssignedToSelectedBoat\">\n            Affecté à {{ form.boatName }}\n          </label>\n          <div class=\"actions\"><button class=\"btn btn-primary\" type=\"button\" [disabled]=\"saving\" (click)=\"saveSkipper()\">Enregistrer le skipper</button></div>\n        </div>\n      </div>\n    </article>\n  </div>\n</section>\n";
+module.exports = "<section class=\"fleet-page\">\n  <div class=\"container fleet-shell\">\n    <div class=\"section-head\">\n      <span class=\"eyebrow\">{{ 'auto.home.admin-fleet.admin-fleet.component.ressources' | siteText }}</span>\n      <h1>{{ 'auto.home.admin-fleet.admin-fleet.component.flotte_bateaux' | siteText }}</h1>\n      <p>{{ 'auto.home.admin-fleet.admin-fleet.component.configurez_les_informations_des_bateaux_utilis_es_' | siteText }}</p>\n    </div>\n\n    <div class=\"fleet-layout\">\n      <aside class=\"fleet-list\">\n        <button class=\"btn btn-secondary\" type=\"button\" (click)=\"newBoat()\">{{ 'auto.home.admin-fleet.admin-fleet.component.nouveau_bateau' | siteText }}</button>\n\n        <button\n          class=\"fleet-list-item\"\n          type=\"button\"\n          *ngFor=\"let boat of boats\"\n          [class.active]=\"boat.boatId === selectedBoatId\"\n          (click)=\"selectBoat(boat.boatId)\">\n          <strong>{{ boat.boatName }}</strong>\n          <small>{{ boat.manufacturer }} {{ boat.model }}</small>\n        </button>\n      </aside>\n\n      <article class=\"fleet-card\">\n        <p *ngIf=\"loading\">{{ 'auto.home.admin-fleet.admin-fleet.component.chargement' | siteText }}</p>\n\n        <div class=\"form-grid\">\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.identifiant_bateau' | siteText }}<input type=\"text\" [(ngModel)]=\"form.boatId\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.alegria' | siteText\" />\n          </label>\n\n          <label>Identifiant propriétaire<input type=\"text\" [(ngModel)]=\"form.ownerId\" placeholder=\"owner-id\" required />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.nom_du_bateau' | siteText }}<input type=\"text\" [(ngModel)]=\"form.boatName\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.alegria' | siteText\" required />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.type_de_bateau' | siteText }}<input type=\"text\" [(ngModel)]=\"form.boatType\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.catamaran' | siteText\" required />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.constructeur' | siteText }}<input type=\"text\" [(ngModel)]=\"form.manufacturer\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.bali_catana' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.mod_le' | siteText }}<input type=\"text\" [(ngModel)]=\"form.model\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.bali_4_1' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.ann_e' | siteText }}<input type=\"number\" [(ngModel)]=\"form.year\" min=\"1900\" max=\"2100\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.immatriculation' | siteText }}<input type=\"text\" [(ngModel)]=\"form.registrationNumber\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.marina_de_d_part_par_d_faut' | siteText }}<input type=\"text\" [(ngModel)]=\"form.defaultDepartureMarina\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.marina_baie_des_anges' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.lien_click_boat' | siteText }}<input type=\"url\" [(ngModel)]=\"form.clickAndBoatUrl\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.https_www_clickandboat_com' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.id_annonce_click_boat' | siteText }}<input type=\"text\" [(ngModel)]=\"form.clickAndBoatListingId\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.lien_samboat' | siteText }}<input type=\"url\" [(ngModel)]=\"form.samBoatUrl\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.id_annonce_samboat' | siteText }}<input type=\"text\" [(ngModel)]=\"form.samBoatListingId\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.lien_site_alegria' | siteText }}<input type=\"url\" [(ngModel)]=\"form.websiteUrl\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.caution_par_d_faut' | siteText }}<input type=\"number\" min=\"0\" step=\"0.01\" [(ngModel)]=\"form.defaultWarranty\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.skipper_par_d_faut' | siteText }}<input type=\"number\" min=\"0\" step=\"0.01\" [(ngModel)]=\"form.defaultSkipperPrice\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.nettoyage_carburant_par_d_faut' | siteText }}<input type=\"number\" min=\"0\" step=\"0.01\" [(ngModel)]=\"form.defaultCleaningPrice\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.devise' | siteText }}<input type=\"text\" [(ngModel)]=\"form.currency\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.eur' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.passagers_maximum' | siteText }}<input type=\"number\" min=\"0\" step=\"1\" [(ngModel)]=\"form.maxGuests\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.cabines' | siteText }}<input type=\"number\" min=\"0\" step=\"1\" [(ngModel)]=\"form.cabins\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.salles_de_bain' | siteText }}<input type=\"number\" min=\"0\" step=\"1\" [(ngModel)]=\"form.bathrooms\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.longueur' | siteText }}<input type=\"text\" [(ngModel)]=\"form.length\" [placeholder]=\"'auto.home.admin-fleet.admin-fleet.component.12_37_m' | siteText\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.largeur' | siteText }}<input type=\"text\" [(ngModel)]=\"form.beam\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.tirant_d_eau' | siteText }}<input type=\"text\" [(ngModel)]=\"form.draft\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.moteurs' | siteText }}<input type=\"text\" [(ngModel)]=\"form.engines\" />\n          </label>\n\n          <label>{{ 'auto.home.admin-fleet.admin-fleet.component.image_url_photo' | siteText }}<input type=\"url\" [(ngModel)]=\"form.imageUrl\" />\n          </label>\n\n          <label>Photo principale marketplace<input type=\"text\" [(ngModel)]=\"form.coverImageUrl\" placeholder=\"assets/img/boat/...\" />\n          </label>\n\n          <label>Lieu affiché<input type=\"text\" [(ngModel)]=\"form.location\" placeholder=\"Antibes · Côte d’Azur\" />\n          </label>\n\n          <label>Prix d’appel<input type=\"number\" min=\"0\" step=\"1\" [(ngModel)]=\"form.startingPrice\" />\n          </label>\n\n          <label class=\"full-width\">Description courte marketplace<textarea rows=\"3\" [(ngModel)]=\"form.shortDescription\"></textarea>\n          </label>\n\n          <label class=\"checkbox-line\">\n            <input type=\"checkbox\" [(ngModel)]=\"form.marketplaceVisible\" />Publié sur la marketplace\n          </label>\n\n          <label class=\"checkbox-line\">\n            <input type=\"checkbox\" [(ngModel)]=\"form.featured\" />Bateau mis en avant\n          </label>\n\n          <label class=\"checkbox-line\">\n            <input type=\"checkbox\" [(ngModel)]=\"form.active\" />{{ 'auto.home.admin-fleet.admin-fleet.component.bateau_actif' | siteText }}</label>\n        </div>\n\n        <div class=\"actions\">\n          <button class=\"btn btn-primary\" type=\"button\" [disabled]=\"saving\" (click)=\"saveBoat()\">\n            {{ saving ? 'Enregistrement...' : 'Enregistrer le bateau' }}\n          </button>\n        </div>\n\n        <p class=\"success\" *ngIf=\"message\">{{ message }}</p>\n        <p class=\"error\" *ngIf=\"error\">{{ error }}</p>\n      </article>\n    </div>\n\n    <article class=\"fleet-card\" style=\"margin-top: 2rem\">\n      <div class=\"section-head\">\n        <span class=\"eyebrow\">Équipage</span>\n        <h2>Skippers</h2>\n        <p>Un skipper peut être rattaché à un ou plusieurs bateaux.</p>\n      </div>\n      <div class=\"fleet-layout\">\n        <aside class=\"fleet-list\">\n          <button class=\"btn btn-secondary\" type=\"button\" (click)=\"newSkipper()\">Nouveau skipper</button>\n          <button class=\"fleet-list-item\" type=\"button\" *ngFor=\"let skipper of skippers\" (click)=\"editSkipper(skipper)\">\n            <strong>{{ skipper.displayName }}</strong>\n            <small>{{ skipper.email }}</small>\n          </button>\n        </aside>\n        <div class=\"form-grid\">\n          <label>Identifiant<input [(ngModel)]=\"skipperForm.skipperId\" placeholder=\"jean-dupont\"></label>\n          <label>Nom affiché<input [(ngModel)]=\"skipperForm.displayName\" required></label>\n          <label>Propriétaire<input [(ngModel)]=\"skipperForm.ownerId\"></label>\n          <label>Email<input type=\"email\" [(ngModel)]=\"skipperForm.email\"></label>\n          <label>Téléphone<input [(ngModel)]=\"skipperForm.phone\"></label>\n          <label>Numéro de brevet<input [(ngModel)]=\"skipperForm.licenseNumber\"></label>\n          <label>Tarif journalier<input type=\"number\" min=\"0\" [(ngModel)]=\"skipperForm.dailyRate\"></label>\n          <label class=\"checkbox-line\"><input type=\"checkbox\" [(ngModel)]=\"skipperForm.active\">Skipper actif</label>\n          <label class=\"checkbox-line\" *ngIf=\"selectedBoatId\">\n            <input type=\"checkbox\" [(ngModel)]=\"skipperAssignedToSelectedBoat\">\n            Affecté à {{ form.boatName }}\n          </label>\n          <div class=\"actions\"><button class=\"btn btn-primary\" type=\"button\" [disabled]=\"saving\" (click)=\"saveSkipper()\">Enregistrer le skipper</button></div>\n        </div>\n      </div>\n    </article>\n  </div>\n</section>\n";
 
 /***/ }),
 
@@ -4675,6 +4690,301 @@ MyBookingsComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_an
 
 "use strict";
 module.exports = "<section class=\"admin-page\">\n  <div class=\"container\">\n    <div class=\"admin-head\">\n      <span class=\"eyebrow\">{{ 'auto.home.admin-manage-outings.admin-manage-outings.component.admin' | siteText }}</span>\n      <h1>{{ t('title') }}</h1>\n      <p>{{ t('intro') }}</p>\n    </div>\n\n    <p class=\"alert error\" *ngIf=\"error\">{{ error }}</p>\n    <p class=\"alert success\" *ngIf=\"message\">{{ message }}</p>\n\n    <div class=\"admin-grid\" *ngIf=\"!loading\">\n      <aside class=\"outing-list\">\n        <button type=\"button\" *ngFor=\"let outing of outings\" [class.active]=\"selected?.slug === outing.slug\" (click)=\"select(outing)\">\n          <strong>{{ outing[currentLanguage]?.title || outing.fr.title }}</strong>\n          <small>{{ outing.slug }}</small>\n        </button>\n      </aside>\n\n      <form class=\"editor\" *ngIf=\"selected\" (ngSubmit)=\"save()\">\n        <div class=\"editor-row compact\">\n          <label><input type=\"checkbox\" [(ngModel)]=\"selected.active\" name=\"active\" /> {{ t('active') }}</label>\n        </div>\n\n        <div class=\"editor-row\">\n          <label>{{ t('image') }}</label>\n          <input type=\"text\" [(ngModel)]=\"selected.image\" name=\"image\" />\n        </div>\n\n        <div class=\"editor-row price-editor\">\n          <label>{{ t('price') }}</label>\n          <input type=\"number\" min=\"0\" step=\"1\" [(ngModel)]=\"selected.priceFrom\" name=\"priceFrom\" />\n          <small>{{ t('priceHelp') }}</small>\n        </div>\n\n        <div class=\"lang-block\" *ngFor=\"let lang of ['fr', 'en', 'es']\">\n          <h2>{{ lang | uppercase }}</h2>\n          <div class=\"editor-row\"><label>{{ 'auto.home.admin-manage-outings.admin-manage-outings.component.title' | siteText }}</label><input type=\"text\" [(ngModel)]=\"selected[lang].title\" name=\"title-{{lang}}\" /></div>\n          <div class=\"editor-row\"><label>{{ t('duration') }}</label><input type=\"text\" [(ngModel)]=\"selected[lang].duration\" name=\"duration-{{lang}}\" /></div>\n          <div class=\"editor-row\"><label>{{ t('guests') }}</label><input type=\"text\" [(ngModel)]=\"selected[lang].guests\" name=\"guests-{{lang}}\" /></div>\n          <div class=\"editor-row\">\n            <label>{{ t('priceLabel') }}</label>\n            <input type=\"text\" [(ngModel)]=\"selected[lang].priceLabel\" name=\"priceLabel-{{lang}}\" />\n            <small>{{ t('priceLabelHelp') }}</small>\n          </div>\n          <div class=\"editor-row\"><label>{{ t('description') }}</label><textarea rows=\"4\" [(ngModel)]=\"selected[lang].description\" name=\"description-{{lang}}\"></textarea></div>\n\n          <div class=\"editor-row\">\n            <label>{{ t('highlights') }}</label>\n            <div class=\"highlight-row\" *ngFor=\"let item of selected[lang].highlights; let i = index\">\n              <input type=\"text\" [(ngModel)]=\"selected[lang].highlights![i]\" name=\"highlight-{{lang}}-{{i}}\" />\n              <button type=\"button\" class=\"small-danger\" (click)=\"removeHighlight(lang, i)\">×</button>\n            </div>\n            <button type=\"button\" class=\"secondary\" (click)=\"addHighlight(lang)\">{{ 'auto.home.admin-manage-outings.admin-manage-outings.component.add' | siteText }}</button>\n          </div>\n        </div>\n\n        <button type=\"submit\" class=\"primary\" [disabled]=\"saving\">{{ saving ? t('saving') : t('save') }}</button>\n      </form>\n    </div>\n  </div>\n</section>\n";
+
+/***/ }),
+
+/***/ 18646:
+/*!***************************************************************!*\
+  !*** ./src/app/home/platform-home/platform-home.component.ts ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PlatformHomeComponent: () => (/* binding */ PlatformHomeComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _platform_home_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./platform-home.component.html?ngResource */ 1154);
+/* harmony import */ var _platform_home_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./platform-home.component.scss?ngResource */ 65110);
+/* harmony import */ var _platform_home_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_platform_home_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _services_boat_context_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/boat-context.service */ 61766);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/language.service */ 48756);
+/* harmony import */ var _fleet_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../fleet.service */ 84737);
+
+
+
+
+
+
+
+
+
+
+const FALLBACK = {
+  fr: {
+    brand: 'Boat Marketplace',
+    eyebrow: 'Sorties privées en mer',
+    title: 'Trouvez le bateau qui correspond à votre envie',
+    intro: 'Découvrez des bateaux sélectionnés, leurs sorties, leurs disponibilités et réservez auprès de propriétaires indépendants.',
+    boatsEyebrow: 'Notre flotte',
+    boatsTitle: 'Choisissez votre bateau',
+    boatsIntro: 'Chaque bateau dispose de son propre programme, de ses tarifs et de son calendrier.',
+    discover: 'Découvrir ce bateau',
+    from: 'À partir de',
+    perDay: 'par jour',
+    guests: 'passagers',
+    cabins: 'cabines',
+    noBoats: 'Aucun bateau publié pour le moment.',
+    trustTitle: 'Une réservation simple et transparente',
+    trustItems: ['Bateaux et propriétaires identifiés', 'Prix et disponibilités propres à chaque bateau', 'Paiement sécurisé avec Stripe'],
+    ownerTitle: 'Vous êtes propriétaire ?',
+    ownerText: 'Publiez votre bateau, gérez vos sorties, votre calendrier et recevez directement vos paiements.',
+    ownerCta: 'Rejoindre la plateforme'
+  },
+  en: {
+    brand: 'Boat Marketplace',
+    eyebrow: 'Private sea experiences',
+    title: 'Find the right boat for your next escape',
+    intro: 'Explore selected boats, their outings and availability, and book with independent owners.',
+    boatsEyebrow: 'Our fleet',
+    boatsTitle: 'Choose your boat',
+    boatsIntro: 'Each boat has its own experiences, prices and calendar.',
+    discover: 'View this boat',
+    from: 'From',
+    perDay: 'per day',
+    guests: 'guests',
+    cabins: 'cabins',
+    noBoats: 'No boats are currently published.',
+    trustTitle: 'Simple and transparent booking',
+    trustItems: ['Verified boats and owners', 'Boat-specific prices and availability', 'Secure Stripe payments'],
+    ownerTitle: 'Are you a boat owner?',
+    ownerText: 'Publish your boat, manage outings and availability, and receive payments directly.',
+    ownerCta: 'Join the platform'
+  },
+  es: {
+    brand: 'Boat Marketplace',
+    eyebrow: 'Experiencias privadas en el mar',
+    title: 'Encuentra el barco ideal para tu próxima escapada',
+    intro: 'Descubre barcos seleccionados, sus salidas y disponibilidad, y reserva con propietarios independientes.',
+    boatsEyebrow: 'Nuestra flota',
+    boatsTitle: 'Elige tu barco',
+    boatsIntro: 'Cada barco tiene sus propias experiencias, precios y calendario.',
+    discover: 'Descubrir este barco',
+    from: 'Desde',
+    perDay: 'por día',
+    guests: 'pasajeros',
+    cabins: 'cabinas',
+    noBoats: 'No hay barcos publicados.',
+    trustTitle: 'Una reserva sencilla y transparente',
+    trustItems: ['Barcos y propietarios verificados', 'Precios y disponibilidad por barco', 'Pagos seguros con Stripe'],
+    ownerTitle: '¿Eres propietario?',
+    ownerText: 'Publica tu barco, gestiona salidas y disponibilidad y recibe pagos directamente.',
+    ownerCta: 'Unirse a la plataforma'
+  },
+  it: {
+    brand: 'Boat Marketplace',
+    eyebrow: 'Esperienze private in mare',
+    title: 'Trova la barca giusta per la tua prossima fuga',
+    intro: 'Scopri barche selezionate, uscite e disponibilità e prenota con proprietari indipendenti.',
+    boatsEyebrow: 'La nostra flotta',
+    boatsTitle: 'Scegli la tua barca',
+    boatsIntro: 'Ogni barca ha esperienze, prezzi e calendario propri.',
+    discover: 'Scopri questa barca',
+    from: 'Da',
+    perDay: 'al giorno',
+    guests: 'ospiti',
+    cabins: 'cabine',
+    noBoats: 'Nessuna barca pubblicata.',
+    trustTitle: 'Prenotazione semplice e trasparente',
+    trustItems: ['Barche e proprietari verificati', 'Prezzi e disponibilità per barca', 'Pagamenti Stripe sicuri'],
+    ownerTitle: 'Sei proprietario?',
+    ownerText: 'Pubblica la tua barca, gestisci uscite e disponibilità e ricevi direttamente i pagamenti.',
+    ownerCta: 'Unisciti alla piattaforma'
+  },
+  de: {
+    brand: 'Boat Marketplace',
+    eyebrow: 'Private Erlebnisse auf See',
+    title: 'Finden Sie das passende Boot für Ihre nächste Auszeit',
+    intro: 'Entdecken Sie ausgewählte Boote, Ausflüge und Verfügbarkeiten und buchen Sie bei unabhängigen Eigentümern.',
+    boatsEyebrow: 'Unsere Flotte',
+    boatsTitle: 'Wählen Sie Ihr Boot',
+    boatsIntro: 'Jedes Boot hat eigene Erlebnisse, Preise und einen Kalender.',
+    discover: 'Boot entdecken',
+    from: 'Ab',
+    perDay: 'pro Tag',
+    guests: 'Gäste',
+    cabins: 'Kabinen',
+    noBoats: 'Derzeit sind keine Boote veröffentlicht.',
+    trustTitle: 'Einfach und transparent buchen',
+    trustItems: ['Geprüfte Boote und Eigentümer', 'Preise und Verfügbarkeit je Boot', 'Sichere Stripe-Zahlungen'],
+    ownerTitle: 'Sie sind Bootseigentümer?',
+    ownerText: 'Veröffentlichen Sie Ihr Boot, verwalten Sie Ausflüge und erhalten Sie Zahlungen direkt.',
+    ownerCta: 'Plattform beitreten'
+  },
+  nl: {
+    brand: 'Boat Marketplace',
+    eyebrow: 'Privé-ervaringen op zee',
+    title: 'Vind de juiste boot voor je volgende uitstap',
+    intro: 'Ontdek geselecteerde boten, uitstappen en beschikbaarheid en boek bij onafhankelijke eigenaars.',
+    boatsEyebrow: 'Onze vloot',
+    boatsTitle: 'Kies je boot',
+    boatsIntro: 'Elke boot heeft eigen ervaringen, prijzen en kalender.',
+    discover: 'Ontdek deze boot',
+    from: 'Vanaf',
+    perDay: 'per dag',
+    guests: 'gasten',
+    cabins: 'hutten',
+    noBoats: 'Er zijn momenteel geen boten gepubliceerd.',
+    trustTitle: 'Eenvoudig en transparant boeken',
+    trustItems: ['Geverifieerde boten en eigenaars', 'Prijzen en beschikbaarheid per boot', 'Veilige Stripe-betalingen'],
+    ownerTitle: 'Ben je booteigenaar?',
+    ownerText: 'Publiceer je boot, beheer uitstappen en ontvang betalingen rechtstreeks.',
+    ownerCta: 'Word lid van het platform'
+  },
+  ru: {
+    brand: 'Boat Marketplace',
+    eyebrow: 'Частные морские прогулки',
+    title: 'Найдите подходящую яхту для следующего путешествия',
+    intro: 'Выбирайте проверенные суда, прогулки и даты и бронируйте у независимых владельцев.',
+    boatsEyebrow: 'Наш флот',
+    boatsTitle: 'Выберите судно',
+    boatsIntro: 'У каждого судна свои программы, цены и календарь.',
+    discover: 'Посмотреть судно',
+    from: 'От',
+    perDay: 'в день',
+    guests: 'гостей',
+    cabins: 'кают',
+    noBoats: 'Сейчас нет опубликованных судов.',
+    trustTitle: 'Простое и прозрачное бронирование',
+    trustItems: ['Проверенные суда и владельцы', 'Цены и доступность для каждого судна', 'Безопасная оплата Stripe'],
+    ownerTitle: 'Вы владелец судна?',
+    ownerText: 'Опубликуйте судно, управляйте прогулками и получайте платежи напрямую.',
+    ownerCta: 'Присоединиться'
+  }
+};
+let PlatformHomeComponent = class PlatformHomeComponent {
+  http;
+  router;
+  boatContext;
+  languageService;
+  fleetService;
+  language = 'fr';
+  texts = FALLBACK.fr;
+  boats = [];
+  loading = true;
+  boatsLoadError = false;
+  languageSub;
+  firebaseUrl = 'https://adn-dev-4d05d.firebaseio.com';
+  constructor(http, router, boatContext, languageService, fleetService) {
+    this.http = http;
+    this.router = router;
+    this.boatContext = boatContext;
+    this.languageService = languageService;
+    this.fleetService = fleetService;
+  }
+  ngOnInit() {
+    this.language = this.languageService.currentLanguage || 'fr';
+    this.languageSub = this.languageService.language$.subscribe(language => {
+      this.language = language;
+      this.loadTexts();
+    });
+    this.load();
+  }
+  ngOnDestroy() {
+    this.languageSub?.unsubscribe();
+  }
+  load() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this.loading = true;
+      _this.boatsLoadError = false;
+      try {
+        yield Promise.all([_this.loadTexts(), _this.loadBoats()]);
+      } catch {
+        _this.boatsLoadError = true;
+        _this.boats = [_this.fleetService.getDefaultBoat()];
+      } finally {
+        _this.loading = false;
+      }
+    })();
+  }
+  loadTexts() {
+    var _this2 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const fallback = FALLBACK[_this2.language] || FALLBACK.en;
+      try {
+        const value = yield _this2.http.get(`${_this2.firebaseUrl}/platformContent/${_this2.language}.json`).toPromise();
+        _this2.texts = {
+          ...fallback,
+          ...(value || {})
+        };
+      } catch {
+        _this2.texts = fallback;
+      }
+    })();
+  }
+  loadBoats() {
+    var _this3 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const boats = yield _this3.fleetService.listBoats();
+      _this3.boats = (boats || []).filter(boat => boat && boat.active !== false && boat.marketplaceVisible !== false && boat.visible !== false);
+      if (!_this3.boats.length) {
+        _this3.boats = [_this3.fleetService.getDefaultBoat()];
+      }
+      yield Promise.all(_this3.boats.map(/*#__PURE__*/function () {
+        var _ref = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (boat) {
+          if (boat.startingPrice) return;
+          try {
+            const pricing = yield _this3.http.get(`${_this3.firebaseUrl}/bnPricingModel/${encodeURIComponent(boat.boatId)}.json`).toPromise();
+            const candidates = [pricing?.sunset, pricing?.halfDay, pricing?.day].map(Number).filter(value => Number.isFinite(value) && value > 0);
+            boat.startingPrice = candidates.length ? Math.min(...candidates) : undefined;
+          } catch {}
+        });
+        return function (_x) {
+          return _ref.apply(this, arguments);
+        };
+      }()));
+    })();
+  }
+  trackBoat(_index, boat) {
+    return boat.boatId;
+  }
+  openBoat(boat) {
+    this.boatContext.setBoatId(boat.boatId);
+    this.router.navigate(['/boats', boat.boatId]);
+  }
+  imageFor(boat) {
+    return boat.coverImageUrl || boat.gallery?.[0] || boat.imageUrl || 'assets/img/logo-Alegria.png';
+  }
+  descriptionFor(boat) {
+    return boat.shortDescription || `${boat.manufacturer || boat.boatType || ''} ${boat.model || ''}`.trim();
+  }
+  locationFor(boat) {
+    return boat.location || boat.defaultDepartureMarina || '';
+  }
+  static ctorParameters = () => [{
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_6__.HttpClient
+  }, {
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_7__.Router
+  }, {
+    type: _services_boat_context_service__WEBPACK_IMPORTED_MODULE_3__.BoatContextService
+  }, {
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_4__.LanguageService
+  }, {
+    type: _fleet_service__WEBPACK_IMPORTED_MODULE_5__.FleetService
+  }];
+};
+PlatformHomeComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_8__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Component)({
+  selector: 'app-platform-home',
+  template: _platform_home_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [(_platform_home_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
+})], PlatformHomeComponent);
+
 
 /***/ }),
 
@@ -7646,6 +7956,7 @@ let AdminFleetComponent = class AdminFleetComponent {
   validateBoat() {
     if (!String(this.form.boatName || '').trim()) throw new Error('Le nom du bateau est obligatoire.');
     if (!String(this.form.boatType || '').trim()) throw new Error('Le type de bateau est obligatoire.');
+    if (!String(this.form.ownerId || '').trim()) throw new Error('L’identifiant du propriétaire est obligatoire.');
     if (this.form.clickAndBoatUrl && !/^https?:\/\//i.test(this.form.clickAndBoatUrl)) throw new Error('Le lien Click&Boat doit commencer par http:// ou https://.');
     if (this.form.samBoatUrl && !/^https?:\/\//i.test(this.form.samBoatUrl)) throw new Error('Le lien SamBoat doit commencer par http:// ou https://.');
     if (this.form.websiteUrl && !/^https?:\/\//i.test(this.form.websiteUrl)) throw new Error('Le lien site web doit commencer par http:// ou https://.');
@@ -11220,12 +11531,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   HomeModule: () => (/* binding */ HomeModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! @ionic/angular */ 21507);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! @ionic/angular */ 21507);
 /* harmony import */ var _home_router_module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./home.router.module */ 61506);
 /* harmony import */ var _home_home_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./home/home.component */ 52702);
 /* harmony import */ var _outings_outings_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./outings/outings.component */ 76582);
@@ -11266,6 +11577,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _site_text_pipe__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./site-text.pipe */ 99343);
 /* harmony import */ var _admin_site_content_admin_site_content_component__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./admin-site-content/admin-site-content.component */ 14374);
 /* harmony import */ var _admin_boat_calendar_admin_boat_calendar_component__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./admin-boat-calendar/admin-boat-calendar.component */ 74942);
+/* harmony import */ var _admin_stripe_connect_admin_stripe_connect_component__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./admin-stripe-connect/admin-stripe-connect.component */ 82108);
+/* harmony import */ var _platform_home_platform_home_component__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ./platform-home/platform-home.component */ 18646);
+
+
 
 
 
@@ -11313,9 +11628,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let HomeModule = class HomeModule {};
-HomeModule = (0,tslib__WEBPACK_IMPORTED_MODULE_40__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_41__.NgModule)({
-  declarations: [_home_home_component__WEBPACK_IMPORTED_MODULE_1__.HomeComponent, _outings_outings_component__WEBPACK_IMPORTED_MODULE_2__.OutingsComponent, _boat_boat_component__WEBPACK_IMPORTED_MODULE_3__.BoatComponent, _gallery_gallery_component__WEBPACK_IMPORTED_MODULE_4__.GalleryComponent, _contact_contact_component__WEBPACK_IMPORTED_MODULE_5__.ContactComponent, _crew_crew_component__WEBPACK_IMPORTED_MODULE_6__.CrewComponent, _tours_full_day_full_day_component__WEBPACK_IMPORTED_MODULE_7__.FullDayComponent, _tours_sunset_cruise_sunset_cruise_component__WEBPACK_IMPORTED_MODULE_8__.SunsetCruiseComponent, _tours_evjf_evg_evjf_evg_component__WEBPACK_IMPORTED_MODULE_9__.EvjfEvgComponent, _tours_business_outing_business_outing_component__WEBPACK_IMPORTED_MODULE_10__.BusinessOutingComponent, _terms_terms_component__WEBPACK_IMPORTED_MODULE_11__.TermsComponent, _safety_instructions_safety_instructions_component__WEBPACK_IMPORTED_MODULE_12__.SafetyInstructionsComponent, _deposit_deposit_component__WEBPACK_IMPORTED_MODULE_13__.DepositComponent, _account_summary_account_summary_component__WEBPACK_IMPORTED_MODULE_14__.AccountSummaryComponent, _my_profile_my_profile_component__WEBPACK_IMPORTED_MODULE_15__.MyProfileComponent, _my_feedbacks_my_feedbacks_component__WEBPACK_IMPORTED_MODULE_16__.MyFeedbacksComponent, _admin_feedbacks_admin_feedbacks_component__WEBPACK_IMPORTED_MODULE_17__.AdminFeedbacksComponent, _admin_outings_admin_outings_component__WEBPACK_IMPORTED_MODULE_18__.AdminOutingsComponent, _admin_outing_detail_admin_outing_detail_component__WEBPACK_IMPORTED_MODULE_19__.AdminOutingDetailComponent, _admin_manage_outings_admin_manage_outings_component__WEBPACK_IMPORTED_MODULE_20__.AdminManageOutingsComponent, _guest_faq_guest_faq_component__WEBPACK_IMPORTED_MODULE_21__.GuestFaqComponent, _guest_journey_guest_journey_component__WEBPACK_IMPORTED_MODULE_22__.GuestJourneyComponent, _bookings_bookings_component__WEBPACK_IMPORTED_MODULE_23__.BookingsComponent, _my_bookings_my_bookings_component__WEBPACK_IMPORTED_MODULE_24__.MyBookingsComponent, _my_offers_my_offers_component__WEBPACK_IMPORTED_MODULE_25__.MyOffersComponent, _booking_detail_booking_detail_component__WEBPACK_IMPORTED_MODULE_26__.BookingDetailComponent, _booking_invoice_booking_invoice_component__WEBPACK_IMPORTED_MODULE_27__.BookingInvoiceComponent, _admin_warranty_charge_admin_warranty_charge_component__WEBPACK_IMPORTED_MODULE_28__.AdminWarrantyChargeComponent, _admin_offers_admin_offers_component__WEBPACK_IMPORTED_MODULE_29__.AdminOffersComponent, _offer_confirmation_offer_confirmation_component__WEBPACK_IMPORTED_MODULE_30__.OfferConfirmationComponent, _admin_external_bookings_admin_external_bookings_component__WEBPACK_IMPORTED_MODULE_31__.AdminExternalBookingsComponent, _booking_process_booking_process_component__WEBPACK_IMPORTED_MODULE_32__.BookingProcessComponent, _online_booking_online_booking_component__WEBPACK_IMPORTED_MODULE_33__.OnlineBookingComponent, _admin_pricing_model_admin_pricing_model_component__WEBPACK_IMPORTED_MODULE_35__.AdminPricingModelComponent, _admin_fleet_admin_fleet_component__WEBPACK_IMPORTED_MODULE_36__.AdminFleetComponent, _sea_toys_sea_toys_component__WEBPACK_IMPORTED_MODULE_34__.SeaToysComponent, _admin_site_content_admin_site_content_component__WEBPACK_IMPORTED_MODULE_38__.AdminSiteContentComponent, _admin_boat_calendar_admin_boat_calendar_component__WEBPACK_IMPORTED_MODULE_39__.AdminBoatCalendarComponent],
-  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_42__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_43__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_44__.RouterModule, _ionic_angular__WEBPACK_IMPORTED_MODULE_45__.IonicModule, _home_router_module__WEBPACK_IMPORTED_MODULE_0__.HomeRoutingModule, _site_text_pipe__WEBPACK_IMPORTED_MODULE_37__.SiteTextPipe]
+HomeModule = (0,tslib__WEBPACK_IMPORTED_MODULE_42__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_43__.NgModule)({
+  declarations: [_home_home_component__WEBPACK_IMPORTED_MODULE_1__.HomeComponent, _outings_outings_component__WEBPACK_IMPORTED_MODULE_2__.OutingsComponent, _boat_boat_component__WEBPACK_IMPORTED_MODULE_3__.BoatComponent, _gallery_gallery_component__WEBPACK_IMPORTED_MODULE_4__.GalleryComponent, _contact_contact_component__WEBPACK_IMPORTED_MODULE_5__.ContactComponent, _crew_crew_component__WEBPACK_IMPORTED_MODULE_6__.CrewComponent, _tours_full_day_full_day_component__WEBPACK_IMPORTED_MODULE_7__.FullDayComponent, _tours_sunset_cruise_sunset_cruise_component__WEBPACK_IMPORTED_MODULE_8__.SunsetCruiseComponent, _tours_evjf_evg_evjf_evg_component__WEBPACK_IMPORTED_MODULE_9__.EvjfEvgComponent, _tours_business_outing_business_outing_component__WEBPACK_IMPORTED_MODULE_10__.BusinessOutingComponent, _terms_terms_component__WEBPACK_IMPORTED_MODULE_11__.TermsComponent, _safety_instructions_safety_instructions_component__WEBPACK_IMPORTED_MODULE_12__.SafetyInstructionsComponent, _deposit_deposit_component__WEBPACK_IMPORTED_MODULE_13__.DepositComponent, _account_summary_account_summary_component__WEBPACK_IMPORTED_MODULE_14__.AccountSummaryComponent, _my_profile_my_profile_component__WEBPACK_IMPORTED_MODULE_15__.MyProfileComponent, _my_feedbacks_my_feedbacks_component__WEBPACK_IMPORTED_MODULE_16__.MyFeedbacksComponent, _admin_feedbacks_admin_feedbacks_component__WEBPACK_IMPORTED_MODULE_17__.AdminFeedbacksComponent, _admin_outings_admin_outings_component__WEBPACK_IMPORTED_MODULE_18__.AdminOutingsComponent, _admin_outing_detail_admin_outing_detail_component__WEBPACK_IMPORTED_MODULE_19__.AdminOutingDetailComponent, _admin_manage_outings_admin_manage_outings_component__WEBPACK_IMPORTED_MODULE_20__.AdminManageOutingsComponent, _guest_faq_guest_faq_component__WEBPACK_IMPORTED_MODULE_21__.GuestFaqComponent, _guest_journey_guest_journey_component__WEBPACK_IMPORTED_MODULE_22__.GuestJourneyComponent, _bookings_bookings_component__WEBPACK_IMPORTED_MODULE_23__.BookingsComponent, _my_bookings_my_bookings_component__WEBPACK_IMPORTED_MODULE_24__.MyBookingsComponent, _my_offers_my_offers_component__WEBPACK_IMPORTED_MODULE_25__.MyOffersComponent, _booking_detail_booking_detail_component__WEBPACK_IMPORTED_MODULE_26__.BookingDetailComponent, _booking_invoice_booking_invoice_component__WEBPACK_IMPORTED_MODULE_27__.BookingInvoiceComponent, _admin_warranty_charge_admin_warranty_charge_component__WEBPACK_IMPORTED_MODULE_28__.AdminWarrantyChargeComponent, _admin_offers_admin_offers_component__WEBPACK_IMPORTED_MODULE_29__.AdminOffersComponent, _offer_confirmation_offer_confirmation_component__WEBPACK_IMPORTED_MODULE_30__.OfferConfirmationComponent, _admin_external_bookings_admin_external_bookings_component__WEBPACK_IMPORTED_MODULE_31__.AdminExternalBookingsComponent, _booking_process_booking_process_component__WEBPACK_IMPORTED_MODULE_32__.BookingProcessComponent, _online_booking_online_booking_component__WEBPACK_IMPORTED_MODULE_33__.OnlineBookingComponent, _admin_pricing_model_admin_pricing_model_component__WEBPACK_IMPORTED_MODULE_35__.AdminPricingModelComponent, _admin_fleet_admin_fleet_component__WEBPACK_IMPORTED_MODULE_36__.AdminFleetComponent, _sea_toys_sea_toys_component__WEBPACK_IMPORTED_MODULE_34__.SeaToysComponent, _admin_site_content_admin_site_content_component__WEBPACK_IMPORTED_MODULE_38__.AdminSiteContentComponent, _admin_boat_calendar_admin_boat_calendar_component__WEBPACK_IMPORTED_MODULE_39__.AdminBoatCalendarComponent, _admin_stripe_connect_admin_stripe_connect_component__WEBPACK_IMPORTED_MODULE_40__.AdminStripeConnectComponent, _platform_home_platform_home_component__WEBPACK_IMPORTED_MODULE_41__.PlatformHomeComponent],
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_44__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_45__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_46__.RouterModule, _ionic_angular__WEBPACK_IMPORTED_MODULE_47__.IonicModule, _home_router_module__WEBPACK_IMPORTED_MODULE_0__.HomeRoutingModule, _site_text_pipe__WEBPACK_IMPORTED_MODULE_37__.SiteTextPipe]
 })], HomeModule);
 
 
@@ -16174,6 +16489,123 @@ module.exports = "<section class=\"invoice-page\" *ngIf=\"!loading && booking\">
 
 /***/ }),
 
+/***/ 61188:
+/*!******************************************************************************************!*\
+  !*** ./src/app/home/admin-stripe-connect/admin-stripe-connect.component.scss?ngResource ***!
+  \******************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `.connect-page {
+  padding: 3rem 1rem 5rem;
+  background: #f7fafc;
+  min-height: 70vh;
+}
+
+.connect-shell {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  color: #087a9b;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+h1 {
+  color: #082f49;
+  margin: 0.5rem 0;
+}
+
+header p {
+  max-width: 760px;
+  color: #475569;
+}
+
+.connect-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.connect-card {
+  background: white;
+  border: 1px solid #dbe7ef;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 30px rgba(8, 47, 73, 0.08);
+}
+
+dl, dd {
+  margin: 0;
+}
+
+dl > div, .status-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+dt, .status-row span {
+  color: #64748b;
+}
+
+dd, .status-row strong {
+  color: #0f172a;
+  text-align: right;
+}
+
+.ok {
+  color: #15803d !important;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.danger {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fff;
+}
+
+.error {
+  color: #b91c1c;
+  background: #fef2f2;
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+small {
+  display: block;
+  color: #64748b;
+  margin-top: 1rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .connect-grid {
+    grid-template-columns: 1fr;
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/home/admin-stripe-connect/admin-stripe-connect.component.scss"],"names":[],"mappings":"AAAA;EAAgB,uBAAA;EAAyB,mBAAA;EAAqB,gBAAA;AAI9D;;AAHA;EAAiB,gBAAA;EAAkB,cAAA;AAQnC;;AAPA;EAAW,cAAA;EAAgB,yBAAA;EAA2B,sBAAA;EAAuB,gBAAA;AAc7E;;AAbA;EAAK,cAAA;EAAgB,gBAAA;AAkBrB;;AAjBA;EAAW,gBAAA;EAAkB,cAAA;AAsB7B;;AArBA;EAAgB,aAAA;EAAe,gDAAA;EAAkD,YAAA;EAAc,gBAAA;AA4B/F;;AA3BA;EAAgB,iBAAA;EAAmB,yBAAA;EAA2B,mBAAA;EAAqB,eAAA;EAAiB,6CAAA;AAmCpG;;AAlCA;EAAS,SAAA;AAsCT;;AArCA;EAAwB,aAAA;EAAe,8BAAA;EAAgC,SAAA;EAAW,kBAAA;EAAmB,gCAAA;AA6CrG;;AA5CA;EAAuB,cAAA;AAgDvB;;AA/CA;EAAyB,cAAA;EAAgB,iBAAA;AAoDzC;;AAnDA;EAAM,yBAAA;AAuDN;;AAtDA;EAAW,aAAA;EAAe,eAAA;EAAiB,YAAA;EAAa,kBAAA;AA6DxD;;AA5DA;EAAU,cAAA;EAAgB,qBAAA;EAAuB,gBAAA;AAkEjD;;AAjEA;EAAS,cAAA;EAAgB,mBAAA;EAAqB,aAAA;EAAe,mBAAA;AAwE7D;;AAvEA;EAAQ,cAAA;EAAgB,cAAA;EAAgB,gBAAA;EAAkB,gBAAA;AA8E1D;;AA7EA;EAA4B;IAAgB,0BAAA;EAkF1C;AACF","sourcesContent":[".connect-page { padding: 3rem 1rem 5rem; background: #f7fafc; min-height: 70vh; }\n.connect-shell { max-width: 980px; margin: 0 auto; }\n.eyebrow { color: #087a9b; text-transform: uppercase; letter-spacing: .12em; font-weight: 700; }\nh1 { color: #082f49; margin: .5rem 0; }\nheader p { max-width: 760px; color: #475569; }\n.connect-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin-top: 2rem; }\n.connect-card { background: white; border: 1px solid #dbe7ef; border-radius: 18px; padding: 1.5rem; box-shadow: 0 12px 30px rgba(8, 47, 73, .08); }\ndl, dd { margin: 0; }\ndl > div, .status-row { display: flex; justify-content: space-between; gap: 1rem; padding: .75rem 0; border-bottom: 1px solid #edf2f7; }\ndt, .status-row span { color: #64748b; }\ndd, .status-row strong { color: #0f172a; text-align: right; }\n.ok { color: #15803d !important; }\n.actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }\n.danger { color: #b91c1c; border-color: #fecaca; background: #fff; }\n.error { color: #b91c1c; background: #fef2f2; padding: 1rem; border-radius: 12px; }\nsmall { display: block; color: #64748b; margin-top: 1rem; line-height: 1.5; }\n@media (max-width: 720px) { .connect-grid { grid-template-columns: 1fr; } }\n"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
 /***/ 61506:
 /*!********************************************!*\
   !*** ./src/app/home/home.router.module.ts ***!
@@ -16185,9 +16617,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   HomeRoutingModule: () => (/* binding */ HomeRoutingModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! @angular/router */ 99585);
 /* harmony import */ var _home_home_component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./home/home.component */ 52702);
 /* harmony import */ var _outings_outings_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./outings/outings.component */ 76582);
 /* harmony import */ var _boat_boat_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./boat/boat.component */ 36424);
@@ -16226,6 +16658,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _sea_toys_sea_toys_component__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! ./sea-toys/sea-toys.component */ 48286);
 /* harmony import */ var _admin_site_content_admin_site_content_component__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! ./admin-site-content/admin-site-content.component */ 14374);
 /* harmony import */ var _admin_boat_calendar_admin_boat_calendar_component__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ./admin-boat-calendar/admin-boat-calendar.component */ 74942);
+/* harmony import */ var _admin_stripe_connect_admin_stripe_connect_component__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ./admin-stripe-connect/admin-stripe-connect.component */ 82108);
+/* harmony import */ var _platform_home_platform_home_component__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! ./platform-home/platform-home.component */ 18646);
+/* harmony import */ var _boat_context_guard__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! ./boat-context.guard */ 88121);
+
+
+
 
 
 
@@ -16269,10 +16707,15 @@ __webpack_require__.r(__webpack_exports__);
 
 const routes = [{
   path: '',
-  component: _home_home_component__WEBPACK_IMPORTED_MODULE_0__.HomeComponent
+  component: _platform_home_platform_home_component__WEBPACK_IMPORTED_MODULE_39__.PlatformHomeComponent
+}, {
+  path: 'boats/:boatId',
+  component: _home_home_component__WEBPACK_IMPORTED_MODULE_0__.HomeComponent,
+  canActivate: [_boat_context_guard__WEBPACK_IMPORTED_MODULE_40__.BoatContextGuard]
 }, {
   path: 'home',
-  component: _home_home_component__WEBPACK_IMPORTED_MODULE_0__.HomeComponent
+  redirectTo: 'boats/alegria',
+  pathMatch: 'full'
 }, {
   path: 'sorties',
   component: _outings_outings_component__WEBPACK_IMPORTED_MODULE_1__.OutingsComponent
@@ -16441,6 +16884,9 @@ const routes = [{
   path: 'admin/fleet',
   component: _admin_fleet_admin_fleet_component__WEBPACK_IMPORTED_MODULE_34__.AdminFleetComponent
 }, {
+  path: 'admin/stripe-connect',
+  component: _admin_stripe_connect_admin_stripe_connect_component__WEBPACK_IMPORTED_MODULE_38__.AdminStripeConnectComponent
+}, {
   path: 'admin/external-bookings',
   component: _bookings_bookings_component__WEBPACK_IMPORTED_MODULE_22__.BookingsComponent
 }, {
@@ -16454,9 +16900,9 @@ const routes = [{
   component: _admin_warranty_charge_admin_warranty_charge_component__WEBPACK_IMPORTED_MODULE_27__.AdminWarrantyChargeComponent
 }];
 let HomeRoutingModule = class HomeRoutingModule {};
-HomeRoutingModule = (0,tslib__WEBPACK_IMPORTED_MODULE_38__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_39__.NgModule)({
-  imports: [_angular_router__WEBPACK_IMPORTED_MODULE_40__.RouterModule.forChild(routes)],
-  exports: [_angular_router__WEBPACK_IMPORTED_MODULE_40__.RouterModule]
+HomeRoutingModule = (0,tslib__WEBPACK_IMPORTED_MODULE_41__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_42__.NgModule)({
+  imports: [_angular_router__WEBPACK_IMPORTED_MODULE_43__.RouterModule.forChild(routes)],
+  exports: [_angular_router__WEBPACK_IMPORTED_MODULE_43__.RouterModule]
 })], HomeRoutingModule);
 
 
@@ -19054,6 +19500,492 @@ module.exports = "<section class=\"page-hero\">\n  <div class=\"container text-b
 
 /***/ }),
 
+/***/ 65110:
+/*!****************************************************************************!*\
+  !*** ./src/app/home/platform-home/platform-home.component.scss?ngResource ***!
+  \****************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `:host {
+  display: block;
+  color: #123247;
+  background: #fff;
+}
+
+.marketplace-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 74px 0;
+  color: #fff;
+  background: radial-gradient(circle at 72% 20%, rgba(29, 143, 173, 0.32), transparent 34%), linear-gradient(125deg, #062c43 0%, #0a405b 58%, #116b83 100%);
+}
+
+.marketplace-hero::after {
+  position: absolute;
+  right: -160px;
+  bottom: -290px;
+  width: 620px;
+  height: 620px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 50%;
+  content: "";
+}
+
+.marketplace-hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(420px, 0.75fr);
+  gap: 72px;
+  align-items: center;
+}
+
+.hero-copy {
+  max-width: 690px;
+}
+
+.marketplace-hero .eyebrow {
+  color: #70d2e6;
+}
+
+.marketplace-hero h1 {
+  max-width: 680px;
+  margin: 12px 0 20px;
+  color: #fff;
+  font-size: clamp(2.8rem, 4.4vw, 4.8rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.marketplace-hero p {
+  max-width: 620px;
+  margin: 0 0 28px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.hero-actions > span {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.hero-collage {
+  position: relative;
+  height: 360px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 28px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.27);
+}
+
+.hero-collage::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(2, 25, 38, 0.68), transparent 48%);
+  content: "";
+}
+
+.hero-collage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-boat-caption {
+  position: absolute;
+  z-index: 1;
+  left: 24px;
+  bottom: 21px;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-boat-caption span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-boat-caption strong {
+  color: #fff;
+  font-size: 1.4rem;
+}
+
+.fleet-section {
+  padding: 64px 0 72px;
+  background: #f8f6f1;
+}
+
+.fleet-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  align-items: flex-end;
+  margin-bottom: 30px;
+}
+
+.fleet-head h2 {
+  margin: 5px 0 0;
+  color: #082f46;
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  letter-spacing: -0.025em;
+}
+
+.fleet-head p {
+  max-width: 540px;
+  margin: 0 0 4px;
+  color: #657581;
+  line-height: 1.55;
+}
+
+.boat-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 22px;
+  padding: 4px 4px 22px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-color: rgba(8, 47, 70, 0.18) transparent;
+  scrollbar-width: thin;
+}
+
+.boat-grid.single-boat {
+  justify-content: center;
+}
+
+.boat-card {
+  flex: 0 0 304px;
+  overflow: hidden;
+  border: 1px solid rgba(8, 47, 70, 0.08);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(10, 48, 68, 0.1);
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.boat-card:hover, .boat-card:focus {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 44px rgba(10, 48, 68, 0.16);
+  outline: none;
+}
+
+.boat-image {
+  position: relative;
+  height: 174px;
+  overflow: hidden;
+  background: #eaf2f5;
+}
+
+.boat-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.boat-card:hover .boat-image img {
+  transform: scale(1.035);
+}
+
+.featured {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #ff8427;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.18);
+}
+
+.boat-type {
+  position: absolute;
+  left: 13px;
+  bottom: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(4, 35, 52, 0.78);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.boat-body {
+  padding: 18px 19px 17px;
+}
+
+.location {
+  display: block;
+  overflow: hidden;
+  color: #17839e;
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.075em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.boat-body h3 {
+  margin: 5px 0 2px;
+  color: #082f46;
+  font-size: 1.45rem;
+  line-height: 1.12;
+}
+
+.boat-model {
+  height: 21px;
+  margin: 0;
+  overflow: hidden;
+  color: #75838d;
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boat-meta {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 0;
+  overflow: hidden;
+  color: #435d6c;
+  border-top: 1px solid #e8eef1;
+  border-bottom: 1px solid #e8eef1;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.boat-meta span {
+  flex: 0 0 auto;
+}
+
+.boat-footer {
+  display: flex;
+  min-height: 54px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 13px;
+}
+
+.price-block {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  column-gap: 5px;
+}
+
+.price-block small {
+  color: #84919a;
+  font-size: 0.67rem;
+  white-space: nowrap;
+}
+
+.price-block small:last-child {
+  grid-column: 1/-1;
+}
+
+.price-block strong {
+  color: #082f46;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.boat-footer button {
+  padding: 0 0 2px;
+  border: 0;
+  color: #ed7125;
+  background: none;
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.trust-section {
+  padding: 62px 0;
+  color: #123247;
+  background: #fff;
+}
+
+.trust-heading {
+  text-align: center;
+}
+
+.trust-heading > span {
+  color: #16809d;
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.trust-heading h2 {
+  max-width: 720px;
+  margin: 7px auto 0;
+  color: #082f46;
+  font-size: clamp(1.8rem, 2.8vw, 2.55rem);
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.trust-grid article {
+  display: flex;
+  min-height: 106px;
+  align-items: center;
+  gap: 17px;
+  padding: 23px;
+  border: 1px solid #e6edf0;
+  border-radius: 18px;
+  background: #fbfcfc;
+}
+
+.trust-grid article > span {
+  color: #f1782b;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.trust-grid p {
+  margin: 0;
+  color: #425968;
+  line-height: 1.45;
+}
+
+.owner-section {
+  padding: 0 0 72px;
+  background: #fff;
+}
+
+.owner-panel {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 42px;
+  overflow: hidden;
+  padding: 40px 46px;
+  border-radius: 25px;
+  color: #fff;
+  background: linear-gradient(120deg, #082f46, #0c5169);
+}
+
+.owner-panel::after {
+  position: absolute;
+  right: -55px;
+  width: 210px;
+  height: 210px;
+  border: 35px solid rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  content: "";
+}
+
+.owner-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.owner-panel .eyebrow {
+  color: #70d2e6;
+}
+
+.owner-panel h2 {
+  margin: 6px 0 9px;
+  color: #fff;
+  font-size: 2rem;
+}
+
+.owner-panel p {
+  max-width: 720px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 960px) {
+  .marketplace-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 42px;
+  }
+  .hero-collage {
+    height: 330px;
+  }
+  .fleet-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+@media (max-width: 680px) {
+  .marketplace-hero {
+    padding: 50px 0;
+  }
+  .marketplace-hero h1 {
+    font-size: 2.7rem;
+  }
+  .hero-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .hero-collage {
+    height: 260px;
+    border-radius: 21px;
+  }
+  .fleet-section, .trust-section {
+    padding: 48px 0;
+  }
+  .boat-grid.single-boat {
+    justify-content: flex-start;
+  }
+  .boat-card {
+    flex-basis: min(304px, 100vw - 42px);
+  }
+  .trust-grid {
+    grid-template-columns: 1fr;
+  }
+  .owner-panel {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 32px 28px;
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/home/platform-home/platform-home.component.scss"],"names":[],"mappings":"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","sourcesContent":[":host {\n  display: block;\n  color: #123247;\n  background: #fff;\n}\n\n.marketplace-hero {\n  position: relative;\n  overflow: hidden;\n  padding: 74px 0;\n  color: #fff;\n  background:\n    radial-gradient(circle at 72% 20%, rgba(29, 143, 173, .32), transparent 34%),\n    linear-gradient(125deg, #062c43 0%, #0a405b 58%, #116b83 100%);\n}\n\n.marketplace-hero::after {\n  position: absolute;\n  right: -160px;\n  bottom: -290px;\n  width: 620px;\n  height: 620px;\n  border: 1px solid rgba(255,255,255,.09);\n  border-radius: 50%;\n  content: \"\";\n}\n\n.marketplace-hero-grid {\n  position: relative;\n  z-index: 1;\n  display: grid;\n  grid-template-columns: minmax(0, .95fr) minmax(420px, .75fr);\n  gap: 72px;\n  align-items: center;\n}\n\n.hero-copy { max-width: 690px; }\n.marketplace-hero .eyebrow { color: #70d2e6; }\n.marketplace-hero h1 {\n  max-width: 680px;\n  margin: 12px 0 20px;\n  color: #fff;\n  font-size: clamp(2.8rem, 4.4vw, 4.8rem);\n  line-height: 1.02;\n  letter-spacing: -.045em;\n}\n.marketplace-hero p {\n  max-width: 620px;\n  margin: 0 0 28px;\n  color: rgba(255,255,255,.78);\n  font-size: 1.08rem;\n  line-height: 1.7;\n}\n.hero-actions { display: flex; align-items: center; gap: 20px; }\n.hero-actions > span { color: rgba(255,255,255,.68); font-size: .88rem; white-space: nowrap; }\n.hero-collage {\n  position: relative;\n  height: 360px;\n  overflow: hidden;\n  border: 1px solid rgba(255,255,255,.17);\n  border-radius: 28px;\n  box-shadow: 0 30px 70px rgba(0,0,0,.27);\n}\n.hero-collage::after {\n  position: absolute;\n  inset: 0;\n  background: linear-gradient(to top, rgba(2,25,38,.68), transparent 48%);\n  content: \"\";\n}\n.hero-collage img { width: 100%; height: 100%; object-fit: cover; }\n.hero-boat-caption {\n  position: absolute;\n  z-index: 1;\n  left: 24px;\n  bottom: 21px;\n  display: flex;\n  flex-direction: column;\n}\n.hero-boat-caption span { color: rgba(255,255,255,.72); font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }\n.hero-boat-caption strong { color: #fff; font-size: 1.4rem; }\n\n.fleet-section { padding: 64px 0 72px; background: #f8f6f1; }\n.fleet-head {\n  display: flex;\n  justify-content: space-between;\n  gap: 40px;\n  align-items: flex-end;\n  margin-bottom: 30px;\n}\n.fleet-head h2 { margin: 5px 0 0; color: #082f46; font-size: clamp(2rem, 3vw, 2.75rem); letter-spacing: -.025em; }\n.fleet-head p { max-width: 540px; margin: 0 0 4px; color: #657581; line-height: 1.55; }\n\n.boat-grid {\n  display: flex;\n  flex-wrap: nowrap;\n  gap: 22px;\n  padding: 4px 4px 22px;\n  overflow-x: auto;\n  scroll-snap-type: x proximity;\n  scrollbar-color: rgba(8,47,70,.18) transparent;\n  scrollbar-width: thin;\n}\n.boat-grid.single-boat { justify-content: center; }\n.boat-card {\n  flex: 0 0 304px;\n  overflow: hidden;\n  border: 1px solid rgba(8,47,70,.08);\n  border-radius: 22px;\n  background: #fff;\n  box-shadow: 0 12px 32px rgba(10,48,68,.1);\n  cursor: pointer;\n  scroll-snap-align: start;\n  transition: transform .22s ease, box-shadow .22s ease;\n}\n.boat-card:hover, .boat-card:focus {\n  transform: translateY(-6px);\n  box-shadow: 0 20px 44px rgba(10,48,68,.16);\n  outline: none;\n}\n.boat-image { position: relative; height: 174px; overflow: hidden; background: #eaf2f5; }\n.boat-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }\n.boat-card:hover .boat-image img { transform: scale(1.035); }\n.featured {\n  position: absolute;\n  top: 13px;\n  right: 13px;\n  display: grid;\n  width: 32px;\n  height: 32px;\n  place-items: center;\n  border-radius: 50%;\n  color: #fff;\n  background: #ff8427;\n  box-shadow: 0 6px 15px rgba(0,0,0,.18);\n}\n.boat-type {\n  position: absolute;\n  left: 13px;\n  bottom: 12px;\n  padding: 6px 10px;\n  border-radius: 999px;\n  color: #fff;\n  background: rgba(4,35,52,.78);\n  backdrop-filter: blur(8px);\n  font-size: .7rem;\n  font-weight: 700;\n}\n.boat-body { padding: 18px 19px 17px; }\n.location {\n  display: block;\n  overflow: hidden;\n  color: #17839e;\n  font-size: .69rem;\n  font-weight: 800;\n  letter-spacing: .075em;\n  text-overflow: ellipsis;\n  text-transform: uppercase;\n  white-space: nowrap;\n}\n.boat-body h3 { margin: 5px 0 2px; color: #082f46; font-size: 1.45rem; line-height: 1.12; }\n.boat-model { height: 21px; margin: 0; overflow: hidden; color: #75838d; font-size: .84rem; text-overflow: ellipsis; white-space: nowrap; }\n.boat-meta {\n  display: flex;\n  flex-wrap: nowrap;\n  justify-content: space-between;\n  gap: 8px;\n  margin-top: 14px;\n  padding: 12px 0;\n  overflow: hidden;\n  color: #435d6c;\n  border-top: 1px solid #e8eef1;\n  border-bottom: 1px solid #e8eef1;\n  font-size: .72rem;\n  white-space: nowrap;\n}\n.boat-meta span { flex: 0 0 auto; }\n.boat-footer { display: flex; min-height: 54px; align-items: flex-end; justify-content: space-between; gap: 14px; padding-top: 13px; }\n.price-block { display: grid; grid-template-columns: auto auto; align-items: baseline; column-gap: 5px; }\n.price-block small { color: #84919a; font-size: .67rem; white-space: nowrap; }\n.price-block small:last-child { grid-column: 1 / -1; }\n.price-block strong { color: #082f46; font-size: 1rem; white-space: nowrap; }\n.boat-footer button {\n  padding: 0 0 2px;\n  border: 0;\n  color: #ed7125;\n  background: none;\n  font-size: .76rem;\n  font-weight: 800;\n  white-space: nowrap;\n  cursor: pointer;\n}\n\n.trust-section { padding: 62px 0; color: #123247; background: #fff; }\n.trust-heading { text-align: center; }\n.trust-heading > span { color: #16809d; font-size: .73rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }\n.trust-heading h2 { max-width: 720px; margin: 7px auto 0; color: #082f46; font-size: clamp(1.8rem, 2.8vw, 2.55rem); }\n.trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 32px; }\n.trust-grid article {\n  display: flex;\n  min-height: 106px;\n  align-items: center;\n  gap: 17px;\n  padding: 23px;\n  border: 1px solid #e6edf0;\n  border-radius: 18px;\n  background: #fbfcfc;\n}\n.trust-grid article > span { color: #f1782b; font-size: .76rem; font-weight: 900; letter-spacing: .08em; }\n.trust-grid p { margin: 0; color: #425968; line-height: 1.45; }\n\n.owner-section { padding: 0 0 72px; background: #fff; }\n.owner-panel {\n  position: relative;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  gap: 42px;\n  overflow: hidden;\n  padding: 40px 46px;\n  border-radius: 25px;\n  color: #fff;\n  background: linear-gradient(120deg, #082f46, #0c5169);\n}\n.owner-panel::after {\n  position: absolute;\n  right: -55px;\n  width: 210px;\n  height: 210px;\n  border: 35px solid rgba(255,255,255,.05);\n  border-radius: 50%;\n  content: \"\";\n}\n.owner-panel > * { position: relative; z-index: 1; }\n.owner-panel .eyebrow { color: #70d2e6; }\n.owner-panel h2 { margin: 6px 0 9px; color: #fff; font-size: 2rem; }\n.owner-panel p { max-width: 720px; margin: 0; color: rgba(255,255,255,.72); }\n\n@media (max-width: 960px) {\n  .marketplace-hero-grid { grid-template-columns: 1fr; gap: 42px; }\n  .hero-collage { height: 330px; }\n  .fleet-head { align-items: flex-start; flex-direction: column; gap: 10px; }\n}\n\n@media (max-width: 680px) {\n  .marketplace-hero { padding: 50px 0; }\n  .marketplace-hero h1 { font-size: 2.7rem; }\n  .hero-actions { align-items: flex-start; flex-direction: column; gap: 12px; }\n  .hero-collage { height: 260px; border-radius: 21px; }\n  .fleet-section, .trust-section { padding: 48px 0; }\n  .boat-grid.single-boat { justify-content: flex-start; }\n  .boat-card { flex-basis: min(304px, calc(100vw - 42px)); }\n  .trust-grid { grid-template-columns: 1fr; }\n  .owner-panel { align-items: flex-start; flex-direction: column; padding: 32px 28px; }\n}\n"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
 /***/ 65522:
 /*!**********************************************************!*\
   !*** ./src/app/home/crew/crew.component.html?ngResource ***!
@@ -20670,6 +21602,17 @@ ___CSS_LOADER_EXPORT___.push([module.id, `.calendar-page {
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
+
+/***/ }),
+
+/***/ 69136:
+/*!******************************************************************************************!*\
+  !*** ./src/app/home/admin-stripe-connect/admin-stripe-connect.component.html?ngResource ***!
+  \******************************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<section class=\"connect-page\">\n  <div class=\"container connect-shell\">\n    <header>\n      <span class=\"eyebrow\">{{ t('eyebrow') }}</span>\n      <h1>{{ t('title') }}</h1>\n      <p>{{ t('intro') }}</p>\n    </header>\n\n    <p class=\"error\" *ngIf=\"error\">{{ error }}</p>\n    <p *ngIf=\"loading\">{{ t('loading') }}</p>\n\n    <div class=\"connect-grid\" *ngIf=\"!loading\">\n      <article class=\"connect-card identity-card\">\n        <dl>\n          <div><dt>{{ t('boat') }}</dt><dd>{{ boatName }}</dd></div>\n          <div><dt>{{ t('owner') }}</dt><dd>{{ ownerId }}</dd></div>\n          <div>\n            <dt>{{ t('status') }}</dt>\n            <dd [class.ok]=\"operational\">\n              {{ operational ? t('operational') : (status?.connected ? t('actionRequired') : t('notConnected')) }}\n            </dd>\n          </div>\n          <div><dt>{{ t('commission') }}</dt><dd>{{ (status?.commissionPercent || 0) | number:'1.0-2' }} %</dd></div>\n        </dl>\n      </article>\n\n      <article class=\"connect-card status-card\">\n        <div class=\"status-row\"><span>{{ t('charges') }}</span><strong [class.ok]=\"status?.chargesEnabled\">{{ status?.chargesEnabled ? t('enabled') : t('disabled') }}</strong></div>\n        <div class=\"status-row\"><span>{{ t('payouts') }}</span><strong [class.ok]=\"status?.payoutsEnabled\">{{ status?.payoutsEnabled ? t('enabled') : t('disabled') }}</strong></div>\n        <div class=\"status-row\"><span>{{ t('mode') }}</span><strong>{{ status?.livemode ? t('live') : t('test') }}</strong></div>\n        <small>{{ t('note') }}</small>\n      </article>\n    </div>\n\n    <div class=\"actions\" *ngIf=\"!loading\">\n      <button class=\"btn btn-primary\" type=\"button\" (click)=\"connect()\">\n        {{ status?.connected ? t('continue') : t('connect') }}\n      </button>\n      <button class=\"btn btn-secondary\" type=\"button\" (click)=\"refresh()\">{{ t('refresh') }}</button>\n      <button class=\"btn danger\" type=\"button\" *ngIf=\"status?.connected\" [disabled]=\"disconnecting\" (click)=\"disconnect()\">{{ t('disconnect') }}</button>\n    </div>\n  </div>\n</section>\n";
 
 /***/ }),
 
@@ -27365,6 +28308,362 @@ MyOffersComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_angu
 
 /***/ }),
 
+/***/ 82108:
+/*!*****************************************************************************!*\
+  !*** ./src/app/home/admin-stripe-connect/admin-stripe-connect.component.ts ***!
+  \*****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AdminStripeConnectComponent: () => (/* binding */ AdminStripeConnectComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _admin_stripe_connect_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-stripe-connect.component.html?ngResource */ 69136);
+/* harmony import */ var _admin_stripe_connect_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-stripe-connect.component.scss?ngResource */ 61188);
+/* harmony import */ var _admin_stripe_connect_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_admin_stripe_connect_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/language.service */ 48756);
+/* harmony import */ var _services_boat_context_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/boat-context.service */ 61766);
+/* harmony import */ var _fleet_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../fleet.service */ 84737);
+/* harmony import */ var _stripe_connect_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../stripe-connect.service */ 90917);
+
+
+
+
+
+
+
+
+
+
+const FALLBACK = {
+  fr: {
+    eyebrow: 'Paiements propriétaires',
+    title: 'Stripe Connect',
+    intro: 'Connectez le compte Stripe du propriétaire pour recevoir directement les paiements et verser automatiquement la commission de la plateforme.',
+    owner: 'Propriétaire',
+    boat: 'Bateau',
+    status: 'Statut',
+    connected: 'Connecté',
+    notConnected: 'Non connecté',
+    actionRequired: 'Action requise',
+    operational: 'Opérationnel',
+    charges: 'Paiements',
+    payouts: 'Virements',
+    enabled: 'Activés',
+    disabled: 'Désactivés',
+    mode: 'Mode',
+    live: 'Production',
+    test: 'Test',
+    commission: 'Commission plateforme',
+    connect: 'Connecter Stripe',
+    continue: 'Continuer la configuration',
+    refresh: 'Actualiser',
+    disconnect: 'Déconnecter',
+    disconnectConfirm: 'Déconnecter ce compte Stripe ?',
+    loading: 'Chargement…',
+    error: 'Impossible de charger le statut Stripe.',
+    note: 'Le taux de commission est défini par l’administrateur de la plateforme et enregistré au moment de chaque paiement.'
+  },
+  en: {
+    eyebrow: 'Owner payments',
+    title: 'Stripe Connect',
+    intro: 'Connect the owner’s Stripe account to receive booking payments directly and automatically pay the platform commission.',
+    owner: 'Owner',
+    boat: 'Boat',
+    status: 'Status',
+    connected: 'Connected',
+    notConnected: 'Not connected',
+    actionRequired: 'Action required',
+    operational: 'Operational',
+    charges: 'Payments',
+    payouts: 'Payouts',
+    enabled: 'Enabled',
+    disabled: 'Disabled',
+    mode: 'Mode',
+    live: 'Live',
+    test: 'Test',
+    commission: 'Platform commission',
+    connect: 'Connect Stripe',
+    continue: 'Continue setup',
+    refresh: 'Refresh',
+    disconnect: 'Disconnect',
+    disconnectConfirm: 'Disconnect this Stripe account?',
+    loading: 'Loading…',
+    error: 'Unable to load Stripe status.',
+    note: 'The commission rate is defined by the platform administrator and recorded with every payment.'
+  },
+  es: {
+    eyebrow: 'Pagos del propietario',
+    title: 'Stripe Connect',
+    intro: 'Conecte la cuenta Stripe del propietario para recibir pagos directamente y abonar automáticamente la comisión de la plataforma.',
+    owner: 'Propietario',
+    boat: 'Barco',
+    status: 'Estado',
+    connected: 'Conectado',
+    notConnected: 'No conectado',
+    actionRequired: 'Acción requerida',
+    operational: 'Operativo',
+    charges: 'Pagos',
+    payouts: 'Transferencias',
+    enabled: 'Activados',
+    disabled: 'Desactivados',
+    mode: 'Modo',
+    live: 'Producción',
+    test: 'Prueba',
+    commission: 'Comisión de plataforma',
+    connect: 'Conectar Stripe',
+    continue: 'Continuar configuración',
+    refresh: 'Actualizar',
+    disconnect: 'Desconectar',
+    disconnectConfirm: '¿Desconectar esta cuenta Stripe?',
+    loading: 'Cargando…',
+    error: 'No se puede cargar el estado de Stripe.',
+    note: 'La comisión la define el administrador de la plataforma y se registra en cada pago.'
+  },
+  it: {
+    eyebrow: 'Pagamenti proprietario',
+    title: 'Stripe Connect',
+    intro: 'Collega l’account Stripe del proprietario per ricevere direttamente i pagamenti e versare automaticamente la commissione della piattaforma.',
+    owner: 'Proprietario',
+    boat: 'Barca',
+    status: 'Stato',
+    connected: 'Collegato',
+    notConnected: 'Non collegato',
+    actionRequired: 'Azione richiesta',
+    operational: 'Operativo',
+    charges: 'Pagamenti',
+    payouts: 'Bonifici',
+    enabled: 'Attivati',
+    disabled: 'Disattivati',
+    mode: 'Modalità',
+    live: 'Produzione',
+    test: 'Test',
+    commission: 'Commissione piattaforma',
+    connect: 'Collega Stripe',
+    continue: 'Continua configurazione',
+    refresh: 'Aggiorna',
+    disconnect: 'Disconnetti',
+    disconnectConfirm: 'Disconnettere questo account Stripe?',
+    loading: 'Caricamento…',
+    error: 'Impossibile caricare lo stato Stripe.',
+    note: 'La commissione è definita dall’amministratore della piattaforma e registrata per ogni pagamento.'
+  },
+  de: {
+    eyebrow: 'Zahlungen des Eigentümers',
+    title: 'Stripe Connect',
+    intro: 'Verbinden Sie das Stripe-Konto des Eigentümers, um Zahlungen direkt zu empfangen und die Plattformprovision automatisch abzurechnen.',
+    owner: 'Eigentümer',
+    boat: 'Boot',
+    status: 'Status',
+    connected: 'Verbunden',
+    notConnected: 'Nicht verbunden',
+    actionRequired: 'Aktion erforderlich',
+    operational: 'Betriebsbereit',
+    charges: 'Zahlungen',
+    payouts: 'Auszahlungen',
+    enabled: 'Aktiviert',
+    disabled: 'Deaktiviert',
+    mode: 'Modus',
+    live: 'Produktion',
+    test: 'Test',
+    commission: 'Plattformprovision',
+    connect: 'Stripe verbinden',
+    continue: 'Einrichtung fortsetzen',
+    refresh: 'Aktualisieren',
+    disconnect: 'Trennen',
+    disconnectConfirm: 'Dieses Stripe-Konto trennen?',
+    loading: 'Laden…',
+    error: 'Stripe-Status konnte nicht geladen werden.',
+    note: 'Der Provisionssatz wird vom Plattformadministrator festgelegt und bei jeder Zahlung gespeichert.'
+  },
+  nl: {
+    eyebrow: 'Betalingen eigenaar',
+    title: 'Stripe Connect',
+    intro: 'Koppel het Stripe-account van de eigenaar om betalingen rechtstreeks te ontvangen en de platformcommissie automatisch af te dragen.',
+    owner: 'Eigenaar',
+    boat: 'Boot',
+    status: 'Status',
+    connected: 'Verbonden',
+    notConnected: 'Niet verbonden',
+    actionRequired: 'Actie vereist',
+    operational: 'Operationeel',
+    charges: 'Betalingen',
+    payouts: 'Uitbetalingen',
+    enabled: 'Ingeschakeld',
+    disabled: 'Uitgeschakeld',
+    mode: 'Modus',
+    live: 'Productie',
+    test: 'Test',
+    commission: 'Platformcommissie',
+    connect: 'Stripe koppelen',
+    continue: 'Configuratie voortzetten',
+    refresh: 'Vernieuwen',
+    disconnect: 'Ontkoppelen',
+    disconnectConfirm: 'Dit Stripe-account ontkoppelen?',
+    loading: 'Laden…',
+    error: 'Stripe-status kan niet worden geladen.',
+    note: 'Het commissietarief wordt bepaald door de platformbeheerder en bij elke betaling vastgelegd.'
+  },
+  ru: {
+    eyebrow: 'Платежи владельца',
+    title: 'Stripe Connect',
+    intro: 'Подключите Stripe владельца, чтобы получать платежи напрямую и автоматически перечислять комиссию платформе.',
+    owner: 'Владелец',
+    boat: 'Судно',
+    status: 'Статус',
+    connected: 'Подключено',
+    notConnected: 'Не подключено',
+    actionRequired: 'Требуется действие',
+    operational: 'Работает',
+    charges: 'Платежи',
+    payouts: 'Выплаты',
+    enabled: 'Включены',
+    disabled: 'Отключены',
+    mode: 'Режим',
+    live: 'Рабочий',
+    test: 'Тестовый',
+    commission: 'Комиссия платформы',
+    connect: 'Подключить Stripe',
+    continue: 'Продолжить настройку',
+    refresh: 'Обновить',
+    disconnect: 'Отключить',
+    disconnectConfirm: 'Отключить этот аккаунт Stripe?',
+    loading: 'Загрузка…',
+    error: 'Не удалось загрузить статус Stripe.',
+    note: 'Ставка комиссии задаётся администратором платформы и сохраняется для каждого платежа.'
+  }
+};
+let AdminStripeConnectComponent = class AdminStripeConnectComponent {
+  http;
+  languageService;
+  boatContext;
+  fleetService;
+  stripeConnect;
+  language = 'fr';
+  texts = FALLBACK.fr;
+  ownerId = '';
+  boatName = '';
+  loading = true;
+  disconnecting = false;
+  error = '';
+  status = null;
+  languageSub;
+  firebaseUrl = 'https://adn-dev-4d05d.firebaseio.com';
+  constructor(http, languageService, boatContext, fleetService, stripeConnect) {
+    this.http = http;
+    this.languageService = languageService;
+    this.boatContext = boatContext;
+    this.fleetService = fleetService;
+    this.stripeConnect = stripeConnect;
+  }
+  ngOnInit() {
+    this.language = this.languageService.currentLanguage || 'fr';
+    this.languageSub = this.languageService.language$.subscribe(language => {
+      this.language = language;
+      this.loadTexts();
+    });
+    this.initialize();
+  }
+  ngOnDestroy() {
+    this.languageSub?.unsubscribe();
+  }
+  t(key) {
+    return this.texts[key] || FALLBACK[this.language]?.[key] || FALLBACK.en[key] || key;
+  }
+  initialize() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        const boat = yield _this.fleetService.getBoat(_this.boatContext.boatId);
+        _this.ownerId = String(boat.ownerId || boat.boatId || _this.boatContext.boatId);
+        _this.boatName = boat.boatName || boat.boatId;
+        yield Promise.all([_this.loadTexts(), _this.refresh()]);
+      } catch (error) {
+        _this.error = error?.message || _this.t('error');
+        _this.loading = false;
+      }
+    })();
+  }
+  loadTexts() {
+    var _this2 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const fallback = FALLBACK[_this2.language] || FALLBACK.en;
+      try {
+        const value = yield _this2.http.get(`${_this2.firebaseUrl}/siteContent/${encodeURIComponent(_this2.boatContext.boatId)}/${_this2.language}/stripeConnect.json`).toPromise();
+        _this2.texts = {
+          ...fallback,
+          ...(value || {})
+        };
+      } catch {
+        _this2.texts = fallback;
+      }
+    })();
+  }
+  refresh() {
+    var _this3 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (!_this3.ownerId) return;
+      _this3.loading = true;
+      _this3.error = '';
+      try {
+        _this3.status = yield _this3.stripeConnect.getStatus(_this3.ownerId);
+      } catch (error) {
+        _this3.error = error?.error?.error || error?.message || _this3.t('error');
+      } finally {
+        _this3.loading = false;
+      }
+    })();
+  }
+  connect() {
+    if (!this.ownerId) return;
+    const returnUrl = `${window.location.origin}/admin/stripe-connect`;
+    window.location.href = this.stripeConnect.buildAuthorizeUrl(this.ownerId, returnUrl);
+  }
+  disconnect() {
+    var _this4 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (!_this4.ownerId || !window.confirm(_this4.t('disconnectConfirm'))) return;
+      _this4.disconnecting = true;
+      _this4.error = '';
+      try {
+        yield _this4.stripeConnect.disconnect(_this4.ownerId);
+        yield _this4.refresh();
+      } catch (error) {
+        _this4.error = error?.error?.error || error?.message || _this4.t('error');
+      } finally {
+        _this4.disconnecting = false;
+      }
+    })();
+  }
+  get operational() {
+    return !!this.status?.connected && !!this.status?.chargesEnabled && !!this.status?.payoutsEnabled;
+  }
+  static ctorParameters = () => [{
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_7__.HttpClient
+  }, {
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_3__.LanguageService
+  }, {
+    type: _services_boat_context_service__WEBPACK_IMPORTED_MODULE_4__.BoatContextService
+  }, {
+    type: _fleet_service__WEBPACK_IMPORTED_MODULE_5__.FleetService
+  }, {
+    type: _stripe_connect_service__WEBPACK_IMPORTED_MODULE_6__.StripeConnectService
+  }];
+};
+AdminStripeConnectComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_8__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Component)({
+  selector: 'app-admin-stripe-connect',
+  template: _admin_stripe_connect_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [(_admin_stripe_connect_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
+})], AdminStripeConnectComponent);
+
+
+/***/ }),
+
 /***/ 82474:
 /*!*****************************************************************!*\
   !*** ./src/app/home/booking-detail/booking-detail.component.ts ***!
@@ -31335,6 +32634,12 @@ let FleetService = class FleetService {
       draft: '',
       engines: '',
       imageUrl: 'assets/img/logo-Alegria.png',
+      coverImageUrl: 'assets/img/boat/bali4.1/bali-41-2.jpg',
+      shortDescription: '',
+      location: 'Marina Baie des Anges',
+      startingPrice: 600,
+      marketplaceVisible: true,
+      featured: false,
       extraServices: {},
       active: true,
       createdTS: now,
@@ -31386,6 +32691,9 @@ let FleetService = class FleetService {
         maxGuests: Number(boat.maxGuests ?? 12),
         cabins: Number(boat.cabins ?? 0),
         bathrooms: Number(boat.bathrooms ?? 0),
+        startingPrice: Number(boat.startingPrice ?? 0),
+        marketplaceVisible: boat.marketplaceVisible !== false,
+        featured: boat.featured === true,
         active: boat.active !== false,
         createdTS: boat.createdTS || now,
         modifiedTS: now
@@ -31397,13 +32705,21 @@ let FleetService = class FleetService {
   readPath(path) {
     var _this4 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      // The marketplace has one canonical public database. Read it first so an
+      // obsolete Firebase app initialized by godigital-lib cannot shadow bnFleet
+      // with an empty snapshot from another project.
+      try {
+        const restValue = yield _this4.http.get(`${_this4.firebaseUrl}/${path}.json`).toPromise();
+        if (restValue !== null && restValue !== undefined) return restValue;
+      } catch {}
       for (const db of _this4.getRealtimeDatabaseCandidates()) {
         try {
           const snap = yield db.ref(path).once('value');
-          return snap && typeof snap.val === 'function' ? snap.val() : null;
+          const value = snap && typeof snap.val === 'function' ? snap.val() : null;
+          if (value !== null && value !== undefined) return value;
         } catch {}
       }
-      return _this4.http.get(`${_this4.firebaseUrl}/${path}.json`).toPromise();
+      return null;
     })();
   }
   writePath(path, payload) {
@@ -32467,6 +33783,44 @@ module.exports = ___CSS_LOADER_EXPORT___.toString();
 
 "use strict";
 module.exports = "\n<section class=\"page-hero\">\n  <div class=\"container narrow\">\n    <span class=\"eyebrow\">{{ tour.eyebrow }}</span>\n    <h1>{{ tour.title }}</h1>\n    <p class=\"subtitle\">{{ tour.subtitle }}</p>\n    <p>{{ tour.intro }}</p>\n  </div>\n</section>\n\n<section class=\"section\">\n  <div class=\"container detail-grid\">\n    <div class=\"image-col\">\n      <img [src]=\"tour.image\" [alt]=\"tour.title\" />\n      <div class=\"meta-box\">\n        <div>{{ tour.duration }}</div>\n        <div>{{ tour.guests }}</div>\n      </div>\n    </div>\n\n    <div>\n      <h2>{{ tour.highlightsTitle }}</h2>\n      <ul class=\"bullet-list\">\n        <li *ngFor=\"let item of tour.highlights\">{{ item }}</li>\n      </ul>\n    </div>\n  </div>\n</section>\n\n<section class=\"section section-light\">\n  <div class=\"container two-col\">\n    <div>\n      <h2>{{ tour.programTitle }}</h2>\n      <ol class=\"program-list\">\n        <li *ngFor=\"let item of tour.program\">{{ item }}</li>\n      </ol>\n    </div>\n\n    <div>\n      <h2>{{ tour.includesTitle }}</h2>\n      <ul class=\"bullet-list\">\n        <li *ngFor=\"let item of tour.includes\">{{ item }}</li>\n      </ul>\n    </div>\n  </div>\n</section>\n\n\n<section class=\"section\">\n  <div class=\"container offering-grid\">\n    <div class=\"offer-card\">\n      <h2>{{ tour.coreOfferingTitle }}</h2>\n      <ul class=\"bullet-list\">\n        <li *ngFor=\"let item of tour.coreOffering\">{{ item }}</li>\n      </ul>\n    </div>\n\n    <div class=\"offer-card\">\n      <h2>{{ tour.optionalExtrasTitle }}</h2>\n      <ul class=\"bullet-list\">\n        <li *ngFor=\"let item of tour.optionalExtras\">{{ item }}</li>\n      </ul>\n    </div>\n\n    <div class=\"offer-card\">\n      <h2>{{ tour.suggestionsTitle }}</h2>\n      <ul class=\"bullet-list\">\n        <li *ngFor=\"let item of tour.guestSuggestions\">{{ item }}</li>\n      </ul>\n    </div>\n  </div>\n</section>\n\n<section class=\"section\" *ngIf=\"tour.gallery?.length\">\n  <div class=\"container\">\n    <h2>{{ tour.galleryTitle }}</h2>\n    <div class=\"gallery-grid\">\n      <img *ngFor=\"let photo of tour.gallery\" [src]=\"photo\" [alt]=\"tour.title\" />\n    </div>\n  </div>\n</section>\n\n<section class=\"section\">\n  <div class=\"container two-col\">\n    <div>\n      <h2>{{ tour.idealForTitle }}</h2>\n      <ul class=\"bullet-list\">\n        <li *ngFor=\"let item of tour.idealFor\">{{ item }}</li>\n      </ul>\n    </div>\n\n    <div class=\"cta-card\">\n      <p>{{ tour.contactNote }}</p>\n      <a routerLink=\"/calendar\" class=\"btn\">{{ tour.cta }}</a>\n    </div>\n  </div>\n</section>\n";
+
+/***/ }),
+
+/***/ 88121:
+/*!********************************************!*\
+  !*** ./src/app/home/boat-context.guard.ts ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BoatContextGuard: () => (/* binding */ BoatContextGuard)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _services_boat_context_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/boat-context.service */ 61766);
+
+
+
+let BoatContextGuard = class BoatContextGuard {
+  boatContext;
+  constructor(boatContext) {
+    this.boatContext = boatContext;
+  }
+  canActivate(route) {
+    const boatId = route.paramMap.get('boatId');
+    if (boatId) this.boatContext.setBoatId(boatId);
+    return true;
+  }
+  static ctorParameters = () => [{
+    type: _services_boat_context_service__WEBPACK_IMPORTED_MODULE_0__.BoatContextService
+  }];
+};
+BoatContextGuard = (0,tslib__WEBPACK_IMPORTED_MODULE_1__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Injectable)({
+  providedIn: 'root'
+})], BoatContextGuard);
+
 
 /***/ }),
 
@@ -33590,6 +34944,77 @@ h2, h3 {
 }`, "",{"version":3,"sources":["webpack://./src/app/home/admin-outing-detail/admin-outing-detail.component.scss"],"names":[],"mappings":"AAAA;EACE,eAAA;EACA,mBAAA;EACA,gBAAA;AACF;;AACA;EAAa,iBAAA;EAAmB,cAAA;EAAgB,eAAA;AAKhD;;AAJA;EAAa,SAAA;EAAW,uBAAA;EAAyB,cAAA;EAAgB,kCAAA;EAAoC,gBAAA;EAAkB,eAAA;EAAiB,mBAAA;AAcxI;;AAbA;EAAgB,mBAAA;AAiBhB;;AAhBA;EAAW,qBAAA;EAAsB,cAAA;EAAe,yBAAA;EAA0B,sBAAA;EAAsB,kCAAA;EAAkC,gBAAA;EAAiB,kBAAA;AA0BnJ;;AAzBA;EAAK,cAAA;EAAgB,cAAA;EAAe,sCAAA;EAAsC,mCAAA;AAgC1E;;AA/BA;EAAI,cAAA;EAAe,+BAAA;AAoCnB;;AAnCA;EAAgC,gBAAA;EAAiB,mBAAA;EAAoB,aAAA;EAAc,4CAAA;EAAyC,mBAAA;AA2C5H;;AA1CA;EAAc,aAAA;EAAc,yBAAA;EAA0B,mBAAA;AAgDtD;;AA/CA;EAAU,oBAAA;EAAqB,iBAAA;EAAkB,oCAAA;EAAiC,cAAA;EAAe,kCAAA;EAAkC,gBAAA;AAwDnI;;AAvDA;EAAiB,oCAAA;EAAiC,cAAA;AA4DlD;;AA3DA;EAAa,aAAA;EAAc,gDAAA;EAA+C,SAAA;AAiE1E;;AAhEA;EAAmB,aAAA;EAAc,sBAAA;EAAuB,QAAA;EAAS,cAAA;EAAe,kCAAA;EAAkC,gBAAA;AAyElH;;AAxEA;EAAmB,iBAAA;AA4EnB;;AA3EA;EAA0B,WAAA;EAAY,uCAAA;EAAoC,mBAAA;EAAoB,kBAAA;EAAmB,+BAAA;EAA+B,eAAA;EAAgB,gBAAA;EAAiB,cAAA;AAsFjL;;AArFA;EAAW,gBAAA;AAyFX;;AAxFA;EAAW,aAAA;EAAc,SAAA;EAAU,eAAA;EAAgB,gBAAA;AA+FnD;;AA9FA;EAAO,SAAA;EAAU,oBAAA;EAAqB,kBAAA;EAAmB,kCAAA;EAAkC,gBAAA;EAAiB,eAAA;EAAgB,qBAAA;AAwG5H;;AAvGA;EAAgB,aAAA;EAAa,mBAAA;AA4G7B;;AA3GA;EAAe,mBAAA;EAAoB,cAAA;AAgHnC;;AA/GA;EAAiB,mBAAA;EAAoB,WAAA;AAoHrC;;AAnHA;EAAU,mBAAA;EAAoB,kBAAA;EAAmB,cAAA;EAAe,kCAAA;EAAkC,gBAAA;AA2HlG;;AA1HA;EAAkB,oCAAA;EAAiC,cAAA;AA+HnD;;AA9HA;EAAgB,mCAAA;EAAgC,cAAA;AAmIhD;;AAlIA;EAAsC,aAAA;EAAc,8BAAA;EAA+B,mBAAA;EAAoB,SAAA;EAAU,mBAAA;AA0IjH;;AAzIA;EAAS,SAAA;EAAU,cAAA;EAAe,sCAAA;AA+IlC;;AA9IA;EAAgD,oBAAA;EAAqB,iBAAA;EAAkB,mBAAA;EAAoB,cAAA;EAAe,kCAAA;EAAkC,gBAAA;EAAiB,mBAAA;AAwJ7K;;AAvJA;EAAkE,oCAAA;EAAiC,cAAA;AA4JnG;;AA3JA;EAAmB,0CAAA;EAAuC,iBAAA;EAAkB,gBAAA;AAiK5E;;AAhKA;EAAkB,aAAA;EAAc,SAAA;AAqKhC;;AApKA;EAAc,aAAA;EAAc,uBAAA;EAAwB,SAAA;EAAU,aAAA;EAAc,uCAAA;EAAoC,mBAAA;EAAoB,gBAAA;EAAiB,eAAA;EAAgB,+BAAA;EAA+B,cAAA;AAiLpM;;AAhLA;EAAmB,oCAAA;AAoLnB;;AAnLA;EAAoB,aAAA;AAuLpB;;AAtLA;EAAc,WAAA;EAAY,YAAA;EAAa,kBAAA;EAAmB,yBAAA;EAA0B,cAAA;EAAe,kBAAA;EAAmB,eAAA;AAgMtH;;AA/LA;EAAsC,WAAA;EAAY,kBAAA;EAAmB,UAAA;EAAW,kBAAA;EAAmB,mBAAA;AAuMnG;;AAtMA;EAAc,cAAA;EAAe,eAAA;EAAgB,cAAA;EAAe,kBAAA;AA6M5D;;AA5MA;EAA4B;IAAa,0BAAA;EAiNvC;EAjNoE;IAA+B,aAAA;IAAc,mBAAA;EAqNjH;EArNuI;IAAgB,WAAA;EAwNvJ;EAxNqK;IAAqC,uBAAA;IAAwB,sBAAA;EA4NlO;AACF;AA3NA;EAAwB,SAAA;EAAW,kBAAA;EAAoB,cAAA;AAgOvD;;AA7NA;EACE,aAAA;EACA,WAAA;EACA,gBAAA;EACA,eAAA;AAgOF;;AA7NA;EACE,qBAAA;EACA,oBAAA;EACA,sBAAA;EACA,gBAAA;EACA,eAAA;AAgOF;;AA7NA;EACE,mBAAA;EACA,WAAA;EACA,qBAAA;AAgOF","sourcesContent":[".admin-outing-detail-page {\n  padding: 64px 0;\n  background: #f7fbfd;\n  min-height: 80vh;\n}\n.container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }\n.back-link { border: 0; background: transparent; color: #0d4f6d; font-family: 'Raleway', sans-serif; font-weight: 800; cursor: pointer; margin-bottom: 18px; }\n.section-head { margin-bottom: 28px; }\n.eyebrow { display:inline-block; color:#0d6f8f; text-transform:uppercase; letter-spacing:.16em; font-family:'Raleway',sans-serif; font-weight:800; font-size:.75rem; }\nh1 { margin: 10px 0; color:#08263a; font-family:'Playfair Display',serif; font-size:clamp(2rem,5vw,3.5rem); }\np { color:#526173; font-family:'Lato',sans-serif; }\n.detail-card, .checklist-card { background:#fff; border-radius:24px; padding:28px; box-shadow:0 18px 45px rgba(8,38,58,.1); margin-bottom:24px; }\n.status-row { display:flex; justify-content:flex-end; margin-bottom:12px; }\n.status { border-radius:999px; padding:8px 14px; background:rgba(245,158,11,.16); color:#92400e; font-family:'Raleway',sans-serif; font-weight:800; }\n.status.closed { background:rgba(16,185,129,.14); color:#047857; }\n.form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }\n.form-grid label { display:flex; flex-direction:column; gap:8px; color:#0f2d3f; font-family:'Raleway',sans-serif; font-weight:800; }\n.form-grid .wide { grid-column:1 / -1; }\ninput, select, textarea { width:100%; border:1px solid rgba(8,38,58,.16); border-radius:14px; padding:12px 14px; font-family:'Lato',sans-serif; font-size:1rem; background:#fff; color:#0f172a; }\ntextarea { resize:vertical; }\n.actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:22px; }\n.btn { border:0; border-radius:999px; padding:12px 20px; font-family:'Raleway',sans-serif; font-weight:900; cursor:pointer; text-decoration:none; }\n.btn:disabled { opacity:.45; cursor:not-allowed; }\n.btn-primary { background:#f59e0b; color:#08263a; }\n.btn-secondary { background:#0d4f6d; color:#fff; }\n.notice { border-radius:16px; padding:14px 16px; margin:14px 0; font-family:'Raleway',sans-serif; font-weight:800; }\n.notice.success { background:rgba(16,185,129,.13); color:#047857; }\n.notice.error { background:rgba(239,68,68,.12); color:#b91c1c; }\n.checklist-head, .checklist-subhead { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px; }\nh2, h3 { margin:0; color:#08263a; font-family:'Playfair Display',serif; }\n.checklist-head span, .checklist-subhead span { border-radius:999px; padding:8px 12px; background:#e5eef3; color:#0d4f6d; font-family:'Raleway',sans-serif; font-weight:900; white-space:nowrap; }\n.checklist-head span.complete, .checklist-subhead span.complete { background:rgba(16,185,129,.14); color:#047857; }\n.checklist-group { border-top:1px solid rgba(8,38,58,.1); padding-top:20px; margin-top:20px; }\n.checklist-grid { display:grid; gap:12px; }\n.check-item { display:flex; align-items:flex-start; gap:12px; padding:14px; border:1px solid rgba(8,38,58,.12); border-radius:16px; background:#fff; cursor:pointer; font-family:'Lato',sans-serif; color:#1f2937; }\n.check-item.done { background:rgba(13,111,143,.06); }\n.check-item input { display:none; }\n.fake-radio { width:22px; height:22px; border-radius:50%; border:2px solid #0d6f8f; flex:0 0 auto; position:relative; margin-top:1px; }\n.check-item.done .fake-radio::after { content:''; position:absolute; inset:4px; border-radius:50%; background:#f59e0b; }\n.check-meta { display:block; margin-top:5px; color:#64748b; font-size:.78rem; }\n@media (max-width: 760px) { .form-grid { grid-template-columns:1fr; } .detail-card,.checklist-card { padding:20px; border-radius:18px; } .actions .btn { width:100%; } .checklist-head,.checklist-subhead { align-items:flex-start; flex-direction:column; } }\n\n.checklist-subhead h4 { margin: 0; font-size: 1.02rem; color: #08263a; }\n\n\n.outing-tabs {\n  display: flex;\n  gap: 0.5rem;\n  margin: 1.5rem 0;\n  flex-wrap: wrap;\n}\n\n.outing-tab {\n  padding: 0.75rem 1rem;\n  border-radius: 999px;\n  border: 1px solid #ddd;\n  background: #fff;\n  cursor: pointer;\n}\n\n.outing-tab.active {\n  background: #0f172a;\n  color: #fff;\n  border-color: #0f172a;\n}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
+/***/ 90917:
+/*!************************************************!*\
+  !*** ./src/app/home/stripe-connect.service.ts ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   StripeConnectService: () => (/* binding */ StripeConnectService)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ 93262);
+
+
+
+
+let StripeConnectService = class StripeConnectService {
+  http;
+  constructor(http) {
+    this.http = http;
+  }
+  getStatus(ownerId) {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      return _this.http.get(`${_this.backendUrl}/owner/stripe/status`, {
+        params: {
+          ownerId
+        },
+        withCredentials: true
+      }).toPromise();
+    })();
+  }
+  buildAuthorizeUrl(ownerId, returnUrl) {
+    const query = new URLSearchParams({
+      ownerId,
+      accountType: 'owner',
+      returnUrl
+    });
+    return `${this.backendUrl}/stripe/connect/authorize?${query.toString()}`;
+  }
+  disconnect(ownerId) {
+    var _this2 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      yield _this2.http.post(`${_this2.backendUrl}/stripe/connect/deauthorize`, {
+        ownerId
+      }, {
+        withCredentials: true
+      }).toPromise();
+    })();
+  }
+  get backendUrl() {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
+      return 'https://localhost:2000';
+    }
+    return window.location.origin;
+  }
+  static ctorParameters = () => [{
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_1__.HttpClient
+  }];
+};
+StripeConnectService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Injectable)({
+  providedIn: 'root'
+})], StripeConnectService);
 
 
 /***/ }),

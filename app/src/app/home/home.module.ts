@@ -44,6 +44,8 @@ import { AdminFleetComponent } from './admin-fleet/admin-fleet.component';
 import { SiteTextPipe } from './site-text.pipe';
 import { AdminSiteContentComponent } from './admin-site-content/admin-site-content.component';
 import { AdminBoatCalendarComponent } from './admin-boat-calendar/admin-boat-calendar.component';
+import { AdminStripeConnectComponent } from './admin-stripe-connect/admin-stripe-connect.component';
+import { PlatformHomeComponent } from './platform-home/platform-home.component';
 
 @NgModule({
   declarations: [
@@ -85,6 +87,8 @@ import { AdminBoatCalendarComponent } from './admin-boat-calendar/admin-boat-cal
     SeaToysComponent,
     AdminSiteContentComponent,
     AdminBoatCalendarComponent,
+    AdminStripeConnectComponent,
+    PlatformHomeComponent,
   ],
   imports: [
     CommonModule,
