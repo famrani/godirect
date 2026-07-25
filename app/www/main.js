@@ -51,7 +51,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   guidregex: () => (/* binding */ guidregex),
 /* harmony export */   hourInMilliseconds: () => (/* binding */ hourInMilliseconds)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var firebase_compat_app__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! firebase/compat/app */ 3602);
 /* harmony import */ var firebase_compat_auth__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! firebase/compat/auth */ 12043);
@@ -670,12 +670,12 @@ class UtilsService {
   }
   checkFileIonic(dir, fileName, check) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       let result = 0;
       return new Promise(/*#__PURE__*/function () {
-        var _ref = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve) {
+        var _ref = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve) {
           _this.fileIonic.checkFile(_this.fileIonic.externalDataDirectory + dir, fileName).then(/*#__PURE__*/function () {
-            var _ref2 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (data) {
+            var _ref2 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (data) {
               _this.fileIonic.resolveLocalFilesystemUrl(_this.fileIonic.externalDataDirectory + dir + fileName).then(data1 => {
                 data1.getMetadata(metadata => {
                   if (metadata.size > 2000) {
@@ -706,7 +706,7 @@ class UtilsService {
   checkFileTablet(url, check) {
     var _this2 = this;
     return new Promise(/*#__PURE__*/function () {
-      var _ref3 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref3 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         const pathnameRegex = /(\/?(.+)\/)/;
         const filenameRegex = /.*\/(.+)$/;
         const filedirt = pathnameRegex.exec(url);
@@ -736,7 +736,7 @@ class UtilsService {
   downloadThumb2(url, dir, localurl, check, force) {
     var _this3 = this;
     return new Promise(/*#__PURE__*/function () {
-      var _ref4 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolvef) {
+      var _ref4 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolvef) {
         const filenameRegyoutube = /(youtube\.com|youtu\.be)/;
         const regExB = /(([^\/]+\.([\w]+))(\?.*)?)$/;
         const regExC = /([^\/]+)\?.+$/;
@@ -781,7 +781,7 @@ class UtilsService {
               _this3.http.get(urldownloadUrl, {
                 params: params1
               }).subscribe(/*#__PURE__*/function () {
-                var _ref5 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (temp12) {
+                var _ref5 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (temp12) {
                   const result = temp12;
                   localurl = result.backendurl;
                   if (_this3.platformDevice && _this3.platformDevice.is('cordova')) {
@@ -816,7 +816,7 @@ class UtilsService {
             }));
           }
           promise1.then(/*#__PURE__*/function () {
-            var _ref6 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (temp3) {
+            var _ref6 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (temp3) {
               if (localurl && _this3.platformDevice && _this3.platformDevice.is('cordova')) {
                 const temp1 = yield _this3.checkFileTablet(localurl, check);
                 if (temp1 === 0) {
@@ -847,7 +847,7 @@ class UtilsService {
   downloadThumb(urlToDownload, dir, localurl, check) {
     var _this4 = this;
     return new Promise(/*#__PURE__*/function () {
-      var _ref7 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref7 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         if (urlToDownload) {
           let temp1;
           if (localurl === undefined) {
@@ -862,7 +862,7 @@ class UtilsService {
               _this4.http.get(url, {
                 params: params1
               }).subscribe(/*#__PURE__*/function () {
-                var _ref8 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (temp) {
+                var _ref8 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (temp) {
                   const result = temp;
                   localurl = result.backendurl;
                   if (_this4.platformDevice && _this4.platformDevice.is('cordova')) {
@@ -933,7 +933,7 @@ class UtilsService {
             _this4.http.get(url, {
               params: params1
             }).subscribe(/*#__PURE__*/function () {
-              var _ref9 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (temp) {
+              var _ref9 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (temp) {
                 const result = temp;
                 localurl = result.backendurl;
                 if (_this4.platformDevice && _this4.platformDevice.is('cordova')) {
@@ -996,7 +996,7 @@ class UtilsService {
     var _this5 = this;
     let result;
     return new Promise(/*#__PURE__*/function () {
-      var _ref10 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref10 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         let toto = false;
         if (mainAssetUrl !== undefined) {
           //        if (false) {
@@ -1048,7 +1048,7 @@ class UtilsService {
   listDir(path, dirName) {
     var _this6 = this;
     return new Promise(/*#__PURE__*/function () {
-      var _ref11 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref11 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         if (_this6.platformDevice && _this6.platformDevice.is('cordova')) {
           const path1 = _this6.fileIonic.externalDataDirectory + path;
           let dirList;
@@ -1585,7 +1585,7 @@ class StoreDbService {
       }
       if (objectData) {
         fbDbRef.ref(tempObject).set(objectData).then(/*#__PURE__*/function () {
-          var _ref12 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (data) {
+          var _ref12 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (data) {
             resolve(objectData);
           });
           return function (_x16) {
@@ -1613,7 +1613,7 @@ class StoreDbService {
   searchObject(storeId, fbDbRef, fbObject, field, fieldvalue) {
     var _this7 = this;
     return new Promise(/*#__PURE__*/function () {
-      var _ref13 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref13 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         let tempObject = fbObject;
         if (fbObject.indexOf('backend') !== 0) {
           tempObject = storeId + '/' + fbObject;
@@ -1688,7 +1688,7 @@ class StoreDbService {
       const fileName = event.target.files[0].name;
       ref = this.utilSvc.mst.ref(directory + '/' + fileName);
       const task = ref.put(event.target.files[0]).then(/*#__PURE__*/function () {
-        var _ref14 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (snapshot) {
+        var _ref14 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (snapshot) {
           try {
             const downloadURL = yield ref.getDownloadURL();
             resolve(downloadURL);
@@ -1714,7 +1714,7 @@ class StoreDbService {
         ref = this.utilSvc.mst.ref(directory + '/' + fileName);
       }
       const task = ref.put(file).then(/*#__PURE__*/function () {
-        var _ref15 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (snapshot) {
+        var _ref15 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (snapshot) {
           try {
             const downloadURL = yield ref.getDownloadURL();
             resolve(downloadURL);
@@ -1733,7 +1733,7 @@ class StoreDbService {
   uploadMedia(storeId, event, directory) {
     var _this8 = this;
     return new Promise(/*#__PURE__*/function () {
-      var _ref16 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref16 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         let thumb;
         if (!directory) {
           directory = '';
@@ -1755,7 +1755,7 @@ class StoreDbService {
   uploadMedia1(storeId, file, directory) {
     var _this9 = this;
     return new Promise(/*#__PURE__*/function () {
-      var _ref17 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref17 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         let thumb;
         if (!directory) {
           directory = '';
@@ -2600,7 +2600,7 @@ class UsersService {
     var _this10 = this;
     const maf = this.storeDbSvc.firebaseauth;
     return new Promise(/*#__PURE__*/function () {
-      var _ref18 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref18 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         try {
           const cred = yield maf.createUserWithEmailAndPassword(email.toLowerCase(), password);
           const user = cred.user;
@@ -2639,7 +2639,7 @@ class UsersService {
     var _this11 = this;
     const user = this.storeDbSvc.firebaseauth.currentUser;
     return new Promise(/*#__PURE__*/function () {
-      var _ref19 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref19 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         if (!user) return reject(new Error('Not signed in'));
         try {
           yield user.sendEmailVerification({
@@ -2658,7 +2658,7 @@ class UsersService {
   }
   getUserProfile(uid) {
     var _this12 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const storeId = _this12.utilSvc.backendFBstoreId;
       const data = yield _this12.storeDbSvc.getObject(storeId, _this12.utilSvc.mdb, OBJECTNAME.bnUsers, uid);
       return data || null;
@@ -2669,7 +2669,7 @@ class UsersService {
    */
   signInWithGoogleAndLoadProfile() {
     var _this13 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const maf = _this13.utilSvc.mauth;
       const provider = new firebase_compat_app__WEBPACK_IMPORTED_MODULE_1__["default"].auth.GoogleAuthProvider();
       // Popup (you can also support redirect similarly)
@@ -2750,7 +2750,7 @@ class UsersService {
   // ------------------------
   changePasswordWithOldPassword(oldPassword, newPassword) {
     var _this14 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const auth = _this14.storeDbSvc.firebaseauth;
       const user = auth.currentUser;
       if (!user || !user.email) {
@@ -2763,14 +2763,14 @@ class UsersService {
   }
   changePasswordReauthWithGoogle(newPassword) {
     var _this15 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const auth = _this15.storeDbSvc.firebaseauth;
       const user = auth.currentUser;
       if (!user) throw new Error('Not signed in.');
       const provider = new firebase_compat_app__WEBPACK_IMPORTED_MODULE_1__["default"].auth.GoogleAuthProvider();
       yield user.reauthenticateWithPopup?.(provider) // compat has this on User
       .catch(/*#__PURE__*/function () {
-        var _ref20 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (e) {
+        var _ref20 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (e) {
           if (e?.code === 'auth/popup-blocked') {
             yield auth.signInWithRedirect(provider);
             yield auth.getRedirectResult();
@@ -2802,7 +2802,7 @@ class UsersService {
   // ------------------------------------
   saveUserProfile(user, merge = false) {
     var _this16 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const storeId = _this16.utilSvc.backendFBstoreId;
       const existing = merge ? yield _this16.storeDbSvc.getObject(storeId, _this16.utilSvc.mdb, OBJECTNAME.bnUsers, user.userId) : null;
       const payload = merge && existing ? {
@@ -3080,7 +3080,7 @@ class ServicesService {
     var _this17 = this;
     return new Promise((resolve, reject) => {
       const backendFbConfig = this.config[env.platform].firebaseMasterConfig;
-      this.storeDbSvc.initFB(this.utilSvc.backendFBstoreId, backendFbConfig, 'goDigitalBE', true, true, this.backendFbObjects, this.storeDbSvc.backendFbRef).then(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      this.storeDbSvc.initFB(this.utilSvc.backendFBstoreId, backendFbConfig, 'goDigitalBE', true, true, this.backendFbObjects, this.storeDbSvc.backendFbRef).then(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
         const databaseString = 'database';
         const authString = 'auth';
         _this17.utilSvc.mdb = _this17.storeDbSvc.backendFbRef[databaseString];
@@ -3200,7 +3200,7 @@ class ServicesService {
   }
   loginOrValidateUser(email, password, firebaseUid, verifyEmail) {
     var _this18 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const auth = _this18.utilSvc.mauth;
       const db = _this18.utilSvc.mdb;
       if (verifyEmail === undefined) {
@@ -3287,7 +3287,7 @@ class ServicesService {
   }
   setLoggedUser(value) {
     var _this19 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (value) {
         _this19.utilSvc.setUid(value.userId);
         _this19.bnUser = value;
@@ -3328,7 +3328,7 @@ class ServicesService {
   uploadThumb(event1, source, url, directory) {
     var _this20 = this;
     return new Promise(/*#__PURE__*/function () {
-      var _ref22 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
+      var _ref22 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (resolve, reject) {
         _this20.spinner.show();
         if (source === 'url') {
           if (url && url.length > 0) {
@@ -3599,7 +3599,7 @@ class ServicesService {
    */
   bootstrap(envPlatform) {
     var _this21 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const env = envPlatform ? {
         platform: envPlatform
       } : {};
@@ -12133,7 +12133,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AppComponent: () => (/* binding */ AppComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _app_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./app.component.html?ngResource */ 61584);
 /* harmony import */ var _app_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./app.component.css?ngResource */ 90309);
@@ -12241,7 +12241,7 @@ let AppComponent = class AppComponent {
   }
   initializeApp() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       let value2;
       let error;
       _this.utilSvc.appName = 'Alegria';
@@ -12249,7 +12249,7 @@ let AppComponent = class AppComponent {
       if (platform !== 'dev ' && platform !== 'test ' && platform !== 'prod') {
         platform = 'test';
       }
-      _this.platform.ready().then(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this.platform.ready().then(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
         const autoHide = true;
         if (_this.platform.is('cordova')) {
           _this.statusBar.hide();
@@ -12326,7 +12326,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   OfferApiService: () => (/* binding */ OfferApiService)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/common/http */ 93262);
@@ -12402,7 +12402,7 @@ let OfferApiService = class OfferApiService {
   }
   saveOffer(input) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.validateOfferInput(input);
       const now = Date.now();
       const offerId = input.offerId || `offer_${now}_${Math.random().toString(36).slice(2, 8)}`;
@@ -12530,7 +12530,7 @@ let OfferApiService = class OfferApiService {
   }
   markTermsAccepted(offerId) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const current = yield _this2.readItem(_this2.offersCollection, offerId);
       if (!current) throw new Error('Offer not found');
       if (current.validUntil && Date.now() > current.validUntil) {
@@ -12638,7 +12638,7 @@ let OfferApiService = class OfferApiService {
   }
   setWarrantyChoice(offerId, warrantyPaymentChoice) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const current = yield _this3.readItem(_this3.offersCollection, offerId);
       if (!current) throw new Error('Offer not found');
       const patch = {
@@ -12656,7 +12656,7 @@ let OfferApiService = class OfferApiService {
   }
   finalizeOfferWizard(offerId, warrantyPaymentChoice) {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const hydrated = yield _this4.readOfferWithPaymentState(offerId);
       if (!hydrated) throw new Error('Offer not found');
       const depositPaid = hydrated.depositPaid === true || hydrated.depositStatus === 'paid' || hydrated.paymentStatus === 'paid' || hydrated.paymentStatus === 'charge_succeeded';
@@ -12742,7 +12742,7 @@ let OfferApiService = class OfferApiService {
   }
   markSent(offer) {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this5.assertOfferCanBeRenewed(offer);
       const refreshed = yield _this5.readItem(_this5.offersCollection, offer.offerId).catch(() => offer);
       const offerToSend = {
@@ -12799,7 +12799,7 @@ let OfferApiService = class OfferApiService {
   }
   sendOfferNotifications(offer) {
     var _this6 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const offerId = offer.offerId;
       if (!offerId) return;
       const now = Date.now();
@@ -12852,7 +12852,7 @@ let OfferApiService = class OfferApiService {
   }
   acceptOffer(offerId, warrantyPaymentChoice) {
     var _this7 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       // Backward-compatible wrapper: in the new wizard, accepting only records T&C + warranty choice.
       const offer = yield _this7.markTermsAccepted(offerId);
       return _this7.setWarrantyChoice(offerId, warrantyPaymentChoice).then(updated => ({
@@ -12863,7 +12863,7 @@ let OfferApiService = class OfferApiService {
   }
   renewOffer(offerId) {
     var _this8 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const current = yield _this8.readItem(_this8.offersCollection, offerId);
       if (!current) throw new Error('Offer not found');
       _this8.assertOfferCanBeRenewed(current);
@@ -12887,7 +12887,7 @@ let OfferApiService = class OfferApiService {
   }
   updateCustomerOfferRequest(offerId, patch) {
     var _this9 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this9.patchOffer(offerId, {
         ...patch,
         status: 'request',
@@ -12908,7 +12908,7 @@ let OfferApiService = class OfferApiService {
   }
   cancelCustomerOfferRequest(offerId) {
     var _this10 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this10.patchOffer(offerId, {
         status: 'cancelled_by_customer',
         bookingRequestStatus: 'cancelled_by_customer',
@@ -12926,13 +12926,13 @@ let OfferApiService = class OfferApiService {
   }
   deleteOffer(offerId) {
     var _this11 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this11.deleteItem(_this11.offersCollection, offerId);
     })();
   }
   createManualHistoricalBookingRecord(input) {
     var _this12 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const now = Date.now();
       const bookingId = String(input.bookingId || `booking_${now}_${Math.random().toString(36).slice(2, 8)}`);
       const source = String(input.source || 'direct').toLowerCase();
@@ -13100,7 +13100,7 @@ let OfferApiService = class OfferApiService {
   }
   createExternalBookingRecord(offer) {
     var _this13 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const now = Date.now();
       const anyOffer = offer || {};
       const bookingId = String(anyOffer.relatedBookingId || anyOffer.offerId || `external_${now}_${Math.random().toString(36).slice(2, 8)}`);
@@ -13177,7 +13177,7 @@ let OfferApiService = class OfferApiService {
   }
   createExternalBooking(input) {
     var _this14 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const remainingOnboardAmount = Number(input.externalRemainingOnboardAmount || input.remainingOnboardAmount || 0);
       const extraServicesOnboardAmount = Number(input.externalExtraServicesOnboardAmount || input.extraServicesOnboardAmount || 0);
       const onboardAmount = Number(input.totalAmount || remainingOnboardAmount + extraServicesOnboardAmount || 0);
@@ -13242,7 +13242,7 @@ let OfferApiService = class OfferApiService {
   }
   attachCustomerAccount(offerId, payload) {
     var _this15 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this15.patchOffer(offerId, {
         customerUid: payload.customerUid,
         customerAuthProvider: payload.customerAuthProvider,
@@ -13254,7 +13254,7 @@ let OfferApiService = class OfferApiService {
   }
   patchOffer(id, patch) {
     var _this16 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const current = yield _this16.readItem(_this16.offersCollection, id);
       if (!current) throw new Error('Offer not found');
       yield _this16.writeItem(_this16.offersCollection, id, {
@@ -13266,7 +13266,7 @@ let OfferApiService = class OfferApiService {
   }
   markDepositPaidFromStripeReturn(offerId, payload = {}) {
     var _this17 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const current = yield _this17.readItem(_this17.offersCollection, offerId);
       if (!current) {
         throw new Error('Offer not found');
@@ -13294,7 +13294,7 @@ let OfferApiService = class OfferApiService {
   }
   patchBookingDepositState(offerId, offer, payload = {}) {
     var _this18 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const bookingId = offer.relatedBookingId || offerId;
       const existing = yield _this18.readItem(_this18.bookingsCollection, bookingId).catch(() => undefined);
       const payment = {
@@ -13390,7 +13390,7 @@ let OfferApiService = class OfferApiService {
   }
   markWarrantyRegisteredFromStripeReturn(offerId, payload = {}) {
     var _this19 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const current = yield _this19.readItem(_this19.offersCollection, offerId);
       if (!current) throw new Error('Offer not found');
       const sessionId = String(payload.sessionId || payload.session_id || payload.checkoutSessionId || '').trim();
@@ -13504,7 +13504,7 @@ let OfferApiService = class OfferApiService {
   }
   createBookingFromOffer(p) {
     var _this20 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const anyP = p || {};
       const raw = anyP.raw || {};
       const firstPositive = (...values) => {
@@ -13785,7 +13785,7 @@ let OfferApiService = class OfferApiService {
   }
   queueOfferNotification(offer, channel, payload, now) {
     var _this21 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const offerId = offer.offerId;
       const id = `${offerId}_${channel}_${now}`;
       const destination = channel === 'email' ? payload.customerEmail : payload.customerWhatsapp;
@@ -13809,7 +13809,7 @@ let OfferApiService = class OfferApiService {
   }
   readOfferWithPaymentState(id) {
     var _this22 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const offer = yield _this22.readItem(_this22.offersCollection, id);
       if (!offer) return undefined;
       if (offer.status === 'accepted') {
@@ -13849,7 +13849,7 @@ let OfferApiService = class OfferApiService {
   }
   readCollection(collection) {
     var _this23 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const value = yield _this23.http.get(`${_this23.firebaseUrl}/${collection}.json`).toPromise();
       if (!value) return [];
       return Object.keys(value).map(key => ({
@@ -13860,7 +13860,7 @@ let OfferApiService = class OfferApiService {
   }
   readItem(collection, id) {
     var _this24 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const value = yield _this24.http.get(`${_this24.firebaseUrl}/${collection}/${id}.json`).toPromise();
       return value ? {
         ...value,
@@ -13870,13 +13870,13 @@ let OfferApiService = class OfferApiService {
   }
   deleteItem(collection, id) {
     var _this25 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this25.http.delete(`${_this25.firebaseUrl}/${collection}/${id}.json`).toPromise();
     })();
   }
   writeItem(collection, id, value) {
     var _this26 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this26.http.put(`${_this26.firebaseUrl}/${collection}/${id}.json`, value).toPromise();
     })();
   }
@@ -14159,7 +14159,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Page404Component: () => (/* binding */ Page404Component)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _page404_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./page404.component.html?ngResource */ 51108);
 /* harmony import */ var _page404_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./page404.component.scss?ngResource */ 73330);
@@ -14196,7 +14196,7 @@ let Page404Component = class Page404Component {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.allSiteContent = yield _this.siteContentService.getContent();
         _this.content = _this.allSiteContent[_this.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT[_this.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT.fr;
@@ -14825,7 +14825,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   HomefooterComponent: () => (/* binding */ HomefooterComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _homefooter_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./homefooter.component.html?ngResource */ 72735);
 /* harmony import */ var _homefooter_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./homefooter.component.scss?ngResource */ 38745);
@@ -14867,7 +14867,7 @@ let HomefooterComponent = class HomefooterComponent {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.allSiteContent = yield _this.siteContentService.getContent();
       } catch {
@@ -15073,7 +15073,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   HomeheaderComponent: () => (/* binding */ HomeheaderComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _homeheader_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./homeheader.component.html?ngResource */ 4527);
 /* harmony import */ var _homeheader_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./homeheader.component.scss?ngResource */ 39829);
@@ -15427,7 +15427,7 @@ let HomeheaderComponent = class HomeheaderComponent {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.allSiteContent = yield _this.siteContentService.getContent();
         _this.content = _this.allSiteContent[_this.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT[_this.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT.fr;
@@ -16275,7 +16275,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SiteContentService: () => (/* binding */ SiteContentService)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common/http */ 93262);
@@ -16315,7 +16315,7 @@ let SiteContentService = class SiteContentService {
    */
   getContent(forceRefresh = false) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (_this.cached && !forceRefresh) {
         return _this.cached;
       }
@@ -16340,14 +16340,14 @@ let SiteContentService = class SiteContentService {
   }
   getLanguageContent(language) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const all = yield _this2.getContent();
       return all[language] || all.en || all.fr || {};
     })();
   }
   getRawContent(forceRefresh = false) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!forceRefresh && _this3.rawSiteContent) return _this3.rawSiteContent;
       for (const baseUrl of _this3.restDatabaseUrls) {
         try {
@@ -16363,7 +16363,7 @@ let SiteContentService = class SiteContentService {
   }
   translate(path, language = 'fr', fallback = '') {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const all = yield _this4.getContent();
       return _this4.tFromContent(all, path, language, fallback);
     })();
@@ -16389,23 +16389,23 @@ let SiteContentService = class SiteContentService {
    * not rely on alegria_v2 anymore.
    */
   getV2Root(_forceRefresh = false) {
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return null;
     })();
   }
   getTenantConfig(_tenantId = this.defaultTenantId, _forceRefresh = false) {
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return null;
     })();
   }
   getTenantSettings(_tenantId = this.defaultTenantId, _forceRefresh = false) {
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return null;
     })();
   }
   getTenantMarinas(_tenantId = this.defaultTenantId) {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const all = yield _this5.getContent();
       const marinas = all?.fr?.settings?.marinas || all?.en?.settings?.marinas;
       return Array.isArray(marinas) ? marinas : [];
@@ -17066,7 +17066,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   LocalUtilsService: () => (/* binding */ LocalUtilsService),
 /* harmony export */   externalUrlProvider: () => (/* binding */ externalUrlProvider)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _awesome_cordova_plugins_geolocation_ngx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @awesome-cordova-plugins/geolocation/ngx */ 86241);
@@ -17230,7 +17230,7 @@ let LocalUtilsService = class LocalUtilsService {
     });
   }
   sendEmail(message_title, message_content, user_guest, email_guest, phone_guest) {
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         const response = yield _emailjs_browser__WEBPACK_IMPORTED_MODULE_2__["default"].send("service_7vistjr", "template_bsdvkhk", {
           message_title,
@@ -17349,7 +17349,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PendingOfferLoginModalService: () => (/* binding */ PendingOfferLoginModalService)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/router */ 50085);
@@ -17378,7 +17378,7 @@ let PendingOfferLoginModalService = class PendingOfferLoginModalService {
   }
   checkAfterLogin(user) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!user || _this.checking) return;
       const role = String(user.role || user.userRole || '').toLowerCase();
       const isAdmin = role === 'admin' || role === 'owner' || role === 'superadmin';
@@ -17416,7 +17416,7 @@ let PendingOfferLoginModalService = class PendingOfferLoginModalService {
   }
   showModal(isAdmin, count) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const language = _this2.languageService.currentLanguage || 'fr';
       const fr = language === 'fr';
       const plural = count > 1;
@@ -17466,7 +17466,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SiteTextPipe: () => (/* binding */ SiteTextPipe)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./site-content-service/site-content.service */ 73196);
@@ -17504,7 +17504,7 @@ let SiteTextPipe = class SiteTextPipe {
   }
   load() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.loading = true;
       try {
         _this.content = yield _this.siteContent.getContent(false);

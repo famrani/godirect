@@ -691,7 +691,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ContactComponent: () => (/* binding */ ContactComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _contact_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./contact.component.html?ngResource */ 11650);
 /* harmony import */ var _contact_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./contact.component.scss?ngResource */ 73110);
@@ -747,7 +747,7 @@ let ContactComponent = class ContactComponent {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.allSiteContent = yield _this.siteContentService.getContent();
         _this.content = _this.mergeContactInfo(_this.allSiteContent[_this.currentLanguage] || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT[_this.currentLanguage] || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT.fr);
@@ -838,7 +838,7 @@ let ContactComponent = class ContactComponent {
   }
   submit() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (_this2.isSending) {
         return;
       }
@@ -895,7 +895,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   DEFAULT_BN_OUTINGS: () => (/* binding */ DEFAULT_BN_OUTINGS),
 /* harmony export */   OutingsDataService: () => (/* binding */ OutingsDataService)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common/http */ 93262);
@@ -927,7 +927,7 @@ let OutingsDataService = class OutingsDataService {
   }
   getOutings() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const raw = yield _this.readBnOutingsFromFirebase();
       const values = _this.normalizeRaw(raw);
       return values.filter(item => item && item.slug && item.active !== false).sort((a, b) => _this.sortOrder(a.slug) - _this.sortOrder(b.slug));
@@ -935,7 +935,7 @@ let OutingsDataService = class OutingsDataService {
   }
   saveOuting(outing) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const slug = outing.slug || outing.id;
       if (!slug) {
         throw new Error('Missing outing slug.');
@@ -1032,7 +1032,7 @@ let OutingsDataService = class OutingsDataService {
   }
   getOutingBySlug(slug) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const outings = yield _this3.getOutings();
       return outings.find(outing => outing.slug === slug);
     })();
@@ -1042,7 +1042,7 @@ let OutingsDataService = class OutingsDataService {
   }
   readBnOutingsFromFirebase() {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const store = _this4.storeDb;
       const util = _this4.utilSvc;
       // Your current Realtime Database export stores bnOutings at the ROOT: /bnOutings.
@@ -1096,7 +1096,7 @@ let OutingsDataService = class OutingsDataService {
   }
   readBnOutingsViaRest() {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const paths = [_this5.collectionPath, `1000/${_this5.collectionName}`];
       for (const baseUrl of _this5.restDatabaseUrls) {
         for (const path of paths) {
@@ -1126,7 +1126,7 @@ let OutingsDataService = class OutingsDataService {
   }
   saveBnOutingViaRest(payload, arrayIndex) {
     var _this6 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       for (const baseUrl of _this6.restDatabaseUrls) {
         try {
           const base = baseUrl.replace(/\/+$/, '');
@@ -1152,7 +1152,7 @@ let OutingsDataService = class OutingsDataService {
     return candidates.filter((db, index, array) => db && typeof db.ref === 'function' && array.indexOf(db) === index);
   }
   readDatabasePath(db, path) {
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         const cleanPath = path.replace(/^\/+/, '');
         const snapshot = yield db.ref(cleanPath).once('value');
@@ -1488,7 +1488,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AdminFeedbacksComponent: () => (/* binding */ AdminFeedbacksComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _admin_feedbacks_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-feedbacks.component.html?ngResource */ 11266);
 /* harmony import */ var _admin_feedbacks_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-feedbacks.component.scss?ngResource */ 40030);
@@ -1626,7 +1626,7 @@ let AdminFeedbacksComponent = class AdminFeedbacksComponent {
   }
   updateFeedback(item) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const id = _this.feedbackId(item);
       _this.actionError = '';
       _this.actionMessage = '';
@@ -1666,7 +1666,7 @@ let AdminFeedbacksComponent = class AdminFeedbacksComponent {
   }
   deleteFeedback(item) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const id = _this2.feedbackId(item);
       _this2.actionError = '';
       _this2.actionMessage = '';
@@ -1699,13 +1699,13 @@ let AdminFeedbacksComponent = class AdminFeedbacksComponent {
   }
   updateFeedbackObject(id, payload) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this3.storeDb.updateObject(_this3.utilSvc.backendFBstoreId, _this3.utilSvc.mdb, godigital_lib__WEBPACK_IMPORTED_MODULE_4__.OBJECTNAME.bnFeedbacks, payload, id);
     })();
   }
   deleteFeedbackObject(id, item) {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const store = _this4.storeDb;
       const storeId = _this4.utilSvc.backendFBstoreId;
       const mdb = _this4.utilSvc.mdb;
@@ -1881,7 +1881,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   FullDayComponent: () => (/* binding */ FullDayComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _full_day_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./full-day.component.html?ngResource */ 78652);
 /* harmony import */ var _full_day_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./full-day.component.scss?ngResource */ 12848);
@@ -1921,7 +1921,7 @@ let FullDayComponent = class FullDayComponent {
   }
   loadDynamicTour() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.dynamicOuting = yield _this.outingsData.getOutingBySlug('journee-en-mer');
       } catch {
@@ -2513,7 +2513,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AdminSiteContentComponent: () => (/* binding */ AdminSiteContentComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _admin_site_content_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-site-content.component.html?ngResource */ 13586);
 /* harmony import */ var _admin_site_content_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-site-content.component.scss?ngResource */ 3866);
@@ -2581,7 +2581,7 @@ let AdminSiteContentComponent = class AdminSiteContentComponent {
   }
   ngOnInit() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this.load();
     })();
   }
@@ -2624,7 +2624,7 @@ let AdminSiteContentComponent = class AdminSiteContentComponent {
   }
   load() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this2.loading = true;
       _this2.message = '';
       _this2.error = '';
@@ -2646,7 +2646,7 @@ let AdminSiteContentComponent = class AdminSiteContentComponent {
   }
   selectBoat(boatId) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this3.boatId = _this3.boatContext.setBoatId(boatId);
       yield _this3.load();
     })();
@@ -2700,7 +2700,7 @@ let AdminSiteContentComponent = class AdminSiteContentComponent {
   }
   translateCurrentTab() {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const sourceLanguage = _this4.selectedLanguage;
       const sourcePayload = _this4.getTabPayload(sourceLanguage);
       if (!sourcePayload) return;
@@ -2724,7 +2724,7 @@ let AdminSiteContentComponent = class AdminSiteContentComponent {
   }
   saveCurrentTab() {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this5.saving = true;
       _this5.message = '';
       _this5.error = '';
@@ -2819,7 +2819,7 @@ let AdminSiteContentComponent = class AdminSiteContentComponent {
   }
   translateValue(value, source, target, path) {
     var _this6 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (value === null || value === undefined) return value;
       if (typeof value === 'number' || typeof value === 'boolean') return value;
       if (Array.isArray(value)) {
@@ -2851,7 +2851,7 @@ let AdminSiteContentComponent = class AdminSiteContentComponent {
   }
   translateText(text, source, target) {
     var _this7 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const url = 'https://translate.googleapis.com/translate_a/single';
       const response = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_5__.firstValueFrom)(_this7.http.get(url, {
         params: {
@@ -2890,7 +2890,7 @@ let AdminSiteContentComponent = class AdminSiteContentComponent {
   }
   saveOperationalOutings() {
     var _this8 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       let existing = {};
       try {
         existing = (yield (0,rxjs__WEBPACK_IMPORTED_MODULE_5__.firstValueFrom)(_this8.http.get(`${_this8.firebaseDatabaseUrl}/bnOutings/${encodeURIComponent(_this8.boatId)}.json`).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_6__.timeout)(15000)))) || {};
@@ -2982,7 +2982,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AccountSummaryComponent: () => (/* binding */ AccountSummaryComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _account_summary_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./account-summary.component.html?ngResource */ 44878);
 /* harmony import */ var _account_summary_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./account-summary.component.scss?ngResource */ 80458);
@@ -3065,7 +3065,7 @@ let AccountSummaryComponent = class AccountSummaryComponent {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         const firebaseContent = yield Promise.race([_this.siteContentService.getContent(false), new Promise((_, reject) => setTimeout(() => reject(new Error('site-content-timeout')), 5000))]);
         if (firebaseContent && typeof firebaseContent === 'object') {
@@ -4145,7 +4145,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MyBookingsComponent: () => (/* binding */ MyBookingsComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _my_bookings_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./my-bookings.component.html?ngResource */ 67710);
 /* harmony import */ var _my_bookings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./my-bookings.component.scss?ngResource */ 95938);
@@ -4266,7 +4266,7 @@ let MyBookingsComponent = class MyBookingsComponent {
   }
   loadPageText(language) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const fallback = _site_content__WEBPACK_IMPORTED_MODULE_4__.SITE_CONTENT[language]?.bookingManagement || _site_content__WEBPACK_IMPORTED_MODULE_4__.SITE_CONTENT.fr?.bookingManagement || {};
       try {
         const content = yield _this.siteContentService.getContent();
@@ -4689,7 +4689,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   BookingProcessComponent: () => (/* binding */ BookingProcessComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _booking_process_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./booking-process.component.html?ngResource */ 22410);
 /* harmony import */ var _booking_process_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./booking-process.component.scss?ngResource */ 57574);
@@ -5135,7 +5135,7 @@ let BookingProcessComponent = class BookingProcessComponent {
   }
   loadContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.allContent = yield _this.withTimeout(_this.siteContentService.getContent(false), 2500);
         _this.applyLanguage(_this.currentLanguage);
@@ -5774,7 +5774,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AdminOffersComponent: () => (/* binding */ AdminOffersComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _admin_offers_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-offers.component.html?ngResource */ 75322);
 /* harmony import */ var _admin_offers_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-offers.component.scss?ngResource */ 19370);
@@ -5845,7 +5845,7 @@ let AdminOffersComponent = class AdminOffersComponent {
   }
   loadPageText(language) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const fallback = _site_content__WEBPACK_IMPORTED_MODULE_4__.SITE_CONTENT[language]?.offerManagement || _site_content__WEBPACK_IMPORTED_MODULE_4__.SITE_CONTENT.fr?.offerManagement || {};
       try {
         const content = yield _this.siteContentService.getContent();
@@ -6119,7 +6119,7 @@ let AdminOffersComponent = class AdminOffersComponent {
   }
   saveOffer() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this2.error = '';
       _this2.message = '';
       if (!_this2.validateOfferForm()) return;
@@ -6143,7 +6143,7 @@ let AdminOffersComponent = class AdminOffersComponent {
   }
   markSent() {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this3.error = '';
       if (!_this3.validateOfferForm()) return;
       if (!_this3.form.offerId) return;
@@ -6160,7 +6160,7 @@ let AdminOffersComponent = class AdminOffersComponent {
   }
   renewOffer(offer, event) {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       event?.stopPropagation();
       if (!offer.offerId) return;
       _this4.error = '';
@@ -6185,7 +6185,7 @@ let AdminOffersComponent = class AdminOffersComponent {
   }
   deleteOffer(offer, event) {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       event?.stopPropagation();
       if (!offer.offerId) return;
       const customer = offer.customerName || offer.customerEmail || offer.offerId;
@@ -6413,7 +6413,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   DepositComponent: () => (/* binding */ DepositComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _deposit_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./deposit.component.html?ngResource */ 10842);
 /* harmony import */ var _deposit_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./deposit.component.scss?ngResource */ 26278);
@@ -6854,7 +6854,7 @@ let DepositComponent = class DepositComponent {
     this.isChargingWarranty = true;
     this.bookingApi.chargeWarranty(this.bookingId, amount, this.warrantyReason.trim(), this.ownerId).subscribe({
       next: function () {
-        var _ref = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        var _ref = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
           try {
             yield _this.bookingApi.updateBooking(_this.bookingId, {
               warrantyStatus: 'charged',
@@ -7411,7 +7411,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   EvjfEvgComponent: () => (/* binding */ EvjfEvgComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _evjf_evg_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./evjf-evg.component.html?ngResource */ 87592);
 /* harmony import */ var _evjf_evg_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./evjf-evg.component.scss?ngResource */ 11428);
@@ -7451,7 +7451,7 @@ let EvjfEvgComponent = class EvjfEvgComponent {
   }
   loadDynamicTour() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.dynamicOuting = yield _this.outingsData.getOutingBySlug('party');
       } catch {
@@ -7490,7 +7490,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AdminFleetComponent: () => (/* binding */ AdminFleetComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _admin_fleet_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-fleet.component.html?ngResource */ 12406);
 /* harmony import */ var _admin_fleet_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-fleet.component.scss?ngResource */ 9074);
@@ -7538,7 +7538,7 @@ let AdminFleetComponent = class AdminFleetComponent {
   }
   loadBoats() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.loading = true;
       _this.error = '';
       try {
@@ -7556,7 +7556,7 @@ let AdminFleetComponent = class AdminFleetComponent {
   }
   selectBoat(boatId) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this2.selectedBoatId = boatId;
       _this2.form = yield _this2.fleetService.getBoat(boatId);
       _this2.skipperForm.ownerId = _this2.form.ownerId || '';
@@ -7583,7 +7583,7 @@ let AdminFleetComponent = class AdminFleetComponent {
   }
   saveSkipper() {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!String(_this3.skipperForm.displayName || '').trim()) {
         _this3.error = 'Le nom du skipper est obligatoire.';
         return;
@@ -7626,7 +7626,7 @@ let AdminFleetComponent = class AdminFleetComponent {
   }
   saveBoat() {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this4.saving = true;
       _this4.message = '';
       _this4.error = '';
@@ -7815,7 +7815,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   GuestFaqComponent: () => (/* binding */ GuestFaqComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _guest_faq_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./guest-faq.component.html?ngResource */ 22918);
 /* harmony import */ var _guest_faq_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./guest-faq.component.scss?ngResource */ 28938);
@@ -7855,7 +7855,7 @@ let GuestFaqComponent = class GuestFaqComponent {
   }
   load() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.loading = true;
       try {
         const content = yield _this.guestContentService.getContent();
@@ -8317,7 +8317,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   GuestJourneyComponent: () => (/* binding */ GuestJourneyComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _guest_journey_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./guest-journey.component.html?ngResource */ 48874);
 /* harmony import */ var _guest_journey_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./guest-journey.component.scss?ngResource */ 88406);
@@ -8356,7 +8356,7 @@ let GuestJourneyComponent = class GuestJourneyComponent {
   }
   load() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.loading = true;
       try {
         const content = yield _this.guestContentService.getContent();
@@ -8404,7 +8404,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   BoatComponent: () => (/* binding */ BoatComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _boat_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./boat.component.html?ngResource */ 65100);
 /* harmony import */ var _boat_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./boat.component.scss?ngResource */ 99192);
@@ -8502,7 +8502,7 @@ let BoatComponent = class BoatComponent {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.allSiteContent = yield _this.siteContentService.getContent();
         _this.content = _this.allSiteContent[_this.currentLanguage] || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT[_this.currentLanguage];
@@ -8971,7 +8971,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AdminManageOutingsComponent: () => (/* binding */ AdminManageOutingsComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _admin_manage_outings_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-manage-outings.component.html?ngResource */ 18642);
 /* harmony import */ var _admin_manage_outings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-manage-outings.component.scss?ngResource */ 77550);
@@ -9012,7 +9012,7 @@ let AdminManageOutingsComponent = class AdminManageOutingsComponent {
   }
   load() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.loading = true;
       _this.error = '';
       try {
@@ -9034,7 +9034,7 @@ let AdminManageOutingsComponent = class AdminManageOutingsComponent {
   }
   save() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this2.selected) return;
       _this2.saving = true;
       _this2.message = '';
@@ -9831,7 +9831,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AdminOutingDetailComponent: () => (/* binding */ AdminOutingDetailComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _admin_outing_detail_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-outing-detail.component.html?ngResource */ 96678);
 /* harmony import */ var _admin_outing_detail_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-outing-detail.component.scss?ngResource */ 90810);
@@ -9944,7 +9944,7 @@ let AdminOutingDetailComponent = class AdminOutingDetailComponent {
   }
   loadOuting() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this.outingId) return;
       _this.loading = true;
       _this.error = '';
@@ -9968,7 +9968,7 @@ let AdminOutingDetailComponent = class AdminOutingDetailComponent {
   }
   saveDetails() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this2.outing || !_this2.isAdmin) return;
       _this2.saving = true;
       _this2.saved = false;
@@ -9998,7 +9998,7 @@ let AdminOutingDetailComponent = class AdminOutingDetailComponent {
   }
   toggleChecklist(item) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       item.done = !item.done;
       if (item.done) {
         item.doneBy = _this3.getLoggedUserName();
@@ -10014,7 +10014,7 @@ let AdminOutingDetailComponent = class AdminOutingDetailComponent {
   }
   closeOuting() {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this4.outing) return;
       // The log can be closed even if the arrival checklist is not fully complete.
       // Incomplete checklist items are still saved with their current state for operational follow-up.
@@ -10096,7 +10096,7 @@ let AdminOutingDetailComponent = class AdminOutingDetailComponent {
   }
   getFromFirebase(id) {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const collectionName = _this5.outingsCollectionName;
       const store = _this5.storeDb;
       const util = _this5.utilSvc;
@@ -10127,7 +10127,7 @@ let AdminOutingDetailComponent = class AdminOutingDetailComponent {
     })();
   }
   readDatabasePath(db, path) {
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         const cleanPath = path.replace(/^\/+/, '');
         const snapshot = yield db.ref(cleanPath).once('value');
@@ -10152,7 +10152,7 @@ let AdminOutingDetailComponent = class AdminOutingDetailComponent {
   }
   readSingleOutingViaRest(id) {
     var _this6 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const paths = [`${_this6.outingsCollectionName}/${id}`, `1000/${_this6.outingsCollectionName}/${id}`];
       for (const baseUrl of _this6.restDatabaseUrls) {
         for (const path of paths) {
@@ -10169,7 +10169,7 @@ let AdminOutingDetailComponent = class AdminOutingDetailComponent {
   }
   saveToFirebase(id, payload) {
     var _this7 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const store = _this7.storeDb;
       const util = _this7.utilSvc;
       const record = {
@@ -11343,7 +11343,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SkipperService: () => (/* binding */ SkipperService)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ 93262);
@@ -11359,7 +11359,7 @@ let SkipperService = class SkipperService {
   }
   listSkippers(boatId) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const raw = yield _this.http.get(`${_this.firebaseUrl}/bnSkippers.json`).toPromise().catch(() => ({}));
       return Object.keys(raw || {}).map(key => ({
         skipperId: key,
@@ -11369,7 +11369,7 @@ let SkipperService = class SkipperService {
   }
   saveSkipper(input) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const now = Date.now();
       const skipperId = _this2.slug(input.skipperId || input.displayName || `skipper-${now}`);
       const payload = {
@@ -11415,7 +11415,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SeaToysComponent: () => (/* binding */ SeaToysComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _sea_toys_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./sea-toys.component.html?ngResource */ 75850);
 /* harmony import */ var _sea_toys_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./sea-toys.component.scss?ngResource */ 43622);
@@ -11453,7 +11453,7 @@ let SeaToysComponent = class SeaToysComponent {
   }
   loadCopy(language) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const fallback = _this.defaultCopy[language] || _this.defaultCopy.fr;
       _this.copy = fallback;
       try {
@@ -11745,7 +11745,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   BusinessOutingComponent: () => (/* binding */ BusinessOutingComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _business_outing_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./business-outing.component.html?ngResource */ 9178);
 /* harmony import */ var _business_outing_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./business-outing.component.scss?ngResource */ 67010);
@@ -11785,7 +11785,7 @@ let BusinessOutingComponent = class BusinessOutingComponent {
   }
   loadDynamicTour() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.dynamicOuting = yield _this.outingsData.getOutingBySlug('sortie-entreprise');
       } catch {
@@ -12049,7 +12049,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SunsetCruiseComponent: () => (/* binding */ SunsetCruiseComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _sunset_cruise_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./sunset-cruise.component.html?ngResource */ 962);
 /* harmony import */ var _sunset_cruise_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./sunset-cruise.component.scss?ngResource */ 86730);
@@ -12089,7 +12089,7 @@ let SunsetCruiseComponent = class SunsetCruiseComponent {
   }
   loadDynamicTour() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.dynamicOuting = yield _this.outingsData.getOutingBySlug('coucher-de-soleil');
       } catch {
@@ -12129,7 +12129,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   DEFAULT_GUEST_INFO_CONTENT: () => (/* binding */ DEFAULT_GUEST_INFO_CONTENT),
 /* harmony export */   GuestContentService: () => (/* binding */ GuestContentService)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/common/http */ 93262);
@@ -12872,7 +12872,7 @@ let GuestContentService = class GuestContentService {
   }
   getContent(forceRefresh = false) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (_this.cached && !forceRefresh) return _this.cached;
       for (const baseUrl of _this.restDatabaseUrls) {
         try {
@@ -13153,7 +13153,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   HomeComponent: () => (/* binding */ HomeComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _home_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./home.component.html?ngResource */ 51770);
 /* harmony import */ var _home_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./home.component.scss?ngResource */ 58009);
@@ -13667,7 +13667,7 @@ let HomeComponent = class HomeComponent {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.contentReady = false;
       _this.applyLanguageContent(_this.currentLanguage);
       _this.contentReady = true;
@@ -13690,7 +13690,7 @@ let HomeComponent = class HomeComponent {
   }
   loadDynamicOutings() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this2.dynamicOutings = yield _this2.outingsData.getOutings();
       } catch {
@@ -14208,7 +14208,7 @@ let HomeComponent = class HomeComponent {
   }
   loadPricingModel() {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this3.pricingModel = yield _this3.bookingApi.getPricingModel();
       } catch {
@@ -19312,7 +19312,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AdminExternalBookingsComponent: () => (/* binding */ AdminExternalBookingsComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _admin_external_bookings_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-external-bookings.component.html?ngResource */ 71010);
 /* harmony import */ var _admin_external_bookings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-external-bookings.component.scss?ngResource */ 56598);
@@ -19413,7 +19413,7 @@ let AdminExternalBookingsComponent = class AdminExternalBookingsComponent {
   }
   loadBoats() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.boats = yield _this.fleetService.listBoats();
         const defaultBoat = _this.boats.find(boat => boat.boatId === _this.selectedBoatId) || _this.boats[0];
@@ -19553,7 +19553,7 @@ let AdminExternalBookingsComponent = class AdminExternalBookingsComponent {
   }
   loadPageText(language) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const fallback = _site_content__WEBPACK_IMPORTED_MODULE_5__.SITE_CONTENT[language]?.externalBookings || _site_content__WEBPACK_IMPORTED_MODULE_5__.SITE_CONTENT.fr?.externalBookings || {};
       try {
         const content = yield _this2.siteContentService.getContent();
@@ -19736,7 +19736,7 @@ let AdminExternalBookingsComponent = class AdminExternalBookingsComponent {
   }
   saveManualHistoricalBooking() {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this3.saving = true;
       _this3.error = '';
       _this3.message = '';
@@ -19793,7 +19793,7 @@ let AdminExternalBookingsComponent = class AdminExternalBookingsComponent {
   }
   saveExternalBooking() {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this4.saving = true;
       _this4.error = '';
       _this4.message = '';
@@ -20684,7 +20684,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   OfferConfirmationComponent: () => (/* binding */ OfferConfirmationComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _offer_confirmation_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./offer-confirmation.component.html?ngResource */ 46284);
 /* harmony import */ var _offer_confirmation_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./offer-confirmation.component.scss?ngResource */ 42220);
@@ -20763,7 +20763,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
     const id = this.route.snapshot.paramMap.get('offerId') || '';
     this.offerApi.getOffer(id).subscribe({
       next: function () {
-        var _ref = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (p) {
+        var _ref = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (p) {
           _this.offer = p;
           _this.warrantyChoice = p?.warrantyPaymentChoice || 'stripe_card';
           _this.loading = false;
@@ -20789,7 +20789,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   persistWarrantySuccess(sessionId = '') {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const offerId = _this2.route.snapshot.paramMap.get('offerId') || _this2.offer?.offerId || '';
       _this2.message = _this2.text('warrantySuccess');
       if (!offerId) {
@@ -20809,7 +20809,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   persistDepositSuccess(sessionId = '') {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const offerId = _this3.route.snapshot.paramMap.get('offerId') || _this3.offer?.offerId || '';
       if (!offerId) {
         _this3.message = _this3.text('depositPaymentSuccess');
@@ -20910,7 +20910,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   prepareOfferAccess() {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this4.offer) return;
       _this4.offerAccessError = '';
       _this4.offerAccessMessage = '';
@@ -20941,7 +20941,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   continueWithGoogle() {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this5.offer) return;
       _this5.offerAccessLoading = true;
       _this5.offerAccessError = '';
@@ -20995,7 +20995,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   createAndLoginCustomerAccount() {
     var _this6 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this6.offer || !_this6.offerEmail) return;
       _this6.customerAccountCreating = true;
       _this6.offerAccessLoading = true;
@@ -21056,7 +21056,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   attachCurrentUserToOffer(provider) {
     var _this7 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this7.offer) return;
       const current = _this7.getCurrentUser();
       const uid = current?.userId || current?.uid;
@@ -21074,7 +21074,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   loadOfferInfo(language) {
     var _this8 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const defaultInfo = _this8.defaultOfferInfo(language);
       let guestContent = null;
       let siteContent = null;
@@ -21755,7 +21755,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   acceptOffer() {
     var _this9 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this9.offer || !_this9.offerAccessReady || !_this9.offerCanStartCustomerWorkflow || !_this9.canAccept) return;
       _this9.accepting = true;
       _this9.error = '';
@@ -21775,7 +21775,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
     if (!id) return;
     this.offerApi.getOffer(id).subscribe({
       next: function () {
-        var _ref2 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (offer) {
+        var _ref2 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (offer) {
           if (offer) {
             _this10.offer = offer;
             if (!_this10.selectedWizardStep || !_this10.canGoToWizardStep(_this10.selectedWizardStep)) {
@@ -21823,7 +21823,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   acceptCashWarranty() {
     var _this11 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this11.offer || !_this11.offerAccessReady || !_this11.offerCanStartCustomerWorkflow || !_this11.depositPaid) return;
       _this11.payingWarranty = true;
       _this11.error = '';
@@ -21838,7 +21838,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   finalizeOffer() {
     var _this12 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this12.offer || !_this12.offerCanStartCustomerWorkflow || !_this12.canFinalizeOffer || _this12.finalizingBooking) return;
       _this12.finalizingBooking = true;
       _this12.error = '';
@@ -21856,7 +21856,7 @@ let OfferConfirmationComponent = class OfferConfirmationComponent {
   }
   registerWarrantyCard() {
     var _this13 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this13.offer || !_this13.offerAccessReady || !_this13.offerCanStartCustomerWorkflow || !_this13.depositPaid) return;
       _this13.payingWarranty = true;
       _this13.error = '';
@@ -22788,7 +22788,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   OnlineBookingComponent: () => (/* binding */ OnlineBookingComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _online_booking_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./online-booking.component.html?ngResource */ 4178);
 /* harmony import */ var _online_booking_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./online-booking.component.scss?ngResource */ 70542);
@@ -22966,7 +22966,7 @@ let OnlineBookingComponent = class OnlineBookingComponent {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.allSiteContent = yield _this.siteContentService.getContent();
         _this.content = _this.normalizeContent(_this.allSiteContent[_this.currentLanguage] || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT[_this.currentLanguage], _this.currentLanguage);
@@ -22977,7 +22977,7 @@ let OnlineBookingComponent = class OnlineBookingComponent {
   }
   loadPricingModel() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this2.pricingModel = yield _this2.bookingApi.getPricingModel();
       } catch {
@@ -23380,7 +23380,7 @@ let OnlineBookingComponent = class OnlineBookingComponent {
   }
   ensureBookingCreated() {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (_this3.createdBookingId) return _this3.createdBookingId;
       if (!_this3.canSubmitRequest) {
         throw new Error(_this3.firstRequestValidationError || _this3.bookingText?.requestMissingData || '');
@@ -23452,7 +23452,7 @@ let OnlineBookingComponent = class OnlineBookingComponent {
   }
   finalSubmit() {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this4.error = '';
       _this4.message = '';
       if (_this4.isAdminUser) {
@@ -23521,7 +23521,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   BookingApiService: () => (/* binding */ BookingApiService)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/common/http */ 93262);
@@ -23580,7 +23580,7 @@ let BookingApiService = class BookingApiService {
   }
   getPricingModel() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       // One pricing source per boat.
       try {
         const [operational, cms] = yield Promise.all([_this.readFirebasePath(`/bnPricingModel/${_this.boatContext.boatId}`).catch(() => null), Promise.resolve(null)]);
@@ -23596,7 +23596,7 @@ let BookingApiService = class BookingApiService {
   }
   savePricingModel(model) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const payload = {
         ..._this2.getDefaultPricingModel(),
         ...(model || {}),
@@ -23628,7 +23628,7 @@ let BookingApiService = class BookingApiService {
   }
   createBooking(input) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const now = Date.now();
       const bookingId = input.bookingId || `booking_${now}_${Math.random().toString(36).slice(2, 8)}`;
       const anyInput = input || {};
@@ -23692,7 +23692,7 @@ let BookingApiService = class BookingApiService {
   }
   getBookingDirectFromFirebase(bookingId) {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!bookingId) return undefined;
       for (const baseUrl of _this4.restDatabaseUrls) {
         try {
@@ -23737,7 +23737,7 @@ let BookingApiService = class BookingApiService {
     const endpoints = [`${this.baseUrl}/pay/outing-deposit-complete`, `${this.baseUrl}/api/payments/complete-deposit-payment`, `${this.baseUrl}/stripe/deposit-complete`];
     return new rxjs__WEBPACK_IMPORTED_MODULE_5__.Observable(observer => {
       const markLocally = /*#__PURE__*/function () {
-        var _ref = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (backendResponse = {}, backendError = null) {
+        var _ref = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (backendResponse = {}, backendError = null) {
           try {
             const localResult = yield _this5.markDepositPaidLocally(payload, backendResponse);
             observer.next({
@@ -23763,7 +23763,7 @@ let BookingApiService = class BookingApiService {
   }
   markDepositPaidLocally(payload, backendResponse = {}) {
     var _this6 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const bookingId = String(payload.bookingId || '').trim();
       if (!bookingId) throw new Error('Missing booking id for local deposit update.');
       const existing = yield _this6.getBookingFromFirebase(bookingId).catch(() => undefined);
@@ -23887,7 +23887,7 @@ let BookingApiService = class BookingApiService {
     const endpoints = [`${this.baseUrl}/pay/outing-balance-complete`, `${this.baseUrl}/pay/outing-remaining-complete`, `${this.baseUrl}/api/payments/complete-balance-payment`, `${this.baseUrl}/api/payments/complete-remaining-payment`, `${this.baseUrl}/stripe/balance-complete`, `${this.baseUrl}/stripe/remaining-complete`];
     return new rxjs__WEBPACK_IMPORTED_MODULE_5__.Observable(observer => {
       const markLocally = /*#__PURE__*/function () {
-        var _ref2 = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (backendResponse = {}, backendError = null) {
+        var _ref2 = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (backendResponse = {}, backendError = null) {
           try {
             const localResult = yield _this7.markBalancePaidLocally(payload, backendResponse);
             observer.next({
@@ -23913,7 +23913,7 @@ let BookingApiService = class BookingApiService {
   }
   markBalancePaidLocally(payload, backendResponse = {}) {
     var _this8 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const bookingId = String(payload.bookingId || '').trim();
       if (!bookingId) throw new Error('Missing booking id for local balance update.');
       const existing = yield _this8.getBookingFromFirebase(bookingId).catch(() => undefined);
@@ -24064,7 +24064,7 @@ let BookingApiService = class BookingApiService {
   }
   getPaymentPageStateFromFirebase(bookingId) {
     var _this9 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const id = String(bookingId || '').trim();
       if (!id) throw new Error('Missing booking id.');
       const booking = yield _this9.getBookingFromFirebase(id).catch(() => undefined);
@@ -24107,7 +24107,7 @@ let BookingApiService = class BookingApiService {
   }
   fetchBnPaymentRecordsByField(field, value) {
     var _this10 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const safeField = encodeURIComponent(`\"${field}\"`).replace(/%5C/g, '');
       const encodedValue = encodeURIComponent(`\"${value}\"`).replace(/%5C/g, '');
       const collection = 'bnPayment';
@@ -24164,7 +24164,7 @@ let BookingApiService = class BookingApiService {
   }
   createExtraServiceRequest(bookingId, extraService) {
     var _this11 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const id = extraService.id || `extra_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const payload = {
         ...extraService,
@@ -24228,7 +24228,7 @@ let BookingApiService = class BookingApiService {
   }
   readFirebasePath(path) {
     var _this12 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       for (const baseUrl of _this12.restDatabaseUrls) {
         try {
           return yield _this12.http.get(`${baseUrl}${path}.json`).toPromise();
@@ -24287,7 +24287,7 @@ let BookingApiService = class BookingApiService {
   }
   updateCustomerRequest(bookingId, payload) {
     var _this13 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const patch = {
         ...payload,
         bookingRequestStatus: 'request_updated_by_customer',
@@ -24301,7 +24301,7 @@ let BookingApiService = class BookingApiService {
   }
   cancelCustomerRequest(bookingId) {
     var _this14 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this14.updateBooking(bookingId, {
         status: 'cancelled_by_customer',
         bookingRequestStatus: 'cancelled_by_customer',
@@ -24313,7 +24313,7 @@ let BookingApiService = class BookingApiService {
   }
   deleteBooking(bookingId) {
     var _this15 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const store = _this15.storeDb;
       const util = _this15.utilsSvc;
       for (const db of _this15.getRealtimeDatabaseCandidates(store, util)) {
@@ -24358,7 +24358,7 @@ let BookingApiService = class BookingApiService {
   }
   updateBooking(bookingId, payload) {
     var _this16 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const store = _this16.storeDb;
       const util = _this16.utilsSvc;
       const existing = yield _this16.getBookingFromFirebase(bookingId).catch(() => undefined);
@@ -24425,7 +24425,7 @@ let BookingApiService = class BookingApiService {
   }
   getBookingsFromFirebase(email) {
     var _this17 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const raw = yield _this17.readBookingsRaw();
       const bookings = _this17.normalizeBookings(raw).filter(booking => String(booking.boatId || 'alegria') === _this17.boatContext.boatId).filter(booking => String(booking.bookingStatus || booking.status || '').toLowerCase() !== 'deleted').filter(booking => String(booking.bookingRequestStatus || booking.status || '').toLowerCase() !== 'cancelled_by_customer').sort((a, b) => String(b.outingDate || '').localeCompare(String(a.outingDate || '')) || String(b.departureTime || '').localeCompare(String(a.departureTime || '')));
       if (!email) return bookings;
@@ -24435,14 +24435,14 @@ let BookingApiService = class BookingApiService {
   }
   getBookingFromFirebase(bookingId) {
     var _this18 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const bookings = yield _this18.getBookingsFromFirebase();
       return bookings.find(booking => booking.bookingId === bookingId);
     })();
   }
   readBookingsRaw() {
     var _this19 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const store = _this19.storeDb;
       const util = _this19.utilsSvc;
       // Current Firebase structure from your export:
@@ -24491,7 +24491,7 @@ let BookingApiService = class BookingApiService {
   }
   readBookingsViaRest() {
     var _this20 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const paths = [_this20.collectionName, `1000/${_this20.collectionName}`];
       for (const baseUrl of _this20.restDatabaseUrls) {
         for (const path of paths) {
@@ -24518,7 +24518,7 @@ let BookingApiService = class BookingApiService {
     return candidates.filter((db, index, array) => db && typeof db.ref === 'function' && array.indexOf(db) === index);
   }
   readDatabasePath(db, path) {
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         const cleanPath = path.replace(/^\/+/, '');
         const snapshot = yield db.ref(cleanPath).once('value');
@@ -25416,7 +25416,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   OutingsComponent: () => (/* binding */ OutingsComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _outings_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./outings.component.html?ngResource */ 64498);
 /* harmony import */ var _outings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./outings.component.scss?ngResource */ 30126);
@@ -25465,7 +25465,7 @@ let OutingsComponent = class OutingsComponent {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.allSiteContent = yield _this.siteContentService.getContent();
         _this.content = _this.allSiteContent[_this.currentLanguage] || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT[_this.currentLanguage];
@@ -25477,7 +25477,7 @@ let OutingsComponent = class OutingsComponent {
   }
   loadDynamicOutings() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this2.loading = true;
       try {
         _this2.dynamicOutings = yield _this2.outingsData.getOutings();
@@ -25710,7 +25710,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   TermsComponent: () => (/* binding */ TermsComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _terms_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./terms.component.html?ngResource */ 73610);
 /* harmony import */ var _terms_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./terms.component.scss?ngResource */ 51982);
@@ -25800,7 +25800,7 @@ let TermsComponent = class TermsComponent {
   }
   ngOnInit() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       // Render immediately with the local fallback so the /terms route never blocks
       // on Firebase/network latency. Firebase content is applied when it arrives.
       _this.language = _this.languageService.currentLanguage || 'fr';
@@ -25815,7 +25815,7 @@ let TermsComponent = class TermsComponent {
   }
   loadContent() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this2.allContent = yield _this2.withTimeout(_this2.siteContentService.getContent(false), 2500);
         _this2.applyLanguage(_this2.language);
@@ -25919,7 +25919,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AdminPricingModelComponent: () => (/* binding */ AdminPricingModelComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _admin_pricing_model_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-pricing-model.component.html?ngResource */ 12042);
 /* harmony import */ var _admin_pricing_model_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-pricing-model.component.scss?ngResource */ 99246);
@@ -25969,7 +25969,7 @@ let AdminPricingModelComponent = class AdminPricingModelComponent {
   }
   ngOnInit() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.languageSub = _this.languageService.language$.subscribe(language => {
         _this.currentLanguage = language;
         _this.loadPageText(language);
@@ -25987,7 +25987,7 @@ let AdminPricingModelComponent = class AdminPricingModelComponent {
   }
   loadPageText(language) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const fallback = _site_content__WEBPACK_IMPORTED_MODULE_4__.SITE_CONTENT[language]?.pricingModel || _site_content__WEBPACK_IMPORTED_MODULE_4__.SITE_CONTENT.fr?.pricingModel || {};
       try {
         const content = yield _this2.siteContentService.getContent();
@@ -26030,7 +26030,7 @@ let AdminPricingModelComponent = class AdminPricingModelComponent {
   }
   save() {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this3.saving = true;
       _this3.message = '';
       _this3.error = '';
@@ -26786,7 +26786,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MyOffersComponent: () => (/* binding */ MyOffersComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _my_offers_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./my-offers.component.html?ngResource */ 40674);
 /* harmony import */ var _my_offers_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./my-offers.component.scss?ngResource */ 92822);
@@ -26866,7 +26866,7 @@ let MyOffersComponent = class MyOffersComponent {
   }
   loadPageText(language) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const fallback = _site_content__WEBPACK_IMPORTED_MODULE_5__.SITE_CONTENT[language]?.offerManagement || _site_content__WEBPACK_IMPORTED_MODULE_5__.SITE_CONTENT.fr?.offerManagement || {};
       try {
         const content = yield _this.siteContentService.getContent();
@@ -27192,7 +27192,7 @@ let MyOffersComponent = class MyOffersComponent {
   }
   saveEditRequest(request, event) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       event?.stopPropagation();
       if (!_this2.canManageRequest(request)) return;
       _this2.actionMessage = '';
@@ -27220,7 +27220,7 @@ let MyOffersComponent = class MyOffersComponent {
   }
   cancelCustomerRequest(request, event) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       event?.stopPropagation();
       if (!_this3.canManageRequest(request)) return;
       const ok = window.confirm(_this3.t('cancelRequestConfirm') || 'Cancel this request?');
@@ -27241,7 +27241,7 @@ let MyOffersComponent = class MyOffersComponent {
   }
   cancelCustomerOfferRequest(request, event) {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       event?.stopPropagation();
       if (!_this4.canManageOfferRequest(request)) return;
       const ok = window.confirm(_this4.t('cancelRequestConfirm') || 'Cancel this request?');
@@ -27376,7 +27376,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   BookingDetailComponent: () => (/* binding */ BookingDetailComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _booking_detail_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./booking-detail.component.html?ngResource */ 29118);
 /* harmony import */ var _booking_detail_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./booking-detail.component.scss?ngResource */ 64662);
@@ -27530,7 +27530,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   markSkipperPaidAfterStripe(sessionId) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this.bookingId) return;
       try {
         const current = yield _this.bookingApi.getBooking(_this.bookingId).toPromise();
@@ -27582,7 +27582,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   markAdditionalPaymentPaidAfterStripe(sessionId, paymentType = 'ad_hoc', paymentId = '') {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this2.bookingId) return;
       try {
         const current = yield _this2.bookingApi.getBooking(_this2.bookingId).toPromise();
@@ -27624,7 +27624,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   loadBooking() {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this3.loading = true;
       _this3.notFound = false;
       _this3.error = '';
@@ -27770,7 +27770,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   saveEdit() {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this4.editForm?.bookingId) return;
       _this4.saving = true;
       _this4.error = '';
@@ -27947,7 +27947,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   deleteBooking() {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const id = _this5.vm?.bookingId || _this5.bookingId;
       if (!id) return;
       const ok = window.confirm(`Delete booking ${id}? This cannot be undone.`);
@@ -27970,7 +27970,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   writeJson(path, payload) {
     var _this6 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const encodedPath = path.split('/').filter(Boolean).map(part => encodeURIComponent(part)).join('/');
       const url = `${_this6.firebaseBaseUrl}/${encodedPath}.json`;
       const response = yield fetch(url, {
@@ -27987,7 +27987,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   enrichWithPaymentRecords(booking) {
     var _this7 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const bookingId = booking?.bookingId || _this7.bookingId;
       const offerId = booking?.offerId || booking?.relatedBookingId || bookingId;
       const ids = Array.from(new Set([bookingId, offerId].filter(Boolean)));
@@ -28020,7 +28020,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   fetchPaymentRecordsByBookingId(collection, bookingId) {
     var _this8 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const encodedCollection = encodeURIComponent(collection);
       const encodedId = encodeURIComponent(bookingId);
       const url = `${_this8.firebaseBaseUrl}/${encodedCollection}.json?orderBy=%22bookingId%22&equalTo=%22${encodedId}%22`;
@@ -28041,7 +28041,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   fetchJsonWithTimeout(path, timeoutMs) {
     var _this9 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const encodedPath = path.split('/').filter(Boolean).map(part => encodeURIComponent(part)).join('/');
       const url = `${_this9.firebaseBaseUrl}/${encodedPath}.json`;
       const controller = new AbortController();
@@ -28489,7 +28489,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   savePendingAlegriaPayment(bookingId, amount) {
     var _this10 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!bookingId || amount <= 0) return;
       try {
         const current = yield _this10.bookingApi.getBooking(bookingId).toPromise();
@@ -28527,7 +28527,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   confirmAlegriaCashReceived() {
     var _this11 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this11.vm || !_this11.canConfirmAlegriaCashReceived() || _this11.payingAlegria) return;
       const booking = _this11.vm.display || {};
       const bookingId = _this11.vm.bookingId || booking.bookingId || _this11.bookingId;
@@ -28605,7 +28605,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   confirmSkipperPaid() {
     var _this12 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this12.vm || !_this12.canConfirmSkipperPaid() || _this12.payingSkipper) return;
       const booking = _this12.vm.display || {};
       const bookingId = _this12.vm.bookingId || booking.bookingId || _this12.bookingId;
@@ -28670,7 +28670,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   selectAlegriaCash() {
     var _this13 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this13.vm || _this13.editMode || _this13.vm.remainingAlegriaRevenue <= 0 || _this13.selectingAlegriaCash) return;
       const booking = _this13.vm.display || {};
       const bookingId = _this13.vm.bookingId || booking.bookingId || _this13.bookingId;
@@ -28716,7 +28716,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   selectSkipperCash() {
     var _this14 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this14.vm || _this14.editMode || _this14.vm.remainingSkipperFee <= 0 || _this14.selectingSkipperCash) return;
       const booking = _this14.vm.display || {};
       const bookingId = _this14.vm.bookingId || booking.bookingId || _this14.bookingId;
@@ -28849,7 +28849,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   chargeWarrantyForDamage() {
     var _this15 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this15.vm || !_this15.canAdminChargeWarranty()) return;
       const bookingId = _this15.vm.bookingId || _this15.bookingId;
       const amount = Number(_this15.adminWarrantyChargeAmount || 0);
@@ -28884,7 +28884,7 @@ let BookingDetailComponent = class BookingDetailComponent {
           _this15.loadBooking();
         },
         error: function () {
-          var _ref = (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (_error) {
+          var _ref = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (_error) {
             _this15.adminChargingWarranty = false;
             try {
               yield _this15.bookingApi.updateBooking(bookingId, {
@@ -29122,7 +29122,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   registerWarrantyCardOnline() {
     var _this16 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this16.vm || !_this16.canRegisterWarrantyCard() || _this16.registeringWarrantyCard) return;
       const booking = _this16.vm.display || {};
       const bookingId = _this16.vm.bookingId || booking.bookingId || _this16.bookingId;
@@ -29185,7 +29185,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   selectCashWarranty() {
     var _this17 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this17.vm || !_this17.canSelectCashWarranty()) return;
       const booking = _this17.vm.display || {};
       const bookingId = _this17.vm.bookingId || booking.bookingId || _this17.bookingId;
@@ -29392,7 +29392,7 @@ let BookingDetailComponent = class BookingDetailComponent {
   }
   loadFinanceText(language) {
     var _this18 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const fallback = _site_content__WEBPACK_IMPORTED_MODULE_4__.SITE_CONTENT[language]?.bookingFinance || _site_content__WEBPACK_IMPORTED_MODULE_4__.SITE_CONTENT.en?.bookingFinance || {};
       _this18.financeText = fallback;
       try {
@@ -30600,7 +30600,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MyFeedbacksComponent: () => (/* binding */ MyFeedbacksComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _my_feedbacks_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./my-feedbacks.component.html?ngResource */ 36050);
 /* harmony import */ var _my_feedbacks_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./my-feedbacks.component.scss?ngResource */ 95790);
@@ -30862,7 +30862,7 @@ let MyFeedbacksComponent = class MyFeedbacksComponent {
   }
   saveFeedback() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (_this.saving) return;
       _this.saved = false;
       _this.saveError = '';
@@ -30961,7 +30961,7 @@ let MyFeedbacksComponent = class MyFeedbacksComponent {
   }
   updateExistingFeedback(item) {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const id = _this2.feedbackId(item);
       _this2.editError = '';
       _this2.editSaved = '';
@@ -31000,7 +31000,7 @@ let MyFeedbacksComponent = class MyFeedbacksComponent {
   }
   deleteFeedback(item) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const id = _this3.feedbackId(item);
       _this3.editError = '';
       _this3.editSaved = '';
@@ -31032,13 +31032,13 @@ let MyFeedbacksComponent = class MyFeedbacksComponent {
   }
   updateFeedbackObject(id, payload) {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this4.storeDb.updateObject(_this4.utilSvc.backendFBstoreId, _this4.utilSvc.mdb, godigital_lib__WEBPACK_IMPORTED_MODULE_5__.OBJECTNAME.bnFeedbacks, payload, id);
     })();
   }
   deleteFeedbackObject(id, item) {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const userId = _this5.loggedUser?.userId || _this5.loggedUser?.uid || '';
       const email = _this5.loggedUser?.email || '';
       // 1) Preferred path: backend deletes from Firebase Admin SDK and verifies ownership
@@ -31284,7 +31284,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   FleetService: () => (/* binding */ FleetService)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ 93262);
@@ -31343,7 +31343,7 @@ let FleetService = class FleetService {
   }
   listBoats() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const raw = yield _this.readPath(_this.collectionPath).catch(() => null);
       let boats = [];
       if (Array.isArray(raw)) {
@@ -31362,7 +31362,7 @@ let FleetService = class FleetService {
   }
   getBoat(boatId = 'alegria') {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const raw = yield _this2.readPath(`${_this2.collectionPath}/${boatId}`).catch(() => null);
       return {
         ..._this2.getDefaultBoat(),
@@ -31373,7 +31373,7 @@ let FleetService = class FleetService {
   }
   saveBoat(boat) {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const now = Date.now();
       const boatId = String(boat.boatId || boat.boatName || 'alegria').trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'alegria';
       const payload = {
@@ -31396,7 +31396,7 @@ let FleetService = class FleetService {
   }
   readPath(path) {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       for (const db of _this4.getRealtimeDatabaseCandidates()) {
         try {
           const snap = yield db.ref(path).once('value');
@@ -31408,7 +31408,7 @@ let FleetService = class FleetService {
   }
   writePath(path, payload) {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       for (const db of _this5.getRealtimeDatabaseCandidates()) {
         try {
           yield db.ref(path).set(payload);
@@ -32685,7 +32685,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   BookingsComponent: () => (/* binding */ BookingsComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _bookings_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./bookings.component.html?ngResource */ 26456);
 /* harmony import */ var _bookings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./bookings.component.scss?ngResource */ 62992);
@@ -32784,7 +32784,7 @@ let BookingsComponent = class BookingsComponent {
   }
   loadPageText(language) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const fallback = _site_content__WEBPACK_IMPORTED_MODULE_5__.SITE_CONTENT[language]?.bookingManagement || _site_content__WEBPACK_IMPORTED_MODULE_5__.SITE_CONTENT.fr?.bookingManagement || {};
       try {
         const content = yield _this.siteContentService.getContent();
@@ -33167,7 +33167,7 @@ let BookingsComponent = class BookingsComponent {
     this.balancePaymentNotes = '';
   }
   recordBalancePayment() {
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       // Admin users do not pay or record remaining 90% from the booking list.
       // Remaining balance must be paid by the customer through Stripe.
       return Promise.resolve();
@@ -33605,7 +33605,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   GalleryComponent: () => (/* binding */ GalleryComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _gallery_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./gallery.component.html?ngResource */ 90578);
 /* harmony import */ var _gallery_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./gallery.component.scss?ngResource */ 86566);
@@ -33642,7 +33642,7 @@ let GalleryComponent = class GalleryComponent {
   }
   loadSiteContent() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this.allSiteContent = yield _this.siteContentService.getContent();
         _this.content = _this.allSiteContent[_this.currentLanguage] || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT[_this.currentLanguage] || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT.fr;
@@ -33995,7 +33995,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AdminOutingsComponent: () => (/* binding */ AdminOutingsComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _admin_outings_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./admin-outings.component.html?ngResource */ 28738);
 /* harmony import */ var _admin_outings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin-outings.component.scss?ngResource */ 85206);
@@ -34983,7 +34983,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   toggleChecklist(item) {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       item.done = !item.done;
       if (item.done) {
         item.doneBy = _this.getLoggedUserName();
@@ -35001,7 +35001,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   saveChecklistChangeImmediately() {
     var _this2 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (_this2.mode === 'create' || !_this2.selectedOuting || !_this2.selectedOuting.outingId) return;
       _this2.saving = true;
       _this2.error = '';
@@ -35027,7 +35027,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   persistCurrentChecklistState() {
     var _this3 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this3.selectedOuting?.outingId) return;
       const base = {
         ..._this3.selectedOuting
@@ -35089,7 +35089,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   loadOutings() {
     var _this4 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this4.loading = true;
       _this4.error = '';
       try {
@@ -35117,7 +35117,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   readRootAdminOutings() {
     var _this5 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const collectionName = _this5.outingsCollectionName;
       const store = _this5.storeDb;
       const util = _this5.utilSvc;
@@ -35150,7 +35150,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
     })();
   }
   readDatabasePath(db, path) {
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         const cleanPath = path.replace(/^\/+/, '');
         const snapshot = yield db.ref(cleanPath).once('value');
@@ -35184,7 +35184,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   readAdminOutingsViaRest() {
     var _this6 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const paths = [_this6.outingsCollectionName, `1000/${_this6.outingsCollectionName}`];
       for (const baseUrl of _this6.restDatabaseUrls) {
         for (const path of paths) {
@@ -35260,7 +35260,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   updateOuting() {
     var _this7 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this7.saved = false;
       _this7.error = _this7.validateEditForm();
       if (_this7.error || !_this7.selectedOuting) return;
@@ -35298,7 +35298,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   createOuting() {
     var _this8 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this8.saved = false;
       _this8.error = _this8.validateForm();
       if (_this8.error) return;
@@ -35346,7 +35346,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   closeOuting(outing) {
     var _this9 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this9.closeError = '';
       if (!_this9.isAdmin) {
         _this9.closeError = _this9.t('adminOnly');
@@ -35388,7 +35388,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   deleteOuting(outing) {
     var _this10 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this10.closeError = '';
       if (!_this10.isAdmin) {
         _this10.closeError = _this10.t('adminOnly');
@@ -35408,7 +35408,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   deleteFromFirebase(id, outing) {
     var _this11 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       // Never delete the booking itself; only tombstone its embedded logbook.
       yield _this11.saveToFirebase(id, {
         ...outing,
@@ -35420,7 +35420,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   writeRootAdminOutingViaSdk(id, payload) {
     var _this12 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const store = _this12.storeDb;
       const util = _this12.utilSvc;
       const dbCandidates = [util?.mdb, store?.backendFbRef?.database, store?.backendFbRef?.['database'], store?.firebaseBSSdata?.database].filter((db, index, array) => db && typeof db.ref === 'function' && array.indexOf(db) === index);
@@ -35443,7 +35443,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   writeRootAdminOutingViaRest(id, payload) {
     var _this13 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       for (const baseUrl of _this13.restDatabaseUrls) {
         try {
           const url = `${baseUrl.replace(/\/+$/, '')}/${_this13.outingsCollectionName}/${id}.json`;
@@ -35464,7 +35464,7 @@ let AdminOutingsComponent = class AdminOutingsComponent {
   }
   saveToFirebase(id, payload) {
     var _this14 = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const store = _this14.storeDb;
       const util = _this14.utilSvc;
       // Operational logs are embedded in their canonical bnBookings record.
@@ -35733,7 +35733,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MyProfileComponent: () => (/* binding */ MyProfileComponent)
 /* harmony export */ });
-/* harmony import */ var _Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _my_profile_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./my-profile.component.html?ngResource */ 6808);
 /* harmony import */ var _my_profile_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./my-profile.component.scss?ngResource */ 3248);
@@ -35804,7 +35804,7 @@ let MyProfileComponent = class MyProfileComponent {
   }
   saveProfile() {
     var _this = this;
-    return (0,_Users_faycalamrani_data_ADN_harbornest_1_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this.saved = false;
       _this.error = '';
       const uid = _this.loggedUser?.userId || _this.loggedUser?.uid;
