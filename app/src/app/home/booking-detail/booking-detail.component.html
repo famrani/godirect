@@ -1,4 +1,4 @@
-<section class="booking-page">
+<section class="booking-page" *ngIf="!isCarBooking">
   <div class="container booking-shell">
     <article class="loading-card" *ngIf="loading">
       <h1>{{ tText('auto.home.booking-detail.booking-detail.component.loading_booking') }}</h1>
@@ -7,7 +7,7 @@
 
     <article class="empty-card" *ngIf="!loading && notFound">
       <h1>{{ tText('auto.home.booking-detail.booking-detail.component.booking_not_found') }}</h1>
-      <p *ngIf="error">{{ error }}</p>
+      <p *ngIf="error">{{ error | siteText }}</p>
       <button class="btn btn-secondary" type="button" (click)="goBack()">{{ tText('auto.home.booking-detail.booking-detail.component.back') }}</button>
       <button class="btn btn-secondary" type="button" (click)="loadBooking()">{{ tText('auto.home.booking-detail.booking-detail.component.retry') }}</button>
     </article>
@@ -15,21 +15,29 @@
     <article class="booking-detail-card" *ngIf="!loading && vm">
       <div class="booking-hero">
         <div>
-          <span class="eyebrow">{{ vm.isExternalBooking ? vm.platformLabel + ' booking' : 'Alegria booking' }}</span>
+          <span class="eyebrow">{{ vm.isExternalBooking ? vm.platformLabel + ' · ' + ('ui.pages.t2065075fd5e6' | siteText) : 'Alegria · ' + ('ui.pages.t2065075fd5e6' | siteText) }}</span>
           <h1>{{ vm.display.customerName || '-' }}</h1>
-          <p>{{ vm.display.outingDate || '-' }} · {{ vm.display.departureTime || '-' }} → {{ vm.display.arrivalTime || '-' }} · {{ vm.display.passengers || 0 }} guests</p>
+          <p>{{ vm.display.outingDate || '-' }} · {{ vm.display.departureTime || '-' }} → {{ vm.display.arrivalTime || '-' }} · {{ vm.display.passengers || 0 }} {{ "ui.pages.tf8122851dbc0" | siteText }}</p>
         </div>
 
         <div class="status-badges">
           <span class="status-badge done">{{ vm.bookingStatusBadge }}</span>
-          <span class="status-badge paid">{{ vm.paymentStatusBadge }}</span>
-          <span class="status-badge warranty">{{ vm.warrantyStatusBadge }}</span>
+          <span class="status-badge paid" *ngIf="!vm.cancelled">{{ vm.paymentStatusBadge }}</span>
+          <span class="status-badge warranty" *ngIf="!vm.cancelled">{{ vm.warrantyStatusBadge }}</span>
         </div>
       </div>
 
-      <p class="error-message" *ngIf="error">{{ error }}</p>
+      <p class="error-message" *ngIf="error">{{ error | siteText }}</p>
 
-      <section class="booking-completion-card" *ngIf="!editMode">
+      <section class="cancellation-notice" *ngIf="vm.cancelled && !editMode">
+        <div>
+          <span class="eyebrow">{{ t('cancellationNotice') }}</span>
+          <h2>{{ t('cancellationReason') }}</h2>
+          <p>{{ vm.cancellationReason }}</p>
+        </div>
+      </section>
+
+      <section class="booking-completion-card" *ngIf="!editMode && !vm.cancelled">
         <div class="completion-header">
           <div>
             <h2>{{ t('bookingCompletion') }}</h2>
@@ -46,17 +54,29 @@
         </div>
         <div class="completion-links">
           <button class="btn btn-secondary btn-small" type="button" (click)="openTermsModal()">{{ t('rereadTerms') }}</button>
-          <a routerLink="/terms" target="_blank" rel="noopener">{{ t('openTermsPage') }}</a>
+          <a [routerLink]="'/terms' | resourceRoute" target="_blank" rel="noopener">{{ t('openTermsPage') }}</a>
         </div>
       </section>
 
       <div class="admin-toolbar" *ngIf="vm.isAdmin">
         <button class="btn btn-primary" type="button" *ngIf="!editMode" (click)="startEdit()">{{ tText('auto.home.booking-detail.booking-detail.component.edit_booking') }}</button>
         <button class="btn btn-danger" type="button" *ngIf="!editMode" [disabled]="deleting" (click)="deleteBooking()">
-          {{ deleting ? 'Deleting...' : 'Delete booking' }}
+          {{ deleting ? ('ui.messages.te16cac651b17' | siteText) : ('ui.messages.t7fb25e582f65' | siteText) }}
         </button>
         <button class="btn btn-secondary" type="button" (click)="goBack()">{{ tText('auto.home.booking-detail.booking-detail.component.back') }}</button>
       </div>
+
+      <section class="cockpit-section booking-notes-card" *ngIf="vm.isAdmin && !editMode && (vm.display.offerMessage || vm.display.bookingDescription || vm.display.description || vm.display.internalComments || vm.display.comments || vm.display.offerNotes || vm.display.raw?.offerMessage || vm.display.raw?.comments)">
+        <h2>{{ t('bookingNotes') }}</h2>
+        <div class="booking-note" *ngIf="vm.display.bookingDescription || vm.display.description || vm.display.offerMessage || vm.display.offerNotes?.description">
+          <strong>{{ t('offerDescription') }}</strong>
+          <p>{{ vm.display.bookingDescription || vm.display.description || vm.display.offerMessage || vm.display.offerNotes?.description || vm.display.raw?.description || vm.display.raw?.offerMessage }}</p>
+        </div>
+        <div class="booking-note internal" *ngIf="vm.display.internalComments || vm.display.comments || vm.display.offerNotes?.internalComments">
+          <strong>{{ t('internalNotes') }}</strong>
+          <p>{{ vm.display.internalComments || vm.display.comments || vm.display.offerNotes?.internalComments || vm.display.raw?.internalComments || vm.display.raw?.comments }}</p>
+        </div>
+      </section>
 
       <form class="edit-panel booking-cockpit-edit" *ngIf="editMode" (ngSubmit)="saveEdit()">
         <div class="edit-header">
@@ -65,7 +85,7 @@
             <p class="section-help">{{ tText('auto.home.booking-detail.booking-detail.component.all_cockpit_fields_below_are_editable_financial_to') }}</p>
           </div>
           <div class="actions compact-actions">
-            <button class="btn btn-primary" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save booking' }}</button>
+            <button class="btn btn-primary" type="submit" [disabled]="saving">{{ saving ? ('ui.messages.tae7e887517b0' | siteText) : 'Save booking' }}</button>
             <button class="btn btn-secondary" type="button" (click)="cancelEdit()">{{ tText('auto.home.booking-detail.booking-detail.component.cancel') }}</button>
           </div>
         </div>
@@ -131,11 +151,9 @@
         <section class="edit-section revenue-edit">
           <h3>{{ t('commission') }}</h3>
           <div class="edit-grid">
-            <label>{{ t('rentalCommission') }}<input name="rentalCommissionAmount" type="number" min="0" step="0.01" [(ngModel)]="editForm.rentalCommissionAmount" (ngModelChange)="recalculateEditCustomerTotal()" [readonly]="!editForm.source || editForm.source === 'direct' || editForm.source === 'alegria'" /></label>
-            <label>{{ t('serviceFeesLabel') }}<input name="serviceFeesAmount" type="number" min="0" step="0.01" [(ngModel)]="editForm.serviceFeesAmount" (ngModelChange)="recalculateEditCustomerTotal()" [readonly]="!editForm.source || editForm.source === 'direct' || editForm.source === 'alegria'" /></label>
-            <label class="pricing-total-field">{{ t('totalCommission') }}<input name="totalCommission" type="number" [(ngModel)]="editForm.totalCommission" readonly /></label>
-            <label class="pricing-total-field">{{ t('alegriaRevenue') }}<input name="alegriaRevenueTotal" type="number" [(ngModel)]="editForm.alegriaRevenueTotal" readonly /></label>
-            <label class="pricing-total-field">{{ t('skipperRevenue') }}<input name="skipperRevenueTotal" type="number" [(ngModel)]="editForm.skipperRevenueTotal" readonly /></label>
+            <label>{{ t('platformCommission') }}<input name="platformCommissionAmount" type="number" min="0" step="0.01" [(ngModel)]="editForm.platformCommissionAmount" (ngModelChange)="recalculateEditCustomerTotal()" [readonly]="!editForm.source || editForm.source === 'direct' || editForm.source === 'alegria'" /></label>
+            <label class="pricing-total-field">{{ t('alegriaRecovered') }}<input name="alegriaRecoveredAmount" type="number" [(ngModel)]="editForm.alegriaRecoveredAmount" readonly /></label>
+            <label class="pricing-total-field">{{ t('alegriaNetRevenue') }}<input name="alegriaRevenueTotal" type="number" [(ngModel)]="editForm.alegriaRevenueTotal" readonly /></label>
           </div>
         </section>
 
@@ -199,11 +217,12 @@
 
         <section class="edit-section">
           <h3>{{ tText('auto.home.booking-detail.booking-detail.component.8_notes') }}</h3>
+          <label class="full-width">{{ t('offerDescription') }}<textarea name="offerMessage" rows="3" [(ngModel)]="editForm.offerMessage"></textarea></label>
           <label class="full-width">{{ tText('auto.home.booking-detail.booking-detail.component.comments') }}<textarea name="comments" rows="3" [(ngModel)]="editForm.comments"></textarea></label>
         </section>
 
         <div class="actions sticky-save-actions">
-          <button class="btn btn-primary" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save booking' }}</button>
+          <button class="btn btn-primary" type="submit" [disabled]="saving">{{ saving ? ('ui.messages.tae7e887517b0' | siteText) : 'Save booking' }}</button>
           <button class="btn btn-secondary" type="button" (click)="cancelEdit()">{{ tText('auto.home.booking-detail.booking-detail.component.cancel') }}</button>
         </div>
       </form>
@@ -218,9 +237,9 @@
 
         <article class="info-card">
           <h2>{{ t('boat') }}</h2>
-          <p class="big-value">{{ vm.display.boatName || 'Alegria' }}</p>
+          <p class="big-value">{{ vm.display.boatName || ('ui.pages.t35ade5651991' | siteText) }}</p>
           <p>{{ vm.display.boatManufacturer || '' }} {{ vm.display.boatModel || vm.display.boatType || '' }}</p>
-          <p>{{ vm.display.startMarina || 'Marina Baie des Anges' }}</p>
+          <p>{{ vm.display.startMarina || ('ui.messages.tca49e6f2aec1' | siteText) }}</p>
           <p class="links-row" *ngIf="vm.boatListingUrl"><a [href]="vm.boatListingUrl" target="_blank" rel="noopener">{{ t('openBoatListing') }} ↗</a></p>
         </article>
 
@@ -238,7 +257,7 @@
         </article>
       </div>
 
-      <section class="customer-finance-simple booking-customer-clean" *ngIf="!editMode">
+      <section class="customer-finance-simple booking-customer-clean" *ngIf="!editMode && !vm.cancelled">
         <article class="cockpit-section finance-panel finance-summary-panel">
           <h2>{{ t('outingPrice') }}</h2>
           <div class="finance-table compact">
@@ -258,23 +277,24 @@
         <article class="cockpit-section finance-panel alegria-panel">
           <h2>{{ t('commission') }}</h2>
           <div class="finance-table compact">
-            <div class="finance-line negative-line"><span>{{ t('rentalCommission') }}</span><strong>{{ formatMoney(vm.rentalCommissionAmount) }}</strong></div>
-            <div class="finance-line negative-line"><span>{{ t('serviceFeesLabel') }}</span><strong>{{ formatMoney(vm.serviceFeesAmount) }}</strong></div>
-            <div class="finance-line finance-total"><span>{{ t('totalCommission') }}</span><strong>{{ formatMoney(vm.totalCommission) }}</strong></div>
+            <div class="finance-line finance-total negative-line"><span>{{ t('platformCommission') }}</span><strong>{{ formatMoney(vm.totalCommission) }}</strong></div>
           </div>
         </article>
 
         <article class="cockpit-section finance-panel alegria-panel">
-          <h2>{{ t('alegriaRevenue') }}</h2>
-          <p class="finance-subtitle">{{ t('totalOutingPrice') }} − {{ t('totalCommission') }} − {{ t('skipper') }}</p>
+          <h2>{{ t('alegriaRecovered') }}</h2>
+          <p class="finance-subtitle">{{ t('totalOutingPrice') }} − {{ t('platformCommission') }}</p>
           <div class="finance-table compact">
-            <div class="finance-line finance-total"><span>{{ t('alegriaRevenue') }}</span><strong>{{ formatMoney(vm.alegriaRevenueTotal) }}</strong></div>
+            <div class="finance-line finance-total"><span>{{ t('alegriaRecovered') }}</span><strong>{{ formatMoney(vm.alegriaRecoveredAmount) }}</strong></div>
+            <div class="finance-line"><span>{{ t('skipperToReverse') }}</span><strong>− {{ formatMoney(vm.skipperCost) }}</strong></div>
+            <div class="finance-line finance-total"><span>{{ t('alegriaNetRevenue') }}</span><strong>{{ formatMoney(vm.alegriaRevenueTotal) }}</strong></div>
             <div class="finance-line paid-line" *ngIf="vm.alegriaPaidAmount > 0"><span>{{ t('alreadyPaid') }}</span><strong>{{ formatMoney(vm.alegriaPaidAmount) }}</strong></div>
             <div class="finance-line outstanding-line" *ngIf="vm.remainingAlegriaRevenue > 0"><span>{{ t('leftToPay') }}</span><strong>{{ formatMoney(vm.remainingAlegriaRevenue) }}</strong></div>
           </div>
           <div class="warranty-actions" *ngIf="vm.remainingAlegriaRevenue > 0">
             <button class="btn btn-primary finance-action" type="button" *ngIf="canPayAlegriaOnline()" [disabled]="payingAlegria" (click)="payAlegriaOnline()">{{ payingAlegria ? t('redirecting') : t('payByCard') }}</button>
-            <button class="btn btn-secondary finance-action" type="button" *ngIf="!isAlegriaCashSelected()" [disabled]="selectingAlegriaCash" (click)="selectAlegriaCash()">{{ selectingAlegriaCash ? t('saving') : t('payByCash') }}</button>
+            <button class="btn btn-secondary finance-action" type="button" *ngIf="!isAlegriaCashSelected()" [disabled]="selectingAlegriaCash || payingAlegria" (click)="selectAlegriaCash()">{{ selectingAlegriaCash ? t('saving') : t('payByCash') }}</button>
+            <p role="status" *ngIf="isAlegriaCashSelected()">{{ t('cashPaymentSelected') }}</p>
             <label class="cash-amount-entry" *ngIf="canConfirmAlegriaCashReceived()">{{ t('amount') }}
               <input type="number" min="0.01" [max]="vm.remainingAlegriaRevenue" step="0.01" [(ngModel)]="adminAlegriaCashAmount" name="adminAlegriaCashAmount" [placeholder]="formatMoney(vm.remainingAlegriaRevenue)" />
             </label>
@@ -294,7 +314,8 @@
           </div>
           <div class="warranty-actions" *ngIf="vm.remainingSkipperFee > 0">
             <button class="btn btn-primary finance-action" type="button" *ngIf="canPaySkipperOnline()" [disabled]="payingSkipper" (click)="paySkipperOnline()">{{ payingSkipper ? t('redirecting') : t('payByCard') }}</button>
-            <button class="btn btn-secondary finance-action" type="button" *ngIf="!isSkipperCashSelected()" [disabled]="selectingSkipperCash" (click)="selectSkipperCash()">{{ selectingSkipperCash ? t('saving') : t('payByCash') }}</button>
+            <button class="btn btn-secondary finance-action" type="button" *ngIf="!isSkipperCashSelected()" [disabled]="selectingSkipperCash || payingSkipper" (click)="selectSkipperCash()">{{ selectingSkipperCash ? t('saving') : t('payByCash') }}</button>
+            <p role="status" *ngIf="isSkipperCashSelected()">{{ t('cashPaymentSelected') }}</p>
             <label class="cash-amount-entry" *ngIf="canConfirmSkipperPaid()">{{ t('amount') }}
               <input type="number" min="0.01" [max]="vm.remainingSkipperFee" step="0.01" [(ngModel)]="adminSkipperCashAmount" name="adminSkipperCashAmount" [placeholder]="formatMoney(vm.remainingSkipperFee)" />
             </label>
@@ -351,7 +372,7 @@
           </div>
         </article>
 
-        <article id="additional-payments" class="cockpit-section finance-panel additional-payment-panel" *ngIf="!vm.isAdmin">
+        <article id="additional-payments" class="cockpit-section finance-panel additional-payment-panel">
           <h2>{{ t('additionalPayments') }}</h2>
           <p class="finance-subtitle">{{ t('additionalPaymentsHelp') }}</p>
           <div class="payment-action-form">
@@ -466,6 +487,9 @@
               </label>
               <label>{{ t('paymentIntentOptional') }}
                 <input type="text" [(ngModel)]="adminRefundPaymentIntentId" name="adminRefundPaymentIntentId" />
+              </label>
+              <label *ngIf="adminRefundPaymentType === 'extra_service' || adminRefundPaymentType === 'ad_hoc'">{{ t('paymentReference') }}
+                <input type="text" [(ngModel)]="adminRefundItemId" name="adminRefundItemId" />
               </label>
               <label>{{ t('description') }}
                 <textarea rows="4" [(ngModel)]="adminRefundReason" name="adminRefundReason"></textarea>
@@ -604,6 +628,114 @@
         </section>
       </div>
 
+      <div class="terms-modal-backdrop" *ngIf="skipperTipModalOpen" (click)="closeSkipperTipModal()">
+        <section class="terms-modal skipper-tip-modal" role="dialog" aria-modal="true" aria-labelledby="skipperTipTitle" (click)="$event.stopPropagation()">
+          <div class="terms-modal-header">
+            <div>
+              <span class="eyebrow">{{ t('skipperCardPayment') }}</span>
+              <h2 id="skipperTipTitle">{{ t('chooseCrewTip') }}</h2>
+              <p>{{ t('crewTipHelp') }}</p>
+            </div>
+            <button class="btn btn-secondary btn-small" type="button" [disabled]="payingSkipper" (click)="closeSkipperTipModal()">{{ t('close') }}</button>
+          </div>
+
+          <div class="tip-options" role="group" [attr.aria-label]="t('chooseCrewTip')">
+            <button *ngFor="let percentage of [0, 5, 10, 15, 20]" type="button" class="tip-option" [class.selected]="skipperTipChoice === percentage" (click)="selectSkipperTip(percentage)">
+              {{ percentage }}%
+              <small *ngIf="percentage > 0">{{ formatMoney(skipperTipBaseAmount() * percentage / 100) }}</small>
+            </button>
+            <button type="button" class="tip-option custom" [class.selected]="skipperTipChoice === 'custom'" (click)="selectSkipperTip('custom')">{{ t('customTip') }}</button>
+          </div>
+
+          <label class="custom-tip-entry" *ngIf="skipperTipChoice === 'custom'">
+            <span>{{ t('customTipAmount') }}</span>
+            <div class="money-input-wrap"><span>€</span><input type="number" min="0" step="0.01" [(ngModel)]="customSkipperTipAmount" name="customSkipperTipAmount" inputmode="decimal" /></div>
+          </label>
+
+          <div class="tip-payment-summary">
+            <div><span>{{ t('tipCalculationBase') }}</span><strong>{{ formatMoney(skipperTipBaseAmount()) }}</strong></div>
+            <div><span>{{ t('skipper') }}</span><strong>{{ formatMoney(vm?.remainingSkipperFee || 0) }}</strong></div>
+            <div><span>{{ t('crewTip') }}</span><strong>{{ formatMoney(skipperTipAmount()) }}</strong></div>
+            <div class="tip-total"><span>{{ t('totalCardPayment') }}</span><strong>{{ formatMoney(skipperCheckoutTotal()) }}</strong></div>
+          </div>
+
+          <p class="tip-voluntary-note">{{ t('tipVoluntary') }}</p>
+          <div class="terms-modal-actions">
+            <button class="btn btn-secondary" type="button" [disabled]="payingSkipper" (click)="closeSkipperTipModal()">{{ t('cancel') }}</button>
+            <button class="btn btn-primary" type="button" [disabled]="payingSkipper" (click)="confirmSkipperCardPayment()">{{ payingSkipper ? t('redirecting') : t('continueToCardPayment') }}</button>
+          </div>
+        </section>
+      </div>
+
+    </article>
+  </div>
+</section>
+
+<section class="booking-page" *ngIf="isCarBooking">
+  <div class="container booking-shell">
+    <article class="loading-card" *ngIf="loading"><h1>{{ 'ui.pages.t050109904707' | siteText }}</h1></article>
+    <article class="empty-card" *ngIf="!loading && notFound">
+      <h1>{{ 'ui.pages.t2bf607ce1e4a' | siteText }}</h1><p>{{ error | siteText }}</p>
+      <button class="btn btn-secondary" type="button" (click)="goBack()">{{ 'ui.pages.te5befb1f9671' | siteText }}</button>
+      <button class="btn btn-secondary" type="button" (click)="loadBooking()">{{ 'ui.pages.t895d416be8cd' | siteText }}</button>
+    </article>
+    <article class="booking-detail-card" *ngIf="!loading && carBooking as b">
+      <div class="booking-hero"><div>
+        <span class="eyebrow">{{ 'ui.pages.t90c300e1b5aa' | siteText }} {{ resourceContext.assetId }}</span>
+        <h1>{{ b.customerName || ('ui.pages.t1bdd79b12628' | siteText) }}</h1>
+        <p>{{ 'ui.pages.td3ebb895ef00' | siteText }} {{ bookingId }}</p>
+      </div><div class="status-badges"><span class="status-badge">{{ b.status || ('ui.messages.te22586930a5b' | siteText) }}</span><span class="status-badge">{{ b.paymentStatus || 'unpaid' }}</span></div></div>
+      <div class="admin-toolbar">
+        <button class="btn btn-secondary" type="button" (click)="goBack()">{{ 'ui.pages.t480b5fb5042f' | siteText }}</button>
+        <button class="btn btn-primary" type="button" (click)="r21StartEdit()" [disabled]="r21Busy || b.status === 'cancelled' || !!b.cancellation">{{ 'ui.pages.tf260e757cec7' | siteText }}</button>
+        <button class="btn btn-danger" type="button" (click)="r21Cancel()" [disabled]="r21Busy || b.status === 'cancelled'">{{ 'ui.pages.td05bbb93c567' | siteText }}</button>
+      </div>
+      <section *ngIf="b.cancellation" class="cockpit-section" aria-live="polite">
+        <h2>{{b.cancellation.status==='completed'?('ui.messages.t9c2476dff2f5' | siteText):('ui.messages.t71acc6e6dc14' | siteText)}}</h2>
+        <p *ngIf="b.status!=='cancelled'">{{ 'ui.pages.tc76c9bce927d' | siteText }}</p>
+        <p *ngIf="b.cancellation.error">{{ 'ui.pages.t437db060f43a' | siteText }} {{b.cancellation.error}}</p>
+        <p *ngFor="let item of b.cancellation.items">{{r26RefundKind(item.kind)}} : {{item.refunded / 100 | number:'1.2-2'}} / {{item.collected / 100 | number:'1.2-2'}} {{item.currency | uppercase}} — {{r26RefundStatus(item.status)}}</p>
+        <button type="button" class="btn btn-secondary" *ngIf="b.status!=='cancelled'" (click)="r26CheckRefunds()" [disabled]="r21Busy">{{ 'ui.pages.t270064cc4bda' | siteText }}</button>
+      </section>
+      <p *ngIf="r21Message" role="status">{{ r21Message }}</p>
+      <form *ngIf="r21Edit" class="edit-panel" (ngSubmit)="r21Save()">
+        <h2>{{ 'ui.pages.t6d2f5f3af29a' | siteText }}</h2>
+        <label>{{ 'ui.pages.t1bdd79b12628' | siteText }} <input name="r21Name" [(ngModel)]="r21Form.customerName" required /></label>
+        <label>{{ 'ui.pages.t84add5b29527' | siteText }} <input name="r21Email" type="email" [(ngModel)]="r21Form.customerEmail" required /></label>
+        <label>{{ 'ui.pages.td3b023eabc9c' | siteText }} <input name="r21Phone" [(ngModel)]="r21Form.customerPhone" /></label>
+        <label>{{ 'ui.pages.t5c1cc8e9cdcf' | siteText }} <input name="r21Start" [(ngModel)]="r21Form.startAt" required /></label>
+        <label>{{ 'ui.pages.t5cf4df672dcf' | siteText }} <input name="r21End" [(ngModel)]="r21Form.endAt" required /></label>
+        <label>{{ 'ui.pages.t659499f38a56' | siteText }} <select name="r21Status" [(ngModel)]="r21Form.status"><option value="pending">{{ 'ui.pages.t5231158f14d4' | siteText }}</option><option value="confirmed">{{ 'ui.pages.tbaf9ac3da88b' | siteText }}</option></select></label>
+        <label>{{ 'ui.pages.ta16c0f971f16' | siteText }} <input name="r21Pickup" [(ngModel)]="r21Form.pickupLocation" /></label>
+        <label>{{ 'ui.pages.t1761885e332c' | siteText }} <input name="r21Return" [(ngModel)]="r21Form.returnLocation" /></label>
+        <label><input type="checkbox" name="r21Driver" [(ngModel)]="r21Form.additionalDriver" /> {{ 'ui.pages.tbd4c429c692e' | siteText }}</label>
+        <label><input type="checkbox" name="r21Seat" [(ngModel)]="r21Form.childSeat" /> {{ 'ui.pages.t247c1e5ced94' | siteText }}</label>
+        <label>{{ 'ui.pages.tdbdeccaf80ad' | siteText }} <textarea name="r21Comments" [(ngModel)]="r21Form.comments"></textarea></label>
+        <button class="btn btn-primary" type="submit" [disabled]="r21Busy">{{ 'ui.pages.tf7c8bcd8b213' | siteText }}</button>
+        <button class="btn btn-secondary" type="button" (click)="r21Edit=false">{{ 'ui.pages.t5ab4ec640d65' | siteText }}</button>
+      </form>
+      <section class="cockpit-section"><h2>{{ 'ui.pages.t1bdd79b12628' | siteText }}</h2>
+        <p><strong>{{ 'ui.pages.t9c0bd8d65c3c' | siteText }}</strong> {{ b.customerName || '—' }}</p>
+        <p><strong>{{ 'ui.pages.tf2f25a214e8d' | siteText }}</strong> {{ b.customerEmail || '—' }}</p>
+        <p><strong>{{ 'ui.pages.ta624c50c05f9' | siteText }}</strong> {{ b.customerPhone || '—' }}</p>
+      </section>
+      <section class="cockpit-section"><h2>{{ 'ui.pages.td219c68101f5' | siteText }}</h2>
+        <p><strong>{{ 'ui.pages.tba58cc02c028' | siteText }}</strong> {{ b.startAt | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p><strong>{{ 'ui.pages.t665c4a5ae53f' | siteText }}</strong> {{ b.endAt | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p><strong>{{ 'ui.pages.t223643c21e41' | siteText }}</strong> {{ b.rental?.pickupLocation || '—' }}</p>
+        <p><strong>{{ 'ui.pages.ted76e12c7994' | siteText }}</strong> {{ b.rental?.returnLocation || '—' }}</p>
+        <p><strong>{{ 'ui.pages.t33eedd77ee46' | siteText }}</strong> {{ b.rental?.driverAge || '—' }}</p>
+        <p><strong>{{ 'ui.pages.t0e1157707f81' | siteText }}</strong> {{ b.rental?.licenseCountry || '—' }}</p>
+      </section>
+      <section class="cockpit-section"><h2>{{ 'ui.pages.ta63e74ce4c66' | siteText }}</h2>
+        <p><strong>{{ 'ui.pages.t1add0a0fd413' | siteText }}</strong> {{ b.extras?.additionalDriver ? 'Oui' : 'Non' }}</p>
+        <p><strong>{{ 'ui.pages.t229636c03f94' | siteText }}</strong> {{ b.extras?.childSeat ? 'Oui' : 'Non' }}</p>
+        <p><strong>{{ 'ui.pages.tcea1e9cc3158' | siteText }}</strong> {{ (b.rentalAmount ?? b.pricing?.rentalAmount ?? 0) | currency:(b.currency || 'EUR') }}</p>
+        <p><strong>{{ 'ui.pages.t32d917697017' | siteText }}</strong> {{ (b.bookingDeposit ?? b.pricing?.bookingDeposit ?? 0) | currency:(b.currency || 'EUR') }}</p>
+        <p><strong>{{ 'ui.pages.tab82ffcf286c' | siteText }}</strong> {{ (b.balanceAmount ?? 0) | currency:(b.currency || 'EUR') }}</p>
+        <p><strong>{{ 'ui.pages.t4897cdcb0ea9' | siteText }}</strong> {{ (b.securityDeposit ?? b.pricing?.securityDeposit ?? 0) | currency:(b.currency || 'EUR') }}</p>
+        <p *ngIf="b.comments"><strong>{{ 'ui.pages.t6bbc335b36ad' | siteText }}</strong> {{ b.comments }}</p>
+      </section>
     </article>
   </div>
 </section>

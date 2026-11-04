@@ -28,6 +28,7 @@ interface CustomerFeedback {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-my-feedbacks',
   templateUrl: './my-feedbacks.component.html',
   styleUrls: ['./my-feedbacks.component.scss'],
@@ -574,7 +575,7 @@ export class MyFeedbacksComponent implements OnInit, OnDestroy {
     }
 
     // 3) REST fallback for root and scoped Firebase paths
-    const restBaseUrls = ['https://adn-dev-4d05d.firebaseio.com'];
+    const restBaseUrls = ['https://ailla-poc-default-rtdb.firebaseio.com'];
     for (const baseUrl of restBaseUrls) {
       for (const path of [`${collection}/${id}`, storeId ? `${storeId}/${collection}/${id}` : '']) {
         if (!path) continue;

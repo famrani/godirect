@@ -18,6 +18,7 @@ export interface TourPage {
   duration: string;
   guests: string;
   price: string;
+  priceDetails?: string;
   highlightsTitle: string;
   highlights: string[];
   programTitle: string;
@@ -41,7 +42,7 @@ export interface TourPage {
 /**
  * Editorial content is intentionally absent from this file.
  *
- * Release 104.4: Firebase /bnOutings/{boatId}/{slug}/{language} is the only
+ * Release 104.4: Firebase /bnOutings/{resourceType}/{resourceId}/{slug}/{language} is the only
  * source for outing titles, descriptions, programmes and labels. This empty
  * object only keeps Angular templates type-safe while Firebase is loading.
  */
@@ -57,6 +58,7 @@ export function getTourContent(_language: SiteLanguage, key: TourKey): TourPage 
     duration: '',
     guests: '',
     price: '',
+    priceDetails: '',
     highlightsTitle: '',
     highlights: [],
     programTitle: '',

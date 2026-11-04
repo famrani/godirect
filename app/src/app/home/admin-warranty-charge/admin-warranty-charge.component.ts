@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { OfferApiService, AlegriaOffer } from '../bookings/offer-api.service';
 
 @Component({
+  standalone: false,
   selector: 'app-admin-warranty-charge',
   templateUrl: './admin-warranty-charge.component.html',
   styleUrls: ['./admin-warranty-charge.component.scss']

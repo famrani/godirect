@@ -14,10 +14,11 @@
         <div class="meta-top">{{ outing.duration }} • {{ outing.guests }}</div>
         <h2>{{ outing.title }}</h2>
         <p>{{ outing.description }}</p>
+        <div class="outing-price" *ngIf="outing.priceLabel"><strong>{{ outing.priceLabel }}</strong></div>
         <ul>
           <li *ngFor="let point of outing.highlights">{{ point }}</li>
         </ul>
-        <a [routerLink]="['/sorties', outing.slug]" class="btn">{{ content.outingsPage.cta }}</a>
+        <a [routerLink]="(['/sorties', outing.slug]) | resourceRoute" class="btn">{{ content.outingsPage.cta }}</a>
       </div>
     </article>
   </div>

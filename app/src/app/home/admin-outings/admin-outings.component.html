@@ -196,7 +196,7 @@
                 </span>
                 <span class="status" [class.closed]="anchorageChecklistComplete(anchorage)">
                   {{ countDone(anchorage.arrivalChecklistGroups[0]?.items) + countDone(anchorage.departureChecklistGroups[0]?.items) }} /
-                  {{ (anchorage.arrivalChecklistGroups[0]?.items.length || 0) + (anchorage.departureChecklistGroups[0]?.items.length || 0) }}
+                  {{ (anchorage.arrivalChecklistGroups[0]?.items?.length || 0) + (anchorage.departureChecklistGroups[0]?.items?.length || 0) }}
                 </span>
                 <button type="button" class="detail-link" *ngIf="anchorage.status !== 'closed'" (click)="closeAnchorage(anchorage)">{{ t('liftAnchor') }}</button>
                 <button type="button" class="detail-link" (click)="editAnchorage(anchorage)">{{ t('edit') }}</button>
@@ -276,7 +276,7 @@
         </div>
 
         <div class="notice success" *ngIf="saved">{{ t('saved') }}</div>
-        <div class="notice error" *ngIf="error">{{ error }}</div>
+        <div class="notice error" *ngIf="error">{{ error | siteText }}</div>
       </div>
 
       <div class="outing-form-card" *ngIf="mode === 'close' && selectedOuting">

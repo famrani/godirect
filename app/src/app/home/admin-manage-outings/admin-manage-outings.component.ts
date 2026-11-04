@@ -4,11 +4,13 @@ import { LanguageService, SiteLanguage } from '../../services/language.service';
 import { DynamicOuting, OutingsDataService } from '../outings-data.service';
 
 @Component({
+  standalone: false,
   selector: 'app-admin-manage-outings',
   templateUrl: './admin-manage-outings.component.html',
   styleUrls: ['./admin-manage-outings.component.scss'],
 })
 export class AdminManageOutingsComponent implements OnInit, OnDestroy {
+  readonly editorLanguages: SiteLanguage[] = ['fr', 'en', 'es'];
   currentLanguage: SiteLanguage = 'fr';
   outings: DynamicOuting[] = [];
   selected?: DynamicOuting;

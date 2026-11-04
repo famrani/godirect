@@ -1,3 +1,4 @@
+import {AssetAccessService} from '../../services/asset-access.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { StoreDbService, OBJECTNAME, ServicesService, UtilsService } from 'godigital-lib';
@@ -24,6 +25,7 @@ interface CustomerFeedback {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-admin-feedbacks',
   templateUrl: './admin-feedbacks.component.html',
   styleUrls: ['./admin-feedbacks.component.scss'],
@@ -60,10 +62,12 @@ export class AdminFeedbacksComponent implements OnInit, OnDestroy {
     private languageService: LanguageService,
     private mainSvc: ServicesService,
     private storeDb: StoreDbService,
-    private utilSvc: UtilsService
-  ) {}
+    private utilSvc: UtilsService,
+    public assetAccess:AssetAccessService
+) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.assetAccess.refresh();
     this.languageSub = this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
     });
@@ -93,8 +97,8 @@ export class AdminFeedbacksComponent implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    const role = String(this.loggedUser?.role || '').toLowerCase();
-    return role === 'admin' || this.loggedUser?.isAdmin === true;
+
+    return this.assetAccess.canManage(this.loggedUser);
   }
 
   loadFeedbacks(): void {

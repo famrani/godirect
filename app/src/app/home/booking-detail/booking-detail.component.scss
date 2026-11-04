@@ -1,6 +1,11 @@
 .booking-page { padding: 80px 0; background: #f6f2ea; min-height: 70vh; }
 .booking-shell { max-width: 1120px; margin: 0 auto; }
 .booking-detail-card, .empty-card, .loading-card { background: #fff; border-radius: 28px; padding: 24px; box-shadow: 0 18px 45px rgba(8,38,58,.08); border: 1px solid rgba(8,38,58,.08); }
+
+.booking-notes-card { margin: 18px 0; }
+.booking-note { padding: 14px 16px; margin-top: 10px; border-radius: 14px; background: #f7f3ec; }
+.booking-note.internal { background: #eef6f8; }
+.booking-note p { margin: 6px 0 0; white-space: pre-wrap; }
 .empty-card p, .loading-card p { overflow-wrap: anywhere; color: #667485; }
 .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .78rem; color: #f3d49d; font-weight: 800; }
 .booking-hero { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.35rem; border-radius: 24px; background: linear-gradient(135deg, #08263a, #0d4b5b); color: #fff; overflow: hidden; }
@@ -556,6 +561,26 @@
   border-radius: 18px;
   background: #ffffff;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.cancellation-notice {
+  margin: 1rem 0;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid #e2a2a2;
+  border-left: 6px solid #b42323;
+  border-radius: 18px;
+  background: #fff3f1;
+  color: #5f1919;
+}
+
+.cancellation-notice h2 {
+  margin: 0.2rem 0 0.45rem;
+}
+
+.cancellation-notice p {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.55;
 }
 
 .completion-header {
@@ -1360,3 +1385,21 @@
   width: 9rem;
   min-height: 2.5rem;
 }
+
+.skipper-tip-modal { max-width: 650px; }
+.skipper-tip-modal .terms-modal-header p { margin: .45rem 0 0; color: #667485; }
+.tip-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; margin: 1.25rem 0; }
+.tip-option { min-height: 66px; padding: .7rem; border: 2px solid rgba(8,38,58,.12); border-radius: 16px; background: #fff; color: #08263a; font: inherit; font-size: 1.05rem; font-weight: 900; cursor: pointer; }
+.tip-option small { display: block; margin-top: .2rem; color: #667485; font-size: .72rem; }
+.tip-option:hover, .tip-option.selected { border-color: #0b6e8f; background: #eaf7fa; box-shadow: 0 0 0 3px rgba(11,110,143,.08); }
+.tip-option.custom { font-size: .9rem; }
+.custom-tip-entry { display: grid; gap: .45rem; margin-bottom: 1rem; color: #08263a; font-weight: 800; }
+.custom-tip-entry .money-input-wrap input { width: 100%; min-height: 44px; padding: .6rem .75rem; border: 0; font: inherit; }
+.tip-payment-summary { overflow: hidden; border: 1px solid rgba(8,38,58,.1); border-radius: 16px; background: #fafcfd; }
+.tip-payment-summary > div { display: flex; justify-content: space-between; gap: 1rem; padding: .75rem 1rem; border-bottom: 1px solid rgba(8,38,58,.08); }
+.tip-payment-summary > div:last-child { border-bottom: 0; }
+.tip-payment-summary span { color: #667485; }
+.tip-payment-summary strong { color: #08263a; }
+.tip-payment-summary .tip-total { background: #eef8f4; font-size: 1.08rem; }
+.tip-voluntary-note { margin: .9rem 0 0; color: #667485; font-size: .82rem; }
+@media (max-width: 560px) { .tip-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } .skipper-tip-modal .terms-modal-actions { flex-direction: column-reverse; } .skipper-tip-modal .terms-modal-actions .btn { width: 100%; } }

@@ -1,14 +1,18 @@
+import {SiteContentService} from '../site-content-service/site-content.service';
+import {RegistrationProfileService} from '../../services/registration-profile.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { StoreDbService, OBJECTNAME, ServicesService, UtilsService } from 'godigital-lib';
 import { LanguageService, SiteLanguage } from '../../services/language.service';
 
 @Component({
+  standalone: false,
   selector: 'app-my-profile',
   templateUrl: './my-profile.component.html',
   styleUrls: ['./my-profile.component.scss'],
 })
 export class MyProfileComponent implements OnInit, OnDestroy {
+  uiContent:any;
   currentLanguage: SiteLanguage = 'fr';
   private languageSub?: Subscription;
   private userSub?: Subscription;
@@ -30,10 +34,13 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     private languageService: LanguageService,
     private mainSvc: ServicesService,
     private storeDb: StoreDbService,
-    private utilSvc: UtilsService
+    private utilSvc: UtilsService,
+    private registrationProfile:RegistrationProfileService,
+    private siteContent:SiteContentService
   ) {}
 
   ngOnInit(): void {
+    void this.siteContent.getContent().then(c=>this.uiContent=c);
     this.languageSub = this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
     });
@@ -91,22 +98,16 @@ export class MyProfileComponent implements OnInit, OnDestroy {
         modifiedTS: Date.now(),
       };
 
-      await (this.storeDb as any).updateObject(
-        (this.utilSvc as any).backendFBstoreId,
-        (this.utilSvc as any).mdb,
-        OBJECTNAME.bnUsers,
-        payload,
-        uid
-      );
+      const savedProfile=await this.registrationProfile.save(payload);
 
       const svc = this.mainSvc as any;
       if (typeof svc.setLoggedUser === 'function') {
-        await svc.setLoggedUser(payload);
+        await svc.setLoggedUser(savedProfile);
       } else if (svc.bnUserO && typeof svc.bnUserO.next === 'function') {
-        svc.bnUserO.next(payload);
+        svc.bnUserO.next(savedProfile);
       }
 
-      this.loggedUser = payload;
+      this.loggedUser = savedProfile;
       this.saved = true;
     } catch (e: any) {
       this.error = e?.message || this.t('saveError');
@@ -163,6 +164,6 @@ export class MyProfileComponent implements OnInit, OnDestroy {
         saveError: 'No se puede guardar su perfil en este momento.',
       }
     };
-    return labels[this.currentLanguage][key] || labels.en[key] || key;
+    return this.siteContent.tFromContent(this.uiContent,'ui.profile.'+key,this.currentLanguage,labels[this.currentLanguage]?.[key]||labels.en[key]||key);
   }
 }

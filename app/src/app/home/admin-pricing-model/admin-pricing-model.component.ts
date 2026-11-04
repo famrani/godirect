@@ -6,6 +6,7 @@ import { LanguageService, SiteLanguage } from '../../services/language.service';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-admin-pricing-model',
   templateUrl: './admin-pricing-model.component.html',
   styleUrls: ['./admin-pricing-model.component.scss'],

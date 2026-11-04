@@ -50,7 +50,7 @@
         </div>
       </div>
       <div class="col-6" style="text-align: right;">
-        <a class="small" [routerLink]="['/forgotpwd']">{{ 'login.forgotPassword' | siteText:'Mot de passe oublié' }}</a>
+        <a class="small" [routerLink]="(['/forgotpwd']) | resourceRoute">{{ 'login.forgotPassword' | siteText:'Mot de passe oublié' }}</a>
       </div>
     </div>
 
@@ -64,7 +64,7 @@
       <hr class="w-100">
     </div>
 
-    <button class="btn btn-outline-primary w-100 my-4" type="button" [routerLink]="['/signup']">
+    <button class="btn btn-outline-primary w-100 my-4" type="button" [routerLink]="(['/signup']) | resourceRoute" queryParamsHandling="preserve">
       {{ 'login.createAccount' | siteText:'Créer un compte' }}
     </button>
 

@@ -1,3 +1,4 @@
+import {AssetAccessService} from './asset-access.service';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
@@ -13,13 +14,14 @@ export class PendingOfferLoginModalService {
     private offerApi: OfferApiService,
     private router: Router,
     private languageService: LanguageService,
-  ) {}
+    public assetAccess:AssetAccessService
+) {}
 
   async checkAfterLogin(user: any): Promise<void> {
     if (!user || this.checking) return;
 
-    const role = String(user.role || user.userRole || '').toLowerCase();
-    const isAdmin = role === 'admin' || role === 'owner' || role === 'superadmin';
+    await this.assetAccess.refresh();
+    const isAdmin = this.assetAccess.canManage(user);
     const userId = String(user.userId || user.uid || user.id || '').trim();
     const email = String(user.email || '').trim().toLowerCase();
     const identity = userId || email;

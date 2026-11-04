@@ -32,7 +32,7 @@
           <p>{{ paymentPageText('chooseHelp') }}</p>
         </div>
         <div class="booking-selector-control">
-          <select [(ngModel)]="selectedBookingId" aria-label="Booking">
+          <select [(ngModel)]="selectedBookingId" [attr.aria-label]="'ui.pages.te38ea8eebe78' | siteText">
             <option value="all">{{ paymentPageText('allBookings') }}</option>
             <option *ngFor="let group of paymentGroups" [value]="group.bookingId">
               {{ group.customerName }} · {{ group.title }} · {{ group.date || '-' }} · {{ formatPaymentAmount(group.remainingAlegriaAmount + group.skipperAmount) }}
@@ -65,7 +65,7 @@
 
       <div class="account-empty" *ngIf="!loading && paymentGroups.length === 0">
         <p>{{ paymentPageText('empty') }}</p>
-        <a routerLink="/my-bookings" class="btn btn-primary">{{ paymentPageText('goToBookings') }}</a>
+        <a [routerLink]="'/my-bookings' | resourceRoute" class="btn btn-primary">{{ paymentPageText('goToBookings') }}</a>
       </div>
 
       <div class="payment-summary" *ngIf="!loading && paymentGroups.length > 0">{{ paymentPageText('showing') }} <strong>{{ filteredPaymentGroups.length }}</strong> {{ paymentPageText(filteredPaymentGroups.length === 1 ? 'bookingSingular' : 'bookingPlural') }}.</div>
@@ -151,8 +151,8 @@
 
     <ng-template #defaultAccountSection>
       <div class="account-empty">
-        <p>{{ emptyText }}</p>
-        <a routerLink="/contact" class="btn btn-primary">{{ content.nav.contact }}</a>
+        <p>{{ paymentPageText('empty') }}</p>
+        <a [routerLink]="'/contact' | resourceRoute" class="btn btn-primary">{{ content.nav.contact }}</a>
       </div>
     </ng-template>
   </div>

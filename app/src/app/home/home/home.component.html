@@ -1,5 +1,5 @@
 <ng-container *ngIf="contentReady">
-  <ng-container *ngIf="isAdmin && adminGroups.length; else customerHome">
+  <ng-container *ngIf="showAdminHome && adminGroups.length; else customerHome">
     <section class="admin-home-hero">
       <div class="container admin-hero-grid">
         <div>
@@ -8,7 +8,7 @@
           <p>{{ adminHome?.intro }}</p>
         </div>
         <div class="admin-hero-actions" *ngIf="adminHeroActions.length">
-          <a class="btn btn-primary" *ngFor="let action of adminHeroActions" [routerLink]="action.route">
+          <a class="btn btn-primary" *ngFor="let action of adminHeroActions" [routerLink]="(action.route) | resourceRoute">
             {{ action.label }}
           </a>
         </div>
@@ -35,7 +35,7 @@
             </div>
 
             <div class="admin-links-grid" *ngIf="group.items?.length">
-              <a class="admin-link-card" *ngFor="let item of group.items" [routerLink]="item.route">
+              <a class="admin-link-card" *ngFor="let item of group.items" [routerLink]="(item.route) | resourceRoute" [queryParams]="item.queryParams || null">
                 <strong>{{ item.title }}</strong>
                 <small>{{ item.text }}</small>
               </a>
@@ -55,11 +55,11 @@
         <p>{{ hp.hero?.intro }}</p>
 
         <div class="hero-actions">
-          <a [routerLink]="hp.hero?.primaryRoute || '/sorties'" class="btn btn-primary btn-equal">
+          <a [routerLink]="(hp.hero?.primaryRoute || '/sorties') | resourceRoute" class="btn btn-primary btn-equal">
             {{ hp.hero?.primaryCta }}
           </a>
 
-          <a *ngIf="canShowOnlineBookingButton" routerLink="/calendar" class="btn btn-secondary btn-equal">
+          <a *ngIf="canShowOnlineBookingButton" [routerLink]="'/calendar' | resourceRoute" class="btn btn-secondary btn-equal">
             {{ hp.hero?.secondaryCta }}
           </a>
         </div>
@@ -104,7 +104,7 @@
         <span class="eyebrow">{{ bookingProcessTeaser.eyebrow }}</span>
         <h2>{{ bookingProcessTeaser.title }}</h2>
         <p>{{ bookingProcessTeaser.text }}</p>
-        <a [routerLink]="bookingProcessTeaser.route || '/booking-process'" class="btn btn-secondary">
+        <a [routerLink]="(bookingProcessTeaser.route || '/booking-process') | resourceRoute" class="btn btn-secondary">
           {{ bookingProcessTeaser.cta }}
         </a>
       </div>
@@ -127,7 +127,7 @@
       </div>
 
       <div class="dashboard-cards">
-        <a class="dashboard-card" *ngFor="let card of dashboardCards" [routerLink]="card.route">
+        <a class="dashboard-card" *ngFor="let card of dashboardCards" [routerLink]="(card.route) | resourceRoute">
           <span>{{ card.icon }}</span>
           <strong>{{ card.title }}</strong>
           <small>{{ card.text }}</small>
@@ -146,19 +146,19 @@
 
       <div class="cards-grid experience-grid">
         <article class="card experience-card" *ngFor="let experience of experiences">
-          <img [src]="experience.image" [alt]="experience.title" [routerLink]="experience.route || ['/sorties', experience.slug]" />
+          <img [src]="experience.image" [alt]="experience.title" [routerLink]="(experience.route || ['/sorties', experience.slug]) | resourceRoute" />
           <div class="card-body">
             <h3>{{ experience.title }}</h3>
             <p>{{ experience.description }}</p>
             <div class="meta" *ngIf="experience.meta">{{ experience.meta }}</div>
             <div class="meta price" *ngIf="experience.price">{{ experience.price }}</div>
-            <a [routerLink]="experience.route || ['/sorties', experience.slug]" class="text-link">{{ hp.experiences?.cardCta }}</a>
+            <a [routerLink]="(experience.route || ['/sorties', experience.slug]) | resourceRoute" class="text-link">{{ hp.experiences?.cardCta }}</a>
           </div>
         </article>
       </div>
 
       <div class="home-all-tours-cta" *ngIf="hp.experiences?.cta">
-        <a [routerLink]="hp.experiences?.ctaRoute || '/sorties'" class="btn btn-secondary">{{ hp.experiences.cta }}</a>
+        <a [routerLink]="(hp.experiences?.ctaRoute || '/sorties') | resourceRoute" class="btn btn-secondary">{{ hp.experiences.cta }}</a>
       </div>
     </div>
   </section>
@@ -208,7 +208,7 @@
       </div>
 
       <div class="booking-process-actions" *ngIf="hp.pricing?.cta">
-        <a [routerLink]="hp.pricing?.ctaRoute || '/reserver'" class="btn btn-primary">{{ hp.pricing.cta }}</a>
+        <a [routerLink]="(hp.pricing?.ctaRoute || '/reserver') | resourceRoute" queryParamsHandling="preserve" class="btn btn-primary">{{ hp.pricing.cta }}</a>
       </div>
     </div>
   </section>
@@ -258,7 +258,7 @@
         <ul class="check-list" *ngIf="boatHighlights.length">
           <li *ngFor="let item of boatHighlights">{{ item }}</li>
         </ul>
-        <a [routerLink]="hp.boat?.ctaRoute || '/bateau'" class="btn btn-secondary" *ngIf="hp.boat?.cta">{{ hp.boat.cta }}</a>
+        <a [routerLink]="(hp.boat?.ctaRoute || '/bateau') | resourceRoute" class="btn btn-secondary" *ngIf="hp.boat?.cta">{{ hp.boat.cta }}</a>
       </div>
 
       <div class="boat-card">
@@ -285,7 +285,7 @@
       </div>
 
       <div class="home-all-tours-cta" *ngIf="hp.reviews?.cta">
-        <a [routerLink]="hp.reviews?.ctaRoute || '/feedback'" class="btn btn-secondary">{{ hp.reviews.cta }}</a>
+        <a [routerLink]="(hp.reviews?.ctaRoute || '/feedback') | resourceRoute" class="btn btn-secondary">{{ hp.reviews.cta }}</a>
       </div>
     </div>
   </section>
@@ -296,7 +296,7 @@
         <span class="eyebrow">{{ hp.faq?.eyebrow }}</span>
         <h2>{{ hp.faq?.title }}</h2>
         <p>{{ hp.faq?.text }}</p>
-        <a [routerLink]="hp.faq?.ctaRoute || '/faq'" class="btn btn-secondary" *ngIf="hp.faq?.cta">{{ hp.faq.cta }}</a>
+        <a [routerLink]="(hp.faq?.ctaRoute || '/faq') | resourceRoute" class="btn btn-secondary" *ngIf="hp.faq?.cta">{{ hp.faq.cta }}</a>
       </div>
 
       <div class="faq-list">
@@ -316,8 +316,8 @@
         <p>{{ hp.finalCta?.text }}</p>
       </div>
       <div class="contact-actions">
-        <a [routerLink]="hp.finalCta?.primaryRoute || '/reserver'" class="btn btn-primary" *ngIf="hp.finalCta?.primaryCta">{{ hp.finalCta.primaryCta }}</a>
-        <a [routerLink]="hp.finalCta?.secondaryRoute || '/contact'" class="btn btn-secondary" *ngIf="hp.finalCta?.secondaryCta">{{ hp.finalCta.secondaryCta }}</a>
+        <a [routerLink]="(hp.finalCta?.primaryRoute || '/reserver') | resourceRoute" queryParamsHandling="preserve" class="btn btn-primary" *ngIf="hp.finalCta?.primaryCta">{{ hp.finalCta.primaryCta }}</a>
+        <a [routerLink]="(hp.finalCta?.secondaryRoute || '/contact') | resourceRoute" class="btn btn-secondary" *ngIf="hp.finalCta?.secondaryCta">{{ hp.finalCta.secondaryCta }}</a>
       </div>
     </div>
   </section>

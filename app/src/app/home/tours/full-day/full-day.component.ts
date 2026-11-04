@@ -5,6 +5,7 @@ import { TourPage, getTourContent } from '../tour-content';
 import { DynamicOuting, OutingsDataService } from '../../outings-data.service';
 
 @Component({
+  standalone: false,
   selector: 'app-full-day',
   templateUrl: './full-day.component.html',
   styleUrls: ['./full-day.component.scss'],

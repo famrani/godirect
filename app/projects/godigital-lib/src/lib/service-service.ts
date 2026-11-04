@@ -283,6 +283,7 @@ export class ServicesService {
     public bnBoatServicesO: BehaviorSubject<BoatServices[] | null> = new BehaviorSubject<BoatServices[] | null>(null);*/
 
     public version;
+    private bootstrapPromise?: Promise<void>;
     public firebaseBSSdata = {};
     public languageO: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
 
@@ -533,8 +534,12 @@ export class ServicesService {
     }
 
     async loginOrValidateUser(email?: string, password?: string, firebaseUid?: string, verifyEmail?: boolean): Promise<any> {
+        await this.ensureFirebaseReady();
         const auth = this.utilSvc.mauth;
-        const db = this.utilSvc.mdb;
+
+        if (!auth || typeof auth.signInWithEmailAndPassword !== 'function') {
+            throw [AUTHSTATUS.UNKNOWNERROR, new Error('Firebase Authentication is not initialized.')];
+        }
 
         if (verifyEmail === undefined) {
             verifyEmail = true;
@@ -591,6 +596,16 @@ export class ServicesService {
             this.setLoggedUser(undefined);
             throw ([AUTHSTATUS.UNKNOWNERROR, new Error('You must provide either email/password or firebaseUid.')]);
         }
+    }
+
+    private async ensureFirebaseReady(): Promise<void> {
+        if (this.utilSvc.mauth && this.utilSvc.mdb) {
+            return;
+        }
+
+        const storedPlatform = String(this.utilSvc.getPlatformEnv() || '').trim();
+        const platform = ['dev', 'test', 'prod'].includes(storedPlatform) ? storedPlatform : undefined;
+        await this.bootstrap(platform);
     }
 
     disconnectingUser(adnUserId) {
@@ -1030,10 +1045,24 @@ export class ServicesService {
      * It delegates to the legacy three-step initialization when available.
      */
     async bootstrap(envPlatform?: string): Promise<void> {
-        const env: any = envPlatform ? { platform: envPlatform } : {};
-        await this.readConfigFile(env);
-        await this.initBEService(env);
-        await this.initStorageFb(env);
+        if (this.utilSvc.mauth && this.utilSvc.mdb) {
+            return;
+        }
+
+        if (!this.bootstrapPromise) {
+            this.bootstrapPromise = (async () => {
+                const env: any = envPlatform ? { platform: envPlatform } : {};
+                await this.readConfigFile(env);
+                await this.initBEService(env);
+                await this.initStorageFb(env);
+            })();
+        }
+
+        try {
+            await this.bootstrapPromise;
+        } finally {
+            this.bootstrapPromise = undefined;
+        }
     }
 
     /**

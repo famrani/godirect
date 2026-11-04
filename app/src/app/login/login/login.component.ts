@@ -10,6 +10,7 @@ import { LoginService } from '../login.service';
 declare var $: any;
 
 @Component({
+  standalone: false,
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
@@ -166,13 +167,15 @@ export class LoginComponent {
   }
 
   async loginWithGoogle() {
+    // Keep the Firebase popup promise directly attached to the user's click.
+    // Do NOT wrap popup authentication in an application timeout: choosing a
+    // Google account can legitimately take more than 20 seconds and racing the
+    // popup promise can leave Firebase's popup lifecycle in an inconsistent state.
+    if (this.sending) return;
     this.sending = true;
+    this.closeError();
     try {
-      const user = await this.withTimeout(
-        this.users.signInWithGoogleAndLoadProfile(),
-        20000,
-        'Google sign-in is taking too long. Please try again.'
-      );
+      const user = await this.users.signInWithGoogleAndLoadProfile();
 
       // (Optional) ensure we have an RTDB profile doc (in case first-time Google login)
       // If your UsersService already upserts, you can remove this block:
@@ -212,7 +215,37 @@ export class LoginComponent {
 
       this.postLoginRedirect();
     } catch (e: any) {
-      this.openError(e?.message || 'Google sign-in failed.');
+      const code = String(e?.code || '');
+      console.error('[Google Auth]', { code, message: e?.message, error: e });
+
+      if (code.includes('auth/popup-closed-by-user')) {
+        this.openError(
+          'The Google sign-in window closed before Firebase received the result. Please try again and keep the Google window open until it returns to GoDirect. If it closes immediately, verify that this site domain is listed in Firebase Authentication > Settings > Authorized domains.',
+          'Google sign-in interrupted'
+        );
+      } else if (code.includes('auth/popup-blocked')) {
+        this.openError(
+          'Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.',
+          'Google pop-up blocked'
+        );
+      } else if (code.includes('auth/unauthorized-domain')) {
+        this.openError(
+          `This domain (${window.location.hostname}) is not authorized for Firebase Authentication. Add it in Firebase Authentication > Settings > Authorized domains.`,
+          'Unauthorized domain'
+        );
+      } else if (code.includes('auth/operation-not-allowed')) {
+        this.openError(
+          'Google authentication is not enabled for this Firebase project. Enable Google in Firebase Authentication > Sign-in method.',
+          'Google authentication disabled'
+        );
+      } else if (code.includes('auth/cancelled-popup-request')) {
+        this.openError(
+          'Another Google sign-in request was already in progress. Please try once more.',
+          'Google sign-in interrupted'
+        );
+      } else {
+        this.openError(`${e?.message || 'Google sign-in failed.'}${code ? ` (${code})` : ''}`);
+      }
     } finally {
       this.sending = false;
     }

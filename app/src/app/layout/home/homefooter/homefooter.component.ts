@@ -1,3 +1,4 @@
+import {PLATFORM_HOME_TEXT} from '../../../services/platform-home-text';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ServicesService } from 'godigital-lib';
@@ -5,13 +6,18 @@ import { ServicesService } from 'godigital-lib';
 import { SITE_CONTENT, SiteContent } from '../../../home/site-content';
 import { LanguageService, SiteLanguage } from '../../../services/language.service';
 import { SiteContentService } from '../../../home/site-content-service/site-content.service';
+import { ResourceContextService } from '../../../services/resource-context.service';
+import { ResourceRegistryService } from '../../../services/resource-registry.service';
 
 @Component({
+  standalone: false,
   selector: 'app-homefooter',
   templateUrl: './homefooter.component.html',
   styleUrls: ['./homefooter.component.scss'],
 })
 export class HomefooterComponent implements OnInit, OnDestroy {
+  get goDirectHomeLabel():string {return this.siteContentService.tFromContent(this.allSiteContent,'ui.platform.home',this.currentLanguage,PLATFORM_HOME_TEXT[this.currentLanguage]||PLATFORM_HOME_TEXT.en);}
+
   year = new Date().getFullYear();
 
   content: SiteContent = SITE_CONTENT.fr;
@@ -19,15 +25,19 @@ export class HomefooterComponent implements OnInit, OnDestroy {
 
   currentLanguage: SiteLanguage = 'fr';
   private languageSub?: Subscription;
+  resourceName = 'GoDirect';
 
   constructor(
     private languageService: LanguageService,
     public mainSvc: ServicesService,
-    private siteContentService: SiteContentService
+    private siteContentService: SiteContentService,
+    private resourceContext: ResourceContextService,
+    private resourceRegistry: ResourceRegistryService
   ) {}
 
   ngOnInit(): void {
     this.loadSiteContent();
+    this.loadResourceName();
 
     this.languageSub = this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
@@ -50,6 +60,28 @@ export class HomefooterComponent implements OnInit, OnDestroy {
       this.allSiteContent?.[language] ||
       SITE_CONTENT?.[language] ||
       SITE_CONTENT.fr;
+  }
+
+
+  private async loadResourceName(): Promise<void> {
+    const type = this.resourceContext.resourceType;
+    const id = this.resourceContext.resourceId;
+    try {
+      const items = await this.resourceRegistry.list(type);
+      const current = items.find(item => item.resourceId === id);
+      this.resourceName = current?.name || this.safeBrandName() || id || 'GoDirect';
+    } catch {
+      this.resourceName = this.safeBrandName() || id || 'GoDirect';
+    }
+  }
+
+  private safeBrandName(): string {
+    const brand: any = (this.content as any)?.brand;
+    if (typeof brand === 'string') return brand;
+    if (brand && typeof brand === 'object') {
+      return brand.name || brand.label || brand.title || '';
+    }
+    return '';
   }
 
   private get footerContent(): any {

@@ -216,6 +216,7 @@ const FALLBACK_COPY: Record<SiteLanguage, BookingProcessCopy> = {
 };
 
 @Component({
+  standalone: false,
   selector: 'app-booking-process',
   templateUrl: './booking-process.component.html',
   styleUrls: ['./booking-process.component.scss'],

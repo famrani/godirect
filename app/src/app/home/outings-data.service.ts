@@ -4,14 +4,19 @@ import { StoreDbService, UtilsService } from 'godigital-lib';
 import { SITE_CONTENT, OutingItem } from './site-content';
 import { SiteLanguage } from '../services/language.service';
 import { TourKey, TourPage } from './tours/tour-content';
-import { BoatContextService } from '../services/boat-context.service';
+import { ResourceContextService } from '../services/resource-context.service';
+import { environment } from '../../environments/environment';
+import { PrivateMediaService } from '../services/private-media.service';
 
 export interface LocalizedOutingContent {
   title: string;
   description: string;
   duration: string;
   guests: string;
+  image?: string;
+  gallery?: string[];
   priceLabel?: string;
+  priceDetails?: string;
   highlights?: string[];
   eyebrow?: string;
   subtitle?: string;
@@ -54,24 +59,26 @@ export interface DynamicOuting {
 export class OutingsDataService {
   readonly collectionName = 'bnOutings';
 
-  private readonly restDatabaseUrls = [
-    'https://adn-dev-4d05d.firebaseio.com',
-  ];
+  private readonly restDatabaseUrls = [environment.firebaseDatabaseUrl];
 
   constructor(
     private storeDb: StoreDbService,
     private utilSvc: UtilsService,
     private http: HttpClient,
-    private boatContext: BoatContextService,
+    private resourceContext: ResourceContextService,
+    private privateMedia: PrivateMediaService,
   ) {}
 
   private get collectionPath(): string {
-    return `${this.collectionName}/${this.boatContext.boatId}`;
+    return this.resourceContext.scopedPath(this.collectionName);
   }
 
   async getOutings(): Promise<DynamicOuting[]> {
     const raw = await this.readBnOutingsFromFirebase();
-    const values = this.normalizeRaw(raw);
+    // Normalize every image coming from RTDB before any outing/tour component
+    // receives it. This covers cover images and galleries on all Sorties pages.
+    const mediaResolvedRaw = await this.privateMedia.resolveFirebaseTree(raw);
+    const values = this.normalizeRaw(mediaResolvedRaw);
 
     return values
       .filter((item) => item && item.slug && item.active !== false)
@@ -87,7 +94,7 @@ export class OutingsDataService {
     const payload = {
       ...outing,
       slug,
-      boatId: this.boatContext.boatId,
+      boatId: this.resourceContext.boatId,
       active: outing.active !== false,
       modifiedTS: Date.now(),
       createdTS: outing.createdTS || Date.now(),
@@ -139,9 +146,9 @@ export class OutingsDataService {
         duration: localized.duration,
         guests: localized.guests,
         description: localized.description,
-        image: outing.image,
+        image: outing.image || localized.image || '',
         highlights: localized.highlights || [],
-        priceLabel: undefined,
+        priceLabel: localized.priceLabel || (outing.priceFrom ? this.priceLabel(language, outing.priceFrom) : undefined),
       } as OutingItem;
     });
   }
@@ -160,10 +167,11 @@ export class OutingsDataService {
       title: localized.title || '',
       subtitle: localized.subtitle || '',
       intro: localized.intro || localized.description || '',
-      image: outing.image || '',
+      image: outing.image || localized.image || fallback.image || '',
       duration: localized.duration || '',
       guests: localized.guests || '',
-      price: '',
+      price: localized.priceLabel || (outing.priceFrom ? this.priceLabel(language, outing.priceFrom) : ''),
+      priceDetails: localized.priceDetails || '',
       highlights: localized.highlights || [],
       programTitle: localized.programTitle || '',
       program: localized.program || [],
@@ -174,7 +182,9 @@ export class OutingsDataService {
       cta: localized.cta || '',
       contactNote: localized.contactNote || '',
       galleryTitle: localized.galleryTitle || '',
-      gallery: outing.gallery || [],
+      gallery: outing.gallery?.length
+        ? outing.gallery
+        : (localized.gallery?.length ? localized.gallery : (fallback.gallery || [])),
       coreOfferingTitle: localized.coreOfferingTitle || '',
       coreOffering: localized.coreOffering || [],
       optionalExtrasTitle: localized.optionalExtrasTitle || '',
@@ -197,9 +207,8 @@ export class OutingsDataService {
     const store: any = this.storeDb as any;
     const util: any = this.utilSvc as any;
 
-    // Your current Realtime Database export stores bnOutings at the ROOT: /bnOutings.
-    // We first try direct REST reads because some godigital-lib runtime handles do not expose
-    // a usable Realtime Database ref early enough during public page loading.
+    // GoDirect R1 stores resource-scoped outings under /bnOutings/{resourceType}/{resourceId}.
+    // Use the configured R1 Firebase database as the single REST source of truth.
     const restValue = await this.readBnOutingsViaRest();
     const extractedRest = this.extractBnOutings(restValue);
     if (extractedRest) return extractedRest;
@@ -410,7 +419,7 @@ export const DEFAULT_BN_OUTINGS: DynamicOuting[] = [
     "category": "day",
     "slug": "journee-en-mer",
     "priceFrom": 1299,
-    "image": "assets/img/events/cap-antibes/cap-antibes1.jpg",
+    "image": "/api/media/object?path=assets%2Fevents%2Fde%2Fde1.png",
     "fr": {
       "title": "Journée en mer",
       "description": "Profitez d’une journée ou demi-journée en mer pour naviguer, vous détendre et découvrir les plus beaux mouillages de la Côte d’Azur comme les îles de Lérins, le Cap d’Antibes ou la baie des Milliardaires.",
@@ -456,7 +465,7 @@ export const DEFAULT_BN_OUTINGS: DynamicOuting[] = [
     "category": "sunset",
     "slug": "coucher-de-soleil",
     "priceFrom": 999,
-    "image": "assets/img/events/sunset/sunset1.jpg",
+    "image": "/api/media/object?path=assets%2Fevents%2Fsunset%2Fsunset1.jpg",
     "fr": {
       "title": "Coucher de soleil",
       "description": "Profitez d’une sortie élégante en fin de journée pour admirer le coucher du soleil depuis la mer dans une ambiance calme et raffinée.",
@@ -502,7 +511,7 @@ export const DEFAULT_BN_OUTINGS: DynamicOuting[] = [
     "category": "party",
     "slug": "party",
     "priceFrom": 999,
-    "image": "assets/img/events/evjf/evjf-g1.jpg",
+    "image": "/api/media/object?path=assets%2Fevents%2Fparty%2Fparty1.jpg",
     "fr": {
       "title": "Fête privée",
       "description": "Organisez une fête privée à bord d’Alegria avec musique, baignade, paddle et prestations sur mesure : DJ, yoga, massage ou restauration.",
@@ -548,7 +557,7 @@ export const DEFAULT_BN_OUTINGS: DynamicOuting[] = [
     "category": "corporate",
     "slug": "sortie-entreprise",
     "priceFrom": 999,
-    "image": "assets/img/events/business-meeting/business-meeting1.jpg",
+    "image": "/api/media/object?path=assets%2Fevents%2Fbusiness-meeting%2Fbusiness-meeting1.jpg",
     "fr": {
       "title": "Sortie entreprise",
       "description": "Un cadre original et haut de gamme pour réunir collaborateurs ou clients lors d’une sortie professionnelle en mer.",

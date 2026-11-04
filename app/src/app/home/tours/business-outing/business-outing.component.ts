@@ -5,6 +5,7 @@ import { TourPage, getTourContent } from '../tour-content';
 import { DynamicOuting, OutingsDataService } from '../../outings-data.service';
 
 @Component({
+  standalone: false,
   selector: 'app-business-outing',
   templateUrl: './business-outing.component.html',
   styleUrls: ['./business-outing.component.scss'],

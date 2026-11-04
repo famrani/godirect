@@ -1,3 +1,4 @@
+import {SiteTextPipe} from '../home/site-text.pipe';
 
 
 import { NgModule } from '@angular/core';
@@ -14,7 +15,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [
+  imports: [SiteTextPipe,
     RouterModule.forChild(routes)
   ],
   exports: [RouterModule]

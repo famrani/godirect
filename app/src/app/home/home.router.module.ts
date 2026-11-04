@@ -1,3 +1,4 @@
+import {SiteTextPipe} from './site-text.pipe';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -25,6 +26,7 @@ import { GuestFaqComponent } from './guest-faq/guest-faq.component';
 import { GuestJourneyComponent } from './guest-journey/guest-journey.component';
 import { BookingsComponent } from './bookings/bookings.component';
 import { MyBookingsComponent } from './my-bookings/my-bookings.component';
+import { MyPaymentsComponent } from './my-payments/my-payments.component';
 import { MyOffersComponent } from './my-offers/my-offers.component';
 import { BookingDetailComponent } from './booking-detail/booking-detail.component';
 import { BookingInvoiceComponent } from './booking-invoice/booking-invoice.component';
@@ -39,14 +41,12 @@ import { AdminFleetComponent } from './admin-fleet/admin-fleet.component';
 import { SeaToysComponent } from './sea-toys/sea-toys.component';
 import { AdminSiteContentComponent } from './admin-site-content/admin-site-content.component';
 import { AdminBoatCalendarComponent } from './admin-boat-calendar/admin-boat-calendar.component';
-import { AdminStripeConnectComponent } from './admin-stripe-connect/admin-stripe-connect.component';
-import { PlatformHomeComponent } from './platform-home/platform-home.component';
-import { BoatContextGuard } from './boat-context.guard';
+import { ResourceHomeComponent } from './resource-home/resource-home.component';
+import { ResourceBookingComponent } from './resource-booking/resource-booking.component';
 
 const routes: Routes = [
-  { path: '', component: PlatformHomeComponent },
-  { path: 'boats/:boatId', component: HomeComponent, canActivate: [BoatContextGuard] },
-  { path: 'home', redirectTo: 'boats/alegria', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: ResourceHomeComponent },
   { path: 'sorties', component: OutingsComponent },
   { path: 'sorties/journee-en-mer', component: FullDayComponent },
   { path: 'sorties/coucher-de-soleil', component: SunsetCruiseComponent },
@@ -56,8 +56,9 @@ const routes: Routes = [
   { path: 'bateau', component: BoatComponent },
   { path: 'bateau/jouets-nautiques', component: SeaToysComponent },
   { path: 'galerie', component: GalleryComponent },
-  { path: 'reserver', component: OnlineBookingComponent },
-  { path: 'book-online', component: OnlineBookingComponent },
+  { path: 'reserver', component: ResourceBookingComponent },
+  { path: 'book-online', component: ResourceBookingComponent },
+  { path: 'book-online-legacy', component: OnlineBookingComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'crew', component: CrewComponent },
   { path: 'terms', component: TermsComponent },
@@ -69,9 +70,9 @@ const routes: Routes = [
   { path: 'how-it-works', component: GuestJourneyComponent },
   { path: 'my-bookings', component: MyBookingsComponent },
   { path: 'calendar', component: AdminBoatCalendarComponent, data: { calendarMode: 'customer' } },
-  { path: 'my-offers', component: MyOffersComponent },
-  { path: 'my-proposals', redirectTo: 'my-offers', pathMatch: 'full' },
-  { path: 'my-payments', component: AccountSummaryComponent, data: { section: 'payments' } },
+  { path: 'my-offers', redirectTo: 'my-bookings', pathMatch: 'full' },
+  { path: 'my-proposals', redirectTo: 'my-bookings', pathMatch: 'full' },
+  { path: 'my-payments', component: MyPaymentsComponent },
   { path: 'bookings/:bookingId/invoice', component: BookingInvoiceComponent },
   { path: 'bookings/:bookingId', component: BookingDetailComponent },
   { path: 'payment/:bookingId', component: DepositComponent },
@@ -79,25 +80,26 @@ const routes: Routes = [
   { path: 'my-feedbacks', component: MyFeedbacksComponent },
   { path: 'leave-feedback', redirectTo: 'my-feedbacks', pathMatch: 'full' },
   { path: 'admin/feedbacks', component: AdminFeedbacksComponent },
-  { path: 'admin/bookings', component: BookingsComponent },
-  { path: 'admin/reservations', component: BookingsComponent },
-  { path: 'admin/bookings/:bookingId/invoice', component: BookingInvoiceComponent },
-  { path: 'admin/bookings/:bookingId', component: BookingDetailComponent },
+  { path: 'admin/reservations', component: BookingsComponent, data: { adminMode: true } },
+  { path: 'admin/reservations/:bookingId/invoice', component: BookingInvoiceComponent },
+  { path: 'admin/reservations/:bookingId', component: BookingDetailComponent },
+  { path: 'admin/bookings', redirectTo: 'admin/reservations', pathMatch: 'full' },
+  { path: 'admin/bookings/:bookingId/invoice', redirectTo: 'admin/reservations/:bookingId/invoice', pathMatch: 'full' },
+  { path: 'admin/bookings/:bookingId', redirectTo: 'admin/reservations/:bookingId', pathMatch: 'full' },
   { path: 'admin/booking-detail-v2/:bookingId', component: BookingDetailComponent },
   { path: 'admin/payments', component: AccountSummaryComponent, data: { section: 'payments', admin: true } },
   { path: 'admin/outings', component: AdminOutingsComponent },
   { path: 'admin/calendar', component: AdminBoatCalendarComponent, data: { calendarMode: 'admin' } },
   { path: 'admin/outings/:outingId', component: AdminOutingDetailComponent },
-  { path: 'admin/manage-outings', component: AdminManageOutingsComponent },
-  { path: 'admin/offers', component: AdminOffersComponent },
-  { path: 'admin/proposals', redirectTo: 'admin/offers', pathMatch: 'full' },
+  { path: 'admin/manage-outings', redirectTo: 'admin/site-content', pathMatch: 'full' },
+  { path: 'admin/offers', redirectTo: 'admin/reservations', pathMatch: 'full' },
+  { path: 'admin/proposals', redirectTo: 'admin/reservations', pathMatch: 'full' },
   { path: 'offer/:offerId', component: OfferConfirmationComponent },
   { path: 'proposal/:proposalId', redirectTo: 'offer/:proposalId' },
   { path: 'admin/site-content', component: AdminSiteContentComponent },
   { path: 'admin/content', component: AdminSiteContentComponent },
   { path: 'admin/pricing-model', component: AdminPricingModelComponent },
   { path: 'admin/fleet', component: AdminFleetComponent },
-  { path: 'admin/stripe-connect', component: AdminStripeConnectComponent },
   { path: 'admin/external-bookings', component: BookingsComponent },
   { path: 'admin/new-reservation', component: BookingsComponent },
   { path: 'my-external-bookings', component: AdminExternalBookingsComponent },
@@ -105,7 +107,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [SiteTextPipe,RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
 export class HomeRoutingModule {}

@@ -18,13 +18,13 @@
         {{ charging ? ('auto.home.admin-warranty-charge.admin-warranty-charge.component.charging' | siteText) : ('auto.home.admin-warranty-charge.admin-warranty-charge.component.charge_warranty' | siteText) }}
       </button>
 
-      <p class="success" *ngIf="message">{{ message }}</p>
+      <p class="success" *ngIf="message">{{ message | siteText }}</p>
       <div class="charge-result" *ngIf="lastCharge">
         <strong>{{ 'auto.home.admin-warranty-charge.admin-warranty-charge.component.saved_damage_charge' | siteText }}</strong>
         <span>{{ (lastCharge.amount || 0) / 100 | currency:'EUR' }}</span>
-        <small *ngIf="lastCharge.stripePaymentIntentId">Stripe: {{ lastCharge.stripePaymentIntentId }}</small>
+        <small *ngIf="lastCharge.stripePaymentIntentId">{{ "ui.pages.tc3fc05d8f000" | siteText }} {{ lastCharge.stripePaymentIntentId }}</small>
       </div>
-      <p class="error" *ngIf="error">{{ error }}</p>
+      <p class="error" *ngIf="error">{{ error | siteText }}</p>
     </article>
   </div>
 </section>

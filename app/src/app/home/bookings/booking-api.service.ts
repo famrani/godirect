@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, from, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { StoreDbService, UtilsService } from 'godigital-lib';
-import { BoatContextService } from '../../services/boat-context.service';
+import { ResourceContextService } from '../../services/resource-context.service';
 
 export interface AlegriaPricingModel {
   day: number;
@@ -147,9 +147,10 @@ export interface AlegriaBooking {
 @Injectable({ providedIn: 'root' })
 export class BookingApiService {
   private readonly collectionName = 'bnBookings';
-  private get pricingModelPath(): string { return `bnPricingModel/${this.boatContext.boatId}`; }
+  private get collectionPath(): string { return this.resourceContext.scopedPath(this.collectionName); }
+  private get pricingModelPath(): string { return this.resourceContext.scopedPath('bnPricingModel'); }
 
-  private readonly restDatabaseUrls = [    'https://adn-dev-4d05d.firebaseio.com',
+  private readonly restDatabaseUrls = [    'https://ailla-poc-default-rtdb.firebaseio.com',
   ];
 
   private fallbackBookings: AlegriaBooking[] = [];
@@ -158,7 +159,7 @@ export class BookingApiService {
     private http: HttpClient,
     private utilsSvc: UtilsService,
     private storeDb: StoreDbService,
-    private boatContext: BoatContextService,
+    private resourceContext: ResourceContextService,
   ) {}
 
 
@@ -179,7 +180,7 @@ export class BookingApiService {
     // One pricing source per boat.
     try {
       const [operational, cms] = await Promise.all([
-        this.readFirebasePath(`/bnPricingModel/${this.boatContext.boatId}`).catch(() => null),
+        this.readFirebasePath(`/${this.pricingModelPath}`).catch(() => null),
         Promise.resolve(null),
       ]);
       return {
@@ -212,7 +213,7 @@ export class BookingApiService {
     }
 
     if (typeof store.updateObject === 'function') {
-      await store.updateObject('bnPricingModel', payload, this.boatContext.boatId);
+      await store.updateObject(this.resourceContext.scopedPath('bnPricingModel'), payload);
       return;
     }
 
@@ -223,6 +224,53 @@ export class BookingApiService {
     return from(this.getBookingsFromFirebase(email)).pipe(
       catchError(() => this.getBookingsFromBackend(email)),
       catchError(() => of(this.fallbackBookings))
+    );
+  }
+
+  /**
+   * Administrator source of truth. This deliberately mirrors the calendar's
+   * /bnBookings.json read and bypasses media-tree rewriting, which is neither
+   * needed nor desirable for operational reservation records.
+   */
+  getAdminBookings(): Observable<AlegriaBooking[]> {
+    // R17: typed booking records. Existing boat/legacy administration retains
+    // its established bnBookings workflow until the legacy migration is complete.
+    if (this.resourceContext.resourceType !== 'boat') {
+      const type = encodeURIComponent(this.resourceContext.resourceType);
+      const id = encodeURIComponent(this.resourceContext.resourceId);
+      const url = `${this.restDatabaseUrls[0].replace(/\/+$/, '')}/bookings/${type}/${id}.json`;
+      return this.http.get<Record<string, any> | null>(url).pipe(
+        map(raw => Object.entries(raw || {}).map(([key, b]) => ({
+          ...b,
+          bookingId: String(b.id || key),
+          customerName: String(b.customerName || ''),
+          email: String(b.customerEmail || b.email || ''),
+          phone: String(b.customerPhone || ''),
+          outingType: String(b.assetType || this.resourceContext.resourceType),
+          outingDate: String(b.startAt || '').slice(0,10),
+          departureTime: String(b.startAt || '').slice(11,16),
+          arrivalTime: String(b.endAt || '').slice(11,16),
+          totalPrice: Number(b.rentalAmount || b.pricing?.rentalAmount || 0),
+          totalAmount: Number(b.rentalAmount || b.pricing?.rentalAmount || 0),
+          depositAmount: Number(b.bookingDeposit || 0),
+          warrantyAmount: Number(b.securityDeposit || 0),
+          bookingStatus: String(b.status || 'pending'),
+          platform: 'direct'
+        } as AlegriaBooking)))
+      );
+    }
+    const url = `${this.restDatabaseUrls[0].replace(/\/+$/, '')}/${this.collectionPath}.json`;
+    const headers = new HttpHeaders({ 'X-Skip-Media-Resolution': 'true' });
+    return this.http.get<any>(url, { headers }).pipe(
+      map((raw) => this.normalizeBookings(raw)
+        .filter((booking) => {
+          const boatId = String((booking as any).boatId || 'alegria').trim().toLowerCase();
+          return boatId === this.resourceContext.boatId;
+        })
+        .filter((booking) => String((booking as any).bookingStatus || '').toLowerCase() !== 'deleted')
+        .sort((a, b) => String(b.outingDate || '').localeCompare(String(a.outingDate || '')) ||
+          String(b.departureTime || '').localeCompare(String(a.departureTime || '')))
+      )
     );
   }
 
@@ -277,8 +325,8 @@ export class BookingApiService {
       paymentStatus: anyInput.paymentStatus ?? (isDepositPaid ? 'paid' : 'pending'),
       balancePaid: anyInput.balancePaid === true || anyInput.balanceStatus === 'paid',
       warrantyStatus: input.warrantyStatus || false,
-      boatId: input.boatId || this.boatContext.boatId,
-      ownerId: input.ownerId || this.boatContext.boatId,
+      boatId: input.boatId || this.resourceContext.boatId,
+      ownerId: input.ownerId || this.resourceContext.boatId,
       skipperId: anyInput.skipperId || '',
       createdTS: anyInput.createdTS || now,
       modifiedTS: now,
@@ -308,7 +356,7 @@ export class BookingApiService {
     const util: any = this.utilsSvc as any;
     for (const db of this.getRealtimeDatabaseCandidates(store, util)) {
       try {
-        const snap = await db.ref(`${this.collectionName}/${bookingId}`).once('value');
+        const snap = await db.ref(`${this.collectionPath}/${bookingId}`).once('value');
         const value = snap && typeof snap.val === 'function' ? snap.val() : null;
         if (value) return this.normalizeBooking({ bookingId, ...value } as any);
       } catch {}
@@ -381,10 +429,10 @@ export class BookingApiService {
     ];
 
     return new Observable((observer) => {
-      const markLocally = async (backendResponse: any = {}, backendError: any = null) => {
+      const markLocally = async (backendResponse: any = {}) => {
         try {
           const localResult = await this.markDepositPaidLocally(payload, backendResponse);
-          observer.next({ ...(backendResponse || {}), ...(localResult || {}), localDepositSaved: true, backendError: backendError?.message || backendError?.error?.message || '' });
+          observer.next({ ...(backendResponse || {}), ...(localResult || {}), localDepositSaved: true });
           observer.complete();
         } catch (localError) {
           observer.error(localError);
@@ -393,7 +441,9 @@ export class BookingApiService {
 
       this.postFirstAvailable(endpoints, payload).subscribe({
         next: (response) => markLocally(response),
-        error: (error) => markLocally({}, error),
+        // Never convert a failed/unverified Stripe completion into a locally
+        // paid booking. The backend first retrieves and verifies the session.
+        error: (error) => observer.error(error),
       });
     });
   }
@@ -497,13 +547,6 @@ export class BookingApiService {
       `${this.baseUrl}/api/payments/create-remaining-checkout-session`,
       `${this.baseUrl}/stripe/balance-checkout`,
       `${this.baseUrl}/stripe/remaining-checkout`,
-
-      // Practical fallback: latest backend also has extra-service checkout.
-      // This still redirects to Stripe for the 90% amount; the booking-detail return handler
-      // records balancePaid=true because successUrl keeps paymentType=balance.
-      `${this.baseUrl}/pay/outing-extra-service-checkout`,
-      `${this.baseUrl}/api/payments/create-extra-service-checkout-session`,
-      `${this.baseUrl}/stripe/extra-service-checkout`,
     ], {
       ...enrichedPayload,
       extraServiceId: `balance_${payload.bookingId}`,
@@ -564,8 +607,13 @@ export class BookingApiService {
     bookingId: string;
     offerId?: string;
     ownerId: string;
+    boatId?: string;
     amount: number;
     skipperAmount?: number;
+    tipAmount?: number;
+    tipBaseAmount?: number;
+    tipPercentage?: number | null;
+    tipMode?: 'percentage' | 'custom';
     totalAmount?: number;
     currency?: string;
     customerEmail?: string;
@@ -581,28 +629,30 @@ export class BookingApiService {
     successUrl: string;
     cancelUrl: string;
   }): Observable<any> {
-    const amount = Number(payload.amount || payload.skipperAmount || 0);
+    const skipperAmount = Number(payload.skipperAmount || 0);
+    const tipAmount = Math.max(0, Number(payload.tipAmount || 0));
+    const amount = Number(payload.amount || (skipperAmount + tipAmount) || 0);
     return this.postFirstAvailable([
       `${this.baseUrl}/pay/outing-skipper-fee-checkout`,
       `${this.baseUrl}/api/payments/create-skipper-fee-checkout-session`,
       `${this.baseUrl}/stripe/skipper-fee-checkout`,
-      `${this.baseUrl}/pay/outing-extra-service-checkout`,
-      `${this.baseUrl}/api/payments/create-extra-service-checkout-session`,
-      `${this.baseUrl}/stripe/extra-service-checkout`,
-      `${this.baseUrl}/pay/outing-deposit-checkout`,
-      `${this.baseUrl}/api/payments/create-deposit-checkout-session`,
-      `${this.baseUrl}/stripe/deposit-checkout`,
     ], {
       ...payload,
       offerId: payload.offerId || payload.bookingId,
       amount,
-      skipperAmount: amount,
+      skipperAmount: skipperAmount || Math.max(0, amount - tipAmount),
+      tipAmount,
+      tipBaseAmount: Math.max(0, Number(payload.tipBaseAmount || 0)),
+      tipPercentage: payload.tipPercentage ?? null,
+      tipMode: payload.tipMode || 'percentage',
       extraServiceAmount: amount,
       depositAmount: amount,
       extraServiceId: `skipper_${payload.bookingId}`,
-      title: 'Skipper fee',
-      name: 'Skipper fee',
-      description: `Skipper fee for booking ${payload.bookingId}`,
+      title: tipAmount > 0 ? 'Skipper fee and crew tip' : 'Skipper fee',
+      name: tipAmount > 0 ? 'Skipper fee and crew tip' : 'Skipper fee',
+      description: tipAmount > 0
+        ? `Skipper fee and crew tip for booking ${payload.bookingId}`
+        : `Skipper fee for booking ${payload.bookingId}`,
       paymentType: 'skipper_fee',
       checkoutType: 'skipper_fee',
       currency: payload.currency || 'eur'
@@ -628,109 +678,23 @@ export class BookingApiService {
       `${this.baseUrl}/stripe/remaining-complete`,
     ];
 
-    return new Observable((observer) => {
-      const markLocally = async (backendResponse: any = {}, backendError: any = null) => {
-        try {
-          const localResult = await this.markBalancePaidLocally(payload, backendResponse);
-          observer.next({ ...(backendResponse || {}), ...(localResult || {}), localBalanceSaved: true, backendError: backendError?.message || backendError?.error?.message || '' });
-          observer.complete();
-        } catch (localError) {
-          observer.error(localError);
-        }
-      };
-
-      this.postFirstAvailable(endpoints, payload).subscribe({
-        next: (response) => markLocally(response),
-        error: (error) => markLocally({}, error),
-      });
-    });
+    // The backend retrieves the Checkout Session directly from Stripe and
+    // persists the result only when Stripe confirms it is paid. The browser
+    // must never mark a payment as paid from redirect query parameters.
+    return this.postFirstAvailable(endpoints, payload);
   }
 
-  private async markBalancePaidLocally(payload: { bookingId: string; checkoutSessionId?: string; sessionId?: string; amount?: number; balanceAmount?: number; }, backendResponse: any = {}): Promise<any> {
-    const bookingId = String(payload.bookingId || '').trim();
-    if (!bookingId) throw new Error('Missing booking id for local balance update.');
-
-    const existing = await this.getBookingFromFirebase(bookingId).catch(() => undefined) as any;
-    const raw = existing?.raw || existing || {};
-    const now = Date.now();
-    const existingPayments = raw.payments || {};
-    const explicitAmount = Number(payload.balanceAmount ?? payload.amount ?? backendResponse?.balanceAmount ?? backendResponse?.amount ?? 0) || 0;
-    const storedBalance = Number(
-      raw.balanceAmount
-      ?? raw.remainingFeesAmount
-      ?? raw.remainingOnboardAmount
-      ?? raw.remainingAlegriaRevenue
-      ?? raw.alegriaRemaining
-      ?? existingPayments?.pendingAlegria?.amount
-      ?? existingPayments?.balance?.amount
-      ?? 0
-    ) || 0;
-    const computedRemaining = this.computeRemainingAlegriaAmount(raw);
-    const paidAmount = explicitAmount > 0 ? explicitAmount : this.normalizePaymentAmount(storedBalance || computedRemaining);
-    const sessionId = String(payload.sessionId || payload.checkoutSessionId || backendResponse?.sessionId || backendResponse?.checkoutSessionId || backendResponse?.stripeCheckoutSessionId || '').trim();
-    const paymentIntentId = String(backendResponse?.paymentIntentId || backendResponse?.stripePaymentIntentId || '').trim();
-
-    await this.updateBooking(bookingId, {
-      balancePaid: true,
-      balanceStatus: 'paid',
-      balancePaymentStatus: 'paid',
-      balancePaymentMethod: 'Stripe',
-      balancePaidAt: raw.balancePaidAt || now,
-      remainingFeesAmount: 0,
-      remainingOnboardAmount: 0,
-      remainingAlegriaRevenue: 0,
-      alegriaPaid: true,
-      alegriaPaidAmount: (Number(raw.alegriaPaidAmount || existingPayments?.alegria?.amount || existingPayments?.balance?.amount || 0) || 0) + paidAmount,
-      alegriaPaymentStatus: 'paid',
-      paymentStatus: 'balance_paid',
-      paymentStatusLabel: 'balance_paid',
-      payments: {
-        ...existingPayments,
-        alegria: {
-          ...(existingPayments.alegria || {}),
-          paid: true,
-          status: 'paid',
-          paymentStatus: 'paid',
-          paymentType: 'alegria_balance',
-          type: 'alegria_balance',
-          method: 'Stripe',
-          amount: (Number(existingPayments?.alegria?.amount || 0) || 0) + paidAmount,
-          amount_total: Math.round(((Number(existingPayments?.alegria?.amount || 0) || 0) + paidAmount) * 100),
-          currency: 'eur',
-          bookingId,
-          ownerId: raw.ownerId || 'alegria',
-          checkoutSessionId: sessionId,
-          stripeCheckoutSessionId: sessionId,
-          stripePaymentIntentId: paymentIntentId,
-          paidAt: existingPayments.alegria?.paidAt || now,
-          modifiedTS: now,
-          source: 'stripe_return',
-        },
-        pendingAlegria: null,
-        balance: {
-          ...(existingPayments.balance || {}),
-          paid: true,
-          status: 'paid',
-          paymentStatus: 'paid',
-          paymentType: 'balance',
-          type: 'balance',
-          method: 'Stripe',
-          amount: paidAmount,
-          amount_total: Math.round(paidAmount * 100),
-          currency: 'eur',
-          bookingId,
-          ownerId: raw.ownerId || 'alegria',
-          checkoutSessionId: sessionId,
-          stripeCheckoutSessionId: sessionId,
-          stripePaymentIntentId: paymentIntentId,
-          paidAt: existingPayments.balance?.paidAt || now,
-          modifiedTS: now,
-          source: 'stripe_return',
-        },
-      },
-    } as any);
-
-    return { bookingId, balancePaid: true, balanceAmount: paidAmount };
+  completeAdditionalPayment(payload: {
+    bookingId: string;
+    ownerId?: string;
+    checkoutSessionId?: string;
+    sessionId?: string;
+  }): Observable<any> {
+    return this.postFirstAvailable([
+      `${this.baseUrl}/pay/outing-additional-payment-complete`,
+      `${this.baseUrl}/api/payments/complete-additional-payment`,
+      `${this.baseUrl}/stripe/additional-payment-complete`,
+    ], payload);
   }
 
   private normalizePaymentAmount(value: number): number {
@@ -817,7 +781,7 @@ export class BookingApiService {
   /**
    * Payment-page source of truth.
    * - Booking/payment state comes from bnBookings/{bookingId}.
-   * - Stripe transaction details come only from bnPayment records linked to the booking/offer.
+   * - Stripe transaction details come only from backendpayments records linked to the booking/offer.
    * This avoids mixing backend summary endpoints with the persisted booking state shown to the customer.
    */
   getPaymentPageState(bookingId: string): Observable<any> {
@@ -867,16 +831,22 @@ export class BookingApiService {
   }
 
   private async fetchBnPaymentRecordsByField(field: string, value: string): Promise<any | null> {
-    const safeField = encodeURIComponent(`\"${field}\"`).replace(/%5C/g, '');
-    const encodedValue = encodeURIComponent(`\"${value}\"`).replace(/%5C/g, '');
-    const collection = 'bnPayment';
+    const collection = 'backendpayments';
 
     for (const baseUrl of this.restDatabaseUrls) {
       try {
         const base = baseUrl.replace(/\/+$/, '');
-        const url = `${base}/${collection}.json?orderBy=${safeField}&equalTo=${encodedValue}`;
+        const url = `${base}/${collection}.json`;
         const result = await this.http.get<any>(url).toPromise();
-        if (result && typeof result === 'object') return result;
+        if (result && typeof result === 'object') {
+          return Object.keys(result).reduce((matches: any, key: string) => {
+            const record = result[key];
+            if (record && String(record[field] || '') === String(value || '')) {
+              matches[key] = record;
+            }
+            return matches;
+          }, {});
+        }
       } catch {}
     }
 
@@ -903,7 +873,7 @@ export class BookingApiService {
 
 
 
-  acceptBookingRequest(bookingId: string, ownerId = this.boatContext.boatId, note = ''): Observable<any> {
+  acceptBookingRequest(bookingId: string, ownerId = this.resourceContext.boatId, note = ''): Observable<any> {
     const payload = { bookingId, ownerId, note };
     return this.postFirstAvailable([
       `${this.baseUrl}/pay/outing-booking-accept`,
@@ -911,7 +881,7 @@ export class BookingApiService {
     ], payload);
   }
 
-  rejectBookingRequest(bookingId: string, reason: string, ownerId = this.boatContext.boatId): Observable<any> {
+  rejectBookingRequest(bookingId: string, reason: string, ownerId = this.resourceContext.boatId): Observable<any> {
     const payload = { bookingId, ownerId, reason };
     return this.postFirstAvailable([
       `${this.baseUrl}/pay/outing-booking-reject`,
@@ -920,7 +890,7 @@ export class BookingApiService {
   }
 
   getExtraServicesCatalog(): Observable<any[]> {
-    return from(this.readFirebasePath(`/bnFleet/${this.boatContext.boatId}/extraServices`)).pipe(
+    return from(this.readFirebasePath(`/${this.resourceContext.scopedPath('bnFleet', 'extraServices')}`)).pipe(
       map((raw: any) => {
         const catalog = this.unwrapFirebaseNamedObject(raw, 'extraServices');
         return this.normalizeArray(catalog)
@@ -975,10 +945,6 @@ export class BookingApiService {
       `${this.baseUrl}/pay/outing-extra-service-checkout`,
       `${this.baseUrl}/api/payments/create-extra-service-checkout-session`,
       `${this.baseUrl}/stripe/extra-service-checkout`,
-      // Legacy fallback: create a standard Stripe checkout session with extra-service metadata.
-      `${this.baseUrl}/pay/outing-deposit-checkout`,
-      `${this.baseUrl}/api/payments/create-deposit-checkout-session`,
-      `${this.baseUrl}/stripe/deposit-checkout`,
     ], {
       ...payload,
       amount,
@@ -1038,6 +1004,8 @@ export class BookingApiService {
     amount: number;
     paymentType?: 'deposit' | 'balance' | string;
     reason?: string;
+    extraServiceId?: string;
+    paymentIntentId?: string;
   }): Observable<any> {
     return this.postFirstAvailable([
       `${this.baseUrl}/pay/outing-refund`,
@@ -1139,7 +1107,7 @@ export class BookingApiService {
 
     for (const db of this.getRealtimeDatabaseCandidates(store, util)) {
       try {
-        await db.ref(`${this.collectionName}/${bookingId}`).remove();
+        await db.ref(`${this.collectionPath}/${bookingId}`).remove();
         return;
       } catch {}
     }
@@ -1175,6 +1143,25 @@ export class BookingApiService {
     });
   }
 
+  // Cash writes must target the same root record as the detail screen. The
+  // library updateObject contract prefixes bnBookings with a store id.
+  // Flatten objects so RTDB PATCH preserves unrelated payment records/fields.
+  async updateCashPayment(bookingId: string, payload: Record<string, any>): Promise<void> {
+    if (!bookingId || /[.#$\[\]/]/.test(bookingId)) throw new Error('Invalid booking id.');
+    const patch: Record<string, any> = { modifiedTS: Date.now() };
+    const flatten = (value: any, path: string) => {
+      if (value === undefined) return;
+      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+        Object.entries(value).forEach(([key, child]) => flatten(child, path ? `${path}/${key}` : key));
+      } else {
+        patch[path] = value;
+      }
+    };
+    flatten(payload, '');
+    const url = `${this.restDatabaseUrls[0]}/${this.collectionName}/${encodeURIComponent(bookingId)}.json`;
+    await this.http.patch(url, patch).toPromise();
+  }
+
   async updateBooking(bookingId: string, payload: Partial<AlegriaBooking>): Promise<void> {
     const store: any = this.storeDb as any;
     const util: any = this.utilsSvc as any;
@@ -1185,7 +1172,7 @@ export class BookingApiService {
     // Prefer real RTDB handles when available.
     for (const db of this.getRealtimeDatabaseCandidates(store, util)) {
       try {
-        await db.ref(`${this.collectionName}/${bookingId}`).set(merged);
+        await db.ref(`${this.collectionPath}/${bookingId}`).set(merged);
         notify();
         return;
       } catch {}
@@ -1250,7 +1237,7 @@ export class BookingApiService {
   private async getBookingsFromFirebase(email?: string): Promise<AlegriaBooking[]> {
     const raw = await this.readBookingsRaw();
     const bookings = this.normalizeBookings(raw)
-      .filter((booking) => String((booking as any).boatId || 'alegria') === this.boatContext.boatId)
+      .filter((booking) => String((booking as any).boatId || 'alegria') === this.resourceContext.boatId)
       .filter((booking) => String((booking as any).bookingStatus || (booking as any).status || '').toLowerCase() !== 'deleted')
       .filter((booking) => String((booking as any).bookingRequestStatus || (booking as any).status || '').toLowerCase() !== 'cancelled_by_customer')
       .sort((a, b) => String(b.outingDate || '').localeCompare(String(a.outingDate || '')) || String(b.departureTime || '').localeCompare(String(a.departureTime || '')));
@@ -1277,7 +1264,7 @@ export class BookingApiService {
     if (this.hasBookings(extractedRest)) return extractedRest;
 
     for (const db of this.getRealtimeDatabaseCandidates(store, util)) {
-      const rootValue = await this.readDatabasePath(db, this.collectionName);
+      const rootValue = await this.readDatabasePath(db, this.collectionPath);
       const extractedRoot = this.extractBookings(rootValue);
       if (this.hasBookings(extractedRoot)) return extractedRoot;
 
@@ -1571,10 +1558,21 @@ export class BookingApiService {
       customerEmail: item.customerEmail || item.email || item.payments?.deposit?.customerEmail || item.payments?.warranty?.customerEmail || customer.email || '',
       phone: item.phone || customer.phone || '',
       customerPhone: item.customerPhone || item.phone || customer.phone || '',
-      outingType: item.outingType || item.outing || item.type || item.category || '',
-      outingDate: item.outingDate || item.date || (start ? String(start).slice(0, 10) : ''),
-      departureTime: item.departureTime || (start ? String(start).slice(11, 16) : ''),
-      arrivalTime: item.arrivalTime || (end ? String(end).slice(11, 16) : ''),
+      outingType: item.outingType || item.outing || item.type || item.category ||
+        nestedRaw.outingType || nestedRaw.outing || nestedRawRaw.outingType ||
+        balancePayment.outingType || depositPayment.outingType || '',
+      // Imported/editable bookings may retain their canonical trip date inside
+      // `raw` while the root field is absent. Booking list and detail must use
+      // the same fallback order so they cannot disagree about the date.
+      outingDate: item.outingDate || item.date || item.bookingDate ||
+        nestedRaw.outingDate || nestedRaw.date || nestedRaw.bookingDate ||
+        nestedRawRaw.outingDate || nestedRawRaw.date || nestedRawRaw.bookingDate ||
+        balancePayment.outingDate || depositPayment.outingDate || warrantyPayment.outingDate ||
+        (start ? String(start).slice(0, 10) : ''),
+      departureTime: item.departureTime || nestedRaw.departureTime || nestedRawRaw.departureTime ||
+        balancePayment.departureTime || (start ? String(start).slice(11, 16) : ''),
+      arrivalTime: item.arrivalTime || nestedRaw.arrivalTime || nestedRawRaw.arrivalTime ||
+        balancePayment.arrivalTime || (end ? String(end).slice(11, 16) : ''),
       passengers: Number(item.passengers || party.total || item.guests || 0) || undefined,
       totalPrice,
       totalAmount: Number(item.totalAmount ?? totalPrice),

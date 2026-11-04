@@ -1,0 +1,65 @@
+
+:host {
+  display: block;
+  background: #f8f6f1;
+  color: #17202a;
+  min-height: calc(100vh - 120px);
+}
+
+.asset-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 42px 24px 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, .9fr);
+  gap: 42px;
+  align-items: start;
+  background: transparent !important;
+  background-image: none !important;
+  color: #17202a;
+}
+
+.asset-page app-asset-gallery {
+  display: block;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.copy {
+  position: relative;
+  z-index: 2;
+  background: #fff;
+  color: #17202a;
+  border: 1px solid #e6e2da;
+  border-radius: 18px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(23,32,42,.06);
+}
+
+.eyebrow { text-transform: uppercase; font-weight: 800; font-size: .78rem; letter-spacing: .06em; color: #49606c; }
+h1 { margin: 10px 0 8px; font-size: clamp(2rem, 3.5vw, 3rem); line-height: 1.05; }
+.headline { font-size: 1.18rem; line-height: 1.45; margin: 0 0 12px; }
+.copy > p:not(.headline) { color: #55636c; line-height: 1.55; }
+.facts { display: flex; flex-wrap: wrap; gap: 9px; margin: 22px 0; }
+.facts span { padding: 9px 11px; border: 1px solid #ddd8cf; border-radius: 9px; background: #faf9f6; }
+.price { margin: 22px 0; font-size: 1rem; }
+.price strong { display: inline-block; margin-left: 4px; font-size: 1.55rem; color: #102f40; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.actions a { padding: 12px 18px; border: 1px solid #aeb8bd; border-radius: 9px; text-decoration: none; color: #0b5bd3; background: #fff; font-weight: 650; }
+.actions .primary { background: #0b5bd3; border-color: #0b5bd3; color: #fff; }
+.loading { max-width: 1120px; margin: 0 auto; padding: 48px 24px; }
+
+@media (max-width: 800px) {
+  .asset-page { grid-template-columns: 1fr; gap: 24px; padding: 24px 16px 40px; }
+  .copy { padding: 22px; }
+}
+
+.management-home{max-width:1280px;margin:0 auto;padding:40px 24px 64px;color:#173344}
+.management-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:28px}.management-heading h1{font-size:2rem;margin:8px 0}.management-heading h2{font-size:1.05rem;font-weight:600;margin:0;color:#526773}.management-heading p{color:#647580;margin:12px 0 0;max-width:580px}
+.management-primary,.management-secondary{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:10px;text-decoration:none;font-size:.93rem;font-weight:700;cursor:pointer}.management-primary{background:#153b4b;color:#fff;border:1px solid #153b4b;flex-shrink:0}.management-secondary{border:1px solid #d9e1e5;color:#214655;background:#fff;padding:9px 12px}.management-secondary:disabled{opacity:.5;cursor:wait}
+.management-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px}.management-metrics button{background:#fff;border:1px solid #e3e7e8;border-radius:14px;text-align:left;padding:20px;cursor:pointer;color:inherit;box-shadow:0 4px 14px rgba(20,49,63,.025)}.management-metrics button span{display:block;font-size:.86rem;color:#637782;min-height:36px}.management-metrics strong{display:block;font-size:2rem;margin-top:8px;line-height:1}.management-metrics button:hover{border-color:#7e9ca8}
+.management-layout{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:22px;align-items:start}.management-panel{background:#fff;border:1px solid #e3e7e8;border-radius:16px;padding:24px;min-width:0}.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.management-panel h2{font-size:1.25rem;margin:0}.management-panel h3{font-size:1.05rem;margin:12px 0}.management-sidebar{display:grid;gap:20px}.management-sidebar p{line-height:1.55}.arrival-panel{border-top:3px solid #d8a455}.arrival-panel .eyebrow{font-size:.69rem}.booking-filters{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:22px 0}.filter-tabs{display:flex;gap:3px;flex-wrap:wrap}.filter-tabs button{border:0;border-radius:7px;padding:9px 10px;background:#f3f5f6;color:#586e79;font-size:.83rem;cursor:pointer}.filter-tabs button.selected{background:#e4eff3;color:#123a4c;font-weight:700}.booking-filters input{border:1px solid #dce3e6;border-radius:8px;padding:10px 12px;min-width:160px;flex:1;max-width:300px;font-size:.84rem}.booking-table-wrap{overflow-x:auto}.management-table{border-collapse:collapse;width:100%;font-size:.84rem}.management-table th{text-align:left;font-size:.74rem;font-weight:600;color:#6b7f89;padding:10px 10px 14px 0;border-bottom:1px solid #e4eaed}.management-table td{padding:17px 12px 17px 0;border-bottom:1px solid #edf0f1;vertical-align:middle}.management-table small{display:block;color:#6d7d85;margin-top:5px;overflow-wrap:anywhere}.management-status{display:inline-block;padding:6px 9px;border-radius:7px;background:#fff3dc;color:#79551c;font-size:.75rem;white-space:nowrap}.management-status.confirmed{background:#e7f4ec;color:#26613d}.management-text-link{color:#20546b;text-decoration:none;font-weight:700;white-space:nowrap}.management-all-link{display:inline-block;color:#20546b;font-weight:700;font-size:.88rem;text-decoration:none;margin-top:22px}.management-hint{color:#697a83;font-size:.86rem;line-height:1.55}.management-error{padding:12px;background:#fff0ec;color:#923b2c;border-radius:8px}.management-empty{padding:28px 0;color:#6c7c85}.management-quick-link{display:flex;justify-content:space-between;text-decoration:none;color:#254b60;font-size:.88rem;padding:13px 0;border-top:1px solid #edf0f1}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.management-home a:focus-visible,.management-home button:focus-visible,.management-home input:focus-visible{outline:3px solid #3487ad;outline-offset:3px}
+@media(max-width:1050px){.management-layout{grid-template-columns:minmax(0,1fr)}.management-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.management-heading{align-items:flex-start}.management-primary{max-width:260px;text-align:center}}
+@media(max-width:640px){.management-home{padding:24px 16px 40px}.management-heading{flex-direction:column;gap:18px}.management-primary{max-width:none;width:100%}.management-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.management-metrics button{padding:15px}.management-metrics strong{font-size:1.7rem}.management-panel{padding:18px}.management-sidebar{grid-template-columns:1fr}.booking-filters input{max-width:none;width:100%}.management-table{min-width:590px}}

@@ -9,7 +9,7 @@
       <p class="success" *ngIf="paymentReturnMessage">{{ paymentReturnMessage }}</p>
 
       <div class="summary-card">
-        <h2>{{ isWarrantyAdminMode ? 'Booking summary' : paymentSummaryTitle }}</h2>
+        <h2>{{ isWarrantyAdminMode ? ('ui.messages.te2a9a693601c' | siteText) : paymentSummaryTitle }}</h2>
 
         <ng-container *ngIf="!isWarrantyAdminMode && !isBalanceMode">
           <ul>
@@ -103,6 +103,7 @@
     </section>
 
     <section class="deposit-card warranty-setup-card" *ngIf="showWarrantyRegistration">
+      <p class="note">{{currentLanguage==='fr'?('ui.messages.te78213efac6b' | siteText):('ui.messages.t938aefff6e3f' | siteText)}}</p>
       <span class="eyebrow">{{ 'auto.home.deposit.deposit.component.warranty' | siteText }}</span>
       <h2>{{ 'auto.home.deposit.deposit.component.select_warranty_card_mode' | siteText }}</h2>
       <p class="note">{{ 'auto.home.deposit.deposit.component.credit_card_warranty_mode_has_not_been_selected_ye' | siteText }}</p>
@@ -113,19 +114,19 @@
       </div>
 
       <button type="button" class="btn btn-primary" [disabled]="isWarrantyLoading" (click)="registerWarrantyCard()">
-        {{ isWarrantyLoading ? 'Opening Stripe...' : 'Register warranty card' }}
+        {{ isWarrantyLoading ? (currentLanguage==='fr'?('ui.messages.t487dbec8a462' | siteText):('ui.messages.t8ed3c2197f2d' | siteText)) : (currentLanguage==='fr'?('ui.pages.tc19651206d81' | siteText):'Save my card for the security deposit') }}
       </button>
       <p class="error" *ngIf="warrantySetupMessage">{{ warrantySetupMessage }}</p>
     </section>
 
     <section class="deposit-card warranty-setup-card" *ngIf="showWarrantyCardSummary">
       <span class="eyebrow">{{ 'auto.home.deposit.deposit.component.warranty' | siteText }}</span>
-      <h2>{{ 'auto.home.deposit.deposit.component.credit_card_warranty_selected' | siteText }}</h2>
+      <h2>{{currentLanguage==='fr'?('ui.messages.t1fa6c603ee4e' | siteText):('ui.messages.t4776e13133d5' | siteText)}}</h2>
       <p class="note">{{ 'auto.home.deposit.deposit.component.the_warranty_will_be_handled_by_credit_card_no_add' | siteText }}</p>
 
       <div class="summary-lines">
         <div><strong>{{ 'auto.home.deposit.deposit.component.warranty_mode' | siteText }}</strong><span>{{ 'auto.home.deposit.deposit.component.credit_card' | siteText }}</span></div>
-        <div><strong>{{ 'auto.home.deposit.deposit.component.card' | siteText }}</strong><span>{{ warrantyCardLast4 ? ('•••• ' + warrantyCardLast4) : 'Saved card' }}</span></div>
+        <div><strong>{{ 'auto.home.deposit.deposit.component.card' | siteText }}</strong><span>{{ warrantyCardLast4 ? ('•••• ' + warrantyCardLast4) : ('ui.messages.t05d3f072f1f3' | siteText) }}</span></div>
         <div><strong>{{ 'auto.home.deposit.deposit.component.setup_intent_amount' | siteText }}</strong><span>{{ formatAmount(warrantySetupIntentAmount || warrantyAmount) }}</span></div>
         <div><strong>{{ 'auto.home.deposit.deposit.component.setup_intent' | siteText }}</strong><span>{{ booking?.warrantySetupIntentId || booking?.payments?.warranty?.setupIntentId || '-' }}</span></div>
       </div>
@@ -158,7 +159,7 @@
       <p class="success" *ngIf="warrantyMessage">{{ warrantyMessage }}</p>
 
       <button type="button" class="btn btn-primary danger" [disabled]="isChargingWarranty" (click)="chargeWarranty()">
-        {{ isChargingWarranty ? 'Charging...' : 'Charge warranty amount' }}
+        {{ isChargingWarranty ? ('ui.messages.ta79ec03e44f2' | siteText) : ('ui.messages.tfc495114a0d4' | siteText) }}
       </button>
     </section>
 

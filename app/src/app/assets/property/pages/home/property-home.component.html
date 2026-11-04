@@ -1,0 +1,36 @@
+<ng-container *ngIf="asset; else loading">
+  <main *ngIf="showAdmin; else customerHome" class="management-home">
+    <header class="management-heading">
+      <div><span class="eyebrow">{{adminT('eyebrow')}}</span><h1>{{asset.name}}</h1><p class="asset-location" *ngIf="asset.location?.city">{{asset.location.area ? asset.location.area+' · ':''}}{{asset.location.city}} · {{asset.location.country}}</p><h2>{{adminT('title')}}</h2><p>{{adminT('intro')}}</p></div>
+      <a class="management-primary" [routerLink]="'/admin/reservations' | resourceRoute" [queryParams]="{create:'1'}">+ {{adminT('newBooking')}}</a>
+    </header>
+    <nav class="management-metrics" [attr.aria-label]="'ui.pages.t8558c2442478' | siteText">
+      <button type="button" (click)="filter='upcoming'"><span>{{adminT('upcoming')}}</span><strong>{{dashboardLoaded?upcomingBookings.length:'—'}}</strong></button>
+      <button type="button" (click)="filter='attention'"><span>{{adminT('approvals')}}</span><strong>{{dashboardLoaded?approvalCount:'—'}}</strong></button>
+      <button type="button" (click)="filter='attention'"><span>{{adminT('payments')}}</span><strong>{{dashboardLoaded?paymentCount:'—'}}</strong></button>
+      <button type="button" (click)="filter='attention'"><span>{{adminT('cancellations')}}</span><strong>{{dashboardLoaded?cancellationCount:'—'}}</strong></button>
+    </nav>
+    <div class="management-layout">
+      <section class="management-panel bookings-panel" [attr.aria-busy]="dashboardLoading">
+        <div class="panel-heading"><h2>{{adminT('bookingList')}}</h2><button type="button" class="management-secondary" (click)="refreshDashboard()" [disabled]="dashboardLoading">{{adminT('refresh')}}</button></div>
+        <div class="booking-filters"><div class="filter-tabs" role="group" [attr.aria-label]="adminT('bookingList')"><button type="button" [class.selected]="filter==='upcoming'" [attr.aria-pressed]="filter==='upcoming'" (click)="filter='upcoming'">{{adminT('upcoming')}}</button><button type="button" [class.selected]="filter==='attention'" [attr.aria-pressed]="filter==='attention'" (click)="filter='attention'">{{adminT('attention')}}</button><button type="button" [class.selected]="filter==='all'" [attr.aria-pressed]="filter==='all'" (click)="filter='all'">{{adminT('all')}}</button></div><input type="search" [value]="search" (input)="onSearch($event)" [placeholder]="adminT('search')" [attr.aria-label]="adminT('search')"></div>
+        <p *ngIf="filter==='attention'" class="management-hint">{{adminT('attentionHint')}}</p>
+        <p *ngIf="dashboardLoading" role="status">{{adminT('loading')}}</p>
+        <p *ngIf="dashboardError" class="management-error" role="alert">{{dashboardError}}</p>
+        <p *ngIf="!dashboardLoading && !dashboardError && !visibleBookings.length" class="management-empty">{{adminT('empty')}}</p>
+        <div class="booking-table-wrap" *ngIf="!dashboardError && visibleBookings.length">
+          <table class="management-table"><thead><tr><th>{{adminT('guest')}}</th><th>{{adminT('stay')}}</th><th>{{adminT('status')}}</th><th>{{adminT('payment')}}</th><th><span class="sr-only">{{adminT('action')}}</span></th></tr></thead><tbody>
+            <tr *ngFor="let b of visibleBookings | slice:0:8"><td><strong>{{b.customerName || b.customerEmail}}</strong><small>{{b.customerEmail}}</small></td><td>{{b.startAt | date:'dd/MM/yyyy'}}<small>→ {{b.endAt | date:'dd/MM/yyyy'}}</small></td><td><span class="management-status" [class.confirmed]="b.status==='confirmed' && !cancelling(b)">{{statusText(b)}}</span></td><td>{{paymentText(b)}}</td><td><a class="management-text-link" [routerLink]="'/admin/reservations' | resourceRoute" [queryParams]="{bookingId:b.id}">{{adminT('manage')}} →</a></td></tr>
+          </tbody></table>
+        </div>
+        <a class="management-all-link" [routerLink]="'/admin/reservations' | resourceRoute">{{adminT('allBookings')}} →</a>
+      </section>
+      <aside class="management-sidebar">
+        <section class="management-panel arrival-panel"><span class="eyebrow">{{adminT('nextArrival')}}</span><ng-container *ngIf="nextArrival as arrival; else noArrival"><h3>{{arrival.customerName || arrival.customerEmail}}</h3><p>{{arrival.startAt | date:'dd/MM/yyyy · HH:mm'}} → {{arrival.endAt | date:'dd/MM/yyyy · HH:mm'}}</p><a class="management-text-link" [routerLink]="'/admin/reservations' | resourceRoute" [queryParams]="{bookingId:arrival.id}">{{adminT('manage')}} →</a></ng-container><ng-template #noArrival><p>{{dashboardLoading?adminT('loading'):adminT('noArrival')}}</p></ng-template></section>
+        <section class="management-panel"><h3>{{adminT('attention')}}</h3><p class="management-hint">{{adminT('approvalNote')}}</p><a class="management-quick-link" [routerLink]="'/owner/payments' | resourceRoute">{{adminT('paymentsLink')}} <span>→</span></a><a class="management-quick-link" [routerLink]="'/details' | resourceRoute" queryParamsHandling="preserve">{{adminT('propertyLink')}} <span>→</span></a></section>
+      </aside>
+    </div>
+  </main>
+  <ng-template #customerHome><section class="asset-page"><app-asset-gallery [images]="images" [title]="asset.name"></app-asset-gallery><div class="copy"><span class="eyebrow">{{eyebrow}}</span><h1>{{asset.name}}</h1><p class="asset-location" *ngIf="asset.location?.city">{{asset.location.area ? asset.location.area+' · ':''}}{{asset.location.city}} · {{asset.location.country}}</p><p class="headline">{{localizedHeadline}}</p><p>{{localizedDescription}}</p><div class="facts"><span *ngFor="let fact of facts">{{fact}}</span></div><div class="price">{{t('from')}} <strong>{{price.basePrice}} {{price.currency}}</strong> / {{price.pricingUnit==='night'?t('night'):t('day')}}</div><div class="actions"><a class="primary" [routerLink]="'/reserver' | resourceRoute" queryParamsHandling="preserve">{{t('book')}}</a><a [routerLink]="'/details' | resourceRoute" queryParamsHandling="preserve">{{detailLabel}}</a></div></div></section></ng-template>
+</ng-container>
+<ng-template #loading><div class="loading">{{error || t('loading')}}</div></ng-template>

@@ -7,6 +7,7 @@ import { Subscription, } from 'rxjs';
 declare let $: any;
 
 @Component({
+  standalone: false,
   selector: 'app-layoutnone',
   templateUrl: './layoutnone.component.html',
   styleUrls: ['./layoutnone.component.scss'],

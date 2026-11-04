@@ -90,8 +90,8 @@
       </div>
 
       <div class="calculation">
-        <span>{{ t('computedTotal') || 'Total' }}: <strong>€{{ ((form.proposalBoatPrice || 0) + (form.proposalSkipperPrice || 0) + (form.proposalFuelPrice || 0) + (form.proposalExtraServicesPrice || 0)) | number:'1.2-2' }}</strong></span>
-        <span>{{ priceTitle('skipperPrice') }} cash: <strong>€{{ (form.proposalSkipperPrice || 0) | number:'1.2-2' }}</strong></span>
+        <span>{{ t('computedTotal') || ('ui.messages.tb25928c69902' | siteText) }}: <strong>€{{ ((form.proposalBoatPrice || 0) + (form.proposalSkipperPrice || 0) + (form.proposalFuelPrice || 0) + (form.proposalExtraServicesPrice || 0)) | number:'1.2-2' }}</strong></span>
+        <span>{{ priceTitle('skipperPrice') }} {{ "ui.pages.t8d8b61702507" | siteText }} <strong>€{{ (form.proposalSkipperPrice || 0) | number:'1.2-2' }}</strong></span>
         <span>{{ 'auto.home.admin-offers.admin-offers.component.online_payable' | siteText }}<strong>€{{ ((form.proposalBoatPrice || 0) + (form.proposalFuelPrice || 0) + (form.proposalExtraServicesPrice || 0)) | number:'1.2-2' }}</strong></span>
         <span>{{ priceTitle('deposit10') }}: <strong>€{{ (((form.proposalBoatPrice || 0) + (form.proposalFuelPrice || 0) + (form.proposalExtraServicesPrice || 0)) * 0.1) | number:'1.2-2' }}</strong></span>
         <span>{{ priceTitle('remaining90') }}: <strong>€{{ (((form.proposalBoatPrice || 0) + (form.proposalFuelPrice || 0) + (form.proposalExtraServicesPrice || 0)) * 0.9) | number:'1.2-2' }}</strong></span>
@@ -128,8 +128,8 @@
 
       <p class="validity" *ngIf="form.offerId" [class.expired]="isExpired(form)">{{ formatValidity(form) }}</p>
       <p class="client-link" *ngIf="form.offerId">{{ offerLink }}</p>
-      <p class="success" *ngIf="message">{{ message }}</p>
-      <p class="error" *ngIf="error">{{ error }}</p>
+      <p class="success" *ngIf="message">{{ message | siteText }}</p>
+      <p class="error" *ngIf="error">{{ error | siteText }}</p>
     </article>
 
     <div class="toolbar">

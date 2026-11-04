@@ -5,6 +5,7 @@ import { LanguageService, SiteLanguage } from '../../services/language.service';
 import { BookingApiService, AlegriaBooking } from '../bookings/booking-api.service';
 
 @Component({
+  standalone: false,
   selector: 'app-feedback',
   templateUrl: './feedback.component.html',
   styleUrls: ['./feedback.component.scss'],

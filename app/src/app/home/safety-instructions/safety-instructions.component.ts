@@ -423,6 +423,7 @@ const SAFETY_CONTENT: Partial<Record<SiteLanguage, SafetyContent>> & { fr: Safet
 };
 
 @Component({
+  standalone: false,
   selector: 'app-safety-instructions',
   templateUrl: './safety-instructions.component.html',
   styleUrls: ['./safety-instructions.component.scss']

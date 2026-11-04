@@ -5,6 +5,7 @@ import { TourPage, getTourContent } from '../tour-content';
 import { DynamicOuting, OutingsDataService } from '../../outings-data.service';
 
 @Component({
+  standalone: false,
   selector: 'app-sunset-cruise',
   templateUrl: './sunset-cruise.component.html',
   styleUrls: ['./sunset-cruise.component.scss'],

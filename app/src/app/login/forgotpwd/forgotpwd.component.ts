@@ -5,6 +5,7 @@ import { UsersService } from 'godigital-lib';
 declare var $: any;
 
 @Component({
+  standalone: false,
   selector: 'app-forgotpwd',
   templateUrl: './forgotpwd.component.html'
 })

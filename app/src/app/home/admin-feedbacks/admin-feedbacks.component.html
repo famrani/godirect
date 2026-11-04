@@ -39,7 +39,7 @@
         <p>{{ t('loading') }}</p>
       </div>
 
-      <p class="error" *ngIf="error">{{ error }}</p>
+      <p class="error" *ngIf="error">{{ error | siteText }}</p>
 
       <div class="state-card" *ngIf="!loading && !error && filteredFeedbacks.length === 0">
         <p>{{ t('empty') }}</p>

@@ -1,0 +1,82 @@
+<ng-container *ngIf="asset; else loading">
+  <section class="car-landing">
+    <div class="car-landing__media">
+      <img
+        *ngIf="heroImage && !imageFailed"
+        class="car-landing__image no-image-zoom"
+        [src]="heroImage"
+        [alt]="title"
+        (error)="onImageError()"
+      >
+      <div class="car-landing__placeholder" *ngIf="!heroImage || imageFailed">
+        <div class="car-landing__placeholder-icon">🚗</div>
+        <strong>{{ title }}</strong>
+        <span>{{ 'ui.pages.t2e14691400f5' | siteText }}</span>
+      </div>
+
+      <div class="car-landing__thumbs" *ngIf="galleryImages.length > 1">
+        <button
+          type="button"
+          *ngFor="let image of galleryImages; let i = index"
+          [class.active]="image === heroImage"
+          (click)="selectImage(image)"
+          [attr.aria-label]="'Afficher la photo ' + (i + 1)"
+        >
+          <img class="no-image-zoom" [src]="image" [alt]="title + ' - photo ' + (i + 1)" (error)="onGalleryImageError(image)">
+        </button>
+      </div>
+    </div>
+
+    <div class="car-landing__content">
+      <p class="eyebrow">{{ 'ui.pages.t6e61a4090a7d' | siteText }}</p>
+      <h1>{{ title }}</h1>
+      <p class="lead" *ngIf="intro">{{ intro }}</p>
+
+      <div class="car-landing__facts" *ngIf="features.length">
+        <span *ngFor="let feature of features">{{ feature }}</span>
+      </div>
+
+      <div class="car-landing__price" *ngIf="price.basePrice">
+        <span>{{ 'ui.pages.tc0fd7660f17d' | siteText }}</span>
+        <strong>{{ price.basePrice }} {{ price.currency || 'EUR' }}</strong>
+        <span>{{ 'ui.pages.ta538907bfa85' | siteText }}</span>
+      </div>
+
+      <p class="car-landing__description" *ngIf="description">{{ description }}</p>
+
+      <div class="car-landing__actions">
+        <a class="btn-primary" [routerLink]="'/reserver' | resourceRoute">{{ 'ui.pages.t254b0ae17097' | siteText }}</a>
+        <a class="btn-secondary" [routerLink]="'/vehicle' | resourceRoute">{{ 'ui.pages.tb310add61d46' | siteText }}</a>
+      </div>
+
+      <div class="car-landing__meta">
+        <span *ngIf="asset.location?.city">📍 {{ asset.location.city }}</span>
+        <span *ngIf="asset.paymentPolicy?.securityDeposit?.value">{{ 'ui.pages.t4897cdcb0ea9' | siteText }} {{ asset.paymentPolicy.securityDeposit.value }} {{ price.currency || 'EUR' }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="car-info">
+    <article>
+      <h2>{{ vehiclePage.descriptionTitle || ('ui.messages.t27e518f76490' | siteText) }}</h2>
+      <p>{{ description }}</p>
+    </article>
+    <article>
+      <h2>{{ vehiclePage.rentalTitle || ('ui.messages.t09b2abd819a7' | siteText) }}</h2>
+      <p>{{ vehiclePage.rentalText || ('ui.messages.t6d0f3117fb6c' | siteText) }}</p>
+    </article>
+    <article>
+      <h2>{{ 'ui.pages.t9e1dc68e7d9b' | siteText }}</h2>
+      <ul *ngIf="features.length">
+        <li *ngFor="let feature of features">{{ feature }}</li>
+      </ul>
+    </article>
+  </section>
+</ng-container>
+
+<ng-template #loading>
+  <div class="loading">
+    <p *ngIf="!error">{{ 'ui.pages.tb3bbf87d635d' | siteText }}</p>
+    <p *ngIf="error">{{ error | siteText }}</p>
+  </div>
+</ng-template>

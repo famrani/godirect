@@ -6,7 +6,7 @@
 
     <div class="state-card" *ngIf="!loggedUser">
       <p>{{ t('loginRequired') }}</p>
-      <a routerLink="/login" class="btn btn-primary">{{ t('login') }}</a>
+      <a [routerLink]="'/login' | resourceRoute" class="btn btn-primary">{{ t('login') }}</a>
     </div>
 
     <form class="feedback-form" *ngIf="loggedUser" (ngSubmit)="saveFeedback()">
@@ -83,7 +83,7 @@
         <p>{{ t('loading') }}</p>
       </div>
 
-      <p class="error" *ngIf="error">{{ error }}</p>
+      <p class="error" *ngIf="error">{{ error | siteText }}</p>
       <p class="success" *ngIf="editSaved">{{ editSaved }}</p>
       <p class="error" *ngIf="editError">{{ editError }}</p>
 

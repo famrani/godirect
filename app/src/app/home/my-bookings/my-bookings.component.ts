@@ -1,715 +1,144 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { ServicesService } from 'godigital-lib';
-import { BookingApiService, AlegriaBooking } from '../bookings/booking-api.service';
-import { SITE_CONTENT } from '../site-content';
-import { SiteContentService } from '../site-content-service/site-content.service';
-import { LanguageService, SiteLanguage } from '../../services/language.service';
-import { BookingStateService } from '../bookings/booking-state.service';
+import {inject} from '@angular/core';
+import {UiTextService} from '../../services/ui-text.service';
+import {OWNER_OFFER_TEXT} from '../../services/owner-offer-text';
+import {LanguageService} from '../../services/language.service';
+import {SiteContentService} from '../site-content-service/site-content.service';
+import { ActivatedRoute } from '@angular/router';
+import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { ReservationAuthService } from '../../services/reservation-auth.service';
+import { StripeConnectPaymentService } from '../../services/stripe-connect-payment.service';
+import { ResourceContextService } from '../../services/resource-context.service';
 
-@Component({
-  selector: 'app-my-bookings',
-  templateUrl: './my-bookings.component.html',
-  styleUrls: ['./my-bookings.component.scss']
-})
-export class MyBookingsComponent implements OnInit, OnDestroy {
-  bookings: AlegriaBooking[] = [];
-  loading = true;
-  searchTerm = '';
-  activeDateTab: 'upcoming' | 'past' = 'upcoming';
-  statusFilter = 'all';
-  warrantyFilter = 'all';
-  sortField: 'date' | 'customer' | 'status' | 'total' | 'balance' = 'date';
-  sortDirection: 'asc' | 'desc' = 'asc';
-  loggedUser: any = null;
-  selectedStatusBooking: AlegriaBooking | null = null;
-  private userSub?: Subscription;
-  currentLanguage: SiteLanguage = 'fr';
-  pageText: any = (SITE_CONTENT as any).fr?.bookingManagement || {};
-  private languageSub?: Subscription;
-  private readonly localFallbackText: Record<string, Record<string, string>> = {
-    fr: { upcoming: 'À venir', past: 'Passées', waitingForCustomer: 'En attente du client', bookingConfirmed: 'Réservation confirmée', completed: 'Sortie terminée', cancelled: 'Annulée', fullyPaid: 'Entièrement payé', paymentPending: 'Paiement en attente' },
-    en: { upcoming: 'Upcoming', past: 'Past', waitingForCustomer: 'Waiting for customer', bookingConfirmed: 'Booking confirmed', completed: 'Outing completed', cancelled: 'Cancelled', fullyPaid: 'Fully paid', paymentPending: 'Payment pending' },
-    es: { upcoming: 'Próximas', past: 'Pasadas' },
-    it: { upcoming: 'In arrivo', past: 'Passate' },
-    de: { upcoming: 'Bevorstehend', past: 'Vergangen' },
-    nl: { upcoming: 'Aankomend', past: 'Voorbij' },
-    ru: { upcoming: 'Предстоящие', past: 'Прошедшие' },
-  };
-  private readonly tabKeys = new Set(['upcoming', 'past']);
+type PaymentKind='booking_deposit'|'balance'|'security_deposit';
 
-  constructor(
-    private bookingApi: BookingApiService,
-    private mainSvc: ServicesService,
-    private router: Router,
-    private siteContentService: SiteContentService,
-    private languageService: LanguageService,
-    private bookingStateService: BookingStateService
-  ) {}
-
-  ngOnInit(): void {
-    this.languageSub = this.languageService.language$.subscribe((language) => {
-      this.currentLanguage = language;
-      this.loadPageText(language);
-    });
-    this.loadPageText(this.currentLanguage);
-    const svc = this.mainSvc as any;
-    const userObservable = typeof svc.getLoggedUser === 'function'
-      ? svc.getLoggedUser()
-      : typeof svc.getUser === 'function'
-        ? svc.getUser()
-        : svc.bnUserO;
-
-    if (userObservable && typeof userObservable.subscribe === 'function') {
-      this.userSub = userObservable.subscribe((user: any) => {
-        this.loggedUser = user || svc.bnUser || svc.currentUser || null;
-        this.loadForCurrentMode();
-      });
-    } else {
-      this.loggedUser = svc.bnUser || svc.currentUser || null;
-      this.loadForCurrentMode();
+@Component({selector:'app-my-bookings',standalone:false,templateUrl:'./my-bookings.component.html',styleUrls:['./my-bookings.component.scss']})
+export class MyBookingsComponent implements OnInit,OnDestroy {
+ private readonly uiText=inject(UiTextService);
+  @Input() admin=false;
+  bookings:any[]=[];loading=true;error='';busy='';selected:any=null;
+  createOpen=false;checkout:any=null;paymentMessage='';editing=false;editForm:any={};
+  private timer:any;private mountedElement:any;
+  @ViewChild('paymentHost') set paymentHost(ref:ElementRef<HTMLElement>|undefined){
+    if(ref&&this.checkout&&this.mountedElement!==this.checkout.paymentElement){
+      try{this.checkout.paymentElement.mount(ref.nativeElement);this.mountedElement=this.checkout.paymentElement;ref.nativeElement.scrollIntoView({behavior:'smooth',block:'center'});}
+      catch(e:any){this.error=this.explain(e);}
     }
   }
-
-  ngOnDestroy(): void {
-    this.userSub?.unsubscribe();
-    this.languageSub?.unsubscribe();
+  constructor(private http:HttpClient,private auth:ReservationAuthService,private stripePayments:StripeConnectPaymentService,public ctx:ResourceContextService,private route:ActivatedRoute,private language:LanguageService,private texts:SiteContentService){}
+  offerCopy:any;
+  offer(key:string){const lang=this.language?.currentLanguage||'fr';return this.texts?.tFromContent(this.offerCopy,'ui.ownerOffer.'+key,lang,OWNER_OFFER_TEXT[lang]?.[key]||OWNER_OFFER_TEXT.en[key])||OWNER_OFFER_TEXT[lang]?.[key]||OWNER_OFFER_TEXT.en[key];}
+  async ngOnInit(){void this.texts?.getContent().then(c=>this.offerCopy=c).catch(()=>{});this.createOpen=this.admin&&this.route.snapshot.queryParamMap.get('create')==='1';await this.refresh();const id=this.route.snapshot.queryParamMap.get('bookingId');const booking=this.bookings.find(b=>b.id===id);if(this.admin&&booking)await this.open(booking);}
+  async refresh(){
+    this.loading=true;
+    try{
+      const url=this.admin?`/api/owners/${encodeURIComponent((await this.auth.user()).uid)}/bookings`:'/api/me/bookings';
+      const rows=await firstValueFrom(this.http.get<any[]>(url,{headers:await this.auth.headers()}));
+      this.bookings=this.admin&&['property','parking','pool'].includes(this.ctx.resourceType)?rows.filter(b=>b.assetType===this.ctx.resourceType&&b.assetId===this.ctx.resourceId):rows;
+      if(this.selected&&!this.editing){const latest=this.bookings.find(b=>b.id===this.selected.id);if(latest)this.selected=latest;}
+    }catch(e:any){this.error=this.explain(e);}finally{this.loading=false;}
   }
-
-
-  async loadPageText(language: SiteLanguage): Promise<void> {
-    const fallback = (SITE_CONTENT as any)[language]?.bookingManagement || (SITE_CONTENT as any).fr?.bookingManagement || {};
-    try {
-      const content: any = await this.siteContentService.getContent();
-      this.pageText = {
-        ...fallback,
-        ...(content?.[language]?.bookingManagement || {}),
-        ...(content?.bookingManagement?.[language] || {}),
-      };
-    } catch {
-      this.pageText = fallback;
-    }
+  get upcoming(){return this.bookings.filter(b=>Date.parse(b.endAt||b.outingDate||'')>=Date.now());}
+  get past(){return this.bookings.filter(b=>Date.parse(b.endAt||b.outingDate||'')<Date.now());}
+  get bookingKind():'boat'|'pool'|'property'|'parking'{return this.ctx.resourceType as any;}
+  cancellationLocked(b:any){return ['refund_pending','refund_failed','review_required'].includes(b?.cancellation?.status);}
+  reservationStatus(b:any){if(b.status==='cancelled')return 'Annulée';const state=b.cancellation?.status;return state==='refund_pending'?'Remboursement en cours':state==='refund_failed'?'Remboursement à reprendre':state==='review_required'?'Vérification financière requise':b.cancellationRequestStatus==='pending'?'Annulation demandée':this.statusLabel(b.status);}
+  refundLabel(state:string){return ({refunded:'Remboursé intégralement',no_charge:'Aucun débit à rembourser',refund_pending:'Remboursement en attente',refund_failed:'Remboursement échoué',processing:'Paiement en traitement'} as any)[state]||state;}
+  refundKind(kind:string){return ({booking_deposit:'Acompte',balance:'Solde',security_payment:'Caution payée',security_deposit:'Garantie par carte'} as any)[kind]||kind;}
+  active(b:any){return !!b&&!['cancelled','rejected','completed'].includes(b.status);}
+  depositDone(b:any){return Number(b.bookingDeposit)===0||b.workflow?.depositPaid===true;}
+  warrantyDone(b:any){return Number(b.securityDeposit)===0||b.workflow?.warrantyProvided===true;}
+  balanceDone(b:any){return Number(b.balanceAmount)===0||b.workflow?.balancePaid===true;}
+  financialLocked(b:any){return !!(b.financialChangesLocked||b.paymentCheckoutStartedAt||b.financialReviewRequired||b.workflow?.depositPaid||b.workflow?.warrantyProvided||b.workflow?.balancePaid);}
+  warrantyLabel(b:any){if(Number(b.securityDeposit)===0)return 'Non requise';if(b.warrantyStatus==='paid'||b.workflow?.warrantyProvidedProof?.kind==='security_payment')return 'Caution payée';return this.warrantyDone(b)?'Carte enregistrée — aucun montant bloqué':'Carte à enregistrer — aucun débit ni blocage';}
+  canPay(b:any,kind:PaymentKind){return ['booking_deposit','balance','security_deposit'].includes(kind)&&!this.admin&&(this.active(b)||(b?.status==='completed'&&kind==='balance'))&&!b.financialReviewRequired&&!this.cancellationLocked(b)&&this.money(b,kind)>0&&(kind==='booking_deposit'?!this.depositDone(b):kind==='balance'?!this.balanceDone(b):!this.warrantyDone(b));}
+  money(b:any,kind:PaymentKind){return Number(kind==='booking_deposit'?b.bookingDeposit:kind==='balance'?b.balanceAmount:b.securityDeposit)||0;}
+  paymentTitle(kind:PaymentKind){return kind==='booking_deposit'?'Payer l’acompte':kind==='balance'?'Payer le solde':'Enregistrer ma carte pour la caution';}
+  statusLabel(status:string){return ({pending:'En attente',confirmed:'Confirmée',cancelled:'Annulée',rejected:'Refusée',completed:'Terminée'} as any)[status]||status;}
+  private url(b:any){return `/api/${this.admin?'admin':'me'}/bookings/${encodeURIComponent(b.assetType)}/${encodeURIComponent(b.assetId)}/${encodeURIComponent(b.id||b.bookingId)}`;}
+  async open(b:any){
+    this.error='';this.editing=false;
+    try{this.selected=await firstValueFrom(this.http.get<any>(this.url(b),{headers:await this.auth.headers()}));}
+    catch(e:any){this.error=this.explain(e);}
   }
-
-  t(key: string): string {
-    // These tab labels were sometimes overwritten in Firebase with English values under FR.
-    // Keep them stable and translated while Firebase content is being cleaned/imported.
-    if (this.tabKeys.has(key)) {
-      return this.localFallbackText?.[this.currentLanguage]?.[key] || this.localFallbackText?.fr?.[key] || key;
-    }
-
-    return this.pageText?.[key] ||
-      this.localFallbackText?.[this.currentLanguage]?.[key] ||
-      this.localFallbackText?.fr?.[key] ||
-      key;
+  async cancelAdmin(b:any){
+    if(!confirm(this.uiText.text('Approuver l’annulation et rembourser intégralement tous les paiements (acompte, solde et caution payée) ? La réservation restera active jusqu’à confirmation des remboursements.')))return;
+    this.closePayment();this.editing=false;this.paymentMessage='';
+    this.busy=b.id;this.error='';
+    try{this.selected=await firstValueFrom(this.http.delete<any>(this.url(b),{headers:await this.auth.headers()}));await this.refresh();}
+    catch(e:any){this.error=this.explain(e);await this.refresh();}finally{this.busy='';}
   }
-
-
-  get isAdmin(): boolean {
-    const role = String(this.loggedUser?.role || '').toLowerCase();
-    return role === 'admin' || role === 'owner' || this.loggedUser?.isAdmin === true;
+  async checkCancellation(b:any){
+    this.busy=b.id;this.error='';
+    try{this.selected=await firstValueFrom(this.http.post<any>(this.url(b)+'/cancellation/reconcile',{}, {headers:await this.auth.headers()}));await this.refresh();}
+    catch(e:any){this.error=this.explain(e);await this.refresh();}finally{this.busy='';}
   }
-
-  private loadForCurrentMode(): void {
-    if (this.isAdmin) {
-      this.router.navigate(['/admin/bookings']);
-      return;
-    }
-
-    const email = this.loggedUser?.email || '';
-    this.bookingApi.getBookings(email).subscribe((bookings) => {
-      this.bookings = bookings;
-      this.loading = false;
-    });
+  async approve(b:any){
+    this.busy=b.id;this.error='';
+    try{await firstValueFrom(this.http.patch(this.url(b),{status:'confirmed'},{headers:(await this.auth.headers()).set('If-Match',b.updatedAt||b.createdAt)}));await this.refresh();}
+    catch(e:any){this.error=this.explain(e);}finally{this.busy='';}
   }
-
-  get filteredBookings(): AlegriaBooking[] {
-    const term = this.normalizeSearch(this.searchTerm);
-
-    const filtered = this.bookings.filter((booking) => {
-      if (this.activeDateTab === 'upcoming' && !this.isUpcomingBooking(booking)) return false;
-      if (this.activeDateTab === 'past' && !this.isPastBooking(booking)) return false;
-
-      if (this.statusFilter !== 'all' && this.getDerivedBookingStatus(booking) !== this.statusFilter) return false;
-
-      if (this.warrantyFilter === 'not_selected' && this.getWarrantyChoice(booking)) return false;
-      if (this.warrantyFilter === 'cash' && this.getWarrantyChoice(booking) !== 'cash_on_board') return false;
-      if (this.warrantyFilter === 'card_selected' && this.getWarrantyChoice(booking) !== 'stripe_card') return false;
-      if (this.warrantyFilter === 'card_registered' && !this.isWarrantyCardRegistered(booking)) return false;
-
-      if (term) {
-        const haystack = [
-          booking.customerName,
-          booking.email,
-          booking.phone,
-          booking.outingType,
-          booking.outingDate,
-          (booking as any).bookingId,
-          this.getStatusLabel(booking),
-          this.getWarrantyModeLabel(booking),
-        ].map((value) => this.normalizeSearch(value)).join(' ');
-        if (!haystack.includes(term)) return false;
+  async pay(b:any,kind:PaymentKind){
+    if(this.busy||!this.canPay(b,kind))return;
+    this.error='';this.paymentMessage='';this.busy=b.id;this.editing=false;
+    try{
+      this.closePayment();
+      this.selected=await firstValueFrom(this.http.get<any>(this.url(b),{headers:await this.auth.headers()}));
+      this.checkout={...await this.stripePayments.createPaymentElement(b.id,kind),bookingId:b.id,kind,amount:this.money(this.selected,kind),currency:this.selected.currency};
+    }catch(e:any){this.error=this.explain(e);}finally{this.busy='';}
+  }
+  closePayment(){this.checkout?.paymentElement?.destroy();this.checkout=null;this.mountedElement=null;}
+  async confirmPayment(){
+    if(!this.checkout||this.busy)return;this.busy='payment';this.error='';
+    try{
+      const c=this.checkout;if(c.kind==='security_deposit'&&c.checkout.mode!=='setup')throw new Error('warranty_setup_required');const args={elements:c.elements,confirmParams:{return_url:window.location.href},redirect:'if_required'};
+      const result=c.checkout.mode==='setup'?await c.stripe.confirmSetup(args):await c.stripe.confirmPayment(args);
+      if(result.error)throw new Error(result.error.message);
+      this.closePayment();this.paymentMessage='Validation en cours auprès de Stripe. Le statut sera actualisé après réception de la confirmation du serveur.';
+      await this.refresh();let attempts=0;clearInterval(this.timer);
+      this.timer=setInterval(()=>{this.refresh();if(++attempts>=12)clearInterval(this.timer);},5000);
+    }catch(e:any){this.error=this.explain(e);}finally{this.busy='';}
+  }
+  private localDate(value:string){const d=new Date(value);if(!Number.isFinite(d.getTime()))return '';const pad=(n:number)=>String(n).padStart(2,'0');return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;}
+  async startEdit(b:any){
+    if(this.busy||!this.active(b)||this.cancellationLocked(b))return;
+    await this.open(b);if(this.error||!this.selected)return;this.closePayment();const s=this.selected;
+    this.editForm={customerName:s.customerName||'',customerEmail:s.customerEmail||'',customerPhone:s.customerPhone||'',comments:s.comments||'',startLocal:this.localDate(s.startAt),endLocal:this.localDate(s.endAt),pickupLocation:s.rental?.pickupLocation||'',returnLocation:s.rental?.returnLocation||'',driverAge:s.rental?.driverAge||25,licenseCountry:s.rental?.licenseCountry||'FR',additionalDriver:!!s.extras?.additionalDriver,childSeat:!!s.extras?.childSeat,guests:s.rental?.guests||1,vehiclePlate:s.rental?.vehiclePlate||'',rentalAmount:Number(s.rentalAmount),bookingDeposit:Number(s.bookingDeposit),securityDeposit:Number(s.securityDeposit)};
+    this.editing=true;
+  }
+  async saveEdit(){
+    if(!this.selected||this.busy)return;this.busy='edit';this.error='';
+    try{
+      const s=this.selected,f=this.editForm;
+      const patch:any={customerName:f.customerName,customerPhone:f.customerPhone,comments:f.comments};
+      if(this.admin)patch.customerEmail=f.customerEmail;
+      if(s.assetType==='car')Object.assign(patch,{pickupLocation:f.pickupLocation,returnLocation:f.returnLocation,driverAge:Number(f.driverAge),licenseCountry:f.licenseCountry,additionalDriver:!!f.additionalDriver,childSeat:!!f.childSeat});
+      else if(s.assetType==='parking')patch.vehiclePlate=f.vehiclePlate;
+      else patch.guests=Number(f.guests);
+      if(!this.financialLocked(s)){
+        const start=new Date(f.startLocal),end=new Date(f.endLocal);
+        if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||end<=start)throw new Error('Dates invalides : la fin doit être postérieure au début.');
+        if(start.getTime()!==Date.parse(s.startAt))patch.startAt=start.toISOString();
+        if(end.getTime()!==Date.parse(s.endAt))patch.endAt=end.toISOString();
+        if(this.admin)for(const key of ['rentalAmount','bookingDeposit','securityDeposit'])if(Number(f[key])!==Number(s[key]))patch[key]=Number(f[key]);
       }
-
-      return true;
-    });
-
-    return this.sortBookings(filtered);
+      const headers=(await this.auth.headers()).set('If-Match',s.updatedAt||s.createdAt||'');
+      this.selected=await firstValueFrom(this.http.patch<any>(this.url(s),patch,{headers}));
+      this.editing=false;this.paymentMessage='Réservation enregistrée. Les montants et le statut ont été actualisés.';await this.refresh();
+    }catch(e:any){this.error=this.explain(e);}finally{this.busy='';}
   }
-
-  get upcomingBookingsCount(): number {
-    return this.bookings.filter((booking) => this.isUpcomingBooking(booking)).length;
+  async requestCancellation(b:any){
+    if(!confirm(this.uiText.text('Demander l’annulation ? Après accord de l’administrateur, tous les paiements devront être remboursés avant que la réservation soit annulée.')))return;
+    this.busy=b.id;this.error='';
+    try{await firstValueFrom(this.http.post(this.url(b)+'/cancellation-request',{}, {headers:await this.auth.headers()}));await this.refresh();}
+    catch(e:any){this.error=this.explain(e);}finally{this.busy='';}
   }
-
-  get pastBookingsCount(): number {
-    return this.bookings.filter((booking) => this.isPastBooking(booking)).length;
+  private explain(e:any){
+    const code=e?.error?.error||e?.message||'';
+    const translated=this.uiText.text(code);if(translated!==code)return translated;
+    const messages:any={security_payment_disabled:'La caution se fournit désormais par enregistrement de carte, sans débit ni blocage.',warranty_setup_required:'L’enregistrement de carte n’a pas pu être démarré. Aucun paiement de caution ne sera confirmé. Contactez le propriétaire.',cancellation_in_progress:'L’annulation est en cours : les nouveaux paiements et modifications sont bloqués.',cancellation_busy_or_booking_closed:'Une opération est en cours ou la réservation est déjà clôturée. Actualisez puis réessayez.',cancellation_financial_review_required:'Un paiement ancien ou incomplet doit être vérifié avant tout remboursement ou annulation.',cancellation_payment_scope_mismatch:'Le compte ou le paiement Stripe ne correspond pas à cette réservation. Vérification requise.',cancellation_dispute_review_required:'Un litige Stripe doit être résolu avant l’annulation.',use_refund_cancellation_action:'Utilisez l’action Annuler et rembourser pour clôturer cette réservation.',owner_stripe_test_not_connected:'Le propriétaire doit créer son compte Stripe de test dans sa page Paiements.',stripe_test_account_owner_mismatch:'Le compte Stripe de test ne correspond pas au propriétaire de cette ressource.',stripe_test_account_not_ready:'Le propriétaire doit terminer la configuration de son compte Stripe de test.',stripe_test_connected_account_not_configured:'Le compte Stripe de test doit être configuré.',stripe_test_owners_require_test_keys:'Le mode propriétaires de test nécessite les deux clés Stripe de test.',booking_stripe_mode_mismatch:'Cette réservation appartient à un autre mode Stripe. Créez une nouvelle réservation pour vos essais.',booking_stripe_account_mismatch:'Cette réservation est liée à un autre compte Stripe. Créez une nouvelle réservation de test.',owner_stripe_not_connected:'Le propriétaire doit connecter son compte Stripe avant de recevoir un paiement.',owner_stripe_charges_not_enabled:'Le compte Stripe du propriétaire n’est pas encore activé pour recevoir les paiements.',stripe_publishable_key_not_configured:'La clé publique Stripe doit être configurée sur le serveur.',legacy_payment_review_required:'Un ancien paiement doit être vérifié par l’administrateur avant un nouveau paiement.',financial_changes_locked:'Un paiement a déjà été démarré ou enregistré : les dates, options tarifaires et montants sont verrouillés. Les coordonnées et commentaires restent modifiables.',booking_changed_reload_required:'La réservation a changé. Actualisez-la puis réessayez.',asset_unavailable:'Ces dates sont déjà réservées.',already_completed:'Cette étape est déjà validée. Actualisez la réservation.',invalid_asset_payment_policy:'Les montants configurés ne sont pas valides.',authentication_required:'Connectez-vous pour continuer.',invalid_booking_changes:'Vérifiez les champs de la réservation.',too_many_guests:'Le nombre de personnes dépasse la capacité.',booking_closed:'Cette réservation est clôturée.',invalid_amount:'Aucun montant valide à payer pour cette étape.'};
+    return this.uiText.text(messages[code]||code||'L’opération n’a pas pu aboutir.');
   }
-
-  setDateTab(tab: 'upcoming' | 'past'): void {
-    this.activeDateTab = tab;
-    if (this.sortField === 'date') {
-      this.sortDirection = tab === 'past' ? 'desc' : 'asc';
-    }
-  }
-
-  resetFilters(): void {
-    this.searchTerm = '';
-    this.statusFilter = 'all';
-    this.warrantyFilter = 'all';
-    this.sortField = 'date';
-    this.sortDirection = this.activeDateTab === 'past' ? 'desc' : 'asc';
-  }
-
-  normalizeSearch(value: any): string {
-    return String(value || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .trim();
-  }
-
-  getBookingTime(booking: AlegriaBooking): number {
-    const rawDate = String((booking as any).outingDate || (booking as any).date || (booking as any).bookingDate || '').trim();
-    if (!rawDate) return 0;
-
-    let normalized = rawDate;
-    const frenchDate = rawDate.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
-    if (frenchDate) {
-      const day = frenchDate[1].padStart(2, '0');
-      const month = frenchDate[2].padStart(2, '0');
-      const year = frenchDate[3].length === 2 ? `20${frenchDate[3]}` : frenchDate[3];
-      normalized = `${year}-${month}-${day}`;
-    }
-
-    const departureTime = String((booking as any).departureTime || '').trim();
-    const timestamp = Date.parse(departureTime ? `${normalized}T${departureTime}` : normalized);
-    return Number.isNaN(timestamp) ? 0 : timestamp;
-  }
-
-  isUpcomingBooking(booking: AlegriaBooking): boolean {
-    const time = this.getBookingTime(booking);
-    if (!time) return true;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return time >= today.getTime();
-  }
-
-  isPastBooking(booking: AlegriaBooking): boolean {
-    const time = this.getBookingTime(booking);
-    if (!time) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return time < today.getTime();
-  }
-
-  sortBookings(bookings: AlegriaBooking[]): AlegriaBooking[] {
-    const direction = this.sortDirection === 'asc' ? 1 : -1;
-    return [...bookings].sort((a, b) => {
-      let left: any;
-      let right: any;
-
-      switch (this.sortField) {
-        case 'customer':
-          left = String(a.customerName || '').toLowerCase();
-          right = String(b.customerName || '').toLowerCase();
-          break;
-        case 'status':
-          left = this.getStatusLabel(a);
-          right = this.getStatusLabel(b);
-          break;
-        case 'total':
-          left = Number(a.totalPrice || 0);
-          right = Number(b.totalPrice || 0);
-          break;
-        case 'balance':
-          left = this.getBalanceAmount(a);
-          right = this.getBalanceAmount(b);
-          break;
-        case 'date':
-        default:
-          left = this.getBookingTime(a);
-          right = this.getBookingTime(b);
-          break;
-      }
-
-      if (typeof left === 'number' && typeof right === 'number') {
-        return (left - right) * direction;
-      }
-
-      return String(left || '').localeCompare(String(right || '')) * direction;
-    });
-  }
-
-  getBookingProgress(booking: AlegriaBooking): number {
-    return this.bookingStateService.resolve(booking).progress;
-  }
-
-  isSkipperPaid(booking: AlegriaBooking): boolean {
-    const anyBooking: any = booking || {};
-    const skipperPayment = anyBooking?.payments?.skipper || {};
-    const directPayment = anyBooking?.payments?.direct || {};
-    const skipperCost = Number(
-      anyBooking.skipperPrice ??
-      anyBooking.proposalSkipperPrice ??
-      anyBooking.skipperAmount ??
-      anyBooking.skipperCashAmount ??
-      anyBooking.raw?.skipperPrice ??
-      anyBooking.raw?.proposalSkipperPrice ??
-      0
-    ) || 0;
-
-    // A booking with no skipper fee has no outstanding skipper milestone.
-    if (skipperCost <= 0) return true;
-
-    const paidAmount = Number(
-      anyBooking.skipperPaidAmount ??
-      anyBooking.paidSkipperAmount ??
-      skipperPayment.amountPaid ??
-      skipperPayment.paidAmount ??
-      directPayment.skipperPaidAmount ??
-      0
-    ) || 0;
-
-    return anyBooking.skipperPaid === true ||
-      directPayment.skipperPaid === true ||
-      this.isCompletedStatusValue(anyBooking.skipperStatus) ||
-      this.isCompletedStatusValue(anyBooking.skipperPaymentStatus) ||
-      this.isCompletedStatusValue(skipperPayment.paid) ||
-      this.isCompletedStatusValue(skipperPayment.status) ||
-      this.isCompletedStatusValue(skipperPayment.paymentStatus) ||
-      this.isCompletedStatusValue(directPayment.skipperStatus) ||
-      paidAmount >= skipperCost;
-  }
-
-  isBookingCompleted(booking: AlegriaBooking): boolean {
-    const b: any = booking || {};
-    const values = [
-      b.bookingStatus,
-      b.status,
-      b.outingStatus,
-      b.bookingRequestStatus,
-      b.workflow?.status,
-      b.bookingWorkflow?.status,
-      b.raw?.bookingStatus,
-      b.raw?.status,
-    ].map((value) => String(value ?? '').toLowerCase().trim());
-
-    const completedStatuses = new Set([
-      'completed',
-      'complete',
-      'closed',
-      'terminated',
-      'finished',
-      'done',
-      'outing_completed',
-      'booking_completed',
-    ]);
-
-    return b.completed === true ||
-      b.outingCompleted === true ||
-      b.workflow?.outingCompleted === true ||
-      b.bookingWorkflow?.outingCompleted === true ||
-      values.some((value) => completedStatuses.has(value));
-  }
-
-  getCustomerDisplayName(booking: AlegriaBooking): string {
-    const b: any = booking || {};
-    return String(b.customerName || b.clientName || b.email || this.t('customer')).trim();
-  }
-
-  isTermsAccepted(booking: AlegriaBooking): boolean {
-    const anyBooking: any = booking || {};
-    const explicitAccepted = anyBooking.customerTermsAccepted === true ||
-      anyBooking.termsAccepted === true ||
-      anyBooking.tncAccepted === true ||
-      anyBooking.tcAccepted === true ||
-      anyBooking.tAndCAccepted === true ||
-      anyBooking.termsAndConditionsAccepted === true ||
-      anyBooking.acceptedTerms === true ||
-      anyBooking.workflow?.termsAccepted === true ||
-      anyBooking.bookingWorkflow?.termsAccepted === true ||
-      anyBooking?.documents?.termsAccepted === true ||
-      anyBooking?.terms?.accepted === true;
-
-    const explicitTimestamp = anyBooking.termsAcceptedAt ||
-      anyBooking.tncAcceptedAt ||
-      anyBooking.tcAcceptedAt ||
-      anyBooking.acceptedTermsAt ||
-      anyBooking.termsAndConditionsAcceptedAt ||
-      anyBooking.workflow?.termsAcceptedAt ||
-      anyBooking.bookingWorkflow?.termsAcceptedAt ||
-      anyBooking?.documents?.termsAcceptedAt ||
-      anyBooking?.terms?.acceptedAt;
-
-    const acceptedBy = anyBooking.termsAcceptedBy ||
-      anyBooking.tncAcceptedBy ||
-      anyBooking.acceptedTermsBy ||
-      anyBooking.workflow?.termsAcceptedBy ||
-      anyBooking.bookingWorkflow?.termsAcceptedBy ||
-      anyBooking?.documents?.termsAcceptedBy ||
-      anyBooking?.terms?.acceptedBy;
-
-    const source = String(
-      anyBooking.termsAcceptedSource ||
-      anyBooking.tncAcceptedSource ||
-      anyBooking.acceptedTermsSource ||
-      anyBooking.workflow?.termsAcceptedSource ||
-      anyBooking.bookingWorkflow?.termsAcceptedSource ||
-      anyBooking?.documents?.termsAcceptedSource ||
-      anyBooking?.terms?.source ||
-      ''
-    ).toLowerCase();
-
-    const formalCustomerMarker = anyBooking.customerTermsAccepted === true ||
-      source.includes('customer') ||
-      source.includes('client') ||
-      source.includes('offer') ||
-      source.includes('portal') ||
-      !!acceptedBy;
-
-    return explicitAccepted === true && (!!explicitTimestamp || formalCustomerMarker);
-  }
-
-  isCompletedStatusValue(value: any): boolean {
-    if (value === true) return true;
-    const normalized = String(value || '').toLowerCase().trim();
-    return [
-      'true',
-      'paid',
-      'completed',
-      'complete',
-      'done',
-      'confirmed',
-      'charge_succeeded',
-      'deposit_paid',
-      'balance_paid',
-      'payment_done',
-      'full_payment_done',
-      'card_registered',
-      'warranty_card_saved',
-      'warranty_card_registered',
-      'warranty_charged',
-      'cash_received'
-    ].includes(normalized);
-  }
-
-  isBalanceCompletedStatusValue(value: any): boolean {
-    if (value === true) return true;
-    const normalized = String(value || '').toLowerCase().trim();
-    return [
-      'true',
-      'paid',
-      'completed',
-      'complete',
-      'done',
-      'balance_paid',
-      'remaining_paid',
-      'payment_done',
-      'full_payment_done'
-    ].includes(normalized);
-  }
-
-  isCancelledBooking(booking: AlegriaBooking): boolean {
-    const anyBooking: any = booking || {};
-    const rawStatus = anyBooking.bookingStatus ?? anyBooking.status;
-    const normalizedStatus = String(rawStatus).toLowerCase().trim();
-    // Legacy records frequently use bookingStatus=false for an offer that is
-    // still awaiting confirmation. Only explicit cancellation markers cancel it.
-    return normalizedStatus === 'cancelled' ||
-      normalizedStatus === 'canceled' ||
-      normalizedStatus === 'deleted' ||
-      anyBooking.cancelled === true ||
-      anyBooking.canceled === true;
-  }
-
-
-  getBookingOutingTime(booking: AlegriaBooking): number {
-    const rawDate = String((booking as any)?.outingDate || (booking as any)?.date || (booking as any)?.bookingDate || '').trim();
-    if (!rawDate) return 0;
-
-    let normalized = rawDate;
-    const frenchDate = rawDate.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
-    if (frenchDate) {
-      const day = frenchDate[1].padStart(2, '0');
-      const month = frenchDate[2].padStart(2, '0');
-      const year = frenchDate[3].length === 2 ? `20${frenchDate[3]}` : frenchDate[3];
-      normalized = `${year}-${month}-${day}`;
-    }
-
-    const timestamp = Date.parse(normalized);
-    if (Number.isNaN(timestamp)) return 0;
-
-    const date = new Date(timestamp);
-    date.setHours(0, 0, 0, 0);
-    return date.getTime();
-  }
-
-  isBookingDatePastOrToday(booking: AlegriaBooking): boolean {
-    const outingTime = this.getBookingOutingTime(booking);
-    if (!outingTime) return false;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return outingTime <= today.getTime();
-  }
-
-  isBookingCancelledByDate(_booking: AlegriaBooking): boolean {
-    // A date in the past is not a cancellation signal. Historical and completed
-    // bookings remain valid unless Firebase contains an explicit cancellation.
-    return false;
-  }
-
-  getDerivedBookingStatus(booking: AlegriaBooking): string {
-    const state = this.bookingStateService.resolve(booking);
-    if (state.cancelled) return 'cancelled';
-    if (state.completed) return 'completed';
-    if (state.confirmed) return 'confirmed';
-    return 'not_confirmed';
-  }
-
-  getStatusLabel(booking: AlegriaBooking): string {
-    const state = this.bookingStateService.resolve(booking);
-    return this.t(state.statusKey);
-  }
-
-  getWarrantyChoice(booking: AlegriaBooking): string {
-    const anyBooking: any = booking;
-    const warrantyPayment = anyBooking?.payments?.warranty || {};
-    if (anyBooking.warrantyPaymentChoice) return anyBooking.warrantyPaymentChoice;
-    if (anyBooking.warrantyMethod === 'cash' || anyBooking.warrantyStatus === 'cash_selected' || anyBooking.warrantyCashSelected === true || warrantyPayment.method === 'cash') return 'cash_on_board';
-    if (anyBooking.warrantyMethod === 'card' || anyBooking.warrantyMethod === 'stripe_card' || this.isWarrantyCardRegistered(booking) || warrantyPayment.method === 'card') return 'stripe_card';
-    return '';
-  }
-
-  getWarrantyModeLabel(booking: AlegriaBooking): string {
-    const choice = this.getWarrantyChoice(booking);
-    if (choice === 'cash_on_board') return 'Cash selected';
-    if (choice === 'stripe_card') return 'Card selected';
-    return 'Not selected';
-  }
-
-  isWarrantyCardRegistered(booking: AlegriaBooking): boolean {
-    const anyBooking: any = booking || {};
-    const warrantyPayment = anyBooking?.payments?.warranty || {};
-    const legacyPayment = anyBooking?.payment || {};
-
-    const paymentMethodId = anyBooking.warrantyPaymentMethodId || anyBooking.paymentMethodId ||
-      legacyPayment.warrantyPaymentMethodId || legacyPayment.paymentMethodId ||
-      warrantyPayment.warrantyPaymentMethodId || warrantyPayment.paymentMethodId;
-    const setupIntentId = anyBooking.warrantySetupIntentId || anyBooking.setupIntentId ||
-      legacyPayment.warrantySetupIntentId || legacyPayment.setupIntentId ||
-      warrantyPayment.warrantySetupIntentId || warrantyPayment.setupIntentId;
-    const status = String(warrantyPayment.status || warrantyPayment.warrantyStatus || '').toLowerCase();
-    return !!paymentMethodId && (
-      !!setupIntentId ||
-      status === 'card_registered' ||
-      status === 'warranty_card_saved' ||
-      status === 'setup_succeeded'
-    );
-  }
-
-  getWarrantyCardLabel(booking: AlegriaBooking): string {
-    if (this.isWarrantyCardRegistered(booking)) return 'Completed';
-    if (this.getWarrantyChoice(booking) === 'stripe_card') return 'Card selected, not registered';
-    if (this.getWarrantyChoice(booking) === 'cash_on_board') return 'Not required';
-    return 'Not registered';
-  }
-
-  isBalancePaid(booking: AlegriaBooking): boolean {
-    const anyBooking: any = booking || {};
-    const balancePayment = anyBooking?.payments?.balance || {};
-    const remainingPayment = anyBooking?.payments?.remaining || {};
-
-    const topLevelPaymentStatus = String(anyBooking.paymentStatus || '').toLowerCase().trim();
-    const topLevelMeansBalancePaid = anyBooking.paymentStatus === true || [
-      'balance_paid',
-      'remaining_paid',
-      'full_payment_done',
-      'balance_payment_done',
-      'remaining_payment_done'
-    ].includes(topLevelPaymentStatus);
-
-    // Do not treat generic paymentStatus='paid' as the 90% balance.
-    // In older bookings it only means the 10% deposit has been paid.
-    return topLevelMeansBalancePaid ||
-      this.isBalanceCompletedStatusValue(anyBooking.balancePaid) ||
-      this.isBalanceCompletedStatusValue(anyBooking.balanceStatus) ||
-      this.isBalanceCompletedStatusValue(anyBooking.balancePaymentStatus) ||
-      this.isBalanceCompletedStatusValue(anyBooking.remainingPaid) ||
-      this.isBalanceCompletedStatusValue(anyBooking.remainingStatus) ||
-      this.isBalanceCompletedStatusValue(anyBooking.remainingPaymentStatus) ||
-      this.isBalanceCompletedStatusValue(balancePayment.paid) ||
-      this.isBalanceCompletedStatusValue(balancePayment.status) ||
-      this.isBalanceCompletedStatusValue(balancePayment.paymentStatus) ||
-      this.isBalanceCompletedStatusValue(remainingPayment.paid) ||
-      this.isBalanceCompletedStatusValue(remainingPayment.status) ||
-      this.isBalanceCompletedStatusValue(remainingPayment.paymentStatus) ||
-      this.isBalanceCompletedStatusValue(anyBooking.alegriaPaid) ||
-      this.isBalanceCompletedStatusValue(anyBooking.alegriaPaymentStatus) ||
-      this.isBalanceCompletedStatusValue(anyBooking.payments?.alegria?.paid) ||
-      this.isBalanceCompletedStatusValue(anyBooking.payments?.alegria?.status) ||
-      this.isBalanceCompletedStatusValue(anyBooking.payments?.alegria?.paymentStatus);
-  }
-
-  getDepositAmount(booking: AlegriaBooking): number {
-    const total = Number(booking.totalPrice || 0);
-    return Number(booking.depositAmount || (total ? Math.round(total * 0.1 * 100) / 100 : 0));
-  }
-
-  getBalanceAmount(booking: AlegriaBooking): number {
-    const total = Number(booking.totalPrice || 0);
-    return Number((booking as any).balanceAmount || Math.max(0, Math.round((total - this.getDepositAmount(booking)) * 100) / 100));
-  }
-
-  isDepositPaid(booking: AlegriaBooking): boolean {
-    const anyBooking: any = booking || {};
-    const depositPayment = anyBooking?.payments?.deposit || {};
-    const legacyPayment = anyBooking?.payment || {};
-
-    return this.isCompletedStatusValue(anyBooking.depositStatus) ||
-      this.isCompletedStatusValue(anyBooking.depositPaid) ||
-      this.isCompletedStatusValue(anyBooking.paymentStatus) ||
-      this.isCompletedStatusValue(legacyPayment.depositStatus) ||
-      this.isCompletedStatusValue(legacyPayment.depositPaid) ||
-      this.isCompletedStatusValue(legacyPayment.paid) ||
-      this.isCompletedStatusValue(legacyPayment.status) ||
-      this.isCompletedStatusValue(depositPayment.depositStatus) ||
-      this.isCompletedStatusValue(depositPayment.depositPaid) ||
-      this.isCompletedStatusValue(depositPayment.paid) ||
-      this.isCompletedStatusValue(depositPayment.status);
-  }
-
-  getDepositLabel(booking: AlegriaBooking): string {
-    return this.isDepositPaid(booking) ? 'Acompte payé' : 'Acompte à payer';
-  }
-
-  isWarrantySecured(booking: AlegriaBooking): boolean {
-    return this.isWarrantyCardRegistered(booking) || this.getWarrantyChoice(booking) === 'cash_on_board';
-  }
-
-  canPayDeposit(booking: AlegriaBooking): boolean {
-    return this.getDerivedBookingStatus(booking) !== 'cancelled' && !this.isDepositPaid(booking);
-  }
-
-  canPayBalance(booking: AlegriaBooking): boolean {
-    return this.getDerivedBookingStatus(booking) !== 'cancelled' &&
-      !this.isBookingDatePastOrToday(booking) &&
-      this.isDepositPaid(booking) &&
-      this.isTermsAccepted(booking) &&
-      this.isWarrantySecured(booking) &&
-      !this.isBalancePaid(booking);
-  }
-
-  shouldShowPaymentButton(booking: AlegriaBooking): boolean {
-    return this.canPayDeposit(booking) || this.canPayBalance(booking);
-  }
-
-  getPaymentButtonLabel(booking: AlegriaBooking): string {
-    if (this.canPayDeposit(booking)) return 'Pay 10% deposit';
-    if (this.canPayBalance(booking)) return `Pay remaining 90% (€${this.getBalanceAmount(booking)})`;
-    return 'Payment';
-  }
-
-  openStatusModal(booking: AlegriaBooking, event?: Event): void {
-    event?.stopPropagation();
-    this.selectedStatusBooking = booking;
-  }
-
-  closeStatusModal(): void {
-    this.selectedStatusBooking = null;
-  }
-
-  getStatusStepClass(done: boolean): string {
-    return done ? 'done' : 'pending';
-  }
-
-  getStatusSummaryText(booking: AlegriaBooking): string {
-    const status = this.getDerivedBookingStatus(booking);
-    if (status === 'cancelled') return 'Booking cancelled because the outing date is today or already past and the remaining 90% was not paid.';
-    if (status === 'payment_done') return 'Booking confirmed, warranty secured and full payment recorded.';
-    if (status === 'confirmed') return 'Booking confirmed. Warranty and/or remaining payment may still be pending.';
-    return 'Booking not confirmed yet. Deposit and T&C acceptance are required.';
-  }
-
-  getDamageStatusLabel(booking: AlegriaBooking): string {
-    const anyBooking: any = booking;
-    const amount = anyBooking.warrantyChargedAmount || anyBooking.warrantyCashDamageAmount || anyBooking?.payments?.warrantyCharge?.warrantyChargeAmount || anyBooking?.payments?.warrantyCashDamage?.amount || 0;
-    if (anyBooking.damageReported === true || anyBooking.damageCharged === true || amount) {
-      const euros = Number(amount) > 999 ? Math.round(Number(amount)) / 100 : Number(amount);
-      return `Damage recorded${euros ? ` (€${euros})` : ''}`;
-    }
-    return this.isBalancePaid(booking) ? 'No damage recorded' : 'Available after full payment';
-  }
-
-  openBooking(booking: AlegriaBooking): void {
-    this.router.navigate(['/bookings', booking.bookingId]);
-  }
-
-  payBooking(booking: AlegriaBooking, event?: Event): void {
-    event?.stopPropagation();
-    if (!this.shouldShowPaymentButton(booking) || !booking?.bookingId) return;
-
-    if (this.canPayDeposit(booking)) {
-      this.router.navigate(['/payment', booking.bookingId], { queryParams: { mode: 'deposit' } });
-      return;
-    }
-
-    if (!this.canPayBalance(booking)) return;
-
-    const bookingId = booking.bookingId;
-    const bookingUrl = `${window.location.origin}/bookings/${encodeURIComponent(bookingId)}`;
-    const balanceAmount = this.getBalanceAmount(booking);
-    const payload = {
-      bookingId,
-      offerId: bookingId,
-      ownerId: (booking as any).ownerId || 'alegria',
-      amount: balanceAmount,
-      balanceAmount,
-      totalAmount: Number((booking as any).onlinePayableAmount || booking.totalPrice || 0),
-      currency: 'eur',
-      paymentType: 'balance',
-      customerEmail: booking.email || '',
-      customerName: booking.customerName || '',
-      customerPhone: (booking as any).customerPhone || booking.phone || '',
-      outingType: booking.outingType || '',
-      outingDate: booking.outingDate || '',
-      successUrl: `${bookingUrl}?payment=success&bookingId=${encodeURIComponent(bookingId)}&paymentType=balance`,
-      cancelUrl: `${bookingUrl}?payment=cancelled&bookingId=${encodeURIComponent(bookingId)}&paymentType=balance`,
-    };
-
-    this.bookingApi.createBalanceCheckout(payload).subscribe({
-      next: (response: any) => {
-        const url = response?.url || response?.checkoutUrl || response?.sessionUrl;
-        if (url) {
-          window.location.href = url;
-          return;
-        }
-        window.alert('Unable to open Stripe remaining balance checkout.');
-      },
-      error: (error: any) => {
-        window.alert(error?.error?.error || error?.error?.message || error?.message || 'Unable to create remaining balance checkout.');
-      }
-    });
-  }
+  ngOnDestroy(){clearInterval(this.timer);this.closePayment();}
 }

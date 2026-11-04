@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { LanguageService, SiteLanguage } from '../../services/language.service';
 
 @Component({
+  standalone: false,
   selector: 'app-crew',
   templateUrl: './crew.component.html',
   styleUrls: ['./crew.component.scss'],

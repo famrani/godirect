@@ -1,0 +1,13 @@
+{
+  "storageTenants": {
+    "godirect": {
+      "enabled": true,
+      "bucket": "YOUR_PRIVATE_BUCKET",
+      "root": "tenants",
+      "mediaPrefix": "godirect/img/",
+      "hostnames": ["godirect.example", "www.godirect.example", "localhost", "127.0.0.1"],
+      "adminUids": [],
+      "adminEmails": []
+    }
+  }
+}

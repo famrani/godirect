@@ -1,0 +1,36 @@
+<div class="asset-gallery" *ngIf="images?.length">
+  <div class="asset-gallery-main" (click)="openLightbox()" role="button" tabindex="0" (keyup.enter)="openLightbox()" [attr.aria-label]="'Agrandir ' + title">
+    <img [src]="selected" [alt]="title" />
+    <ng-container *ngIf="images.length > 1">
+      <button type="button" class="gallery-nav gallery-nav-prev" [attr.aria-label]="'ui.pages.t8addcb578d81' | siteText" (click)="previous($event)"><span aria-hidden="true">‹</span></button>
+      <button type="button" class="gallery-nav gallery-nav-next" [attr.aria-label]="'ui.pages.t4759c4115808' | siteText" (click)="next($event)"><span aria-hidden="true">›</span></button>
+      <div class="gallery-counter" aria-live="polite">{{ selectedIndex + 1 }} / {{ images.length }}</div>
+    </ng-container>
+    <div class="gallery-zoom-hint" aria-hidden="true">⛶</div>
+  </div>
+
+  <div class="asset-gallery-thumbs" *ngIf="images.length > 1">
+    <button type="button" *ngFor="let image of images; let i = index" [class.active]="i === selectedIndex"
+      [attr.aria-label]="'Afficher la photo ' + (i + 1)" [attr.aria-current]="i === selectedIndex ? 'true' : null" (click)="selectIndex(i)">
+      <img [src]="image" [alt]="title + ' — photo ' + (i + 1)" />
+    </button>
+  </div>
+</div>
+
+<div class="asset-lightbox" *ngIf="lightboxOpen" role="dialog" aria-modal="true" [attr.aria-label]="title + ' — galerie photos'"
+  (click)="lightboxBackdropClick($event)" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
+  <button type="button" class="lightbox-close" [attr.aria-label]="'ui.pages.t5ab4ec640d65' | siteText" (click)="closeLightbox($event)">×</button>
+  <div class="lightbox-stage">
+    <img [src]="selected" [alt]="title + ' — photo ' + (selectedIndex + 1)" />
+    <ng-container *ngIf="images.length > 1">
+      <button type="button" class="lightbox-nav lightbox-prev" [attr.aria-label]="'ui.pages.t8addcb578d81' | siteText" (click)="previous($event)">‹</button>
+      <button type="button" class="lightbox-nav lightbox-next" [attr.aria-label]="'ui.pages.t4759c4115808' | siteText" (click)="next($event)">›</button>
+    </ng-container>
+  </div>
+  <div class="lightbox-counter">{{ selectedIndex + 1 }} / {{ images.length }}</div>
+  <div class="lightbox-thumbs" *ngIf="images.length > 1">
+    <button type="button" *ngFor="let image of images; let i = index" [class.active]="i === selectedIndex" (click)="selectIndex(i); $event.stopPropagation()">
+      <img [src]="image" [alt]="title + ' — photo ' + (i + 1)" />
+    </button>
+  </div>
+</div>

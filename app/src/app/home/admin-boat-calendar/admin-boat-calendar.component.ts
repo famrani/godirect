@@ -5,7 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ServicesService } from 'godigital-lib';
 import { LanguageService, SiteLanguage } from '../../services/language.service';
-import { BoatContextService } from '../../services/boat-context.service';
+import { ResourceContextService } from '../../services/resource-context.service';
 
 interface CalendarUse {
   id: string;
@@ -19,6 +19,7 @@ interface CalendarUse {
   route?: string;
   ownedByCurrentUser?: boolean;
   restricted?: boolean;
+  bookingData?: any;
 }
 
 interface CalendarCell {
@@ -63,18 +64,20 @@ const DEFAULT_CALENDAR_TEXTS: Record<SiteLanguage, CalendarTexts> = {
 };
 
 @Component({
+  standalone: false,
   selector: 'app-admin-boat-calendar',
   templateUrl: './admin-boat-calendar.component.html',
   styleUrls: ['./admin-boat-calendar.component.scss'],
 })
 export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
-  private readonly databaseUrl = 'https://adn-dev-4d05d.firebaseio.com';
+  private readonly databaseUrl = 'https://ailla-poc-default-rtdb.firebaseio.com';
   currentLanguage: SiteLanguage = 'fr';
   private firebaseTexts: Partial<Record<SiteLanguage, CalendarTexts>> = {};
   currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   cells: CalendarCell[] = [];
   uses: CalendarUse[] = [];
   selectedDate = '';
+  openedBooking: CalendarUse | null = null;
   loading = false;
   error = '';
   showCancelled = false;
@@ -87,7 +90,7 @@ export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
   constructor(
     private http: HttpClient,
     private languageService: LanguageService,
-    private boatContext: BoatContextService,
+    private resourceContext: ResourceContextService,
     private router: Router,
     private route: ActivatedRoute,
     private mainSvc: ServicesService,
@@ -95,7 +98,8 @@ export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.adminCalendarMode = this.route.snapshot.data?.calendarMode === 'admin'
-      || this.router.url.split('?')[0] === '/admin/calendar';
+      || this.router.url.split('?')[0] === '/admin/calendar'
+      || /\/admin\/calendar\/?$/.test(this.router.url.split('?')[0]);
     this.currentLanguage = this.languageService.currentLanguage || 'fr';
     this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
@@ -116,6 +120,8 @@ export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
       || DEFAULT_CALENDAR_TEXTS.en[key]
       || key;
   }
+
+  get todayIso(): string { return this.toIso(new Date()); }
 
   get locale(): string {
     const locales: Record<SiteLanguage, string> = { fr: 'fr-FR', en: 'en-GB', es: 'es-ES', it: 'it-IT', de: 'de-DE', nl: 'nl-NL', ru: 'ru-RU' };
@@ -160,10 +166,26 @@ export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
     const accessible = this.isAdmin
       ? activeUses
       : activeUses.filter((use) => use.ownedByCurrentUser);
-    if (accessible.length === 1 && accessible[0].route) {
-      this.router.navigateByUrl(accessible[0].route);
+    if (accessible.length === 1) {
+      this.openBooking(accessible[0]);
     }
   }
+  openBooking(use: CalendarUse): void {
+    if (use.source === 'booking' && this.isAdmin && use.bookingData) {
+      this.openedBooking = use;
+    } else if (use.route) {
+      this.router.navigateByUrl(use.route);
+    }
+  }
+  navigateToBooking(): void {
+    if (!this.openedBooking || !this.isAdmin) return;
+    const id = String(this.openedBooking.id || '');
+    if (!/^[-a-zA-Z0-9_]+$/.test(id)) return;
+    this.closeBooking();
+    this.router.navigateByUrl(`/${this.resourceContext.assetType}/${this.resourceContext.assetId}/admin/reservations/${encodeURIComponent(id)}`);
+  }
+  closeBooking(): void { this.openedBooking = null; }
+  bookingField(key: string): any { return this.openedBooking?.bookingData?.[key]; }
   toggleCancelled(): void { this.showCancelled = !this.showCancelled; this.buildCalendar(); }
 
   loadCalendar(): void {
@@ -171,12 +193,12 @@ export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
     const calendarDataUrl = this.adminCalendarMode
-      ? `${this.databaseUrl}/bnBookings.json`
-      : `${this.databaseUrl}/backendcalendar.json`;
+      ? `${this.databaseUrl}/bookings/${this.resourceContext.assetType}/${this.resourceContext.assetId}.json`
+      : `${this.databaseUrl}/${this.resourceContext.scopedPath('backendcalendar')}.json`;
     forkJoin({
       bookings: this.http.get<any>(calendarDataUrl).pipe(catchError(() => of({}))),
       content: this.http.get<any>(
-        `${this.databaseUrl}/siteContent/${encodeURIComponent(this.boatContext.boatId)}/${this.currentLanguage}/adminCalendar.json`
+        `${this.databaseUrl}/${this.resourceContext.scopedPath('siteContent', `${this.currentLanguage}/adminCalendar`)}.json`
       ).pipe(catchError(() => of({}))),
     }).subscribe({
       next: ({ bookings, content }) => {
@@ -233,8 +255,10 @@ export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
   private mapBookings(raw: any): CalendarUse[] {
     if (!this.adminCalendarMode) return this.mapAvailabilityIndex(raw);
     return Object.entries(raw || {}).map(([key, value]: [string, any]) => {
-      if (String(value?.boatId || 'alegria') !== this.boatContext.boatId) return null;
+      if (value?.assetId && String(value.assetId) !== this.resourceContext.assetId) return null;
+      if (value?.assetType && String(value.assetType) !== this.resourceContext.assetType) return null;
       const date = this.normalizeDate(
+        value?.startAt ||
         value?.outingDate ||
         value?.date ||
         value?.departureDate ||
@@ -252,9 +276,9 @@ export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
       return {
         id: bookingId,
         date,
-        endDate: this.normalizeDate(value?.arrivalDate || value?.endDate || value?.end) || date,
+        endDate: this.normalizeDate(value?.endAt || value?.arrivalDate || value?.endDate || value?.end) || date,
         title: this.isAdmin || ownedByCurrentUser
-          ? value?.outingType || value?.experience || value?.title || this.t('catamaranOuting')
+          ? value?.outingType || value?.experience || value?.title || this.resourceContext.assetId
           : this.t('reserved'),
         customer,
         status: cancelled ? 'cancelled' : this.temporalStatus(date), source: 'booking' as const,
@@ -262,9 +286,10 @@ export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
           ? [value?.departureTime, value?.destination, value?.passengers ? `${value.passengers} ${this.t('passengers')}` : ''].filter(Boolean).join(' · ')
           : '',
         route: this.isAdmin
-          ? `/admin/bookings/${bookingId}`
+          ? this.resourceContext.route(`/admin/reservations/${bookingId}`)
           : ownedByCurrentUser ? `/bookings/${bookingId}` : undefined,
         ownedByCurrentUser,
+        bookingData: this.isAdmin ? value : undefined,
         restricted: !this.isAdmin && !ownedByCurrentUser,
       };
     }).filter(Boolean) as CalendarUse[];
@@ -274,7 +299,7 @@ export class AdminBoatCalendarComponent implements OnInit, OnDestroy {
     const usesByBooking = new Map<string, CalendarUse>();
     Object.entries(raw || {}).forEach(([day, entries]: [string, any]) => {
       Object.entries(entries || {}).forEach(([entryKey, entry]: [string, any]) => {
-        if (String(entry?.boatId || this.boatContext.boatId) !== this.boatContext.boatId) return;
+        if (String(entry?.boatId || this.resourceContext.boatId) !== this.resourceContext.boatId) return;
         const bookingId = String(entry?.bookingId || entryKey);
         const statusText = String(entry?.status || '').toLowerCase();
         const cancelled = ['cancelled', 'canceled', 'declined', 'rejected', 'deleted']

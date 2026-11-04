@@ -238,3 +238,7 @@ p, li, input, textarea, select, .card-body, .term-section {
 .section-light {
   background: var(--alegria-sand);
 }
+
+.price-box { margin-top: 1rem; padding: 1rem 1.1rem; border: 1px solid rgba(0,0,0,.12); border-radius: 12px; background: rgba(255,255,255,.75); }
+.price-box strong { display:block; font-size:1.25rem; margin-bottom:.35rem; }
+.price-box p { margin:0; }

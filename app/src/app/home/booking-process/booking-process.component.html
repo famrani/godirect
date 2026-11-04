@@ -11,7 +11,7 @@
           <div class="channel-icon" *ngIf="channel.icon">{{ channel.icon }}</div>
           <h3>{{ channel.title }}</h3>
           <p>{{ channel.text }}</p>
-          <a *ngIf="channel.link && channel.cta" [routerLink]="channel.link" class="channel-link">{{ channel.cta }}</a>
+          <a *ngIf="channel.link && channel.cta" [routerLink]="(channel.link) | resourceRoute" class="channel-link">{{ channel.cta }}</a>
         </article>
       </div>
     </section>
@@ -34,7 +34,7 @@
 
     <div class="final-note-card">
       <p>{{ copy.finalNote }}</p>
-      <a [routerLink]="copy.termsLink || '/terms'" class="terms-link">{{ copy.termsCta }}</a>
+      <a [routerLink]="(copy.termsLink || '/terms') | resourceRoute" class="terms-link">{{ copy.termsCta }}</a>
     </div>
   </div>
 </section>

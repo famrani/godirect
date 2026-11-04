@@ -75,6 +75,7 @@ const FALLBACK_TERMS: TermsPageContent = {
 };
 
 @Component({
+  standalone: false,
   selector: 'app-terms',
   templateUrl: './terms.component.html',
   styleUrls: ['./terms.component.scss'],

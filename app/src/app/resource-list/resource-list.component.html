@@ -1,0 +1,11 @@
+<div class="list-page">
+  <button class="back" (click)="back()">← {{'ui.discovery.back' | siteText:'Accueil'}}</button>
+  <h1>{{('ui.marketplace.'+type) | siteText:type}}</h1><p>{{'ui.discovery.direct' | siteText:'En direct avec les propriétaires'}}</p>
+  <div class="grid" *ngIf="!loading">
+    <article class="resource-card" *ngFor="let item of items" (click)="open(item)">
+      <img *ngIf="item.coverImage" [src]="registry.mediaUrl(item.coverImage)" [alt]="item.name || item.resourceId">
+      <div class="body"><h2>{{ item.name || item.resourceId }}</h2><p *ngIf="item.locationLabel">{{item.locationLabel}}</p><p *ngIf="item.description">{{ item.description }}</p><span>{{'ui.discovery.view' | siteText:'Voir le bien'}} →</span></div>
+    </article>
+  </div>
+  <p role="alert" *ngIf="error">{{'ui.discovery.searchFailed' | siteText:'Impossible de charger les annonces.'}}</p><p *ngIf="!loading && !error && !items.length">{{'ui.discovery.noResults' | siteText:'Aucun résultat.'}}</p><p *ngIf="loading">{{ "ui.pages.t33ce417454bf" | siteText }}</p>
+</div>

@@ -6,8 +6,8 @@
       <p>{{ t('intro') }}</p>
     </div>
 
-    <p class="alert error" *ngIf="error">{{ error }}</p>
-    <p class="alert success" *ngIf="message">{{ message }}</p>
+    <p class="alert error" *ngIf="error">{{ error | siteText }}</p>
+    <p class="alert success" *ngIf="message">{{ message | siteText }}</p>
 
     <div class="admin-grid" *ngIf="!loading">
       <aside class="outing-list">
@@ -33,7 +33,7 @@
           <small>{{ t('priceHelp') }}</small>
         </div>
 
-        <div class="lang-block" *ngFor="let lang of ['fr', 'en', 'es']">
+        <div class="lang-block" *ngFor="let lang of editorLanguages">
           <h2>{{ lang | uppercase }}</h2>
           <div class="editor-row"><label>{{ 'auto.home.admin-manage-outings.admin-manage-outings.component.title' | siteText }}</label><input type="text" [(ngModel)]="selected[lang].title" name="title-{{lang}}" /></div>
           <div class="editor-row"><label>{{ t('duration') }}</label><input type="text" [(ngModel)]="selected[lang].duration" name="duration-{{lang}}" /></div>

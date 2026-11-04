@@ -1,12 +1,16 @@
+import {AssetAccessService} from '../../services/asset-access.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ServicesService } from 'godigital-lib';
 import { BookingApiService, AlegriaBooking } from './booking-api.service';
 import { BookingFinancialService } from './booking-financial.service';
+import { BookingStateService, BookingStateModel } from './booking-state.service';
 import { SITE_CONTENT } from '../site-content';
 import { SiteContentService } from '../site-content-service/site-content.service';
 import { LanguageService, SiteLanguage } from '../../services/language.service';
 import { Subscription } from 'rxjs';
+import { boatPath } from '../../services/boat-routing';
+import { ResourceContextService } from '../../services/resource-context.service';
 
 interface BookingFieldView {
   key: string;
@@ -33,15 +37,19 @@ const BOOKING_AUTO_TEXT: Record<string, string> = {
   "auto.home.bookings.bookings.component.close": "Close",
   "auto.home.bookings.bookings.component.if_the_embedded_form_is_not_visible_on_your_browse": "If the embedded form is not visible on your browser, ",
   "auto.home.bookings.bookings.component.bnbookings": "bnBookings",
-  "auto.home.bookings.bookings.component.sumup_card": "SumUp card"
+  "auto.home.bookings.bookings.component.sumup_card": "SumUp card",
+  "auto.home.bookings.bookings.component.payment_pending": "Payment pending"
 };
 
 @Component({
+  standalone: false,
   selector: 'app-bookings',
   templateUrl: './bookings.component.html',
   styleUrls: ['./bookings.component.scss']
 })
 export class BookingsComponent implements OnInit, OnDestroy {
+  get bookingApiResourceType(): string { return this.resourceContext.resourceType; }
+  get bookingApiResourceId(): string { return this.resourceContext.resourceId; }
   bookings: BookingView[] = [];
   loading = true;
   errorMessage = '';
@@ -73,10 +81,16 @@ export class BookingsComponent implements OnInit, OnDestroy {
     private mainSvc: ServicesService,
     private siteContentService: SiteContentService,
     private languageService: LanguageService,
-    private bookingFinancial: BookingFinancialService
-  ) {}
+    private bookingFinancial: BookingFinancialService,
+    private bookingState: BookingStateService,
+    private resourceContext: ResourceContextService,
+    public assetAccess:AssetAccessService
+) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.assetAccess.refresh();
+    // Property and parking management is handled by the owner-authenticated unified component.
+    if(this.resourceContext.resourceType!=='boat')return;
     this.languageSub = this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
       this.loadPageText(language);
@@ -85,17 +99,18 @@ export class BookingsComponent implements OnInit, OnDestroy {
     const svc = this.mainSvc as any;
     this.loggedUser = svc.bnUser || svc.currentUser || null;
     if (!this.isAdmin) {
-      this.router.navigate(['/my-bookings']);
-      return;
+      return; // Unified owner API performs the per-asset ownership check.
     }
-    this.loadBookings();
+    if(this.resourceContext.resourceType==='boat')this.loadBookings();
   }
 
 
+  private translationContent:any;
   async loadPageText(language: SiteLanguage): Promise<void> {
     const fallback = (SITE_CONTENT as any)[language]?.bookingManagement || (SITE_CONTENT as any).fr?.bookingManagement || {};
     try {
       const content: any = await this.siteContentService.getContent();
+      this.translationContent=content;
       this.pageText = {
         ...fallback,
         ...(content?.[language]?.bookingManagement || {}),
@@ -107,6 +122,19 @@ export class BookingsComponent implements OnInit, OnDestroy {
   }
 
   t(key: string): string {
+    if(key.startsWith('auto.'))return this.siteContentService.tFromContent(this.translationContent,key,this.currentLanguage,BOOKING_AUTO_TEXT[key]||key);
+    if (key === 'auto.home.bookings.bookings.component.payment_pending') {
+      const labels: Record<SiteLanguage, string> = {
+        fr: 'Paiement en attente',
+        en: 'Payment pending',
+        es: 'Pago pendiente',
+        it: 'Pagamento in attesa',
+        de: 'Zahlung ausstehend',
+        nl: 'Betaling in afwachting',
+        ru: 'Ожидается оплата',
+      };
+      return labels[this.currentLanguage] || labels.en;
+    }
     return this.pageText?.[key] || BOOKING_AUTO_TEXT[key] || key;
   }
 
@@ -115,8 +143,13 @@ export class BookingsComponent implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    const role = String(this.loggedUser?.role || '').toLowerCase();
-    return role === 'admin' || role === 'owner' || this.loggedUser?.isAdmin === true;
+    // Resource-scoped admin URLs are shaped as
+    // /boat/:boatId/admin/..., so checking startsWith('/admin/') sends an
+    // administrator to /my-bookings while the user record is still loading.
+    const path = this.router.url.split('?')[0].split('#')[0];
+    if (/(?:^|\/)admin(?:\/|$)/.test(path)) return true;
+
+    return this.assetAccess.canManage(this.loggedUser);
   }
 
 
@@ -288,6 +321,10 @@ export class BookingsComponent implements OnInit, OnDestroy {
 
 
   openCreateReservation(): void {
+    if (this.resourceContext.resourceType === 'car') {
+      this.router.navigateByUrl(this.resourceContext.route('/book?admin=1'));
+      return;
+    }
     this.showCreateReservation = true;
     this.createReservationMessage = '';
     setTimeout(() => {
@@ -413,42 +450,30 @@ export class BookingsComponent implements OnInit, OnDestroy {
   }
 
   getDerivedBookingStatus(booking: AlegriaBooking): string {
-    const anyBooking: any = booking || {};
-    const rawStatus = anyBooking.bookingStatus ?? anyBooking.status;
-
-    // Read Firebase status first. bookingStatus: true means confirmed/executed in legacy bnBookings.
-    if (this.isBalancePaid(booking)) return 'payment_done';
-    if (this.isCancelledBooking(booking)) return 'cancelled';
-
-    if (
-      rawStatus === 'payment_done' ||
-      rawStatus === 'full_payment_done' ||
-      rawStatus === 'paid' ||
-      rawStatus === 'completed'
-    ) {
-      return 'payment_done';
-    }
-
-    if (
-      rawStatus === true ||
-      rawStatus === 'true' ||
-      rawStatus === 'confirmed' ||
-      anyBooking.confirmed === true ||
-      anyBooking.bookingConfirmed === true
-    ) {
-      return 'confirmed';
-    }
-
-    if (this.isDepositPaid(booking) && this.isTermsAccepted(booking)) return 'confirmed';
+    const state = this.getCanonicalState(booking);
+    if (state.cancelled) return 'cancelled';
+    // Never infer a completed payment from a legacy booking/status flag.
+    // This is the same canonical financial decision used by booking-detail.
+    if (state.fullyPaid) return 'payment_done';
+    if (state.completed || state.termsAccepted) return 'payment_pending';
+    if (state.confirmed) return 'confirmed';
     return 'not_confirmed';
   }
 
   getStatusLabel(booking: AlegriaBooking): string {
     const status = this.getDerivedBookingStatus(booking);
-    if (status === 'cancelled') return 'Cancelled';
-    if (status === 'payment_done') return 'Payment done';
-    if (status === 'confirmed') return 'Confirmed';
-    return 'Not confirmed';
+    if (status === 'cancelled') return this.t('cancelled');
+    if (status === 'payment_done') return this.t('paymentDone');
+    if (status === 'payment_pending') {
+      const pending = this.t('auto.home.bookings.bookings.component.payment_pending');
+      return this.getCanonicalState(booking).completed ? `${this.t('completed')} · ${pending}` : pending;
+    }
+    if (status === 'confirmed') return this.t('confirmed');
+    return this.t('notConfirmed');
+  }
+
+  getCanonicalState(booking: AlegriaBooking): BookingStateModel {
+    return this.bookingState.resolve(booking || {});
   }
 
   getWarrantyModeLabel(booking: AlegriaBooking): string {
@@ -485,12 +510,21 @@ export class BookingsComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = '';
 
-    this.bookingApi.getBookings().subscribe({
+    this.bookingApi.getAdminBookings().subscribe({
       next: (bookings) => {
         this.bookings = (bookings || []).map((booking) => ({
           ...booking,
           displayFields: this.buildBookingFields(booking)
         }));
+        // Do not present an apparently empty administrator page when every
+        // reservation is historical. The calendar displays both periods, so
+        // select the populated list period automatically as well.
+        if (this.activeDateTab === 'upcoming' &&
+            !this.bookings.some((booking) => this.isUpcomingBooking(booking)) &&
+            this.bookings.some((booking) => this.isPastBooking(booking))) {
+          this.activeDateTab = 'past';
+          if (this.sortField === 'date') this.sortDirection = 'desc';
+        }
         this.loading = false;
       },
       error: () => {
@@ -502,7 +536,7 @@ export class BookingsComponent implements OnInit, OnDestroy {
   }
 
   openBooking(booking: AlegriaBooking): void {
-    this.router.navigate(['/admin/bookings', booking.bookingId]);
+    this.router.navigateByUrl(boatPath(`/admin/reservations/${encodeURIComponent(booking.bookingId)}`));
   }
 
   getCustomerTotal(booking: AlegriaBooking): number {
@@ -684,6 +718,7 @@ export class BookingsComponent implements OnInit, OnDestroy {
   getStatusSummaryText(booking: BookingView): string {
     const status = this.getDerivedBookingStatus(booking);
     if (status === 'payment_done') return 'Booking confirmed, warranty secured and full payment recorded.';
+    if (status === 'payment_pending') return 'The outing status is recorded, but Alegria and/or skipper payment is still pending.';
     if (status === 'confirmed') return 'Booking confirmed. Warranty and/or remaining payment may still be pending.';
     return 'Booking not confirmed yet. Deposit and T&C acceptance are required.';
   }
@@ -706,7 +741,7 @@ export class BookingsComponent implements OnInit, OnDestroy {
 
   openDetail(booking: BookingView): void {
     if (!booking?.bookingId) return;
-    this.router.navigate(['/admin/bookings', booking.bookingId]);
+    this.router.navigateByUrl(boatPath(`/admin/reservations/${encodeURIComponent(booking.bookingId)}`));
   }
 
   payDeposit(booking: AlegriaBooking, event?: Event): void {
@@ -746,7 +781,10 @@ export class BookingsComponent implements OnInit, OnDestroy {
   }
 
   payment(booking: AlegriaBooking): void {
-    this.router.navigate(['/payment', booking.bookingId], { queryParams: { mode: 'warranty' } });
+    this.router.navigate(
+      [boatPath(`/payment/${encodeURIComponent(booking.bookingId)}`)],
+      { queryParams: { mode: 'warranty' } }
+    );
   }
 
   trackByBookingId(index: number, booking: BookingView): string {

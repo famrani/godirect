@@ -2,6 +2,7 @@ import { NgxLoggerLevel } from 'ngx-logger';
 
 export const environment = {
   production: true,
+  firebaseDatabaseUrl: 'https://ailla-poc-default-rtdb.firebaseio.com',
 //  apiUrl: 'https://localhost:5000/analyticseats/logs', // Replace with remote API
    apiUrl: 'https://analytics.kamli.net/analyticseats/logs', // Replace with remote API
   logLevel: NgxLoggerLevel.OFF,

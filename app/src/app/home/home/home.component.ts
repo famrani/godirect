@@ -1,3 +1,6 @@
+import {boatOutingsGroup} from '../../services/boat-outings-management';
+import {ResourceContextService} from '../../services/resource-context.service';
+import {AssetAccessService} from '../../services/asset-access.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SITE_CONTENT, SiteContent } from '../site-content';
@@ -7,18 +10,23 @@ import { SiteContentService } from '../site-content-service/site-content.service
 import { ServicesService } from 'godigital-lib';
 import { Router } from '@angular/router';
 import { AlegriaPricingModel, BookingApiService } from '../bookings/booking-api.service';
+import { PrivateMediaService } from '../../services/private-media.service';
 
 @Component({
+  standalone: false,
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  private readonly ownerViewStorageKey = 'alegria-owner-view';
+  ownerView: 'admin' | 'customer' = 'admin';
   content: SiteContent = SITE_CONTENT.fr;
   private allSiteContent: any = SITE_CONTENT;
   private currentLanguage: SiteLanguage = 'fr';
   private dynamicOutings: DynamicOuting[] = [];
   private cachedExperienceItems: any[] = [];
+  private cachedExperienceLanguage: SiteLanguage | null = null;
   private cachedExperienceSourceRef: any = null;
   private cachedOutingsSourceRef: any = null;
   private cachedAdminGroupsSourceRef: any = null;
@@ -325,9 +333,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     private mainSvc: ServicesService,
     private router: Router,
     private bookingApi: BookingApiService,
-  ) {}
+    private privateMedia: PrivateMediaService,
+    private resourceContext:ResourceContextService,
+    public assetAccess:AssetAccessService
+) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.assetAccess.refresh();
+    this.restoreOwnerView();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('alegria-owner-view-change', this.onOwnerViewChange as EventListener);
+    }
     this.loadSiteContent();
     this.loadPricingModel();
 
@@ -343,6 +359,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.languageSub?.unsubscribe();
     this.accountSub?.unsubscribe();
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('alegria-owner-view-change', this.onOwnerViewChange as EventListener);
+    }
+  }
+
+  private readonly onOwnerViewChange = (event: CustomEvent<'admin' | 'customer'>): void => {
+    this.ownerView = event.detail === 'customer' ? 'customer' : 'admin';
+  };
+
+  private restoreOwnerView(): void {
+    try {
+      this.ownerView = localStorage.getItem(this.ownerViewStorageKey) === 'customer' ? 'customer' : 'admin';
+    } catch {
+      this.ownerView = 'admin';
+    }
   }
 
   private applyLanguageContent(language: SiteLanguage): void {
@@ -366,7 +397,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     try {
       const firebaseContent = await this.withTimeout(
-        this.siteContentService.getContent(),
+        this.siteContentService.getContent(true),
         5000
       );
       this.allSiteContent = firebaseContent || SITE_CONTENT;
@@ -388,8 +419,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   private async loadDynamicOutings(): Promise<void> {
     try {
       this.dynamicOutings = await this.outingsData.getOutings();
+      this.cachedExperienceSourceRef = null;
     } catch {
       this.dynamicOutings = [];
+      this.cachedExperienceSourceRef = null;
     }
   }
 
@@ -411,32 +444,41 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    const role = String(this.loggedUser?.role || '').toLowerCase();
-    return role === 'admin' || role === 'owner' || this.loggedUser?.isAdmin === true;
+
+    return this.assetAccess.canManage(this.loggedUser);
   }
 
   get canShowOnlineBookingButton(): boolean {
-    return !this.isAdmin;
+    return !this.isAdmin || this.ownerView === 'customer';
+  }
+
+  get showAdminHome(): boolean {
+    return this.isAdmin && this.ownerView === 'admin';
   }
 
 
   get adminHome(): any {
+    const fallback = this.buildAdminHomeFallback();
     const firebaseAdminHome = this.hp?.adminDashboard;
     if (firebaseAdminHome && Object.keys(firebaseAdminHome).length) {
-      return firebaseAdminHome;
+      return {
+        ...fallback,
+        ...firebaseAdminHome,
+        intro: fallback.intro,
+      };
     }
-    return this.buildAdminHomeFallback();
+    return fallback;
   }
 
   private buildAdminHomeFallback(): any {
     const fallbacks: Record<string, any> = {
-      fr: { eyebrow: 'Administration', title: 'Tableau de bord', intro: 'Pilotez les offres, réservations, paiements, avis, contenus et sorties bateau depuis un seul espace.', sectionsEyebrow: 'Gestion Alegria', sectionsTitle: 'Actions principales', sectionsText: 'Accédez rapidement aux espaces opérationnels.' },
-      en: { eyebrow: 'Administration', title: 'Dashboard', intro: 'Manage offers, bookings, payments, reviews, content and boat operations from one place.', sectionsEyebrow: 'Alegria management', sectionsTitle: 'Main actions', sectionsText: 'Quickly access operational areas.' },
-      es: { eyebrow: 'Administración', title: 'Panel de control', intro: 'Gestiona propuestas, reservas, pagos, opiniones, contenidos y operaciones del barco desde un solo lugar.', sectionsEyebrow: 'Gestión Alegria', sectionsTitle: 'Acciones principales', sectionsText: 'Accede rápidamente a las áreas operativas.' },
-      it: { eyebrow: 'Amministrazione', title: 'Dashboard', intro: 'Gestisci proposte, prenotazioni, pagamenti, recensioni, contenuti e operazioni della barca da un unico spazio.', sectionsEyebrow: 'Gestione Alegria', sectionsTitle: 'Azioni principali', sectionsText: 'Accedi rapidamente alle aree operative.' },
-      de: { eyebrow: 'Administration', title: 'Dashboard', intro: 'Verwalten Sie Angebote, Buchungen, Zahlungen, Bewertungen, Inhalte und Bootsbetrieb an einem Ort.', sectionsEyebrow: 'Alegria-Verwaltung', sectionsTitle: 'Hauptaktionen', sectionsText: 'Schneller Zugriff auf operative Bereiche.' },
-      nl: { eyebrow: 'Beheer', title: 'Dashboard', intro: 'Beheer voorstellen, boekingen, betalingen, reviews, content en bootoperaties vanuit één plek.', sectionsEyebrow: 'Alegria-beheer', sectionsTitle: 'Belangrijkste acties', sectionsText: 'Ga snel naar de operationele onderdelen.' },
-      ru: { eyebrow: 'Администрирование', title: 'Панель управления', intro: 'Управляйте предложениями, бронированиями, платежами, отзывами, контентом и выходами лодки из одного места.', sectionsEyebrow: 'Управление Alegria', sectionsTitle: 'Основные действия', sectionsText: 'Быстрый доступ к операционным разделам.' },
+      fr: { eyebrow: 'Administration', title: 'Tableau de bord', intro: 'Pilotez les réservations, le calendrier, les paiements, les avis, les contenus et les tarifs depuis un seul espace.', sectionsEyebrow: 'Gestion Alegria', sectionsTitle: 'Actions principales', sectionsText: 'Accédez rapidement aux espaces opérationnels.' },
+      en: { eyebrow: 'Administration', title: 'Dashboard', intro: 'Manage bookings, calendar, payments, reviews, website content and pricing from one place.', sectionsEyebrow: 'Alegria management', sectionsTitle: 'Main actions', sectionsText: 'Quickly access operational areas.' },
+      es: { eyebrow: 'Administración', title: 'Panel de control', intro: 'Gestiona reservas, calendario, pagos, opiniones, contenido y precios desde un solo lugar.', sectionsEyebrow: 'Gestión Alegria', sectionsTitle: 'Acciones principales', sectionsText: 'Accede rápidamente a las áreas operativas.' },
+      it: { eyebrow: 'Amministrazione', title: 'Dashboard', intro: 'Gestisci prenotazioni, calendario, pagamenti, recensioni, contenuti e tariffe da un unico spazio.', sectionsEyebrow: 'Gestione Alegria', sectionsTitle: 'Azioni principali', sectionsText: 'Accedi rapidamente alle aree operative.' },
+      de: { eyebrow: 'Administration', title: 'Dashboard', intro: 'Verwalten Sie Buchungen, Kalender, Zahlungen, Bewertungen, Inhalte und Preise an einem Ort.', sectionsEyebrow: 'Alegria-Verwaltung', sectionsTitle: 'Hauptaktionen', sectionsText: 'Schneller Zugriff auf operative Bereiche.' },
+      nl: { eyebrow: 'Beheer', title: 'Dashboard', intro: 'Beheer boekingen, kalender, betalingen, reviews, content en prijzen vanuit één plek.', sectionsEyebrow: 'Alegria-beheer', sectionsTitle: 'Belangrijkste acties', sectionsText: 'Ga snel naar de operationele onderdelen.' },
+      ru: { eyebrow: 'Администрирование', title: 'Панель управления', intro: 'Управляйте бронированиями, календарём, платежами, отзывами, контентом и тарифами из одного места.', sectionsEyebrow: 'Управление Alegria', sectionsTitle: 'Основные действия', sectionsText: 'Быстрый доступ к операционным разделам.' },
     };
     return fallbacks[this.currentLanguage] || fallbacks.fr;
   }
@@ -462,14 +504,14 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private buildAdminDashboardGroups(sourceGroups: any[] = []): any[] {
-    const offerGroup = this.buildAdminOfferGroup(sourceGroups);
     return [
-      offerGroup,
-      this.mergeAdminGroup(sourceGroups, this.buildAdminSimpleGroup('bookings', '📅', 'bookingsTitle', 'bookingsText', '/admin/bookings'), ['booking', 'réservation', 'reservation', 'reserva', 'prenot', 'buchung', 'boeking', 'бронир']),
+      ...(this.resourceContext.resourceType==='boat'?[boatOutingsGroup(this.currentLanguage,(key,fallback)=>this.siteContentService.tFromContent(this.allSiteContent,key,this.currentLanguage,fallback))]:[]),
+      this.mergeAdminGroup(sourceGroups, this.buildAdminSimpleGroup('bookings', '📅', 'bookingsTitle', 'bookingsText', '/admin/reservations'), ['booking', 'réservation', 'reservation', 'reserva', 'prenot', 'buchung', 'boeking', 'бронир']),
+      this.buildAdminSimpleGroup('calendar', '🗓️', 'calendarTitle', 'calendarText', '/admin/calendar'),
       this.mergeAdminGroup(sourceGroups, this.buildAdminSimpleGroup('payments', '💳', 'paymentsTitle', 'paymentsText', '/admin/payments'), ['payment', 'paiement', 'pago', 'pagamento', 'zahlung', 'betaling', 'плат']),
       this.mergeAdminGroup(sourceGroups, this.buildAdminSimpleGroup('feedback', '⭐', 'feedbackTitle', 'feedbackText', '/admin/feedbacks'), ['feedback', 'avis', 'review', 'opin', 'recension', 'bewertung', 'beoordeling', 'отзыв']),
       this.mergeAdminGroup(sourceGroups, this.buildAdminSimpleGroup('content', '✏️', 'contentTitle', 'contentText', '/admin/site-content'), ['content', 'contenu', 'contenido', 'contenuto', 'inhalt', 'контент']),
-      this.mergeAdminGroup(sourceGroups, this.buildAdminSimpleGroup('operations', '⛵', 'operationsTitle', 'operationsText', '/admin/outings'), ['operation', 'sortie', 'outing', 'boat', 'bateau', 'barca', 'boot', 'лод']),
+      this.buildAdminSimpleGroup('pricing', '€', 'pricingTitle', 'pricingText', '/admin/pricing-model'),
     ];
   }
 
@@ -568,11 +610,24 @@ export class HomeComponent implements OnInit, OnDestroy {
       nl: { waitingTitle: 'Wacht op klant', waitingText: 'Bekijk verzonden voorstellen die wachten op een klantbeslissing.', seeAllTitle: 'Alles bekijken', seeAllText: 'Open de volledige lijst met voorstellen.' },
       ru: { waitingTitle: 'Ожидает клиента', waitingText: 'Посмотреть отправленные предложения, ожидающие решения клиента.', seeAllTitle: 'Показать все', seeAllText: 'Открыть полный список предложений.' },
     };
-    return { ...base, ...(extra[this.currentLanguage] || extra.fr) };
+    const modeLabels: Record<string, any> = {
+      fr: { calendarTitle: 'Calendrier', calendarText: 'Consultez les disponibilités et les réservations planifiées.', pricingTitle: 'Modèle tarifaire', pricingText: 'Gérez les tarifs du bateau, du skipper, des options et les règles de prix.' },
+      en: { calendarTitle: 'Calendar', calendarText: 'View availability and planned bookings.', pricingTitle: 'Pricing model', pricingText: 'Manage boat, skipper and extras pricing rules.' },
+      es: { calendarTitle: 'Calendario', calendarText: 'Consulta disponibilidades y reservas planificadas.', pricingTitle: 'Modelo de precios', pricingText: 'Gestiona las tarifas del barco, patrón y opciones.' },
+      it: { calendarTitle: 'Calendario', calendarText: 'Consulta disponibilità e prenotazioni pianificate.', pricingTitle: 'Modello tariffario', pricingText: 'Gestisci le tariffe di barca, skipper e opzioni.' },
+      de: { calendarTitle: 'Kalender', calendarText: 'Verfügbarkeiten und geplante Buchungen anzeigen.', pricingTitle: 'Preismodell', pricingText: 'Preise für Boot, Skipper und Extras verwalten.' },
+      nl: { calendarTitle: 'Kalender', calendarText: 'Bekijk beschikbaarheid en geplande boekingen.', pricingTitle: 'Prijsmodel', pricingText: 'Beheer prijzen voor boot, schipper en opties.' },
+      ru: { calendarTitle: 'Календарь', calendarText: 'Просматривайте доступность и запланированные бронирования.', pricingTitle: 'Тарифная модель', pricingText: 'Управляйте тарифами лодки, шкипера и опций.' },
+    };
+    return { ...base, ...(extra[this.currentLanguage] || extra.fr), ...(modeLabels[this.currentLanguage] || modeLabels.fr) };
   }
 
   get adminHeroActions(): any[] {
-    return Array.isArray(this.adminHome?.actions) ? this.adminHome.actions : this.EMPTY_ARRAY;
+    const actions = Array.isArray(this.adminHome?.actions) ? this.adminHome.actions : this.EMPTY_ARRAY;
+    return actions.filter((action: any) => {
+      const marker = `${action?.route || ''} ${action?.label || ''}`.toLowerCase();
+      return !marker.includes('offer') && !marker.includes('offre') && !marker.includes('proposal');
+    });
   }
 
   /**
@@ -582,11 +637,40 @@ export class HomeComponent implements OnInit, OnDestroy {
    */
   get hp(): any {
     const anyContent: any = this.content as any;
-    return anyContent?.homePage || anyContent?.home?.portal || this.EMPTY_OBJECT;
+    const legacyHome: any = anyContent?.home || this.EMPTY_OBJECT;
+    const configured: any = anyContent?.homePage || legacyHome?.portal || this.EMPTY_OBJECT;
+
+    // The original Alegria content stores the hero directly under `home`, while
+    // newer Firebase content may store it under `homePage.hero` / `home.portal.hero`.
+    // Merge both shapes so a partial/empty Firebase payload can never blank the hero
+    // after the asynchronous content load.
+    const legacyHero:Record<string,any> = {
+      eyebrow: legacyHome?.eyebrow || '',
+      title: legacyHome?.title || '',
+      intro: legacyHome?.intro || '',
+      primaryCta: legacyHome?.primaryCta || '',
+      secondaryCta: legacyHome?.secondaryCta || legacyHome?.onlineBookingCta || '',
+      primaryRoute: legacyHome?.primaryRoute || '/sorties',
+      badges: legacyHome?.points || [],
+      image: anyContent?.boatHeroImage || anyContent?.heroImage || '',
+      imageAlt: anyContent?.brand || 'Alegria',
+    };
+
+    const configuredHero = configured?.hero || this.EMPTY_OBJECT;
+    const hero = { ...legacyHero, ...configuredHero };
+
+    // Empty strings from Firebase should not erase valid local fallback copy.
+    for (const key of ['eyebrow', 'title', 'intro', 'primaryCta', 'secondaryCta', 'primaryRoute', 'image', 'imageAlt']) {
+      if (!String(hero[key] ?? '').trim()) hero[key] = legacyHero[key];
+    }
+    if (!Array.isArray(hero.badges) || !hero.badges.length) hero.badges = legacyHero.badges;
+
+    return { ...configured, hero };
   }
 
   get heroImage(): string {
-    return this.hp?.hero?.image || this.content?.heroImage || '';
+    const image = this.content?.boatHeroImage || this.hp?.hero?.image || this.content?.heroImage || '';
+    return this.privateMedia.objectUrl(String(image || ''));
   }
 
   /**
@@ -604,7 +688,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   get boatImage(): string {
-    return this.hp?.boat?.image || this.content?.boatHeroImage || this.content?.heroImage || '';
+    const image = this.content?.boatHeroImage || this.hp?.boat?.image || this.content?.heroImage || '';
+    return this.privateMedia.objectUrl(String(image || ''));
   }
 
   get quickActions(): any[] {
@@ -774,52 +859,42 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   get experiences(): any[] {
-    const sourceItems = Array.isArray(this.hp?.experiences?.items)
-      ? this.hp.experiences.items
-      : this.EMPTY_ARRAY;
-    const sourceOutings = Array.isArray((this.content as any)?.outings)
-      ? (this.content as any).outings
-      : this.EMPTY_ARRAY;
+    const sourceItems = Array.isArray(this.hp?.experiences?.items) ? this.hp.experiences.items : this.EMPTY_ARRAY;
+    const sourceOutings = Array.isArray((this.content as any)?.outings) ? (this.content as any).outings : this.EMPTY_ARRAY;
+    const dynamicRef = this.dynamicOutings;
 
-    // Important: keep the same array reference between change-detection cycles.
-    // Returning a newly-created array from this getter makes Angular recreate the
-    // experience cards continuously on the home page, which can make the page hang.
-    if (this.cachedExperienceSourceRef === sourceItems && this.cachedOutingsSourceRef === sourceOutings) {
+    if (this.cachedExperienceSourceRef === sourceItems && this.cachedOutingsSourceRef === sourceOutings && (this as any).cachedDynamicOutingsRef === dynamicRef && this.cachedExperienceLanguage === this.currentLanguage) {
       return this.cachedExperienceItems;
     }
 
-    const items = [...sourceItems];
-
-    // Release 46b: keep the corporate / business outing visible even when an
-    // older Firebase dump only contains 3 homepage experience cards.
-    const hasCorporate = items.some((item: any) => {
-      const marker = String(item?.slug || item?.key || item?.id || item?.title || '').toLowerCase();
-      return marker.includes('entreprise') || marker.includes('corporate') || marker.includes('business');
-    });
-
-    if (!hasCorporate) {
-      const corporate = sourceOutings.find((outing: any) => {
-        const marker = String(outing?.slug || outing?.title || outing?.category || '').toLowerCase();
-        return marker.includes('sortie-entreprise') || marker.includes('entreprise') || marker.includes('corporate') || marker.includes('business');
+    // Outing cards are driven by bnOutings/CMS. Legacy homePage cards are only a fallback.
+    let items: any[] = [];
+    if (dynamicRef.length) {
+      items = dynamicRef.filter((o: any) => o.active !== false).map((outing: any) => {
+        const localized = outing?.[this.currentLanguage] || outing?.fr || outing?.en || {};
+        const cms = sourceOutings.find((o: any) => o.slug === outing.slug) || {};
+        return {
+          slug: outing.slug,
+          route: ['/sorties', outing.slug],
+          title: localized.title || cms.title || '',
+          description: localized.description || cms.description || '',
+          image: this.privateMedia.objectUrl(String(outing.image || localized.image || cms.image || '')),
+          meta: [localized.duration || cms.duration, localized.guests || cms.guests].filter(Boolean).join(' • '),
+          price: localized.priceLabel || (outing.priceFrom ? this.outingsData.priceLabel(this.currentLanguage, outing.priceFrom) : ''),
+        };
       });
-
-      if (corporate) {
-        items.push({
-          slug: corporate.slug || 'sortie-entreprise',
-          route: ['/sorties', corporate.slug || 'sortie-entreprise'],
-          title: corporate.title,
-          description: corporate.description,
-          image: corporate.image,
-          meta: [corporate.duration, corporate.guests].filter(Boolean).join(' • '),
-          price: corporate.price || this.hp?.experiences?.quoteLabel || this.hp?.experiences?.onRequestLabel || this.hp?.pricing?.onRequestLabel || '',
-        });
-      }
+    } else if (sourceOutings.length) {
+      items = sourceOutings.map((o: any) => ({ ...o, route: ['/sorties', o.slug], meta: [o.duration, o.guests].filter(Boolean).join(' • '), price: o.priceLabel || '' }));
+    } else {
+      items = [...sourceItems];
     }
 
+    this.cachedExperienceLanguage = this.currentLanguage;
     this.cachedExperienceSourceRef = sourceItems;
     this.cachedOutingsSourceRef = sourceOutings;
+    (this as any).cachedDynamicOutingsRef = dynamicRef;
     this.cachedExperienceItems = items;
-    return this.cachedExperienceItems;
+    return items;
   }
 
   get pricingRows(): any[] {

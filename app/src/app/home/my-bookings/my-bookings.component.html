@@ -1,157 +1,96 @@
-<section class="booking-page">
-  <div class="container booking-shell">
-    <div class="section-head bookings-page-head">
-      <div>
-        <span class="eyebrow">{{ t('myEyebrow') }}</span>
-        <h1>{{ t('myTitle') }}</h1>
-        <p>{{ t('myIntro') }}</p>
+<section class="customer-bookings">
+  <div class="page-heading"><div><span class="eyebrow">GoDirect</span><h1>{{admin?('ui.messages.tf2ccdcd4dd52' | siteText):('ui.pages.t82a698b57518' | siteText)}}</h1><p>{{ "ui.pages.ta5ffc48fb249" | siteText }}</p></div><button type="button" (click)="refresh()" [disabled]="loading || !!busy">{{ "ui.pages.t9d3b2a7d8b0d" | siteText }}</button></div>
+  <p *ngIf="error" class="notice error" role="alert">{{ error | siteText }}</p>
+  <p *ngIf="paymentMessage" class="notice" role="status">{{ paymentMessage | siteText }}</p>
+  <details *ngIf="admin" class="booking-card" [open]="createOpen"><summary>{{ "ui.pages.tdb3f8932a7a9" | siteText }}</summary>
+    <app-generic-asset-booking *ngIf="ctx.resourceType !== 'car'" [kind]="bookingKind" [admin]="true"></app-generic-asset-booking>
+    <app-car-booking *ngIf="ctx.resourceType === 'car'" [admin]="true"></app-car-booking>
+  </details>
+  <p *ngIf="loading" aria-live="polite">{{ "ui.pages.t8e22b9999d31" | siteText }}</p>
+  <h2>{{ "ui.pages.t5ae4e5874c90" | siteText }}</h2><p *ngIf="!loading && !upcoming.length">{{ "ui.pages.tdae685e69915" | siteText }}</p>
+  <article *ngFor="let b of upcoming" class="booking-card">
+    <div class="card-heading"><h3>{{ b.assetType | siteText }} · {{b.assetId}}</h3><span class="status" [class.confirmed]="b.status==='confirmed'">{{ reservationStatus(b) | siteText }}</span></div>
+    <p>{{b.startAt | date:'medium'}} — {{b.endAt | date:'medium'}}</p>
+    <p class="price">{{b.rentalAmount | number:'1.2-2'}} {{b.currency || 'EUR'}}</p>
+    <div class="reservation-status-steps"><span [class.done]="depositDone(b)">{{ "ui.pages.t79f9f1012a3f" | siteText }} {{depositDone(b)?('ui.pages.t75cc10149318' | siteText):('ui.pages.t3b28057050c4' | siteText)}}</span><span [class.done]="warrantyDone(b)">{{ warrantyLabel(b) | siteText }}</span><span [class.done]="b.workflow?.adminApproved">{{ "ui.pages.td4dbee0f76ac" | siteText }} {{b.workflow?.adminApproved?('ui.messages.te3130f49f2ae' | siteText):('ui.pages.t5fba9c16f0e5' | siteText)}}</span></div>
+    <div class="actions"><button type="button" (click)="open(b)" [disabled]="!!busy">{{ "ui.pages.tc6565c1527e9" | siteText }}</button><button type="button" *ngIf="active(b) && !cancellationLocked(b)" (click)="startEdit(b)" [disabled]="!!busy">{{ "ui.pages.t6d2f5f3af29a" | siteText }}</button><button type="button" class="primary" *ngIf="canPay(b,'booking_deposit')" (click)="pay(b,'booking_deposit')" [disabled]="!!busy">{{ "ui.pages.tad999d81c402" | siteText }} {{b.bookingDeposit}} {{b.currency}}</button></div>
+    <p *ngIf="b.financialReviewRequired" class="notice">{{ "ui.pages.t35b8f6a61721" | siteText }}</p>
+  </article>
+
+  <section *ngIf="selected" class="booking-card detail" [attr.aria-label]="'ui.pages.t293b5d516377' | siteText">
+    <div class="card-heading"><div><span class="eyebrow">{{ "ui.pages.t293b5d516377" | siteText }}</span><h2>{{selected.customerName}}</h2></div><button type="button" (click)="selected=null;editing=false;closePayment()" [disabled]="!!busy">{{ "ui.pages.t5ab4ec640d65" | siteText }}</button></div>
+    <p class="reference">{{selected.id || selected.bookingId}}</p>
+    <p>{{selected.customerEmail}} · {{selected.customerPhone}}</p>
+    <p>{{selected.startAt | date:'medium'}} — {{selected.endAt | date:'medium'}}</p>
+    <p><span class="status" [class.confirmed]="selected.status==='confirmed'">{{ reservationStatus(selected) | siteText }}</span></p>
+    <div class="amounts">
+      <div><span>{{ "ui.pages.taf42c6b10bf9" | siteText }}</span><strong>{{selected.rentalAmount | number:'1.2-2'}} {{selected.currency}}</strong></div>
+      <div><span>{{ "ui.pages.t79f9f1012a3f" | siteText }}</span><strong>{{selected.bookingDeposit | number:'1.2-2'}} {{selected.currency}}</strong><small>{{depositDone(selected)?('ui.messages.t3893f70d45c4' | siteText):('ui.messages.t4999346b25bc' | siteText)}}</small></div>
+      <div><span>{{ "ui.pages.t0b5c7c5e47a7" | siteText }}</span><strong>{{selected.balanceAmount | number:'1.2-2'}} {{selected.currency}}</strong><small>{{balanceDone(selected)?('ui.messages.t3893f70d45c4' | siteText):('ui.messages.t4999346b25bc' | siteText)}}</small></div>
+      <div><span>{{ "ui.pages.td3e7b46b738f" | siteText }}</span><strong>{{selected.securityDeposit | number:'1.2-2'}} {{selected.currency}}</strong><small>{{ warrantyLabel(selected) | siteText }}</small></div>
+    </div>
+    <p *ngIf="selected.financialReviewRequired" class="notice">{{ "ui.pages.t44300432be8e" | siteText }}</p>
+    <div *ngIf="!editing" class="actions">
+      <button type="button" *ngIf="active(selected) && !cancellationLocked(selected)" (click)="startEdit(selected)" [disabled]="!!busy">{{ "ui.pages.t6d2f5f3af29a" | siteText }}</button>
+      <button type="button" class="primary" *ngIf="canPay(selected,'booking_deposit')" (click)="pay(selected,'booking_deposit')" [disabled]="!!busy">{{ "ui.pages.t4d66607dac3a" | siteText }}</button>
+      <button type="button" class="primary" *ngIf="canPay(selected,'balance')" (click)="pay(selected,'balance')" [disabled]="!!busy">{{offer('payBalance')}}</button>
+      <button type="button" *ngIf="canPay(selected,'security_deposit')" (click)="pay(selected,'security_deposit')" [disabled]="!!busy">{{ "ui.pages.tc19651206d81" | siteText }}</button>
+      <button type="button" *ngIf="admin && active(selected) && !cancellationLocked(selected) && !selected.workflow?.adminApproved" (click)="approve(selected)" [disabled]="!!busy">{{ "ui.pages.td8f2c32eec62" | siteText }}</button>
+      <button type="button" *ngIf="admin && active(selected)" (click)="cancelAdmin(selected)" [disabled]="!!busy">{{cancellationLocked(selected)?('ui.messages.t452e77e20f3a' | siteText):('ui.pages.td05bbb93c567' | siteText)}}</button>
+      <button type="button" *ngIf="admin && cancellationLocked(selected)" (click)="checkCancellation(selected)" [disabled]="!!busy">{{ "ui.pages.t270064cc4bda" | siteText }}</button>
+      <button type="button" *ngIf="!admin && active(selected) && selected.cancellationRequestStatus !== 'pending' && !cancellationLocked(selected)" (click)="requestCancellation(selected)" [disabled]="!!busy">{{ "ui.pages.t1e7e2d808ffa" | siteText }}</button>
+    </div>
+    <p *ngIf="selected.cancellationRequestStatus==='pending'" class="notice">{{ "ui.pages.t5a8b34eb6452" | siteText }}</p>
+    <p *ngIf="!admin && !warrantyDone(selected) && selected.securityDeposit>0" class="help">{{ "ui.pages.t161364db700d" | siteText }}</p>
+    <section *ngIf="selected.cancellation" class="notice" aria-live="polite">
+      <strong>{{ reservationStatus(selected) | siteText }}</strong>
+      <p *ngIf="cancellationLocked(selected)">{{ "ui.pages.tc312bce9ad85" | siteText }}</p>
+      <p *ngIf="selected.cancellation.error" class="error">{{ "ui.pages.tc7919d17707b" | siteText }} {{selected.cancellation.error}}</p>
+      <p *ngFor="let refund of selected.cancellation.items">{{ refundKind(refund.kind) | siteText }} : {{ refundLabel(refund.status) | siteText }}<span *ngIf="refund.collected"> — {{refund.refunded / 100 | number:'1.2-2'}} / {{refund.collected / 100 | number:'1.2-2'}} {{refund.currency | uppercase}}</span><span *ngIf="refund.pending"> ({{refund.pending / 100 | number:'1.2-2'}} {{ "ui.pages.t9f81f5f3f4c7" | siteText }}</span></p>
+      <p *ngIf="selected.cancellation.status==='completed'">{{ "ui.pages.tb8e3973dd1a0" | siteText }}</p>
+    </section>
+    <p *ngIf="selected.comments && !editing">{{selected.comments}}</p>
+    <form *ngIf="editing" (ngSubmit)="saveEdit()" class="edit-form">
+      <h3>{{ "ui.pages.t6d2f5f3af29a" | siteText }}</h3>
+      <p *ngIf="financialLocked(selected)" class="notice">{{ "ui.pages.t61e1d39559d8" | siteText }}</p>
+      <p *ngIf="!financialLocked(selected)" class="help">{{ "ui.pages.t7b4dee957e6b" | siteText }}</p>
+      <div class="form-grid">
+        <label>{{ "ui.pages.t7ff20370c8e0" | siteText }}<input name="customerName" [(ngModel)]="editForm.customerName" required maxlength="200"></label>
+        <label>{{ "ui.pages.t84add5b29527" | siteText }}<input name="customerEmail" type="email" [(ngModel)]="editForm.customerEmail" [disabled]="!admin" required></label>
+        <label>{{ "ui.pages.td3b023eabc9c" | siteText }}<input name="customerPhone" [(ngModel)]="editForm.customerPhone" maxlength="80"></label>
+        <label>{{ "ui.pages.tea5b33893e5b" | siteText }}<input name="startLocal" type="datetime-local" [(ngModel)]="editForm.startLocal" [disabled]="financialLocked(selected)" required></label>
+        <label>{{ "ui.pages.tf6a2d77d389d" | siteText }}<input name="endLocal" type="datetime-local" [(ngModel)]="editForm.endLocal" [disabled]="financialLocked(selected)" required></label>
+        <ng-container *ngIf="selected.assetType==='car'">
+          <label>{{ "ui.pages.t4786ef9c6b0f" | siteText }}<input name="pickupLocation" [(ngModel)]="editForm.pickupLocation" maxlength="200"></label>
+          <label>{{ "ui.pages.t23f397112f95" | siteText }}<input name="returnLocation" [(ngModel)]="editForm.returnLocation" maxlength="200"></label>
+          <label>{{ "ui.pages.t2a7b83a2f65a" | siteText }}<input name="driverAge" type="number" min="18" max="100" [(ngModel)]="editForm.driverAge" required></label>
+          <label>{{ "ui.pages.tc22a91310375" | siteText }}<input name="licenseCountry" [(ngModel)]="editForm.licenseCountry" minlength="2" maxlength="3" required></label>
+          <label class="check"><input name="additionalDriver" type="checkbox" [(ngModel)]="editForm.additionalDriver" [disabled]="financialLocked(selected)"> {{ "ui.pages.t923e890c9a0d" | siteText }}</label>
+          <label class="check"><input name="childSeat" type="checkbox" [(ngModel)]="editForm.childSeat" [disabled]="financialLocked(selected)"> {{ "ui.pages.t247c1e5ced94" | siteText }}</label>
+        </ng-container>
+        <label *ngIf="selected.assetType==='parking'">{{ "ui.pages.t678a4af267da" | siteText }}<input name="vehiclePlate" [(ngModel)]="editForm.vehiclePlate" maxlength="80"></label>
+        <label *ngIf="selected.assetType!=='car' && selected.assetType!=='parking'">{{ "ui.pages.t93a4bcbadea4" | siteText }}<input name="guests" type="number" min="1" [(ngModel)]="editForm.guests" required></label>
+        <ng-container *ngIf="admin">
+          <label>{{ "ui.pages.taf42c6b10bf9" | siteText }}<input name="rentalAmount" type="number" min="0.01" step="0.01" [(ngModel)]="editForm.rentalAmount" [disabled]="financialLocked(selected)" required></label>
+          <label>{{ "ui.pages.t79f9f1012a3f" | siteText }}<input name="bookingDeposit" type="number" min="0" step="0.01" [(ngModel)]="editForm.bookingDeposit" [disabled]="financialLocked(selected)" required></label>
+          <label>{{ "ui.pages.t55a89527100d" | siteText }}<input name="securityDeposit" type="number" min="0" step="0.01" [(ngModel)]="editForm.securityDeposit" [disabled]="financialLocked(selected)" required></label>
+        </ng-container>
       </div>
-    </div>
+      <label>{{ "ui.pages.tdbdeccaf80ad" | siteText }}<textarea name="comments" rows="3" maxlength="4000" [(ngModel)]="editForm.comments"></textarea></label>
+      <p *ngIf="error" class="notice error">{{ error | siteText }}</p>
+      <div class="actions"><button type="submit" class="primary" [disabled]="!!busy">{{busy==='edit'?('ui.messages.te7d5f232d832' | siteText):('ui.messages.t2a9459212807' | siteText)}}</button><button type="button" (click)="editing=false" [disabled]="!!busy">{{ "ui.pages.tdff27bb04493" | siteText }}</button></div>
+    </form>
+  </section>
 
-    <p *ngIf="loading" class="muted">{{ t('loadingBookings') }}</p>
-
-    <div *ngIf="!loading && bookings.length === 0" class="empty-card">
-      {{ t('noClientBookings') }}
-    </div>
-
-    <div class="booking-tabs" *ngIf="!loading && bookings.length">
-      <button type="button" [class.active]="activeDateTab === 'upcoming'" (click)="setDateTab('upcoming')">{{ t('upcoming') }}<span>{{ upcomingBookingsCount }}</span>
-      </button>
-      <button type="button" [class.active]="activeDateTab === 'past'" (click)="setDateTab('past')">{{ t('past') }}<span>{{ pastBookingsCount }}</span>
-      </button>
-    </div>
-
-    <div class="booking-toolbar-grid" *ngIf="!loading && bookings.length">
-      <label>
-        <span>{{ t('search') }}</span>
-        <input type="search" [(ngModel)]="searchTerm" [placeholder]="t('searchPlaceholder')" />
-      </label>
-
-      <label>
-        <span>{{ t('status') }}</span>
-        <select [(ngModel)]="statusFilter">
-          <option value="all">{{ t('allStatuses') }}</option>
-          <option value="not_confirmed">{{ t('notConfirmed') }}</option>
-          <option value="confirmed">{{ t('confirmed') }}</option>
-          <option value="payment_done">{{ t('paymentDone') }}</option>
-          <option value="completed">{{ t('outingCompleted') }}</option>
-        </select>
-      </label>
-
-      <label>
-        <span>{{ t('warranty') }}</span>
-        <select [(ngModel)]="warrantyFilter">
-          <option value="all">{{ t('allWarranties') }}</option>
-          <option value="not_selected">{{ t('notSelected') }}</option>
-          <option value="cash">{{ t('cashSelected') }}</option>
-          <option value="card_selected">{{ t('cardSelected') }}</option>
-          <option value="card_registered">{{ t('cardRegistered') }}</option>
-        </select>
-      </label>
-
-      <label>
-        <span>{{ t('orderBy') }}</span>
-        <select [(ngModel)]="sortField">
-          <option value="date">{{ t('date') }}</option>
-          <option value="customer">{{ t('customer') }}</option>
-          <option value="status">{{ t('status') }}</option>
-          <option value="total">{{ t('totalPrice') }}</option>
-          <option value="balance">{{ t('remaining90') }}</option>
-        </select>
-      </label>
-
-      <label>
-        <span>{{ t('direction') }}</span>
-        <select [(ngModel)]="sortDirection">
-          <option value="asc">{{ t('ascending') }}</option>
-          <option value="desc">{{ t('descending') }}</option>
-        </select>
-      </label>
-
-      <button class="btn btn-secondary" type="button" (click)="resetFilters()">{{ t('resetFilters') }}</button>
-    </div>
-
-    <p class="muted" *ngIf="!loading && bookings.length">
-      {{ t('showingBookings') }} <strong>{{ filteredBookings.length }}</strong> {{ activeDateTab === 'upcoming' ? t('upcoming') : t('past') }} {{ t('bookingsOutOf') }} <strong>{{ bookings.length }}</strong>.
-    </p>
-
-    <div class="bookings-list" *ngIf="!loading && filteredBookings.length">
-      <button class="booking-list-row" type="button" *ngFor="let booking of filteredBookings" (click)="openBooking(booking)">
-        <button class="status-pill status-clickable" type="button" (click)="openStatusModal(booking, $event)">
-          {{ getStatusLabel(booking) }}
-        </button>
-
-        <span class="booking-main">
-          <span class="booking-icon">⛵</span>
-          <span>
-            <strong>{{ booking.outingType || t('outing') }}</strong>
-            <small>{{ booking.outingDate || t('dateNotSet') }} <ng-container *ngIf="booking.departureTime">• {{ booking.departureTime }}</ng-container></small>
-          </span>
-        </span>
-
-        <span class="booking-customer">
-          <strong>👤 {{ getCustomerDisplayName(booking) }}</strong>
-          <small>{{ booking.passengers || '-' }} {{ t('passengers') }} · {{ booking.email || t('noEmail') }}</small>
-        </span>
-
-        <span class="booking-price">
-          <strong>€{{ booking.totalPrice || booking.totalAmount || 0 }}</strong>
-          <small>{{ t('totalPrice') }}</small>
-          <span class="booking-progress"><i [style.width.%]="getBookingProgress(booking)"></i></span>
-          <small>{{ getBookingProgress(booking) }}%</small>
-        </span>
-
-        <span class="row-actions" (click)="$event.stopPropagation()">
-          <button type="button" class="mini-btn"
-            *ngIf="shouldShowPaymentButton(booking) && !isBalancePaid(booking)"
-            (click)="payBooking(booking, $event)">
-            {{ getPaymentButtonLabel(booking) }}
-          </button>
-          <span class="row-chevron">›</span>
-        </span>
-      </button>
-    </div>
-
-    <div class="empty-card" *ngIf="!loading && bookings.length && filteredBookings.length === 0">
-      {{ t('noBookingMatch') }}
-    </div>
-  </div>
-
-    <div class="status-modal-backdrop" *ngIf="selectedStatusBooking" (click)="closeStatusModal()">
-      <section class="status-modal" (click)="$event.stopPropagation()">
-        <button class="modal-close" type="button" (click)="closeStatusModal()">×</button>
-        <span class="eyebrow">{{ t('bookingStatus') }}</span>
-        <h2>{{ getStatusLabel(selectedStatusBooking) }}</h2>
-        <p>{{ getStatusSummaryText(selectedStatusBooking) }}</p>
-
-        <div class="status-timeline">
-          <div class="status-step" [ngClass]="getStatusStepClass(isDepositPaid(selectedStatusBooking))">
-            <strong>{{ t('deposit10') }}</strong>
-            <span>{{ isDepositPaid(selectedStatusBooking) ? t('completed') : t('pending') }}</span>
-          </div>
-          <div class="status-step" [ngClass]="getStatusStepClass(isTermsAccepted(selectedStatusBooking))">
-            <strong>{{ t('tc') }}</strong>
-            <span>{{ isTermsAccepted(selectedStatusBooking) ? t('accepted') : t('notAccepted') }}</span>
-          </div>
-          <div class="status-step" [ngClass]="getStatusStepClass(isWarrantySecured(selectedStatusBooking))">
-            <strong>{{ t('warrantyMode') }}</strong>
-            <span>{{ getWarrantyModeLabel(selectedStatusBooking) }} · {{ getWarrantyCardLabel(selectedStatusBooking) }}</span>
-          </div>
-          <div class="status-step" [ngClass]="getStatusStepClass(isBalancePaid(selectedStatusBooking))">
-            <strong>{{ t('remaining90') }}</strong>
-            <span>{{ isBalancePaid(selectedStatusBooking) ? t('completed') : t('pending') }}</span>
-          </div>
-          <div class="status-step" [ngClass]="getStatusStepClass(getDamageStatusLabel(selectedStatusBooking).includes('recorded'))">
-            <strong>{{ t('damage') }}</strong>
-            <span>{{ getDamageStatusLabel(selectedStatusBooking) }}</span>
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn btn-secondary" type="button" (click)="closeStatusModal()">{{ t('close') }}</button>
-          <button class="btn btn-primary" type="button" (click)="openBooking(selectedStatusBooking)">{{ t('openBooking') }}</button>
-        </div>
-      </section>
-    </div>
-
+  <section *ngIf="checkout" class="booking-card payment-panel" [attr.aria-label]="'ui.pages.tad9bf9dd43b5' | siteText">
+    <p *ngIf="checkout.checkout.stripeMode==='test'" class="notice" role="status">{{ "ui.pages.t2a6e31953843" | siteText }}</p>
+    <span class="eyebrow">{{ "ui.pages.t6d3771de8e3a" | siteText }}</span><h2>{{ paymentTitle(checkout.kind) | siteText }}</h2>
+    <p *ngIf="checkout.kind==='security_deposit'">{{ "ui.pages.t1792574188a6" | siteText }} {{checkout.amount}} {{checkout.currency}}{{ "ui.pages.t0e1858a6665b" | siteText }}</p>
+    <p *ngIf="checkout.kind!=='security_deposit'">{{ "ui.pages.tbf63ab8774b1" | siteText }} <strong>{{checkout.amount | number:'1.2-2'}} {{checkout.currency}}</strong></p>
+    <div #paymentHost class="payment-element"></div>
+    <p *ngIf="error" class="notice error">{{ error | siteText }}</p>
+    <div class="actions"><button type="button" class="primary" [disabled]="!!busy" (click)="confirmPayment()">{{busy==='payment'?('ui.messages.t22ddf9388cea' | siteText):checkout.kind==='security_deposit'?('ui.messages.t64d17e0f5f47' | siteText):('ui.messages.tabefff5f023b' | siteText)}}</button><button type="button" [disabled]="!!busy" (click)="closePayment()">{{ "ui.pages.tf201a632220e" | siteText }}</button></div>
+  </section>
+  <h2>{{ "ui.pages.t47d9a55512ce" | siteText }}</h2><p *ngIf="!loading && !past.length">{{ "ui.pages.td6328bc603a4" | siteText }}</p>
+  <article *ngFor="let b of past" class="booking-card"><div class="card-heading"><h3>{{ b.assetType | siteText }} · {{b.assetId}}</h3><span class="status">{{ reservationStatus(b) | siteText }}</span></div><p>{{b.startAt | date:'medium'}} — {{b.endAt | date:'medium'}}</p><button type="button" (click)="open(b)">{{ "ui.pages.tc6565c1527e9" | siteText }}</button></article>
 </section>

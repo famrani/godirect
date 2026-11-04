@@ -1,9 +1,11 @@
+import {PAGE_TRANSLATIONS,LITERAL_KEYS} from '../../services/page-translations';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, timeout } from 'rxjs';
 import { SITE_CONTENT, SiteContent } from '../site-content';
 import { SiteLanguage } from '../../services/language.service';
-import { BoatContextService } from '../../services/boat-context.service';
+import { ResourceContextService } from '../../services/resource-context.service';
+import { PrivateMediaService } from '../../services/private-media.service';
 
 export type SiteContentRoot = Partial<Record<SiteLanguage, any>> & {
   i18n?: Partial<Record<SiteLanguage, any>>;
@@ -40,58 +42,71 @@ export interface AlegriaV2ContentRoot {
 @Injectable({ providedIn: 'root' })
 export class SiteContentService {
   private readonly restDatabaseUrls = [
-    'https://adn-dev-4d05d.firebaseio.com',
+    'https://ailla-poc-default-rtdb.firebaseio.com',
   ];
 
   private readonly languages: SiteLanguage[] = ['fr', 'en', 'es', 'it', 'de', 'nl', 'ru'];
   private readonly defaultTenantId = 'alegria';
 
+  private cacheGeneration=0;
+  invalidate():void { this.cacheGeneration++;this.cached=undefined;this.rawSiteContent=undefined;this.scopeLoads.clear(); }
+  private cacheScope="";
+  private globalContent:any;
+  private globalPromise?:Promise<any>;
+  private scopeLoads=new Map<string,Promise<Record<SiteLanguage,SiteContent>>>();
   private cached?: Record<SiteLanguage, SiteContent>;
-  private cachedBoatId?: string;
+  private rawScope="";
   private rawSiteContent?: SiteContentRoot | null;
 
-  constructor(private http: HttpClient, private boatContext: BoatContextService) {}
+  constructor(
+    private http: HttpClient,
+    private resourceContext: ResourceContextService,
+    private privateMedia: PrivateMediaService,
+  ) {}
 
   /**
-   * Release 3.1: siteContent is the single UI-text source.
+   * R22.8: shared UI is read from /uiTranslations via the backend.
+   * Resource CMS remains scoped to /siteContent/{type}/{id}/{language}.
    *
    * Canonical Firebase shape:
-   *   /siteContent/{boatId}/{language}/...
+   *   /siteContent/{resourceType}/{resourceId}/{language}/...
    *
    * Backwards compatible only for old dumps that still have:
    *   /siteContent/i18n/fr/...
    *
    * The service no longer reads /alegria_v2 for translations.
    */
-  async getContent(forceRefresh = false): Promise<Record<SiteLanguage, SiteContent>> {
-    const boatId = this.boatContext.boatId;
-    if (this.cached && this.cachedBoatId === boatId && !forceRefresh) {
-      return this.cached;
-    }
-
-    for (const baseUrl of this.restDatabaseUrls) {
-      try {
-        const scoped = await firstValueFrom(this.http.get<SiteContentRoot | null>(
-          `${baseUrl}/siteContent/${encodeURIComponent(this.boatContext.boatId)}.json`
-        ).pipe(timeout(5000)));
-        const raw = scoped || await firstValueFrom(this.http.get<SiteContentRoot | null>(`${baseUrl}/siteContent.json`).pipe(timeout(5000)));
-        const normalized = this.normalizeSiteContent(raw);
-
-        if (normalized) {
-          this.rawSiteContent = raw;
-          this.cached = this.normalizeFirebaseLanguages(normalized);
-          this.cachedBoatId = boatId;
-          return this.cached;
-        }
-      } catch {
-        // Continue to local fallback.
+  getContent(forceRefresh = false): Promise<Record<SiteLanguage, SiteContent>> {
+    const scope=this.resourceContext.scopedPath('siteContent');
+    const current=this.scopeLoads.get(scope);if(current&&!forceRefresh)return current;
+    const task=this.loadContent(forceRefresh);this.scopeLoads.set(scope,task);
+    void task.then(()=>{if(this.scopeLoads.get(scope)===task)this.scopeLoads.delete(scope);},()=>this.scopeLoads.delete(scope));return task;
+  }
+  private async loadContent(forceRefresh = false): Promise<Record<SiteLanguage, SiteContent>> {
+    const scope=this.resourceContext.scopedPath('siteContent');
+    if(this.cached&&this.cacheScope===scope&&!forceRefresh)return this.cached;
+    this.cacheScope=scope;
+    const generation=this.cacheGeneration;
+    try{
+      if(forceRefresh)this.globalPromise=undefined;
+      if(!this.globalContent||forceRefresh){try{this.globalPromise ||= firstValueFrom(this.http.get<any>('/api/ui-content').pipe(timeout(5000))).finally(()=>this.globalPromise=undefined);this.globalContent=await this.globalPromise;}catch{}}
+      let scoped:any={};
+      try{scoped=await firstValueFrom(this.http.get<any>(`${this.restDatabaseUrls[0]}/${scope}.json`).pipe(timeout(5000)))||{};}catch{}
+      const value:any={};
+      for(const language of this.languages){
+        const fallback=(SITE_CONTENT as any)[language]||(SITE_CONTENT as any).en||{};
+        value[language]=this.deepMerge(this.deepMerge(fallback,this.globalContent?.[language]||{}),scoped?.[language]||{});
+        // Generic role labels and new shared UI belong to the platform, not boat CMS overrides.
+        if(this.globalContent?.[language]?.roles)value[language].roles=this.globalContent[language].roles;
+        if(this.globalContent?.[language]?.ui)value[language].ui=this.globalContent[language].ui;
+        value[language]=this.applyLegacyContentAliases(value[language]);
       }
+      const resolved=await this.privateMedia.resolveFirebaseTree(value).catch(()=>value);
+      if(this.cacheScope===scope&&this.cacheGeneration===generation){this.rawSiteContent=scoped;this.rawScope=scope;this.cached=resolved;}
+      return resolved;
+    }catch{
+      const fallback=this.mergeAll(SITE_CONTENT as any);if(this.cacheScope===scope&&this.cacheGeneration===generation)this.cached=fallback;return fallback;
     }
-
-    this.rawSiteContent = SITE_CONTENT as any;
-    this.cached = this.mergeAll(SITE_CONTENT as any);
-    this.cachedBoatId = boatId;
-    return this.cached;
   }
 
   async getLanguageContent(language: SiteLanguage): Promise<SiteContent> {
@@ -100,21 +115,23 @@ export class SiteContentService {
   }
 
   async getRawContent(forceRefresh = false): Promise<any> {
-    if (!forceRefresh && this.rawSiteContent) return this.rawSiteContent;
+    const scope=this.resourceContext.scopedPath('siteContent');
+    if (!forceRefresh && this.rawSiteContent && this.rawScope===scope) return this.rawSiteContent;
 
     for (const baseUrl of this.restDatabaseUrls) {
       try {
         this.rawSiteContent = await firstValueFrom(this.http.get<any>(
-          `${baseUrl}/siteContent/${encodeURIComponent(this.boatContext.boatId)}.json`
+          `${baseUrl}/${this.resourceContext.scopedPath('siteContent')}.json`
         ).pipe(timeout(5000)));
         if (!this.rawSiteContent) {
-          this.rawSiteContent = await firstValueFrom(this.http.get<any>(`${baseUrl}/siteContent.json`).pipe(timeout(5000)));
+          this.rawSiteContent = {};
         }
+        this.rawScope=scope;
         return this.rawSiteContent;
       } catch {}
     }
 
-    return SITE_CONTENT as any;
+    return {};
   }
 
   async translate(path: string, language: SiteLanguage = 'fr', fallback = ''): Promise<string> {
@@ -124,12 +141,15 @@ export class SiteContentService {
 
   /** Synchronous lookup for components/pipes that already hold a content object. */
   tFromContent(all: any, path: string, language: SiteLanguage = 'fr', fallback = ''): string {
+    path=LITERAL_KEYS[path]||path;
     const current = all?.[language];
     const english = all?.en;
     const french = all?.fr;
 
     const value = this.getByPath(current, path);
-    if (typeof value === 'string') return value;
+    if (typeof value === 'string' && value.trim()) return value;
+    const bundled=PAGE_TRANSLATIONS[language]?.[path];
+    if(typeof bundled==='string' && bundled.trim())return bundled;
 
     const englishValue = this.getByPath(english, path);
     if (typeof englishValue === 'string') return englishValue;
@@ -206,12 +226,38 @@ export class SiteContentService {
     const french = (value as any).fr || {};
     return this.languages.reduce((acc, language) => {
       const localized = (value as any)[language];
-      (acc as any)[language] = this.deepMerge(
-        this.deepMerge({}, english || french),
+      const merged = this.deepMerge(
+        this.deepMerge({}, french || english),
         localized || french || english
       );
+      (acc as any)[language] = this.applyLegacyContentAliases(merged);
       return acc;
     }, {} as Record<SiteLanguage, SiteContent>);
+  }
+
+  /**
+   * `admin-proposals` was renamed to `admin-offers`. Older Firebase dumps still
+   * contain the WhatsApp dialog copy under the former component path. Preserve
+   * those installations while the canonical Firebase patch is being imported.
+   */
+  private applyLegacyContentAliases<T>(content: T): T {
+    const output: any = content || {};
+    const home = output?.auto?.home;
+    if (!home || typeof home !== 'object') return output as T;
+
+    const legacy = home?.['admin-proposals']?.['admin-proposals']?.component;
+    const current = home?.['admin-offers']?.['admin-offers']?.component;
+    if (!legacy || typeof legacy !== 'object') return output as T;
+
+    const normalized = this.deepMerge({}, legacy) as any;
+    if (!normalized.envoyer_la_offre_au_client && legacy.envoyer_la_proposition_au_client) {
+      normalized.envoyer_la_offre_au_client = legacy.envoyer_la_proposition_au_client;
+    }
+
+    home['admin-offers'] = home['admin-offers'] || {};
+    home['admin-offers']['admin-offers'] = home['admin-offers']['admin-offers'] || {};
+    home['admin-offers']['admin-offers'].component = this.deepMerge(normalized, current || {});
+    return output as T;
   }
 
   private deepMerge<T>(target: T, source: any): T {

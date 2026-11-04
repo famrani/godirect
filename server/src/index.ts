@@ -1,6 +1,8 @@
-import { MainComponent } from './app/main/main';
+import 'dotenv/config';
+import { MainComponent } from './app/main/main.js';
 
-let app = new MainComponent();
-
-export { app };
-
+const main = new MainComponent();
+main.start().catch((error) => {
+  console.error('[GoDirect] fatal startup error', error);
+  process.exit(1);
+});

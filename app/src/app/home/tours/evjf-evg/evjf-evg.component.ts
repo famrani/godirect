@@ -5,6 +5,7 @@ import { TourPage, getTourContent } from '../tour-content';
 import { DynamicOuting, OutingsDataService } from '../../outings-data.service';
 
 @Component({
+  standalone: false,
   selector: 'app-evjf-evg',
   templateUrl: './evjf-evg.component.html',
   styleUrls: ['./evjf-evg.component.scss'],

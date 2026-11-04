@@ -4,6 +4,7 @@ import { LanguageService, SiteLanguage } from '../../services/language.service';
 import { GuestContentService, GuestJourneyContent, DEFAULT_GUEST_INFO_CONTENT } from '../guest-content/guest-content.service';
 
 @Component({
+  standalone: false,
   selector: 'app-guest-journey',
   templateUrl: './guest-journey.component.html',
   styleUrls: ['./guest-journey.component.scss'],

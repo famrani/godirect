@@ -19,7 +19,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/forms */ 34456);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! godigital-lib */ 83);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! godigital-lib */ 22464);
 /* harmony import */ var _login_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../login.service */ 89652);
 
 
@@ -169,9 +169,15 @@ let LoginComponent = class LoginComponent {
   loginWithGoogle() {
     var _this2 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      // Keep the Firebase popup promise directly attached to the user's click.
+      // Do NOT wrap popup authentication in an application timeout: choosing a
+      // Google account can legitimately take more than 20 seconds and racing the
+      // popup promise can leave Firebase's popup lifecycle in an inconsistent state.
+      if (_this2.sending) return;
       _this2.sending = true;
+      _this2.closeError();
       try {
-        const user = yield _this2.withTimeout(_this2.users.signInWithGoogleAndLoadProfile(), 20000, 'Google sign-in is taking too long. Please try again.');
+        const user = yield _this2.users.signInWithGoogleAndLoadProfile();
         // (Optional) ensure we have an RTDB profile doc (in case first-time Google login)
         // If your UsersService already upserts, you can remove this block:
         try {
@@ -195,7 +201,25 @@ let LoginComponent = class LoginComponent {
         } catch {/* best effort upsert */}
         _this2.postLoginRedirect();
       } catch (e) {
-        _this2.openError(e?.message || 'Google sign-in failed.');
+        const code = String(e?.code || '');
+        console.error('[Google Auth]', {
+          code,
+          message: e?.message,
+          error: e
+        });
+        if (code.includes('auth/popup-closed-by-user')) {
+          _this2.openError('The Google sign-in window closed before Firebase received the result. Please try again and keep the Google window open until it returns to GoDirect. If it closes immediately, verify that this site domain is listed in Firebase Authentication > Settings > Authorized domains.', 'Google sign-in interrupted');
+        } else if (code.includes('auth/popup-blocked')) {
+          _this2.openError('Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.', 'Google pop-up blocked');
+        } else if (code.includes('auth/unauthorized-domain')) {
+          _this2.openError(`This domain (${window.location.hostname}) is not authorized for Firebase Authentication. Add it in Firebase Authentication > Settings > Authorized domains.`, 'Unauthorized domain');
+        } else if (code.includes('auth/operation-not-allowed')) {
+          _this2.openError('Google authentication is not enabled for this Firebase project. Enable Google in Firebase Authentication > Sign-in method.', 'Google authentication disabled');
+        } else if (code.includes('auth/cancelled-popup-request')) {
+          _this2.openError('Another Google sign-in request was already in progress. Please try once more.', 'Google sign-in interrupted');
+        } else {
+          _this2.openError(`${e?.message || 'Google sign-in failed.'}${code ? ` (${code})` : ''}`);
+        }
       } finally {
         _this2.sending = false;
       }
@@ -241,6 +265,7 @@ let LoginComponent = class LoginComponent {
   }];
 };
 LoginComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_7__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Component)({
+  standalone: false,
   selector: 'app-login',
   template: _login_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_login_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
@@ -266,7 +291,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `
   min-height: 100vh;
   background:
     linear-gradient(135deg, rgba(8, 38, 58, 0.92), rgba(13, 111, 143, 0.72)),
-    url('/assets/img/home/home-hero-generic.jpg') center/cover no-repeat;
+    url('/api/media/object?path=assets%2Fboats%2Falegria%2Fhomepage%2Fhome-hero-generic.jpg') center/cover no-repeat;
   padding: 56px 16px;
   color: #08263a;
   font-family: 'Lato', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -601,7 +626,7 @@ a:hover {
   line-height: 1.55;
   margin-bottom: 20px;
 }
-`, "",{"version":3,"sources":["webpack://./src/app/login/login/login.component.css"],"names":[],"mappings":";AACA;EACE,cAAc;EACd,iBAAiB;EACjB;;wEAEsE;EACtE,kBAAkB;EAClB,cAAc;EACd,yFAAyF;AAC3F;;AAEA;;EAEE,2BAA2B;EAC3B,cAAc;AAChB;;AAEA;;;;EAIE,qCAAqC;EACrC,2CAA2C;EAC3C,mBAAmB;EACnB,6CAA6C;EAC7C,+BAA+B;EAC/B,mCAA2B;UAA3B,2BAA2B;AAC7B;;AAEA;EACE,kBAAkB;EAClB,mBAAmB;AACrB;;AAEA;EACE,WAAW;EACX,YAAY;EACZ,oBAAoB;EACpB,oBAAoB;EACpB,mBAAmB;EACnB,uBAAuB;EACvB,mBAAmB;EACnB,mBAAmB;EACnB,cAAc;EACd,eAAe;EACf,6CAA6C;AAC/C;;AAEA;;;;EAIE,+CAA+C;EAC/C,cAAc;EACd,gBAAgB;EAChB,uBAAuB;AACzB;;AAEA;;EAEE,iCAAiC;EACjC,kBAAkB;AACpB;;AAEA;;;;EAIE,0CAA0C;EAC1C,yBAAyB;AAC3B;;AAEA;EACE,qBAAqB;EACrB,mBAAmB;EACnB,6CAA6C;EAC7C,cAAc;EACd,kBAAkB;EAClB,gBAAgB;EAChB,sBAAsB;EACtB,yBAAyB;AAC3B;;AAEA;EACE,6CAA6C;EAC7C,cAAc;EACd,kBAAkB;EAClB,gBAAgB;EAChB,sBAAsB;EACtB,yBAAyB;AAC3B;;AAEA;;;;EAIE,gBAAgB;EAChB,0CAA0C;EAC1C,mBAAmB;EACnB,mBAAmB;EACnB,cAAc;EACd,kBAAkB;EAClB,gBAAgB;AAClB;;AAEA;;EAEE,qBAAqB;EACrB,kDAAkD;EAClD,mBAAmB;AACrB;;AAEA;EACE,yBAAyB;EACzB,qBAAqB;AACvB;;AAEA;EACE,6CAA6C;EAC7C,gBAAgB;EAChB,+BAA+B;EAC/B,sBAAsB;EACtB,gBAAgB;AAClB;;AAEA;;EAEE,8BAA8B;EAC9B,gCAAgC;EAChC,yBAAyB;EACzB,gDAAgD;AAClD;;AAEA;;EAEE,8BAA8B;EAC9B,gCAAgC;EAChC,2BAA2B;AAC7B;;AAEA;;;EAGE,gCAAgC;EAChC,yBAAyB;EACzB,kCAAkC;AACpC;;AAEA;;;EAGE,8BAA8B;EAC9B,yBAAyB;AAC3B;;AAEA;EACE,8CAA8C;EAC9C,yBAAyB;EACzB,8BAA8B;AAChC;;AAEA;EACE,8BAA8B;EAC9B,yBAAyB;AAC3B;;AAEA;EACE,cAAc;EACd,gBAAgB;EAChB,qBAAqB;AACvB;;AAEA;EACE,cAAc;EACd,0BAA0B;AAC5B;;AAEA;;EAEE,aAAa;EACb,mBAAmB;EACnB,SAAS;EACT,cAAc;EACd,kBAAkB;EAClB,cAAc;AAChB;;AAEA;;EAEE,SAAS;EACT,mBAAmB;EACnB,6CAA6C;EAC7C,yBAAyB;EACzB,sBAAsB;EACtB,kBAAkB;AACpB;;AAEA;;EAEE,sCAAsC;EACtC,UAAU;AACZ;;AAEA;EACE,SAAS;EACT,mBAAmB;EACnB,oCAAoC;EACpC,cAAc;AAChB;;AAEA;;EAEE,kBAAkB;AACpB;;AAEA;EACE,SAAS;EACT,mBAAmB;EACnB,6CAA6C;AAC/C;;AAEA;EACE,iDAAiD;AACnD;;AAEA;EACE,+CAA+C;EAC/C,cAAc;AAChB;;AAEA;EACE,+BAA+B;EAC/B,aAAa;EACb,mBAAmB;EACnB,uBAAuB;AACzB;;AAEA;EACE,aAAa;AACf;;AAEA;EACE;IACE,kBAAkB;EACpB;;EAEA;;;;IAIE,kBAAkB;IAClB,mBAAmB;EACrB;;EAEA;IACE,0BAA0B;IAC1B,2BAA2B;EAC7B;;EAEA;;IAEE,sBAAsB;EACxB;;EAEA;IACE,mCAAmC;EACrC;;EAEA;;;IAGE,WAAW;EACb;;EAEA;;IAEE,eAAe;EACjB;AACF;;;AAGA;EACE,kBAAkB;AACpB;;AAEA;EACE,mBAAmB;AACrB;;AAEA;EACE,kBAAkB;EAClB,QAAQ;EACR,WAAW;EACX,2BAA2B;EAC3B,SAAS;EACT,uBAAuB;EACvB,cAAc;EACd,6CAA6C;EAC7C,kBAAkB;EAClB,gBAAgB;EAChB,gBAAgB;EAChB,eAAe;AACjB;;AAEA;EACE,cAAc;EACd,0BAA0B;AAC5B;;AAEA;EACE,eAAe;EACf,QAAQ;EACR,kCAAkC;EAClC,aAAa;EACb,aAAa;EACb,mBAAmB;EACnB,uBAAuB;EACvB,aAAa;AACf;;AAEA;EACE,uBAAuB;EACvB,gBAAgB;EAChB,mBAAmB;EACnB,aAAa;EACb,8CAA8C;EAC9C,kBAAkB;AACpB;;AAEA;EACE,mBAAmB;EACnB,gBAAgB;AAClB;;AAEA;EACE,cAAc;EACd,iBAAiB;EACjB,mBAAmB;AACrB","sourcesContent":["\n:host {\n  display: block;\n  min-height: 100vh;\n  background:\n    linear-gradient(135deg, rgba(8, 38, 58, 0.92), rgba(13, 111, 143, 0.72)),\n    url('/assets/img/home/home-hero-generic.jpg') center/cover no-repeat;\n  padding: 56px 16px;\n  color: #08263a;\n  font-family: 'Lato', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;\n}\n\n.auth-shell,\n.container {\n  max-width: 760px !important;\n  margin: 0 auto;\n}\n\n.auth-card,\n.form-box,\nform[formGroup],\n.container > form {\n  background: rgba(255, 255, 255, 0.96);\n  border: 1px solid rgba(255, 255, 255, 0.65);\n  border-radius: 28px;\n  box-shadow: 0 24px 70px rgba(8, 38, 58, 0.28);\n  padding: clamp(24px, 5vw, 44px);\n  backdrop-filter: blur(12px);\n}\n\n.auth-brand {\n  text-align: center;\n  margin-bottom: 26px;\n}\n\n.auth-mark {\n  width: 64px;\n  height: 64px;\n  border-radius: 999px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  margin-bottom: 14px;\n  background: #08263a;\n  color: #f4a261;\n  font-size: 2rem;\n  box-shadow: 0 14px 30px rgba(8, 38, 58, 0.22);\n}\n\n.auth-brand h1,\nh1,\nh1.h4,\nh4 {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: #08263a;\n  font-weight: 700;\n  letter-spacing: -0.02em;\n}\n\n.auth-brand h1,\nh1.h4 {\n  font-size: clamp(2rem, 5vw, 3rem);\n  margin-bottom: 6px;\n}\n\n.auth-brand p,\n.text-muted,\n.form-text,\np {\n  font-family: 'Lato', system-ui, sans-serif;\n  color: #5b6773 !important;\n}\n\n.auth-eyebrow {\n  display: inline-block;\n  margin-bottom: 10px;\n  font-family: 'Raleway', system-ui, sans-serif;\n  color: #0d6f8f;\n  font-size: 0.76rem;\n  font-weight: 800;\n  letter-spacing: 0.18em;\n  text-transform: uppercase;\n}\n\n.form-label {\n  font-family: 'Raleway', system-ui, sans-serif;\n  color: #0d4f6d;\n  font-size: 0.78rem;\n  font-weight: 800;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n}\n\n.form-control,\n.form-select,\n.form-control-sm,\n.form-select-sm {\n  min-height: 46px;\n  border: 1px solid rgba(13, 111, 143, 0.22);\n  border-radius: 14px;\n  background: #f8fbfc;\n  color: #08263a;\n  font-size: 0.95rem;\n  box-shadow: none;\n}\n\n.form-control:focus,\n.form-select:focus {\n  border-color: #0d6f8f;\n  box-shadow: 0 0 0 0.22rem rgba(13, 111, 143, 0.14);\n  background: #ffffff;\n}\n\n.form-check-input:checked {\n  background-color: #f4a261;\n  border-color: #f4a261;\n}\n\n.btn {\n  font-family: 'Raleway', system-ui, sans-serif;\n  font-weight: 800;\n  border-radius: 999px !important;\n  letter-spacing: 0.03em;\n  min-height: 46px;\n}\n\n.btn-primary,\n.btn-dark {\n  background: #f4a261 !important;\n  border-color: #f4a261 !important;\n  color: #08263a !important;\n  box-shadow: 0 16px 28px rgba(244, 162, 97, 0.28);\n}\n\n.btn-primary:hover,\n.btn-dark:hover {\n  background: #e99045 !important;\n  border-color: #e99045 !important;\n  transform: translateY(-1px);\n}\n\n.btn-outline-primary,\n.btn-outline-dark,\n.btn-outline-secondary {\n  border-color: #0d6f8f !important;\n  color: #0d4f6d !important;\n  background: transparent !important;\n}\n\n.btn-outline-primary:hover,\n.btn-outline-dark:hover,\n.btn-outline-secondary:hover {\n  background: #0d6f8f !important;\n  color: #ffffff !important;\n}\n\n.btn-outline-danger {\n  border-color: rgba(8, 38, 58, 0.18) !important;\n  color: #08263a !important;\n  background: #ffffff !important;\n}\n\n.btn-outline-danger:hover {\n  background: #f8fbfc !important;\n  color: #08263a !important;\n}\n\na {\n  color: #0d6f8f;\n  font-weight: 700;\n  text-decoration: none;\n}\n\na:hover {\n  color: #08263a;\n  text-decoration: underline;\n}\n\n.seperator,\n.separator {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  color: #8a97a3;\n  font-size: 0.86rem;\n  margin: 12px 0;\n}\n\n.seperator p,\n.separator p {\n  margin: 0;\n  white-space: nowrap;\n  font-family: 'Raleway', system-ui, sans-serif;\n  text-transform: uppercase;\n  letter-spacing: 0.12em;\n  font-size: 0.72rem;\n}\n\n.seperator hr,\n.separator hr {\n  border-color: rgba(13, 111, 143, 0.18);\n  opacity: 1;\n}\n\n.alert-success {\n  border: 0;\n  border-radius: 18px;\n  background: rgba(13, 111, 143, 0.10);\n  color: #0d4f6d;\n}\n\n.invalid-feedback,\n.text-danger {\n  font-size: 0.85rem;\n}\n\n.modal-content {\n  border: 0;\n  border-radius: 24px;\n  box-shadow: 0 24px 70px rgba(8, 38, 58, 0.28);\n}\n\n.modal-header {\n  border-bottom: 1px solid rgba(13, 111, 143, 0.12);\n}\n\n.modal-title {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: #08263a;\n}\n\n.full-screen {\n  min-height: calc(100vh - 112px);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.bottom-dark {\n  display: none;\n}\n\n@media (max-width: 768px) {\n  :host {\n    padding: 28px 14px;\n  }\n\n  .auth-card,\n  .form-box,\n  form[formGroup],\n  .container > form {\n    padding: 24px 18px;\n    border-radius: 22px;\n  }\n\n  .container {\n    padding-left: 0 !important;\n    padding-right: 0 !important;\n  }\n\n  .row.g-3,\n  .row.g-2 {\n    --bs-gutter-y: 0.85rem;\n  }\n\n  .d-flex.justify-content-end {\n    justify-content: stretch !important;\n  }\n\n  .d-flex.justify-content-end .btn,\n  .d-grid .btn,\n  button.w-100 {\n    width: 100%;\n  }\n\n  .auth-brand h1,\n  h1.h4 {\n    font-size: 2rem;\n  }\n}\n\n\n.password-wrapper {\n  position: relative;\n}\n\n.password-wrapper .form-control {\n  padding-right: 86px;\n}\n\n.password-toggle {\n  position: absolute;\n  top: 50%;\n  right: 10px;\n  transform: translateY(-50%);\n  border: 0;\n  background: transparent;\n  color: #0d6f8f;\n  font-family: 'Raleway', system-ui, sans-serif;\n  font-size: 0.78rem;\n  font-weight: 800;\n  padding: 4px 8px;\n  cursor: pointer;\n}\n\n.password-toggle:hover {\n  color: #08263a;\n  text-decoration: underline;\n}\n\n.auth-error-backdrop {\n  position: fixed;\n  inset: 0;\n  background: rgba(15, 23, 42, 0.55);\n  z-index: 2000;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 24px;\n}\n\n.auth-error-card {\n  width: min(460px, 100%);\n  background: #fff;\n  border-radius: 18px;\n  padding: 28px;\n  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.25);\n  text-align: center;\n}\n\n.auth-error-card h5 {\n  margin-bottom: 12px;\n  font-weight: 700;\n}\n\n.auth-error-card p {\n  color: #475569;\n  line-height: 1.55;\n  margin-bottom: 20px;\n}\n"],"sourceRoot":""}]);
+`, "",{"version":3,"sources":["webpack://./src/app/login/login/login.component.css"],"names":[],"mappings":"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","sourcesContent":["\n:host {\n  display: block;\n  min-height: 100vh;\n  background:\n    linear-gradient(135deg, rgba(8, 38, 58, 0.92), rgba(13, 111, 143, 0.72)),\n    url('/api/media/object?path=assets%2Fboats%2Falegria%2Fhomepage%2Fhome-hero-generic.jpg') center/cover no-repeat;\n  padding: 56px 16px;\n  color: #08263a;\n  font-family: 'Lato', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;\n}\n\n.auth-shell,\n.container {\n  max-width: 760px !important;\n  margin: 0 auto;\n}\n\n.auth-card,\n.form-box,\nform[formGroup],\n.container > form {\n  background: rgba(255, 255, 255, 0.96);\n  border: 1px solid rgba(255, 255, 255, 0.65);\n  border-radius: 28px;\n  box-shadow: 0 24px 70px rgba(8, 38, 58, 0.28);\n  padding: clamp(24px, 5vw, 44px);\n  backdrop-filter: blur(12px);\n}\n\n.auth-brand {\n  text-align: center;\n  margin-bottom: 26px;\n}\n\n.auth-mark {\n  width: 64px;\n  height: 64px;\n  border-radius: 999px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  margin-bottom: 14px;\n  background: #08263a;\n  color: #f4a261;\n  font-size: 2rem;\n  box-shadow: 0 14px 30px rgba(8, 38, 58, 0.22);\n}\n\n.auth-brand h1,\nh1,\nh1.h4,\nh4 {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: #08263a;\n  font-weight: 700;\n  letter-spacing: -0.02em;\n}\n\n.auth-brand h1,\nh1.h4 {\n  font-size: clamp(2rem, 5vw, 3rem);\n  margin-bottom: 6px;\n}\n\n.auth-brand p,\n.text-muted,\n.form-text,\np {\n  font-family: 'Lato', system-ui, sans-serif;\n  color: #5b6773 !important;\n}\n\n.auth-eyebrow {\n  display: inline-block;\n  margin-bottom: 10px;\n  font-family: 'Raleway', system-ui, sans-serif;\n  color: #0d6f8f;\n  font-size: 0.76rem;\n  font-weight: 800;\n  letter-spacing: 0.18em;\n  text-transform: uppercase;\n}\n\n.form-label {\n  font-family: 'Raleway', system-ui, sans-serif;\n  color: #0d4f6d;\n  font-size: 0.78rem;\n  font-weight: 800;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n}\n\n.form-control,\n.form-select,\n.form-control-sm,\n.form-select-sm {\n  min-height: 46px;\n  border: 1px solid rgba(13, 111, 143, 0.22);\n  border-radius: 14px;\n  background: #f8fbfc;\n  color: #08263a;\n  font-size: 0.95rem;\n  box-shadow: none;\n}\n\n.form-control:focus,\n.form-select:focus {\n  border-color: #0d6f8f;\n  box-shadow: 0 0 0 0.22rem rgba(13, 111, 143, 0.14);\n  background: #ffffff;\n}\n\n.form-check-input:checked {\n  background-color: #f4a261;\n  border-color: #f4a261;\n}\n\n.btn {\n  font-family: 'Raleway', system-ui, sans-serif;\n  font-weight: 800;\n  border-radius: 999px !important;\n  letter-spacing: 0.03em;\n  min-height: 46px;\n}\n\n.btn-primary,\n.btn-dark {\n  background: #f4a261 !important;\n  border-color: #f4a261 !important;\n  color: #08263a !important;\n  box-shadow: 0 16px 28px rgba(244, 162, 97, 0.28);\n}\n\n.btn-primary:hover,\n.btn-dark:hover {\n  background: #e99045 !important;\n  border-color: #e99045 !important;\n  transform: translateY(-1px);\n}\n\n.btn-outline-primary,\n.btn-outline-dark,\n.btn-outline-secondary {\n  border-color: #0d6f8f !important;\n  color: #0d4f6d !important;\n  background: transparent !important;\n}\n\n.btn-outline-primary:hover,\n.btn-outline-dark:hover,\n.btn-outline-secondary:hover {\n  background: #0d6f8f !important;\n  color: #ffffff !important;\n}\n\n.btn-outline-danger {\n  border-color: rgba(8, 38, 58, 0.18) !important;\n  color: #08263a !important;\n  background: #ffffff !important;\n}\n\n.btn-outline-danger:hover {\n  background: #f8fbfc !important;\n  color: #08263a !important;\n}\n\na {\n  color: #0d6f8f;\n  font-weight: 700;\n  text-decoration: none;\n}\n\na:hover {\n  color: #08263a;\n  text-decoration: underline;\n}\n\n.seperator,\n.separator {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  color: #8a97a3;\n  font-size: 0.86rem;\n  margin: 12px 0;\n}\n\n.seperator p,\n.separator p {\n  margin: 0;\n  white-space: nowrap;\n  font-family: 'Raleway', system-ui, sans-serif;\n  text-transform: uppercase;\n  letter-spacing: 0.12em;\n  font-size: 0.72rem;\n}\n\n.seperator hr,\n.separator hr {\n  border-color: rgba(13, 111, 143, 0.18);\n  opacity: 1;\n}\n\n.alert-success {\n  border: 0;\n  border-radius: 18px;\n  background: rgba(13, 111, 143, 0.10);\n  color: #0d4f6d;\n}\n\n.invalid-feedback,\n.text-danger {\n  font-size: 0.85rem;\n}\n\n.modal-content {\n  border: 0;\n  border-radius: 24px;\n  box-shadow: 0 24px 70px rgba(8, 38, 58, 0.28);\n}\n\n.modal-header {\n  border-bottom: 1px solid rgba(13, 111, 143, 0.12);\n}\n\n.modal-title {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: #08263a;\n}\n\n.full-screen {\n  min-height: calc(100vh - 112px);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.bottom-dark {\n  display: none;\n}\n\n@media (max-width: 768px) {\n  :host {\n    padding: 28px 14px;\n  }\n\n  .auth-card,\n  .form-box,\n  form[formGroup],\n  .container > form {\n    padding: 24px 18px;\n    border-radius: 22px;\n  }\n\n  .container {\n    padding-left: 0 !important;\n    padding-right: 0 !important;\n  }\n\n  .row.g-3,\n  .row.g-2 {\n    --bs-gutter-y: 0.85rem;\n  }\n\n  .d-flex.justify-content-end {\n    justify-content: stretch !important;\n  }\n\n  .d-flex.justify-content-end .btn,\n  .d-grid .btn,\n  button.w-100 {\n    width: 100%;\n  }\n\n  .auth-brand h1,\n  h1.h4 {\n    font-size: 2rem;\n  }\n}\n\n\n.password-wrapper {\n  position: relative;\n}\n\n.password-wrapper .form-control {\n  padding-right: 86px;\n}\n\n.password-toggle {\n  position: absolute;\n  top: 50%;\n  right: 10px;\n  transform: translateY(-50%);\n  border: 0;\n  background: transparent;\n  color: #0d6f8f;\n  font-family: 'Raleway', system-ui, sans-serif;\n  font-size: 0.78rem;\n  font-weight: 800;\n  padding: 4px 8px;\n  cursor: pointer;\n}\n\n.password-toggle:hover {\n  color: #08263a;\n  text-decoration: underline;\n}\n\n.auth-error-backdrop {\n  position: fixed;\n  inset: 0;\n  background: rgba(15, 23, 42, 0.55);\n  z-index: 2000;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 24px;\n}\n\n.auth-error-card {\n  width: min(460px, 100%);\n  background: #fff;\n  border-radius: 18px;\n  padding: 28px;\n  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.25);\n  text-align: center;\n}\n\n.auth-error-card h5 {\n  margin-bottom: 12px;\n  font-weight: 700;\n}\n\n.auth-error-card p {\n  color: #475569;\n  line-height: 1.55;\n  margin-bottom: 20px;\n}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -624,7 +649,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _forgotpwd_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./forgotpwd.component.html?ngResource */ 39386);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! godigital-lib */ 83);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! godigital-lib */ 22464);
 
 
 
@@ -676,6 +701,7 @@ let ForgotPasswordComponent = class ForgotPasswordComponent {
   }];
 };
 ForgotPasswordComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_5__.Component)({
+  standalone: false,
   selector: 'app-forgotpwd',
   template: _forgotpwd_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__
 })], ForgotPasswordComponent);
@@ -690,7 +716,7 @@ ForgotPasswordComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([(0,
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<div class=\"container py-5 auth-shell\">\n  <div class=\"auth-brand\">\n    <span class=\"auth-eyebrow\">{{ 'login.eyebrow' | siteText:'ALEGRIA BOAT' }}</span>\n    <div class=\"auth-mark\">⛵</div>\n    <h1 class=\"h4 mb-1\">{{ 'login.welcomeTitle' | siteText:'Bienvenue à bord' }}</h1>\n    <p class=\"text-muted small mb-4\">{{ 'login.welcomeSubtitle' | siteText:'Connectez-vous pour gérer votre réservation, votre acompte et votre expérience en mer.' }}</p>\n  </div>\n\n  <form class=\"form-box\" [formGroup]=\"loginForm\" (ngSubmit)=\"loginWithEmail()\">\n    <h4 class=\"text-center mb-4\">{{ 'login.formTitle' | siteText:'Connexion à Alegria' }}</h4>\n\n    <div class=\"f-group\">\n      <label class=\"form-label\"><strong>{{ 'login.email' | siteText:'Email' }}</strong></label>\n      <input\n        [class]=\"loginForm.controls['email'].invalid ? 'form-control error' : 'form-control'\"\n        type=\"email\"\n        required=\"\"\n        [placeholder]=\"'login.email' | siteText:'Email'\"\n        formControlName=\"email\"\n        name=\"email\"\n        autocomplete=\"username\">\n    </div>\n\n    <div class=\"f-group\">\n      <label class=\"form-label\"><strong>{{ 'login.password' | siteText:'Mot de passe' }}</strong></label>\n      <div class=\"password-wrapper\">\n        <input\n          [class]=\"loginForm.controls['password'].invalid ? 'form-control error' : 'form-control'\"\n          [type]=\"showPassword ? 'text' : 'password'\"\n          required=\"\"\n          [placeholder]=\"'login.password' | siteText:'Mot de passe'\"\n          formControlName=\"password\"\n          name=\"password\"\n          autocomplete=\"current-password\">\n        <button\n          class=\"password-toggle\"\n          type=\"button\"\n          (click)=\"togglePasswordVisibility()\"\n          [attr.aria-label]=\"showPassword ? ('login.hidePassword' | siteText:'Masquer le mot de passe') : ('login.showPassword' | siteText:'Afficher le mot de passe')\">\n          {{ showPassword ? ('login.hidePasswordShort' | siteText:'Masquer') : ('login.showPasswordShort' | siteText:'Afficher') }}\n        </button>\n      </div>\n    </div>\n\n    <div class=\"row mx-0\">\n      <div class=\"col-6\">\n        <div class=\"form-check d-inline-block\">\n          <input id=\"rememberme\" class=\"form-check-input\" type=\"checkbox\" formControlName=\"rememberme\">\n          <label for=\"rememberme\" class=\"form-check-label small\">{{ 'login.rememberMe' | siteText:'Se souvenir de moi' }}</label>\n        </div>\n      </div>\n      <div class=\"col-6\" style=\"text-align: right;\">\n        <a class=\"small\" [routerLink]=\"['/forgotpwd']\">{{ 'login.forgotPassword' | siteText:'Mot de passe oublié' }}</a>\n      </div>\n    </div>\n\n    <button class=\"btn btn-primary w-100 my-4\" type=\"submit\" [disabled]=\"loginForm.invalid || sending\">\n      {{ sending ? ('login.signingIn' | siteText:'Connexion en cours...') : ('login.loginButton' | siteText:'Se connecter') }}\n    </button>\n\n    <div class=\"seperator\">\n      <hr class=\"w-100\">\n      <p>{{ 'login.or' | siteText:'ou' }}</p>\n      <hr class=\"w-100\">\n    </div>\n\n    <button class=\"btn btn-outline-primary w-100 my-4\" type=\"button\" [routerLink]=\"['/signup']\">\n      {{ 'login.createAccount' | siteText:'Créer un compte' }}\n    </button>\n\n    <button id=\"googleLoginBtn\" class=\"btn btn-outline-danger w-100 my-2\" type=\"button\" (click)=\"loginWithGoogle()\" [disabled]=\"sending\">\n      {{ 'login.continueWithGoogle' | siteText:'Continuer avec Google' }}\n    </button>\n  </form>\n</div>\n\n<!-- Login Error Modal -->\n<div class=\"modal fade\" id=\"loginErrorModal\" tabindex=\"-1\" aria-labelledby=\"loginErrorLabel\" aria-hidden=\"true\">\n  <div class=\"modal-dialog modal-dialog-centered\">\n    <div class=\"modal-content border-0 rounded-3 shadow-sm\">\n      <div class=\"modal-header bg-danger text-white rounded-top\">\n        <h5 class=\"modal-title fw-bold\" id=\"loginErrorLabel\">{{ 'login.loginFailedTitle' | siteText:'Connexion impossible' }}</h5>\n        <button type=\"button\" class=\"btn-close btn-close-white\" data-bs-dismiss=\"modal\" [attr.aria-label]=\"'login.close' | siteText:'Fermer'\"></button>\n      </div>\n      <div class=\"modal-body text-center p-4\">\n        <p class=\"mb-0\">\n          {{ 'login.loginFailedMessage1' | siteText:'L’email ou le mot de passe saisi est incorrect.' }}<br>\n          {{ 'login.loginFailedMessage2' | siteText:'Veuillez vérifier vos identifiants et réessayer.' }}\n        </p>\n      </div>\n      <div class=\"modal-footer justify-content-center border-0 pb-4\">\n        <button type=\"button\" class=\"btn btn-outline-danger px-4\" data-bs-dismiss=\"modal\">{{ 'login.ok' | siteText:'OK' }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n\n<!-- Email Not Verified Modal -->\n<div class=\"modal fade\" id=\"emailNotVerifiedModal\" tabindex=\"-1\" aria-labelledby=\"emailNotVerifiedLabel\" aria-hidden=\"true\">\n  <div class=\"modal-dialog modal-dialog-centered\">\n    <div class=\"modal-content border-0 rounded-3 shadow-sm\">\n      <div class=\"modal-header bg-warning text-dark rounded-top\">\n        <h5 class=\"modal-title fw-bold\" id=\"emailNotVerifiedLabel\">{{ 'login.emailNotVerifiedTitle' | siteText:'Email non vérifié' }}</h5>\n        <button type=\"button\" class=\"btn-close text-reset\" data-bs-dismiss=\"modal\" [attr.aria-label]=\"'login.close' | siteText:'Fermer'\"></button>\n      </div>\n      <div class=\"modal-body text-center p-4\">\n        <p class=\"mb-2\">{{ 'login.emailNotVerifiedMessage1' | siteText:'Votre compte a été créé, mais votre adresse email n’est pas encore vérifiée.' }}</p>\n        <p>{{ 'login.emailNotVerifiedMessage2' | siteText:'Veuillez vérifier votre boîte de réception ou votre dossier spam, puis cliquez sur le lien de confirmation pour activer votre compte.' }}</p>\n      </div>\n      <div class=\"modal-footer justify-content-center border-0 pb-4\">\n        <button type=\"button\" class=\"btn btn-outline-warning px-4\" data-bs-dismiss=\"modal\">{{ 'login.ok' | siteText:'OK' }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n\n<!-- Inline Error Modal fallback used when Bootstrap/jQuery modal is not available -->\n<div class=\"auth-error-backdrop\" *ngIf=\"showErrorModal\" (click)=\"closeError()\">\n  <div class=\"auth-error-card\" (click)=\"$event.stopPropagation()\">\n    <h5>{{ errorModalTitle }}</h5>\n    <p>{{ errorModalMessage }}</p>\n    <button type=\"button\" class=\"btn btn-primary\" (click)=\"closeError()\">{{ 'login.ok' | siteText:'OK' }}</button>\n  </div>\n</div>\n";
+module.exports = "<div class=\"container py-5 auth-shell\">\n  <div class=\"auth-brand\">\n    <span class=\"auth-eyebrow\">{{ 'login.eyebrow' | siteText:'ALEGRIA BOAT' }}</span>\n    <div class=\"auth-mark\">⛵</div>\n    <h1 class=\"h4 mb-1\">{{ 'login.welcomeTitle' | siteText:'Bienvenue à bord' }}</h1>\n    <p class=\"text-muted small mb-4\">{{ 'login.welcomeSubtitle' | siteText:'Connectez-vous pour gérer votre réservation, votre acompte et votre expérience en mer.' }}</p>\n  </div>\n\n  <form class=\"form-box\" [formGroup]=\"loginForm\" (ngSubmit)=\"loginWithEmail()\">\n    <h4 class=\"text-center mb-4\">{{ 'login.formTitle' | siteText:'Connexion à Alegria' }}</h4>\n\n    <div class=\"f-group\">\n      <label class=\"form-label\"><strong>{{ 'login.email' | siteText:'Email' }}</strong></label>\n      <input\n        [class]=\"loginForm.controls['email'].invalid ? 'form-control error' : 'form-control'\"\n        type=\"email\"\n        required=\"\"\n        [placeholder]=\"'login.email' | siteText:'Email'\"\n        formControlName=\"email\"\n        name=\"email\"\n        autocomplete=\"username\">\n    </div>\n\n    <div class=\"f-group\">\n      <label class=\"form-label\"><strong>{{ 'login.password' | siteText:'Mot de passe' }}</strong></label>\n      <div class=\"password-wrapper\">\n        <input\n          [class]=\"loginForm.controls['password'].invalid ? 'form-control error' : 'form-control'\"\n          [type]=\"showPassword ? 'text' : 'password'\"\n          required=\"\"\n          [placeholder]=\"'login.password' | siteText:'Mot de passe'\"\n          formControlName=\"password\"\n          name=\"password\"\n          autocomplete=\"current-password\">\n        <button\n          class=\"password-toggle\"\n          type=\"button\"\n          (click)=\"togglePasswordVisibility()\"\n          [attr.aria-label]=\"showPassword ? ('login.hidePassword' | siteText:'Masquer le mot de passe') : ('login.showPassword' | siteText:'Afficher le mot de passe')\">\n          {{ showPassword ? ('login.hidePasswordShort' | siteText:'Masquer') : ('login.showPasswordShort' | siteText:'Afficher') }}\n        </button>\n      </div>\n    </div>\n\n    <div class=\"row mx-0\">\n      <div class=\"col-6\">\n        <div class=\"form-check d-inline-block\">\n          <input id=\"rememberme\" class=\"form-check-input\" type=\"checkbox\" formControlName=\"rememberme\">\n          <label for=\"rememberme\" class=\"form-check-label small\">{{ 'login.rememberMe' | siteText:'Se souvenir de moi' }}</label>\n        </div>\n      </div>\n      <div class=\"col-6\" style=\"text-align: right;\">\n        <a class=\"small\" [routerLink]=\"(['/forgotpwd']) | resourceRoute\">{{ 'login.forgotPassword' | siteText:'Mot de passe oublié' }}</a>\n      </div>\n    </div>\n\n    <button class=\"btn btn-primary w-100 my-4\" type=\"submit\" [disabled]=\"loginForm.invalid || sending\">\n      {{ sending ? ('login.signingIn' | siteText:'Connexion en cours...') : ('login.loginButton' | siteText:'Se connecter') }}\n    </button>\n\n    <div class=\"seperator\">\n      <hr class=\"w-100\">\n      <p>{{ 'login.or' | siteText:'ou' }}</p>\n      <hr class=\"w-100\">\n    </div>\n\n    <button class=\"btn btn-outline-primary w-100 my-4\" type=\"button\" [routerLink]=\"(['/signup']) | resourceRoute\" queryParamsHandling=\"preserve\">\n      {{ 'login.createAccount' | siteText:'Créer un compte' }}\n    </button>\n\n    <button id=\"googleLoginBtn\" class=\"btn btn-outline-danger w-100 my-2\" type=\"button\" (click)=\"loginWithGoogle()\" [disabled]=\"sending\">\n      {{ 'login.continueWithGoogle' | siteText:'Continuer avec Google' }}\n    </button>\n  </form>\n</div>\n\n<!-- Login Error Modal -->\n<div class=\"modal fade\" id=\"loginErrorModal\" tabindex=\"-1\" aria-labelledby=\"loginErrorLabel\" aria-hidden=\"true\">\n  <div class=\"modal-dialog modal-dialog-centered\">\n    <div class=\"modal-content border-0 rounded-3 shadow-sm\">\n      <div class=\"modal-header bg-danger text-white rounded-top\">\n        <h5 class=\"modal-title fw-bold\" id=\"loginErrorLabel\">{{ 'login.loginFailedTitle' | siteText:'Connexion impossible' }}</h5>\n        <button type=\"button\" class=\"btn-close btn-close-white\" data-bs-dismiss=\"modal\" [attr.aria-label]=\"'login.close' | siteText:'Fermer'\"></button>\n      </div>\n      <div class=\"modal-body text-center p-4\">\n        <p class=\"mb-0\">\n          {{ 'login.loginFailedMessage1' | siteText:'L’email ou le mot de passe saisi est incorrect.' }}<br>\n          {{ 'login.loginFailedMessage2' | siteText:'Veuillez vérifier vos identifiants et réessayer.' }}\n        </p>\n      </div>\n      <div class=\"modal-footer justify-content-center border-0 pb-4\">\n        <button type=\"button\" class=\"btn btn-outline-danger px-4\" data-bs-dismiss=\"modal\">{{ 'login.ok' | siteText:'OK' }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n\n<!-- Email Not Verified Modal -->\n<div class=\"modal fade\" id=\"emailNotVerifiedModal\" tabindex=\"-1\" aria-labelledby=\"emailNotVerifiedLabel\" aria-hidden=\"true\">\n  <div class=\"modal-dialog modal-dialog-centered\">\n    <div class=\"modal-content border-0 rounded-3 shadow-sm\">\n      <div class=\"modal-header bg-warning text-dark rounded-top\">\n        <h5 class=\"modal-title fw-bold\" id=\"emailNotVerifiedLabel\">{{ 'login.emailNotVerifiedTitle' | siteText:'Email non vérifié' }}</h5>\n        <button type=\"button\" class=\"btn-close text-reset\" data-bs-dismiss=\"modal\" [attr.aria-label]=\"'login.close' | siteText:'Fermer'\"></button>\n      </div>\n      <div class=\"modal-body text-center p-4\">\n        <p class=\"mb-2\">{{ 'login.emailNotVerifiedMessage1' | siteText:'Votre compte a été créé, mais votre adresse email n’est pas encore vérifiée.' }}</p>\n        <p>{{ 'login.emailNotVerifiedMessage2' | siteText:'Veuillez vérifier votre boîte de réception ou votre dossier spam, puis cliquez sur le lien de confirmation pour activer votre compte.' }}</p>\n      </div>\n      <div class=\"modal-footer justify-content-center border-0 pb-4\">\n        <button type=\"button\" class=\"btn btn-outline-warning px-4\" data-bs-dismiss=\"modal\">{{ 'login.ok' | siteText:'OK' }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n\n<!-- Inline Error Modal fallback used when Bootstrap/jQuery modal is not available -->\n<div class=\"auth-error-backdrop\" *ngIf=\"showErrorModal\" (click)=\"closeError()\">\n  <div class=\"auth-error-card\" (click)=\"$event.stopPropagation()\">\n    <h5>{{ errorModalTitle }}</h5>\n    <p>{{ errorModalMessage }}</p>\n    <button type=\"button\" class=\"btn btn-primary\" (click)=\"closeError()\">{{ 'login.ok' | siteText:'OK' }}</button>\n  </div>\n</div>\n";
 
 /***/ }),
 
@@ -701,7 +727,7 @@ module.exports = "<div class=\"container py-5 auth-shell\">\n  <div class=\"auth
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<section class=\"full-screen\">\n  <div>\n    <form class=\"form-box\" [formGroup]=\"forgotpwdForm\">\n      <div class=\"auth-brand\">\n        <span class=\"auth-eyebrow\">{{ 'auto.login.forgotpwd.forgotpwd.component.alegria_boat' | siteText }}</span>\n        <div class=\"auth-mark\">⛵</div>\n        <h1 class=\"h4 mb-1\">{{ 'auto.login.forgotpwd.forgotpwd.component.reset_your_password' | siteText }}</h1>\n      </div>\n      <p class=\"text-center small mb-3\">{{ 'auto.login.forgotpwd.forgotpwd.component.enter_your_alegria_account_email_to_receive_a_secu' | siteText }}</p>\n      <div class=\"f-group\">\n        <label class=\"form-label\"><strong>{{ 'auto.login.forgotpwd.forgotpwd.component.email_address' | siteText }}</strong></label>\n        <input [class]=\"forgotpwdForm.controls['email'].invalid ?'form-control error':'form-control'\"\n        type=\"text\" required=\"\" [placeholder]=\"'auto.login.forgotpwd.forgotpwd.component.email' | siteText\" formControlName=\"email\" />\n      </div>\n      <button class=\"btn btn-primary w-100 my-4\" type=\"submit\" [disabled]=\"forgotpwdForm.invalid\"\n      (click)=\"forgotpwd()\">{{ 'auto.login.forgotpwd.forgotpwd.component.send_reset_link' | siteText }}</button>\n      <div class=\"text-center small\">\n        <a [routerLink]=\"['/login']\">{{ 'auto.login.forgotpwd.forgotpwd.component.back_to_login' | siteText }}</a>\n      </div>\n    </form>\n  </div>\n  <div class=\"bottom-dark\"></div>\n</section>\n\n<div class=\"modal fade\" id=\"resetModal\" tabindex=\"-1\" aria-labelledby=\"resetModalLabel\" aria-hidden=\"true\">\n  <div class=\"modal-dialog modal-dialog-centered\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <h5 class=\"modal-title\" id=\"resetModalLabel\">{{ 'auto.login.forgotpwd.forgotpwd.component.email_sent' | siteText }}</h5>\n        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" [aria-label]=\"'auto.login.forgotpwd.forgotpwd.component.close' | siteText\"></button>\n      </div>\n      <div class=\"modal-body\">{{ 'auto.login.forgotpwd.forgotpwd.component.we_ve_sent_you_an_email_with_instructions_to_reset' | siteText }}</div>\n      <div class=\"modal-footer\">\n        <button type=\"button\" class=\"btn btn-primary\" data-bs-dismiss=\"modal\" routerLink=\"/home\">{{ 'auto.login.forgotpwd.forgotpwd.component.ok' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>";
+module.exports = "<section class=\"full-screen\">\n  <div>\n    <form class=\"form-box\" [formGroup]=\"forgotpwdForm\">\n      <div class=\"auth-brand\">\n        <span class=\"auth-eyebrow\">{{ 'auto.login.forgotpwd.forgotpwd.component.alegria_boat' | siteText }}</span>\n        <div class=\"auth-mark\">⛵</div>\n        <h1 class=\"h4 mb-1\">{{ 'auto.login.forgotpwd.forgotpwd.component.reset_your_password' | siteText }}</h1>\n      </div>\n      <p class=\"text-center small mb-3\">{{ 'auto.login.forgotpwd.forgotpwd.component.enter_your_alegria_account_email_to_receive_a_secu' | siteText }}</p>\n      <div class=\"f-group\">\n        <label class=\"form-label\"><strong>{{ 'auto.login.forgotpwd.forgotpwd.component.email_address' | siteText }}</strong></label>\n        <input [class]=\"forgotpwdForm.controls['email'].invalid ?'form-control error':'form-control'\"\n        type=\"text\" required=\"\" [placeholder]=\"'auto.login.forgotpwd.forgotpwd.component.email' | siteText\" formControlName=\"email\" />\n      </div>\n      <button class=\"btn btn-primary w-100 my-4\" type=\"submit\" [disabled]=\"forgotpwdForm.invalid\"\n      (click)=\"forgotpwd()\">{{ 'auto.login.forgotpwd.forgotpwd.component.send_reset_link' | siteText }}</button>\n      <div class=\"text-center small\">\n        <a [routerLink]=\"(['/login']) | resourceRoute\">{{ 'auto.login.forgotpwd.forgotpwd.component.back_to_login' | siteText }}</a>\n      </div>\n    </form>\n  </div>\n  <div class=\"bottom-dark\"></div>\n</section>\n\n<div class=\"modal fade\" id=\"resetModal\" tabindex=\"-1\" aria-labelledby=\"resetModalLabel\" aria-hidden=\"true\">\n  <div class=\"modal-dialog modal-dialog-centered\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <h5 class=\"modal-title\" id=\"resetModalLabel\">{{ 'auto.login.forgotpwd.forgotpwd.component.email_sent' | siteText }}</h5>\n        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" [attr.aria-label]=\"'auto.login.forgotpwd.forgotpwd.component.close' | siteText\"></button>\n      </div>\n      <div class=\"modal-body\">{{ 'auto.login.forgotpwd.forgotpwd.component.we_ve_sent_you_an_email_with_instructions_to_reset' | siteText }}</div>\n      <div class=\"modal-footer\">\n        <button type=\"button\" class=\"btn btn-primary\" data-bs-dismiss=\"modal\" [routerLink]=\"'/home' | resourceRoute\">{{ 'auto.login.forgotpwd.forgotpwd.component.ok' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>";
 
 /***/ }),
 
@@ -722,7 +748,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `
   min-height: 100vh;
   background:
     linear-gradient(135deg, rgba(8, 38, 58, 0.92), rgba(13, 111, 143, 0.72)),
-    url('/assets/img/home/home-hero-generic.jpg') center/cover no-repeat;
+    url('/api/media/object?path=assets%2Fboats%2Falegria%2Fhomepage%2Fhome-hero-generic.jpg') center/cover no-repeat;
   padding: 56px 16px;
   color: #08263a;
   font-family: 'Lato', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -997,7 +1023,7 @@ a:hover {
     font-size: 2rem;
   }
 }
-`, "",{"version":3,"sources":["webpack://./src/app/login/signup/signup.component.css"],"names":[],"mappings":"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","sourcesContent":["\n:host {\n  display: block;\n  min-height: 100vh;\n  background:\n    linear-gradient(135deg, rgba(8, 38, 58, 0.92), rgba(13, 111, 143, 0.72)),\n    url('/assets/img/home/home-hero-generic.jpg') center/cover no-repeat;\n  padding: 56px 16px;\n  color: #08263a;\n  font-family: 'Lato', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;\n}\n\n.auth-shell,\n.container {\n  max-width: 760px !important;\n  margin: 0 auto;\n}\n\n.auth-card,\n.form-box,\nform[formGroup],\n.container > form {\n  background: rgba(255, 255, 255, 0.96);\n  border: 1px solid rgba(255, 255, 255, 0.65);\n  border-radius: 28px;\n  box-shadow: 0 24px 70px rgba(8, 38, 58, 0.28);\n  padding: clamp(24px, 5vw, 44px);\n  backdrop-filter: blur(12px);\n}\n\n.auth-brand {\n  text-align: center;\n  margin-bottom: 26px;\n}\n\n.auth-mark {\n  width: 64px;\n  height: 64px;\n  border-radius: 999px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  margin-bottom: 14px;\n  background: #08263a;\n  color: #f4a261;\n  font-size: 2rem;\n  box-shadow: 0 14px 30px rgba(8, 38, 58, 0.22);\n}\n\n.auth-brand h1,\nh1,\nh1.h4,\nh4 {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: #08263a;\n  font-weight: 700;\n  letter-spacing: -0.02em;\n}\n\n.auth-brand h1,\nh1.h4 {\n  font-size: clamp(2rem, 5vw, 3rem);\n  margin-bottom: 6px;\n}\n\n.auth-brand p,\n.text-muted,\n.form-text,\np {\n  font-family: 'Lato', system-ui, sans-serif;\n  color: #5b6773 !important;\n}\n\n.auth-eyebrow {\n  display: inline-block;\n  margin-bottom: 10px;\n  font-family: 'Raleway', system-ui, sans-serif;\n  color: #0d6f8f;\n  font-size: 0.76rem;\n  font-weight: 800;\n  letter-spacing: 0.18em;\n  text-transform: uppercase;\n}\n\n.form-label {\n  font-family: 'Raleway', system-ui, sans-serif;\n  color: #0d4f6d;\n  font-size: 0.78rem;\n  font-weight: 800;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n}\n\n.form-control,\n.form-select,\n.form-control-sm,\n.form-select-sm {\n  min-height: 46px;\n  border: 1px solid rgba(13, 111, 143, 0.22);\n  border-radius: 14px;\n  background: #f8fbfc;\n  color: #08263a;\n  font-size: 0.95rem;\n  box-shadow: none;\n}\n\n.form-control:focus,\n.form-select:focus {\n  border-color: #0d6f8f;\n  box-shadow: 0 0 0 0.22rem rgba(13, 111, 143, 0.14);\n  background: #ffffff;\n}\n\n.form-check-input:checked {\n  background-color: #f4a261;\n  border-color: #f4a261;\n}\n\n.btn {\n  font-family: 'Raleway', system-ui, sans-serif;\n  font-weight: 800;\n  border-radius: 999px !important;\n  letter-spacing: 0.03em;\n  min-height: 46px;\n}\n\n.btn-primary,\n.btn-dark {\n  background: #f4a261 !important;\n  border-color: #f4a261 !important;\n  color: #08263a !important;\n  box-shadow: 0 16px 28px rgba(244, 162, 97, 0.28);\n}\n\n.btn-primary:hover,\n.btn-dark:hover {\n  background: #e99045 !important;\n  border-color: #e99045 !important;\n  transform: translateY(-1px);\n}\n\n.btn-outline-primary,\n.btn-outline-dark,\n.btn-outline-secondary {\n  border-color: #0d6f8f !important;\n  color: #0d4f6d !important;\n  background: transparent !important;\n}\n\n.btn-outline-primary:hover,\n.btn-outline-dark:hover,\n.btn-outline-secondary:hover {\n  background: #0d6f8f !important;\n  color: #ffffff !important;\n}\n\n.btn-outline-danger {\n  border-color: rgba(8, 38, 58, 0.18) !important;\n  color: #08263a !important;\n  background: #ffffff !important;\n}\n\n.btn-outline-danger:hover {\n  background: #f8fbfc !important;\n  color: #08263a !important;\n}\n\na {\n  color: #0d6f8f;\n  font-weight: 700;\n  text-decoration: none;\n}\n\na:hover {\n  color: #08263a;\n  text-decoration: underline;\n}\n\n.seperator,\n.separator {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  color: #8a97a3;\n  font-size: 0.86rem;\n  margin: 12px 0;\n}\n\n.seperator p,\n.separator p {\n  margin: 0;\n  white-space: nowrap;\n  font-family: 'Raleway', system-ui, sans-serif;\n  text-transform: uppercase;\n  letter-spacing: 0.12em;\n  font-size: 0.72rem;\n}\n\n.seperator hr,\n.separator hr {\n  border-color: rgba(13, 111, 143, 0.18);\n  opacity: 1;\n}\n\n.alert-success {\n  border: 0;\n  border-radius: 18px;\n  background: rgba(13, 111, 143, 0.10);\n  color: #0d4f6d;\n}\n\n.invalid-feedback,\n.text-danger {\n  font-size: 0.85rem;\n}\n\n.modal-content {\n  border: 0;\n  border-radius: 24px;\n  box-shadow: 0 24px 70px rgba(8, 38, 58, 0.28);\n}\n\n.modal-header {\n  border-bottom: 1px solid rgba(13, 111, 143, 0.12);\n}\n\n.modal-title {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: #08263a;\n}\n\n.full-screen {\n  min-height: calc(100vh - 112px);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.bottom-dark {\n  display: none;\n}\n\n@media (max-width: 768px) {\n  :host {\n    padding: 28px 14px;\n  }\n\n  .auth-card,\n  .form-box,\n  form[formGroup],\n  .container > form {\n    padding: 24px 18px;\n    border-radius: 22px;\n  }\n\n  .container {\n    padding-left: 0 !important;\n    padding-right: 0 !important;\n  }\n\n  .row.g-3,\n  .row.g-2 {\n    --bs-gutter-y: 0.85rem;\n  }\n\n  .d-flex.justify-content-end {\n    justify-content: stretch !important;\n  }\n\n  .d-flex.justify-content-end .btn,\n  .d-grid .btn,\n  button.w-100 {\n    width: 100%;\n  }\n\n  .auth-brand h1,\n  h1.h4 {\n    font-size: 2rem;\n  }\n}\n"],"sourceRoot":""}]);
+`, "",{"version":3,"sources":["webpack://./src/app/login/signup/signup.component.css"],"names":[],"mappings":"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","sourcesContent":["\n:host {\n  display: block;\n  min-height: 100vh;\n  background:\n    linear-gradient(135deg, rgba(8, 38, 58, 0.92), rgba(13, 111, 143, 0.72)),\n    url('/api/media/object?path=assets%2Fboats%2Falegria%2Fhomepage%2Fhome-hero-generic.jpg') center/cover no-repeat;\n  padding: 56px 16px;\n  color: #08263a;\n  font-family: 'Lato', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;\n}\n\n.auth-shell,\n.container {\n  max-width: 760px !important;\n  margin: 0 auto;\n}\n\n.auth-card,\n.form-box,\nform[formGroup],\n.container > form {\n  background: rgba(255, 255, 255, 0.96);\n  border: 1px solid rgba(255, 255, 255, 0.65);\n  border-radius: 28px;\n  box-shadow: 0 24px 70px rgba(8, 38, 58, 0.28);\n  padding: clamp(24px, 5vw, 44px);\n  backdrop-filter: blur(12px);\n}\n\n.auth-brand {\n  text-align: center;\n  margin-bottom: 26px;\n}\n\n.auth-mark {\n  width: 64px;\n  height: 64px;\n  border-radius: 999px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  margin-bottom: 14px;\n  background: #08263a;\n  color: #f4a261;\n  font-size: 2rem;\n  box-shadow: 0 14px 30px rgba(8, 38, 58, 0.22);\n}\n\n.auth-brand h1,\nh1,\nh1.h4,\nh4 {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: #08263a;\n  font-weight: 700;\n  letter-spacing: -0.02em;\n}\n\n.auth-brand h1,\nh1.h4 {\n  font-size: clamp(2rem, 5vw, 3rem);\n  margin-bottom: 6px;\n}\n\n.auth-brand p,\n.text-muted,\n.form-text,\np {\n  font-family: 'Lato', system-ui, sans-serif;\n  color: #5b6773 !important;\n}\n\n.auth-eyebrow {\n  display: inline-block;\n  margin-bottom: 10px;\n  font-family: 'Raleway', system-ui, sans-serif;\n  color: #0d6f8f;\n  font-size: 0.76rem;\n  font-weight: 800;\n  letter-spacing: 0.18em;\n  text-transform: uppercase;\n}\n\n.form-label {\n  font-family: 'Raleway', system-ui, sans-serif;\n  color: #0d4f6d;\n  font-size: 0.78rem;\n  font-weight: 800;\n  letter-spacing: 0.04em;\n  text-transform: uppercase;\n}\n\n.form-control,\n.form-select,\n.form-control-sm,\n.form-select-sm {\n  min-height: 46px;\n  border: 1px solid rgba(13, 111, 143, 0.22);\n  border-radius: 14px;\n  background: #f8fbfc;\n  color: #08263a;\n  font-size: 0.95rem;\n  box-shadow: none;\n}\n\n.form-control:focus,\n.form-select:focus {\n  border-color: #0d6f8f;\n  box-shadow: 0 0 0 0.22rem rgba(13, 111, 143, 0.14);\n  background: #ffffff;\n}\n\n.form-check-input:checked {\n  background-color: #f4a261;\n  border-color: #f4a261;\n}\n\n.btn {\n  font-family: 'Raleway', system-ui, sans-serif;\n  font-weight: 800;\n  border-radius: 999px !important;\n  letter-spacing: 0.03em;\n  min-height: 46px;\n}\n\n.btn-primary,\n.btn-dark {\n  background: #f4a261 !important;\n  border-color: #f4a261 !important;\n  color: #08263a !important;\n  box-shadow: 0 16px 28px rgba(244, 162, 97, 0.28);\n}\n\n.btn-primary:hover,\n.btn-dark:hover {\n  background: #e99045 !important;\n  border-color: #e99045 !important;\n  transform: translateY(-1px);\n}\n\n.btn-outline-primary,\n.btn-outline-dark,\n.btn-outline-secondary {\n  border-color: #0d6f8f !important;\n  color: #0d4f6d !important;\n  background: transparent !important;\n}\n\n.btn-outline-primary:hover,\n.btn-outline-dark:hover,\n.btn-outline-secondary:hover {\n  background: #0d6f8f !important;\n  color: #ffffff !important;\n}\n\n.btn-outline-danger {\n  border-color: rgba(8, 38, 58, 0.18) !important;\n  color: #08263a !important;\n  background: #ffffff !important;\n}\n\n.btn-outline-danger:hover {\n  background: #f8fbfc !important;\n  color: #08263a !important;\n}\n\na {\n  color: #0d6f8f;\n  font-weight: 700;\n  text-decoration: none;\n}\n\na:hover {\n  color: #08263a;\n  text-decoration: underline;\n}\n\n.seperator,\n.separator {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  color: #8a97a3;\n  font-size: 0.86rem;\n  margin: 12px 0;\n}\n\n.seperator p,\n.separator p {\n  margin: 0;\n  white-space: nowrap;\n  font-family: 'Raleway', system-ui, sans-serif;\n  text-transform: uppercase;\n  letter-spacing: 0.12em;\n  font-size: 0.72rem;\n}\n\n.seperator hr,\n.separator hr {\n  border-color: rgba(13, 111, 143, 0.18);\n  opacity: 1;\n}\n\n.alert-success {\n  border: 0;\n  border-radius: 18px;\n  background: rgba(13, 111, 143, 0.10);\n  color: #0d4f6d;\n}\n\n.invalid-feedback,\n.text-danger {\n  font-size: 0.85rem;\n}\n\n.modal-content {\n  border: 0;\n  border-radius: 24px;\n  box-shadow: 0 24px 70px rgba(8, 38, 58, 0.28);\n}\n\n.modal-header {\n  border-bottom: 1px solid rgba(13, 111, 143, 0.12);\n}\n\n.modal-title {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: #08263a;\n}\n\n.full-screen {\n  min-height: calc(100vh - 112px);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.bottom-dark {\n  display: none;\n}\n\n@media (max-width: 768px) {\n  :host {\n    padding: 28px 14px;\n  }\n\n  .auth-card,\n  .form-box,\n  form[formGroup],\n  .container > form {\n    padding: 24px 18px;\n    border-radius: 22px;\n  }\n\n  .container {\n    padding-left: 0 !important;\n    padding-right: 0 !important;\n  }\n\n  .row.g-3,\n  .row.g-2 {\n    --bs-gutter-y: 0.85rem;\n  }\n\n  .d-flex.justify-content-end {\n    justify-content: stretch !important;\n  }\n\n  .d-flex.justify-content-end .btn,\n  .d-grid .btn,\n  button.w-100 {\n    width: 100%;\n  }\n\n  .auth-brand h1,\n  h1.h4 {\n    font-size: 2rem;\n  }\n}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -1015,12 +1041,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   LoginRoutingModule: () => (/* binding */ LoginRoutingModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _signup_signup_component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./signup/signup.component */ 70116);
-/* harmony import */ var _login_login_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./login/login.component */ 15318);
-/* harmony import */ var _forgotpwd_forgotpwd_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./forgotpwd/forgotpwd.component */ 30650);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _signup_signup_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./signup/signup.component */ 70116);
+/* harmony import */ var _login_login_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./login/login.component */ 15318);
+/* harmony import */ var _forgotpwd_forgotpwd_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./forgotpwd/forgotpwd.component */ 30650);
+
 
 
 
@@ -1029,18 +1057,18 @@ __webpack_require__.r(__webpack_exports__);
 
 const routes = [{
   path: 'signup',
-  component: _signup_signup_component__WEBPACK_IMPORTED_MODULE_0__.SignupComponent
+  component: _signup_signup_component__WEBPACK_IMPORTED_MODULE_1__.SignupComponent
 }, {
   path: 'login',
-  component: _login_login_component__WEBPACK_IMPORTED_MODULE_1__.LoginComponent
+  component: _login_login_component__WEBPACK_IMPORTED_MODULE_2__.LoginComponent
 }, {
   path: 'forgotpwd',
-  component: _forgotpwd_forgotpwd_component__WEBPACK_IMPORTED_MODULE_2__.ForgotPasswordComponent
+  component: _forgotpwd_forgotpwd_component__WEBPACK_IMPORTED_MODULE_3__.ForgotPasswordComponent
 }];
 let LoginRoutingModule = class LoginRoutingModule {};
-LoginRoutingModule = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.NgModule)({
-  imports: [_angular_router__WEBPACK_IMPORTED_MODULE_5__.RouterModule.forChild(routes)],
-  exports: [_angular_router__WEBPACK_IMPORTED_MODULE_5__.RouterModule]
+LoginRoutingModule = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_5__.NgModule)({
+  imports: [_home_site_text_pipe__WEBPACK_IMPORTED_MODULE_0__.SiteTextPipe, _angular_router__WEBPACK_IMPORTED_MODULE_6__.RouterModule.forChild(routes)],
+  exports: [_angular_router__WEBPACK_IMPORTED_MODULE_6__.RouterModule]
 })], LoginRoutingModule);
 
 
@@ -1055,17 +1083,20 @@ LoginRoutingModule = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([(0,_angu
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   SignupComponent: () => (/* binding */ SignupComponent)
+/* harmony export */   SignupComponent: () => (/* binding */ SignupComponent),
+/* harmony export */   registrationRole: () => (/* binding */ registrationRole)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _signup_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./signup.component.html?ngResource */ 97356);
 /* harmony import */ var _signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./signup.component.css?ngResource */ 41093);
 /* harmony import */ var _signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! godigital-lib */ 83);
+/* harmony import */ var _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/registration-profile.service */ 92915);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! godigital-lib */ 22464);
+
 
 
 
@@ -1076,12 +1107,40 @@ __webpack_require__.r(__webpack_exports__);
  // adjust path if needed
  // adjust path if needed
 
+function registrationRole(value) {
+  return ['assetOwner', 'boatOwner', 'owner'].includes(String(value)) ? 'assetOwner' : value === 'serviceProvider' ? 'serviceProvider' : 'customer';
+}
 let SignupComponent = class SignupComponent {
   fb;
   users;
   storeDb;
   utilSvc;
   router;
+  registrationProfile;
+  route;
+  publishIntent = false;
+  roles = [];
+  ngOnInit() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this.publishIntent = _this.route?.snapshot.queryParamMap.get('returnUrl') === '/owner/listings';
+      try {
+        _this.roles = yield _this.registrationProfile.roles();
+        if (_this.publishIntent && _this.roles.some(r => r.id === 'assetOwner')) _this.form.patchValue({
+          role: 'assetOwner'
+        });
+      } catch {
+        _this.error = 'Le catalogue des rôles est indisponible. Réessayez.';
+      }
+    })();
+  }
+  socialControl(index, key) {
+    return this.socials.at(index).get(key);
+  }
+  onPhotosInput(event) {
+    void this.onPhotosSelected(event.target?.files || null);
+  }
+  emailActionWarning = '';
   sending = false;
   success = false; // shown only for email/password flow
   error; // non-modal errors (rare)
@@ -1096,23 +1155,25 @@ let SignupComponent = class SignupComponent {
   photoUrls = [];
   /** If true & role is owner/provider, redirect to Stripe Connect after signup */
   connectStripeNow = false;
-  constructor(fb, users, storeDb, utilSvc, router) {
+  constructor(fb, users, storeDb, utilSvc, router, registrationProfile, route) {
     this.fb = fb;
     this.users = users;
     this.storeDb = storeDb;
     this.utilSvc = utilSvc;
     this.router = router;
+    this.registrationProfile = registrationProfile;
+    this.route = route;
     this.form = this.fb.group({
-      email: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_3__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_3__.Validators.email]],
-      password: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_3__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_3__.Validators.minLength(6)]],
-      firstname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_3__.Validators.required]],
-      lastname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_3__.Validators.required]],
+      email: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.email]],
+      password: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.minLength(6)]],
+      firstname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required]],
+      lastname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required]],
       displayName: [''],
       phone: [''],
       country: [''],
-      role: ['guest', [_angular_forms__WEBPACK_IMPORTED_MODULE_3__.Validators.required]],
+      role: ['customer', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required]],
       socialnetwork: this.fb.array([]),
-      acceptTerms: [false, _angular_forms__WEBPACK_IMPORTED_MODULE_3__.Validators.requiredTrue]
+      acceptTerms: [false, _angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.requiredTrue]
     });
   }
   // ---------- helpers
@@ -1134,15 +1195,15 @@ let SignupComponent = class SignupComponent {
   removeSocial(i) {
     this.socials.removeAt(i);
   }
+  firebaseUser() {
+    const db = this.storeDb;
+    return db.firebaseauth?.currentUser || db.firebaseAuth?.currentUser || db.auth?.currentUser || null;
+  }
   isOwnerOrProvider(role) {
-    return role === 'boatOwner' || role === 'serviceProvider';
+    return ['assetOwner', 'boatOwner', 'owner', 'serviceProvider'].includes(String(role));
   }
   buildStripeAuthorizeUrl(ownerId, role) {
-    const base = '/stripe/connect/authorize';
-    const url = new URL(base, window.location.origin);
-    url.searchParams.set('ownerId', ownerId);
-    url.searchParams.set('accountType', role);
-    return url.toString();
+    return new URL('/owner/payments', window.location.origin).toString();
   }
   // ---------- modal controls
   openErrorModal(message, title = 'Authentication failed') {
@@ -1168,39 +1229,48 @@ let SignupComponent = class SignupComponent {
   }
   // ---------- uploads
   onPhotosSelected(files) {
-    var _this = this;
+    var _this2 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!files?.length) return;
-      const storeId = _this.utilSvc.backendFBstoreId;
+      const storeId = _this2.utilSvc.backendFBstoreId;
       const dir = `users/${Date.now()}`;
-      _this.sending = true;
+      _this2.sending = true;
       try {
         for (const file of Array.from(files)) {
-          const url = yield _this.storeDb.uploadObjects1(storeId, file, dir);
-          _this.photoUrls.push(url);
+          const url = yield _this2.storeDb.uploadObjects1(storeId, file, dir);
+          _this2.photoUrls.push(url);
         }
       } catch (e) {
-        _this.openErrorModal(e?.message || 'Photo upload failed', 'Upload failed');
+        _this2.openErrorModal(e?.message || 'Photo upload failed', 'Upload failed');
       } finally {
-        _this.sending = false;
+        _this2.sending = false;
       }
     })();
   }
   // ---------- email/password signup
   signupWithEmail() {
-    var _this2 = this;
+    var _this3 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      _this2.error = undefined;
-      _this2.success = false;
-      if (_this2.form.invalid) return;
-      _this2.sending = true;
+      _this3.error = undefined;
+      _this3.success = false;
+      if (_this3.form.invalid) return;
+      _this3.sending = true;
       try {
-        const v = _this2.form.value;
+        const v = _this3.form.value;
         const displayName = (v.displayName || '').trim() || `${(v.firstname || '').toString().trim()} ${(v.lastname || '').toString().trim()}`.trim();
         // 1) create auth user
-        const {
-          uid
-        } = yield _this2.users.registerWithEmail(v.email, v.password, displayName);
+        _this3.emailActionWarning = '';
+        const previousUid = _this3.firebaseUser()?.uid;
+        let uid;
+        try {
+          uid = (yield _this3.users.registerWithEmail(v.email, v.password, displayName)).uid;
+        } catch (e) {
+          const current = _this3.firebaseUser();
+          if (e?.code === 'auth/unauthorized-continue-uri' && current?.uid && current.uid !== previousUid && String(current.email || '').toLowerCase() === String(v.email).trim().toLowerCase()) {
+            uid = current.uid;
+            _this3.emailActionWarning = 'Le compte a été créé, mais Firebase a refusé l’envoi du courriel de validation. Ajoutez le domaine de l’URL de retour dans Authentication > Settings > Authorized domains, puis renvoyez le courriel. Le compte n’est pas marqué comme vérifié.';
+          } else throw e;
+        }
         // 2) profile
         const now = Date.now();
         const profile = {
@@ -1212,8 +1282,8 @@ let SignupComponent = class SignupComponent {
           stripeAccountStatus: '',
           email: v.email,
           phone: v.phone || '',
-          role: v.role || 'guest',
-          photos: _this2.photoUrls,
+          role: registrationRole(v.role),
+          photos: _this3.photoUrls,
           socialnetwork: (v.socialnetwork || []).map(s => ({
             label: s.label || '',
             url: s.url || ''
@@ -1223,56 +1293,56 @@ let SignupComponent = class SignupComponent {
           displayName: displayName,
           createdTS: now,
           modifiedTS: now,
-          photoURL: _this2.photoUrls[0] || '',
+          photoURL: _this3.photoUrls[0] || '',
           provider: 'firebase'
         };
         // 3) save to RTDB
-        yield _this2.storeDb.updateObject(_this2.utilSvc.backendFBstoreId, _this2.utilSvc.mdb, godigital_lib__WEBPACK_IMPORTED_MODULE_4__.OBJECTNAME.bnUsers, profile, uid);
+        yield _this3.registrationProfile.save(profile);
         // 4) Either redirect to Stripe immediately, or show the success banner (as before)
-        if (_this2.connectStripeNow && _this2.isOwnerOrProvider(profile.role)) {
-          window.location.href = _this2.buildStripeAuthorizeUrl(uid, profile.role);
+        if (_this3.connectStripeNow && _this3.isOwnerOrProvider(profile.role) && !_this3.emailActionWarning) {
+          window.location.href = _this3.buildStripeAuthorizeUrl(uid, profile.role);
           return;
         }
         // Send a password setup/reset email when available so the user can validate or reset access cleanly.
         try {
-          yield _this2.users.resetPwdUser(v.email);
+          yield _this3.users.resetPwdUser(v.email);
         } catch {
           // Best effort only: some Firebase configurations may not allow reset immediately after creation.
         }
-        _this2.success = true;
-        _this2.form.reset({
-          role: 'guest',
+        _this3.success = true;
+        _this3.form.reset({
+          role: 'customer',
           acceptTerms: false
         });
-        _this2.photoUrls = [];
-        _this2.openSuccessModal('Account created successfully. Please check your inbox and your Junk/Spam folder for the password setup/reset email before signing in.', 'Account created successfully');
+        _this3.photoUrls = [];
+        _this3.openSuccessModal(_this3.emailActionWarning || 'Account created successfully. Please check your inbox and your Junk/Spam folder for the password setup/reset email before signing in.', 'Account created successfully');
         setTimeout(() => {
-          if (_this2.showSuccessModal) {
-            _this2.closeSuccessModal();
+          if (_this3.showSuccessModal && !_this3.emailActionWarning) {
+            _this3.closeSuccessModal();
           }
         }, 2500);
       } catch (e) {
-        _this2.openErrorModal(e?.message || 'Sign-up failed.');
+        _this3.openErrorModal(e?.code === 'auth/unauthorized-continue-uri' ? 'Firebase refuse le domaine de l’URL de retour. Dans Firebase Console > Authentication > Settings > Authorized domains, ajoutez le domaine utilisé (par exemple localhost pour vos tests). Le compte peut déjà avoir été créé : essayez de vous connecter avant de recommencer.' : e?.code === 'auth/email-already-in-use' ? 'Cette adresse possède déjà un compte. Connectez-vous ou utilisez Mot de passe oublié.' : e?.message || 'Sign-up failed.');
       } finally {
-        _this2.sending = false;
+        _this3.sending = false;
       }
     })();
   }
   // ---------- Google signup (IMMEDIATE REDIRECT TO HOME)
   signupWithGoogle() {
-    var _this3 = this;
+    var _this4 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      _this3.error = undefined;
-      _this3.sending = true;
+      _this4.error = undefined;
+      _this4.sending = true;
       try {
-        const user = yield _this3.users.signInWithGoogleAndLoadProfile();
+        const user = yield _this4.users.signInWithGoogleAndLoadProfile();
         const uid = user.userId;
         const now = Date.now();
-        const v = _this3.form.value;
+        const v = _this4.form.value;
         const displayName = (v.displayName || user.displayName || '').trim();
         const firstname = v.firstname || displayName.split(' ')[0] || '';
         const lastname = v.lastname || displayName.split(' ').slice(1).join(' ') || '';
-        const role = v.role || 'guest';
+        const role = user.role || registrationRole(v.role);
         const profile = {
           userId: uid,
           firstname,
@@ -1283,7 +1353,7 @@ let SignupComponent = class SignupComponent {
           email: user.email || v.email || '',
           phone: v.phone || user.phone || '',
           role,
-          photos: _this3.photoUrls.length ? _this3.photoUrls : user.photoURL ? [user.photoURL] : [],
+          photos: _this4.photoUrls.length ? _this4.photoUrls : user.photoURL ? [user.photoURL] : [],
           socialnetwork: (v.socialnetwork || []).map(s => ({
             label: s.label || '',
             url: s.url || ''
@@ -1293,37 +1363,45 @@ let SignupComponent = class SignupComponent {
           displayName,
           createdTS: now,
           modifiedTS: now,
-          photoURL: _this3.photoUrls[0] || user.photoURL || '',
+          photoURL: _this4.photoUrls[0] || user.photoURL || '',
           provider: 'google'
         };
-        yield _this3.storeDb.updateObject(_this3.utilSvc.backendFBstoreId, _this3.utilSvc.mdb, godigital_lib__WEBPACK_IMPORTED_MODULE_4__.OBJECTNAME.bnUsers, profile, uid);
+        yield _this4.registrationProfile.save(profile);
         // IMMEDIATE redirect to home (no “user created” banner)
         // If you want to auto-open Stripe right after Google for owners/providers, uncomment below:
         // if (this.isOwnerOrProvider(role) && this.connectStripeNow) {
         //   window.location.href = this.buildStripeAuthorizeUrl(uid, role);
         //   return;
         // }
-        _this3.router.navigateByUrl('/');
+        if (_this4.publishIntent) try {
+          sessionStorage.removeItem('redirectAfterLogin');
+        } catch {}
+        _this4.router.navigateByUrl(_this4.publishIntent ? '/owner/listings' : '/');
       } catch (e) {
-        _this3.openErrorModal(e?.message || 'Google sign-in failed.');
+        _this4.openErrorModal(e?.message || 'Google sign-in failed.');
       } finally {
-        _this3.sending = false;
+        _this4.sending = false;
       }
     })();
   }
   static ctorParameters = () => [{
-    type: _angular_forms__WEBPACK_IMPORTED_MODULE_3__.FormBuilder
+    type: _angular_forms__WEBPACK_IMPORTED_MODULE_4__.FormBuilder
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_4__.UsersService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.UsersService
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_4__.StoreDbService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.StoreDbService
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_4__.UtilsService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.UtilsService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_5__.Router
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_6__.Router
+  }, {
+    type: _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_3__.RegistrationProfileService
+  }, {
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_6__.ActivatedRoute
   }];
 };
-SignupComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.Component)({
+SignupComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_7__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Component)({
+  standalone: false,
   selector: 'app-signup',
   template: _signup_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
@@ -1345,7 +1423,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! godigital-lib */ 83);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! godigital-lib */ 22464);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/router */ 50085);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common/http */ 93262);
 /* harmony import */ var _services_services_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/services.service */ 92030);
@@ -1475,18 +1553,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   LoginModule: () => (/* binding */ LoginModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ionic/angular */ 21507);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var ngx_cookie__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ngx-cookie */ 99787);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ionic/angular */ 21507);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var ngx_cookie__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ngx-cookie */ 99787);
 /* harmony import */ var _login_login_component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./login/login.component */ 15318);
 /* harmony import */ var _signup_signup_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./signup/signup.component */ 70116);
 /* harmony import */ var _forgotpwd_forgotpwd_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./forgotpwd/forgotpwd.component */ 30650);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! godigital-lib */ 83);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! godigital-lib */ 22464);
 /* harmony import */ var _login_router_module__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./login.router.module */ 42814);
 /* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
+/* harmony import */ var _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/resource-route.pipe */ 19337);
 
 /* eslint-disable max-len */
 
@@ -1500,12 +1579,70 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 let LoginModule = class LoginModule {};
-LoginModule = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_6__.NgModule)({
+LoginModule = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.NgModule)({
   declarations: [_login_login_component__WEBPACK_IMPORTED_MODULE_0__.LoginComponent, _signup_signup_component__WEBPACK_IMPORTED_MODULE_1__.SignupComponent, _forgotpwd_forgotpwd_component__WEBPACK_IMPORTED_MODULE_2__.ForgotPasswordComponent],
-  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_7__.CommonModule, _ionic_angular__WEBPACK_IMPORTED_MODULE_8__.IonicModule, _login_router_module__WEBPACK_IMPORTED_MODULE_3__.LoginRoutingModule, _angular_forms__WEBPACK_IMPORTED_MODULE_9__.FormsModule, _angular_forms__WEBPACK_IMPORTED_MODULE_9__.ReactiveFormsModule, ngx_cookie__WEBPACK_IMPORTED_MODULE_10__.CookieModule.forRoot(), godigital_lib__WEBPACK_IMPORTED_MODULE_11__.GodigitalbModule, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_4__.SiteTextPipe],
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_8__.CommonModule, _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_5__.ResourceRoutePipe, _ionic_angular__WEBPACK_IMPORTED_MODULE_9__.IonicModule, _login_router_module__WEBPACK_IMPORTED_MODULE_3__.LoginRoutingModule, _angular_forms__WEBPACK_IMPORTED_MODULE_10__.FormsModule, _angular_forms__WEBPACK_IMPORTED_MODULE_10__.ReactiveFormsModule, ngx_cookie__WEBPACK_IMPORTED_MODULE_11__.CookieModule.forRoot(), godigital_lib__WEBPACK_IMPORTED_MODULE_12__.GodigitalbModule, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_4__.SiteTextPipe],
   providers: []
 })], LoginModule);
+
+
+/***/ }),
+
+/***/ 92915:
+/*!**********************************************************!*\
+  !*** ./src/app/services/registration-profile.service.ts ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   RegistrationProfileService: () => (/* binding */ RegistrationProfileService)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var _reservation_auth_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./reservation-auth.service */ 46709);
+
+
+
+
+
+
+let RegistrationProfileService = class RegistrationProfileService {
+  http;
+  auth;
+  constructor(http, auth) {
+    this.http = http;
+    this.auth = auth;
+  }
+  roles() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      return (0,rxjs__WEBPACK_IMPORTED_MODULE_2__.firstValueFrom)(_this.http.get('/api/account-roles'));
+    })();
+  }
+  save(profile) {
+    var _this2 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      return (0,rxjs__WEBPACK_IMPORTED_MODULE_2__.firstValueFrom)(_this2.http.put('/api/me/profile', profile, {
+        headers: yield _this2.auth.headers()
+      }));
+    })();
+  }
+  static ctorParameters = () => [{
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_3__.HttpClient
+  }, {
+    type: _reservation_auth_service__WEBPACK_IMPORTED_MODULE_1__.ReservationAuthService
+  }];
+};
+RegistrationProfileService = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_5__.Injectable)({
+  providedIn: 'root'
+})], RegistrationProfileService);
 
 
 /***/ }),
@@ -1517,7 +1654,7 @@ LoginModule = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_cor
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<div class=\"container py-5 auth-shell\">\n  <div class=\"auth-brand\">\n    <span class=\"auth-eyebrow\">{{ 'auto.login.signup.signup.component.alegria_boat' | siteText }}</span>\n    <div class=\"auth-mark\">⛵</div>\n    <h1 class=\"h4 mb-1\">{{ 'auto.login.signup.signup.component.create_your_account' | siteText }}</h1>\n    <p class=\"text-muted small mb-4\">{{ 'auto.login.signup.signup.component.prepare_your_charter_manage_your_details_and_confi' | siteText }}</p>\n  </div>\n\n  <div *ngIf=\"success\" class=\"alert alert-success py-2\">{{ 'auto.login.signup.signup.component.account_created_successfully_please_check_your_inb' | siteText }}</div>\n\n  <form [formGroup]=\"form\" (ngSubmit)=\"signupWithEmail()\" novalidate>\n    <div class=\"row g-3\">\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.first_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"firstname\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.last_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"lastname\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.display_name_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"displayName\" [placeholder]=\"'auto.login.signup.signup.component.public_name' | siteText\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.country' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"country\" [placeholder]=\"'auto.login.signup.signup.component.fr' | siteText\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.email' | siteText }}</label>\n        <input type=\"email\" class=\"form-control form-control-sm\" formControlName=\"email\"\n          [class.is-invalid]=\"f.email.touched && f.email.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('required')\">{{ 'auto.login.signup.signup.component.email_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('email')\">{{ 'auto.login.signup.signup.component.enter_a_valid_email' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.phone_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"phone\" placeholder=\"+33 6 ...\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.password' | siteText }}</label>\n        <input type=\"password\" class=\"form-control form-control-sm\" formControlName=\"password\"\n          [class.is-invalid]=\"f.password.touched && f.password.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('required')\">{{ 'auto.login.signup.signup.component.password_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('minlength')\">{{ 'auto.login.signup.signup.component.minimum_6_characters' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.account_type' | siteText }}</label>\n        <select class=\"form-select form-select-sm\" formControlName=\"role\">\n          <option [value]=\"'auto.login.signup.signup.component.customer' | siteText\">{{ 'auto.login.signup.signup.component.customer' | siteText }}</option>\n          <option [value]=\"'auto.login.signup.signup.component.owner' | siteText\">{{ 'auto.login.signup.signup.component.boat_owner_host' | siteText }}</option>\n          <option [value]=\"'auto.login.signup.signup.component.provider' | siteText\">{{ 'auto.login.signup.signup.component.service_partner' | siteText }}</option>\n          <option [value]=\"'auto.login.signup.signup.component.admin' | siteText\">{{ 'auto.login.signup.signup.component.platform_admin' | siteText }}</option>\n        </select>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.admin_role_must_be_granted_by_the_platform' | siteText }}</div>\n      </div>\n\n      <!-- Stripe Connect opt-in (only shows for owner/provider) -->\n      <div class=\"col-12\" *ngIf=\"form.value.role === 'boatOwner' || form.value.role === 'serviceProvider'\">\n        <div class=\"form-check\">\n          <input class=\"form-check-input\" type=\"checkbox\" id=\"connectStripe\" [(ngModel)]=\"connectStripeNow\"\n            [ngModelOptions]=\"{standalone: true}\">\n          <label class=\"form-check-label small\" for=\"connectStripe\">{{ 'auto.login.signup.signup.component.connect_my_stripe_account_right_after_signup' | siteText }}</label>\n        </div>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.you_can_also_do_this_later_from_your_dashboard' | siteText }}</div>\n      </div>\n\n      <!-- Social links -->\n      <div class=\"col-12\">\n        <label class=\"form-label d-flex justify-content-between align-items-center small\">{{ 'auto.login.signup.signup.component.social_links' | siteText }}<button type=\"button\" class=\"btn btn-sm btn-outline-secondary rounded-pill\" (click)=\"addSocial()\">{{ 'auto.login.signup.signup.component.add_link' | siteText }}</button>\n        </label>\n\n        <div *ngFor=\"let s of socials.controls; let i = index\" class=\"row g-2 align-items-center mb-2\">\n          <div class=\"col-md-3\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"s.get('label')\" [placeholder]=\"'auto.login.signup.signup.component.instagram' | siteText\" />\n          </div>\n          <div class=\"col-md-8\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"s.get('url')\"\n              [placeholder]=\"'auto.login.signup.signup.component.https_instagram_com_yourname' | siteText\" />\n          </div>\n          <div class=\"col-md-1 text-end\">\n            <button type=\"button\" class=\"btn btn-link text-danger p-0\" (click)=\"removeSocial(i)\" [title]=\"'auto.login.signup.signup.component.remove' | siteText\">\n              <i class=\"bi bi-x-lg\"></i>\n            </button>\n          </div>\n        </div>\n      </div>\n\n      <!-- Photos upload -->\n      <div class=\"col-12\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.photos_optional' | siteText }}</label>\n        <input type=\"file\" class=\"form-control form-control-sm\" (change)=\"onPhotosSelected(($event.target).files)\"\n          multiple />\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.jpg_png_you_can_add_more_later' | siteText }}</div>\n\n        <div class=\"d-flex flex-wrap gap-2 mt-2\" *ngIf=\"photoUrls.length\">\n          <img *ngFor=\"let url of photoUrls\" [src]=\"url\" class=\"rounded border\"\n            style=\"width:108px;height:80px;object-fit:cover;\">\n        </div>\n      </div>\n\n      <!-- Terms -->\n      <div class=\"col-12\">\n        <div class=\"form-check\">\n          <input class=\"form-check-input\" type=\"checkbox\" id=\"acceptTerms\" formControlName=\"acceptTerms\" />\n          <label class=\"form-check-label small\" for=\"acceptTerms\">{{ 'auto.login.signup.signup.component.i_agree_to_the' | siteText }}<a routerLink=\"/terms\">{{ 'auto.login.signup.signup.component.terms' | siteText }}</a>{{ 'auto.login.signup.signup.component.amp' | siteText }}<a routerLink=\"/privacy\">{{ 'auto.login.signup.signup.component.privacy' | siteText }}</a>.\n          </label>\n        </div>\n        <div class=\"text-danger small mt-1\" *ngIf=\"f.acceptTerms.touched && f.acceptTerms.invalid\">{{ 'auto.login.signup.signup.component.you_must_accept_the_terms_to_create_an_account' | siteText }}</div>\n      </div>\n    </div>\n\n    <div class=\"d-flex justify-content-end gap-2 mt-4\">\n      <button class=\"btn btn-dark btn-sm rounded-pill px-3\" [disabled]=\"form.invalid || sending\">\n        {{ sending ? 'Creating…' : 'Create account' }}\n      </button>\n    </div>\n  </form>\n\n  <div class=\"text-center text-muted my-3 small\">{{ 'auto.login.signup.signup.component.or' | siteText }}</div>\n\n  <div class=\"d-grid\">\n    <button class=\"btn btn-outline-dark btn-sm rounded-pill\" (click)=\"signupWithGoogle()\" [disabled]=\"sending\">\n      <span class=\"d-inline-flex align-items-center gap-2\">\n        <img src=\"https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg\" width=\"16\" height=\"16\" alt=\"\">{{ 'auto.login.signup.signup.component.continue_with_google' | siteText }}</span>\n    </button>\n  </div>\n\n  <hr class=\"my-4\">\n\n  <div class=\"text-center\">\n    <span class=\"text-muted me-1 small\">{{ 'auto.login.signup.signup.component.already_have_an_account' | siteText }}</span>\n    <a routerLink=\"/login\" class=\"text-decoration-none small\">{{ 'auto.login.signup.signup.component.sign_in' | siteText }}</a>\n  </div>\n</div>\n\n<!-- Error Modal (pure Angular + Bootstrap styles) -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showErrorModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showErrorModal\" (click)=\"closeErrorModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ errorModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeErrorModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ errorModalMessage }}</p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-secondary\" (click)=\"closeErrorModal()\">{{ 'auto.login.signup.signup.component.close' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n<!-- Success Modal -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showSuccessModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showSuccessModal\" (click)=\"closeSuccessModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ successModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeSuccessModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ successModalMessage }}<br><br><strong>{{ 'auto.login.signup.signup.component.please_also_check_your_junk_spam_folder' | siteText }}</strong></p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-dark\" (click)=\"closeSuccessModal()\">{{ 'auto.login.signup.signup.component.go_to_login' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n";
+module.exports = "<div class=\"container py-5 auth-shell\">\n  <div class=\"auth-brand\">\n    <span class=\"auth-eyebrow\">{{ 'ui.signup.brand' | siteText:'GoDirect' }}</span>\n    <div class=\"auth-mark\">G</div>\n    <h1 class=\"h4 mb-1\">{{ 'auto.login.signup.signup.component.create_your_account' | siteText }}</h1>\n    <p class=\"text-muted small mb-4\">{{ 'auto.login.signup.signup.component.prepare_your_charter_manage_your_details_and_confi' | siteText }}</p>\n  </div>\n\n  <div *ngIf=\"success\" class=\"alert alert-success py-2\">{{ 'auto.login.signup.signup.component.account_created_successfully_please_check_your_inb' | siteText }}</div>\n\n  <form [formGroup]=\"form\" (ngSubmit)=\"signupWithEmail()\" novalidate>\n    <div class=\"row g-3\">\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.first_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"firstname\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.last_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"lastname\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.display_name_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"displayName\" [placeholder]=\"'auto.login.signup.signup.component.public_name' | siteText\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.country' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"country\" [placeholder]=\"'auto.login.signup.signup.component.fr' | siteText\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.email' | siteText }}</label>\n        <input type=\"email\" class=\"form-control form-control-sm\" formControlName=\"email\"\n          [class.is-invalid]=\"f.email.touched && f.email.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('required')\">{{ 'auto.login.signup.signup.component.email_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('email')\">{{ 'auto.login.signup.signup.component.enter_a_valid_email' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.phone_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"phone\" placeholder=\"+33 6 ...\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.password' | siteText }}</label>\n        <input type=\"password\" class=\"form-control form-control-sm\" formControlName=\"password\"\n          [class.is-invalid]=\"f.password.touched && f.password.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('required')\">{{ 'auto.login.signup.signup.component.password_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('minlength')\">{{ 'auto.login.signup.signup.component.minimum_6_characters' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.account_type' | siteText }}</label>\n        <select class=\"form-select form-select-sm\" formControlName=\"role\">\n          <option *ngFor=\"let r of roles\" [value]=\"r.id\">{{r.labelKey | siteText}}</option>\n        </select>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.admin_role_must_be_granted_by_the_platform' | siteText }}</div>\n      </div>\n\n      <!-- Stripe Connect opt-in (only shows for owner/provider) -->\n      <div class=\"col-12\" *ngIf=\"form.value.role === 'assetOwner' || form.value.role === 'serviceProvider'\">\n        <div class=\"form-check\">\n          <input class=\"form-check-input\" type=\"checkbox\" id=\"connectStripe\" [(ngModel)]=\"connectStripeNow\"\n            [ngModelOptions]=\"{standalone: true}\">\n          <label class=\"form-check-label small\" for=\"connectStripe\">{{ 'auto.login.signup.signup.component.connect_my_stripe_account_right_after_signup' | siteText }}</label>\n        </div>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.you_can_also_do_this_later_from_your_dashboard' | siteText }}</div>\n      </div>\n\n      <!-- Social links -->\n      <div class=\"col-12\">\n        <label class=\"form-label d-flex justify-content-between align-items-center small\">{{ 'auto.login.signup.signup.component.social_links' | siteText }}<button type=\"button\" class=\"btn btn-sm btn-outline-secondary rounded-pill\" (click)=\"addSocial()\">{{ 'auto.login.signup.signup.component.add_link' | siteText }}</button>\n        </label>\n\n        <div *ngFor=\"let s of socials.controls; let i = index\" class=\"row g-2 align-items-center mb-2\">\n          <div class=\"col-md-3\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'label')\" [placeholder]=\"'auto.login.signup.signup.component.instagram' | siteText\" />\n          </div>\n          <div class=\"col-md-8\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'url')\"\n              [placeholder]=\"'auto.login.signup.signup.component.https_instagram_com_yourname' | siteText\" />\n          </div>\n          <div class=\"col-md-1 text-end\">\n            <button type=\"button\" class=\"btn btn-link text-danger p-0\" (click)=\"removeSocial(i)\" [title]=\"'auto.login.signup.signup.component.remove' | siteText\">\n              <i class=\"bi bi-x-lg\"></i>\n            </button>\n          </div>\n        </div>\n      </div>\n\n      <!-- Photos upload -->\n      <div class=\"col-12\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.photos_optional' | siteText }}</label>\n        <input type=\"file\" class=\"form-control form-control-sm\" (change)=\"onPhotosInput($event)\"\n          multiple />\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.jpg_png_you_can_add_more_later' | siteText }}</div>\n\n        <div class=\"d-flex flex-wrap gap-2 mt-2\" *ngIf=\"photoUrls.length\">\n          <img *ngFor=\"let url of photoUrls\" [src]=\"url\" class=\"rounded border\"\n            style=\"width:108px;height:80px;object-fit:cover;\">\n        </div>\n      </div>\n\n      <!-- Terms -->\n      <div class=\"col-12\">\n        <div class=\"form-check\">\n          <input class=\"form-check-input\" type=\"checkbox\" id=\"acceptTerms\" formControlName=\"acceptTerms\" />\n          <label class=\"form-check-label small\" for=\"acceptTerms\">{{ 'auto.login.signup.signup.component.i_agree_to_the' | siteText }}<a [routerLink]=\"'/terms' | resourceRoute\">{{ 'auto.login.signup.signup.component.terms' | siteText }}</a>{{ 'auto.login.signup.signup.component.amp' | siteText }}<a [routerLink]=\"'/privacy' | resourceRoute\">{{ 'auto.login.signup.signup.component.privacy' | siteText }}</a>.\n          </label>\n        </div>\n        <div class=\"text-danger small mt-1\" *ngIf=\"f.acceptTerms.touched && f.acceptTerms.invalid\">{{ 'auto.login.signup.signup.component.you_must_accept_the_terms_to_create_an_account' | siteText }}</div>\n      </div>\n    </div>\n\n    <div class=\"d-flex justify-content-end gap-2 mt-4\">\n      <button class=\"btn btn-dark btn-sm rounded-pill px-3\" [disabled]=\"form.invalid || sending\">\n        {{ sending ? ('ui.messages.t94d7d8ee473f' | siteText) : ('ui.messages.taaf374479756' | siteText) }}\n      </button>\n    </div>\n  </form>\n\n  <div class=\"text-center text-muted my-3 small\">{{ 'auto.login.signup.signup.component.or' | siteText }}</div>\n\n  <div class=\"d-grid\">\n    <button class=\"btn btn-outline-dark btn-sm rounded-pill\" (click)=\"signupWithGoogle()\" [disabled]=\"sending\">\n      <span class=\"d-inline-flex align-items-center gap-2\">\n        <img src=\"https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg\" width=\"16\" height=\"16\" alt=\"\">{{ 'auto.login.signup.signup.component.continue_with_google' | siteText }}</span>\n    </button>\n  </div>\n\n  <hr class=\"my-4\">\n\n  <div class=\"text-center\">\n    <span class=\"text-muted me-1 small\">{{ 'auto.login.signup.signup.component.already_have_an_account' | siteText }}</span>\n    <a [routerLink]=\"'/login' | resourceRoute\" queryParamsHandling=\"preserve\" class=\"text-decoration-none small\">{{ 'auto.login.signup.signup.component.sign_in' | siteText }}</a>\n  </div>\n</div>\n\n<div *ngIf=\"success && publishIntent\" class=\"text-center my-3\"><a class=\"btn btn-dark\" routerLink=\"/owner/listings\">{{ 'ui.discovery.manage' | siteText:'Mes annonces' }}</a></div>\n<!-- Error Modal (pure Angular + Bootstrap styles) -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showErrorModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showErrorModal\" (click)=\"closeErrorModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ errorModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeErrorModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ errorModalMessage }}</p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-secondary\" (click)=\"closeErrorModal()\">{{ 'auto.login.signup.signup.component.close' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n<!-- Success Modal -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showSuccessModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showSuccessModal\" (click)=\"closeSuccessModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ successModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeSuccessModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ successModalMessage }}<br><br><strong>{{ 'auto.login.signup.signup.component.please_also_check_your_junk_spam_folder' | siteText }}</strong></p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-dark\" (click)=\"closeSuccessModal()\">{{ 'auto.login.signup.signup.component.go_to_login' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n";
 
 /***/ }),
 

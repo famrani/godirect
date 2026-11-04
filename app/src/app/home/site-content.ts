@@ -1,3 +1,4 @@
+import {PAGE_TRANSLATIONS} from '../services/page-translations';
 import { SiteLanguage } from '../services/language.service';
 
 export interface OutingItem {
@@ -143,27 +144,27 @@ export interface SiteContent {
 }
 
 const sharedImages = {
-  hero: 'assets/img/home/home-hero-generic.jpg',
-  boatHero: 'assets/img/boat/bali4.1/bali-41-4.jpg',
+  hero: '/api/media/object?path=assets%2Fboats%2Falegria%2Fhomepage%2Fhome-hero-generic.jpg',
+  boatHero: '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-4.jpg',
   gallery: [
-    'assets/img/boat/bali4.1/bali-41-2.jpg',
-    'assets/img/boat/bali4.1/bali-41-3.jpg',
-    'assets/img/boat/bali4.1/bali-41-4.jpg',
-    'assets/img/boat/bali4.1/bali-41-5.jpg',
-    'assets/img/boat/bali4.1/bali-41-1.jpg',
-    'assets/img/boat/bali4.1/bali-41-6.jpg',
-    'assets/img/boat/bali4.1/bali-41-7.jpg',
-    'assets/img/boat/bali4.1/bali-41-8.jpg',
-    'assets/img/boat/bali4.1/bali-41-9.jpg',
-    'assets/img/boat/bali4.1/bali-41-10.jpg',
-    'assets/img/boat/bali4.1/bali-41-11.jpg',
-    'assets/img/boat/bali4.1/bali-41-12.jpg',
-    'assets/img/boat/bali4.1/bali-41-13.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-2.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-3.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-4.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-5.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-1.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-6.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-7.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-8.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-9.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-10.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-11.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-12.jpg',
+    '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-13.jpg',
   ],
-  de1: 'assets/img/events/de/de1.png',
-  sunset1: 'assets/img/events/sunset/sunset1.jpg',
-  business1: 'assets/img/events/business-meeting/business-meeting1.jpg',
-  party1: 'assets/img/events/party/party1.jpg',
+  de1: '/api/media/object?path=assets%2Fboats%2Falegria%2Foutings%2Fde%2Fde1.png',
+  sunset1: '/api/media/object?path=assets%2Fboats%2Falegria%2Foutings%2Fsunset%2Fsunset1.jpg',
+  business1: '/api/media/object?path=assets%2Fboats%2Falegria%2Foutings%2Fbusiness-meeting%2Fbusiness-meeting1.jpg',
+  party1: '/api/media/object?path=assets%2Fboats%2Falegria%2Foutings%2Fparty%2Fparty1.jpg',
 };
 
 export const SITE_CONTENT: Record<string, SiteContent> = {
@@ -7789,3 +7790,17 @@ function alegriaDeepMerge(target: any, source: any): any {
   const fallbackBase = (SITE_CONTENT as any)[language] || (SITE_CONTENT as any).en || (SITE_CONTENT as any).fr || {};
   (SITE_CONTENT as any)[language] = alegriaDeepMerge(fallbackBase, FRONTEND_FIREBASE_I18N_FALLBACK[language] || {});
 });
+
+// Generic offline role-label fallback. Live labels are provided by uiTranslations.
+const GENERIC_ROLE_LABELS:any={"fr": {"customer": "Client", "assetOwner": "Propriétaire de bien", "serviceProvider": "Prestataire de services", "admin": "Administrateur de la plateforme"}, "en": {"customer": "Customer", "assetOwner": "Asset owner", "serviceProvider": "Service provider", "admin": "Platform administrator"}, "es": {"customer": "Cliente", "assetOwner": "Propietario de un bien", "serviceProvider": "Proveedor de servicios", "admin": "Administrador de la plataforma"}, "it": {"customer": "Cliente", "assetOwner": "Proprietario di un bene", "serviceProvider": "Fornitore di servizi", "admin": "Amministratore della piattaforma"}, "de": {"customer": "Kunde", "assetOwner": "Vermieter", "serviceProvider": "Dienstleister", "admin": "Plattformadministrator"}, "nl": {"customer": "Klant", "assetOwner": "Verhuurder", "serviceProvider": "Dienstverlener", "admin": "Platformbeheerder"}, "ru": {"customer": "Клиент", "assetOwner": "Владелец объекта", "serviceProvider": "Поставщик услуг", "admin": "Администратор платформы"}};
+Object.keys(GENERIC_ROLE_LABELS).forEach(l=>{(SITE_CONTENT as any)[l].roles=GENERIC_ROLE_LABELS[l];});
+
+// Complete bundled UI translations before live Firebase overrides are merged.
+for(const [language,entries]of Object.entries(PAGE_TRANSLATIONS)){
+  const content=(SITE_CONTENT as any)[language]||((SITE_CONTENT as any)[language]={});
+  for(const [path,value]of Object.entries(entries)){
+    const parts=path.split('.');let node=content;
+    for(const part of parts.slice(0,-1))node=node[part]??={};
+    node[parts[parts.length-1]]=value;
+  }
+}

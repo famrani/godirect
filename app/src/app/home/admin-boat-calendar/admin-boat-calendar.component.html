@@ -21,7 +21,7 @@
   </div>
 
   <label class="cancelled-toggle"><input type="checkbox" [checked]="showCancelled" (change)="toggleCancelled()" /> {{ t('showCancelled') }}</label>
-  <p class="error" *ngIf="error">{{ error }}</p>
+  <p class="error" *ngIf="error">{{ error | siteText }}</p>
 
   <div class="legend" [attr.aria-label]="t('legend')">
     <span><i class="past"></i> {{ t('pastUse') }}</span>
@@ -33,7 +33,7 @@
   <div class="calendar-shell" [class.loading]="loading">
     <div class="weekday" *ngFor="let weekday of weekdays">{{ weekday }}</div>
     <button type="button" class="day-cell" *ngFor="let cell of cells; trackBy: trackCell"
-      [class.empty]="!cell.inMonth" [class.selected]="cell.iso === selectedDate" [class.occupied]="cell.uses.length"
+      [class.today-date]="cell.inMonth && cell.iso === todayIso" [class.empty]="!cell.inMonth" [class.selected]="cell.iso === selectedDate" [class.occupied]="cell.uses.length"
       (click)="selectDay(cell)" [disabled]="!cell.inMonth">
       <span class="day-number">{{ cell.day }}</span>
       <span class="events" *ngIf="cell.uses.length">
@@ -51,8 +51,30 @@
     </button>
     <p *ngIf="selectedDateUnavailableToCustomer">{{ t('unavailable') }}</p>
     <article *ngFor="let use of selectedUses" [class]="'usage-card ' + use.status">
-      <div><span class="status">{{ statusLabel(use.status) }}</span><h3>{{ use.ownedByCurrentUser && !isAdmin ? t('myBooking') : use.title }}</h3><p *ngIf="use.customer">{{ use.customer }}</p><small>{{ use.details }}</small></div>
-      <a *ngIf="use.route" [routerLink]="use.route">{{ t('viewDetails') }}</a>
+      <div><span class="status">{{ statusLabel(use.status) | siteText }}</span><h3>{{ use.ownedByCurrentUser && !isAdmin ? t('myBooking') : use.title }}</h3><p *ngIf="use.customer">{{ use.customer }}</p><small>{{ use.details }}</small></div>
+      <button *ngIf="isAdmin && use.source === 'booking'" type="button" class="refresh-button" (click)="openBooking(use)">{{ t('viewDetails') }}</button>
+      <a *ngIf="!(isAdmin && use.source === 'booking') && use.route" [routerLink]="(use.route) | resourceRoute">{{ t('viewDetails') }}</a>
     </article>
   </section>
 </section>
+
+<div class="booking-overlay" *ngIf="openedBooking" (click)="closeBooking()">
+  <section class="booking-dialog" role="dialog" aria-modal="true" [attr.aria-label]="'ui.pages.ta3deb6de9367' | siteText" (click)="$event.stopPropagation()">
+    <button class="booking-close" type="button" (click)="closeBooking()" [attr.aria-label]="'ui.pages.t5ab4ec640d65' | siteText">×</button>
+    <h2>{{ "ui.pages.ta3deb6de9367" | siteText }} {{ openedBooking.id }}</h2>
+    <p><strong>{{ "ui.pages.tb20e7fc2aa5e" | siteText }}</strong> {{ bookingField('bookingStatus') || bookingField('status') || '—' }}</p>
+    <p><strong>{{ "ui.pages.t9c5b4ff164c1" | siteText }}</strong> {{ bookingField('customerName') || bookingField('customer')?.name || openedBooking.customer || '—' }}</p>
+    <p><strong>{{ "ui.pages.tf2f25a214e8d" | siteText }}</strong> {{ bookingField('customerEmail') || bookingField('customer')?.email || bookingField('email') || '—' }}</p>
+    <p><strong>{{ "ui.pages.ta624c50c05f9" | siteText }}</strong> {{ bookingField('customerPhone') || bookingField('customer')?.phone || '—' }}</p>
+    <p><strong>{{ "ui.pages.t1d9509c795b1" | siteText }}</strong> {{ bookingField('startAt') || bookingField('startDate') || openedBooking.date }}</p>
+    <p><strong>{{ "ui.pages.t6b28fe14cfe0" | siteText }}</strong> {{ bookingField('endAt') || bookingField('endDate') || openedBooking.endDate }}</p>
+    <p *ngIf="bookingField('pickupLocation')"><strong>{{ "ui.pages.tba58cc02c028" | siteText }}</strong> {{ bookingField('pickupLocation') }}</p>
+    <p *ngIf="bookingField('returnLocation')"><strong>{{ "ui.pages.t665c4a5ae53f" | siteText }}</strong> {{ bookingField('returnLocation') }}</p>
+    <p *ngIf="bookingField('additionalDriver') !== undefined"><strong>{{ "ui.pages.t1add0a0fd413" | siteText }}</strong> {{ bookingField('additionalDriver') ? 'Oui' : 'Non' }}</p>
+    <p *ngIf="bookingField('childSeat') !== undefined"><strong>{{ "ui.pages.t229636c03f94" | siteText }}</strong> {{ bookingField('childSeat') ? 'Oui' : 'Non' }}</p>
+    <p *ngIf="bookingField('rentalAmount') !== undefined"><strong>{{ "ui.pages.tcea1e9cc3158" | siteText }}</strong> {{ bookingField('rentalAmount') }} {{ bookingField('currency') || 'EUR' }}</p>
+    <p *ngIf="bookingField('bookingDeposit') !== undefined"><strong>{{ "ui.pages.t32d917697017" | siteText }}</strong> {{ bookingField('bookingDeposit') }} {{ bookingField('currency') || 'EUR' }}</p>
+    <p *ngIf="bookingField('securityDeposit') !== undefined"><strong>{{ "ui.pages.t4897cdcb0ea9" | siteText }}</strong> {{ bookingField('securityDeposit') }} {{ bookingField('currency') || 'EUR' }}</p>
+    <button type="button" class="refresh-button" (click)="navigateToBooking()">{{ "ui.pages.t55065519550b" | siteText }}</button>
+  </section>
+</div>

@@ -10,7 +10,7 @@
 <section class="offer-confirmation-page">
   <div class="container offer-shell">
     <p class="muted" *ngIf="loading">{{ text('loading') }}</p>
-    <p class="error" *ngIf="error">{{ error }}</p>
+    <p class="error" *ngIf="error">{{ error | siteText }}</p>
 
     <article class="offer-card" *ngIf="!loading && offer">
       <span class="eyebrow">{{ text('offerEyebrow') }}</span>
@@ -145,7 +145,7 @@
               <span>1</span>
               <strong>{{ text('wizardStepTerms') }}</strong>
             </button>
-            <button class="wizard-step" type="button" [class.active]="wizardStep === 2" [class.done]="depositPaid" [disabled]="!canGoToWizardStep(2)" (click)="goToWizardStep(2)">
+            <button class="wizard-step" type="button" *ngIf="paymentRequired" [class.active]="wizardStep === 2" [class.done]="paymentStepComplete" [disabled]="!canGoToWizardStep(2)" (click)="goToWizardStep(2)">
               <span>2</span>
               <strong>{{ text('wizardStepDeposit') }}</strong>
             </button>
@@ -172,12 +172,12 @@
               <p class="muted" *ngIf="!canAcceptTermsCheckbox">{{ text('termsLocked') }}</p>
 
               <button class="btn btn-primary" type="button" [disabled]="!canAccept || accepting" (click)="acceptOffer()">
-                {{ accepting ? text('acceptingButton') : (text('wizardAcceptTermsButton') || 'Validate T&C and continue') }}
+                {{ accepting ? text('acceptingButton') : (text('wizardAcceptTermsButton') || ('ui.messages.t96459ec0c0b6' | siteText)) }}
               </button>
             </ng-container>
 
-            <button class="btn btn-primary" type="button" *ngIf="tncAccepted" (click)="goToWizardStep(2)">
-              {{ text('continueToDepositButton') || text('payDepositButton') }}
+            <button class="btn btn-primary" type="button" *ngIf="tncAccepted" (click)="goToWizardStep(paymentRequired ? 2 : 3)">
+              {{ paymentRequired ? (text('continueToDepositButton') || text('payDepositButton')) : text('continueToWarrantyButton') }}
             </button>
           </section>
 
@@ -264,7 +264,7 @@
           </section>
         </div>
 
-        <p class="success" *ngIf="message">{{ message }}</p>
+        <p class="success" *ngIf="message">{{ message | siteText }}</p>
       </ng-container>
     </article>
   </div>

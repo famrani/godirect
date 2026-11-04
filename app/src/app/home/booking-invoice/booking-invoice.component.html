@@ -1,6 +1,6 @@
 <section class="invoice-page" *ngIf="!loading && booking">
   <div class="invoice-toolbar no-print">
-    <a class="btn btn-secondary" [routerLink]="['/admin/bookings', booking.bookingId]">{{ 'auto.home.booking-invoice.booking-invoice.component.retour_r_servation' | siteText }}</a>
+    <a class="btn btn-secondary" [routerLink]="(['/admin/reservations', booking.bookingId]) | resourceRoute">{{ 'auto.home.booking-invoice.booking-invoice.component.retour_r_servation' | siteText }}</a>
     <button class="btn btn-secondary" type="button" (click)="addLine()">{{ 'auto.home.booking-invoice.booking-invoice.component.ajouter_une_ligne' | siteText }}</button>
     <button class="btn btn-primary" type="button" (click)="printPdf()">{{ 'auto.home.booking-invoice.booking-invoice.component.imprimer_enregistrer_en_pdf' | siteText }}</button>
   </div>
@@ -9,7 +9,7 @@
     <header class="invoice-header">
       <div>
         <h1>{{ 'auto.home.booking-invoice.booking-invoice.component.facture' | siteText }}</h1>
-        <p>{{ invoiceType === 'extras' ? 'Prestations additionnelles / Catering' : 'Prestations ALEGRIA' }}</p>
+        <p>{{ invoiceType === 'extras' ? ('ui.messages.t3a520bf996fa' | siteText) : ('ui.messages.t6e39c3b849b8' | siteText) }}</p>
       </div>
       <div class="invoice-meta">
         <label>{{ 'auto.home.booking-invoice.booking-invoice.component.n_facture' | siteText }}<input [(ngModel)]="invoiceNumber" /></label>
@@ -38,10 +38,10 @@
       <h2>{{ 'auto.home.booking-invoice.booking-invoice.component.sortie_concern_e' | siteText }}</h2>
       <p>
         <strong>{{ booking.outingType }}</strong><br />
-        Date : {{ booking.outingDate }}<br />
-        Horaires : {{ booking.departureTime || '-' }} - {{ booking.arrivalTime || '-' }}<br />
-        Passagers : {{ booking.passengers || '-' }}<br />
-        Référence réservation : {{ booking.bookingId }}
+        {{ "ui.pages.t2e4c6fc1af69" | siteText }} {{ booking.outingDate }}<br />
+        {{ "ui.pages.t2f5dd073ec3d" | siteText }} {{ booking.departureTime || '-' }} - {{ booking.arrivalTime || '-' }}<br />
+        {{ "ui.pages.tab8a4cb7d2d0" | siteText }} {{ booking.passengers || '-' }}<br />
+        {{ "ui.pages.t21d88aef2e8f" | siteText }} {{ booking.bookingId }}
       </p>
     </section>
 

@@ -1,15 +1,10 @@
 import { NgModule } from '@angular/core';
 
-import { AngularFireModule } from '@angular/fire/compat';
-import { AngularFireAuthModule } from '@angular/fire/compat/auth';
-import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
-import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
 import { TranslateModule, TranslateLoader, MissingTranslationHandler, MissingTranslationHandlerParams } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { HttpClientModule, HttpClientJsonpModule, HttpClient } from '@angular/common/http';
-import { firebaseConfig } from '../firebase.config';
 
 import { HaversineService } from 'ng2-haversine';
 
@@ -39,10 +34,6 @@ export class MyMissingTranslationHandler implements MissingTranslationHandler {
   declarations: [],
   imports: [
     HttpClientModule,
-    AngularFireModule.initializeApp(firebaseConfig, 'bootstrap'),
-    AngularFireAuthModule,
-    AngularFireStorageModule,
-    AngularFireDatabaseModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

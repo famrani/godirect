@@ -49,13 +49,12 @@ label {
   font-weight: 600;
   color: #082b3f;
 }
-input, textarea {
+input {
   border: 1px solid rgba(8,43,63,.16);
   border-radius: 12px;
   padding: .75rem .85rem;
   font: inherit;
 }
-.full-width { grid-column: 1 / -1; }
 .checkbox-line {
   flex-direction: row;
   align-items: center;

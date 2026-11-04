@@ -49,7 +49,7 @@
         {{ saving ? t('saving') : t('save') }}
       </button>
     </div>
-    <p class="success" *ngIf="message">{{ message }}</p>
-    <p class="error-message" *ngIf="error">{{ error }}</p>
+    <p class="success" *ngIf="message">{{ message | siteText }}</p>
+    <p class="error-message" *ngIf="error">{{ error | siteText }}</p>
   </div>
 </section>

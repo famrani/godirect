@@ -305,6 +305,31 @@ p, li, input, textarea, select, .card-body, .term-section {
   box-shadow: 0 14px 28px rgba(242, 140, 40, 0.22);
 }
 
+.owner-view-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.62rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-family: 'Raleway', Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.owner-view-switch:hover,
+.owner-view-switch:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.admin-navigation-panel {
+  min-width: 260px;
+}
+
 @media (min-width: 961px) {
   .nav-dropdown:not([open]) .dropdown-panel {
     display: none;
@@ -354,6 +379,13 @@ p, li, input, textarea, select, .card-body, .term-section {
 
   .language-switcher select {
     width: 100%;
+  }
+
+  .owner-view-switch {
+    width: 100%;
+    justify-content: center;
+    margin: 0.15rem 0;
+    padding: 0.9rem 1rem;
   }
 }
 
@@ -422,3 +454,5 @@ p, li, input, textarea, select, .card-body, .term-section {
 .account-admin-panel a {
   white-space: nowrap;
 }
+
+.platform-return{background:#f1f5f4;border-bottom:1px solid #dce5df;padding:7px 0;font:600 12px/1.5 Arial,sans-serif}.platform-return a{display:inline-flex;align-items:center;gap:7px;color:#173b36!important;text-decoration:none}.platform-return a:hover{text-decoration:underline}.platform-return a:focus-visible{outline:2px solid #173b36;outline-offset:3px}

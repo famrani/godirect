@@ -1,8 +1,8 @@
 {
   "application": {
-    "name": "Boatify back-end",
+    "name": "godirect back-end",
     "platform": "test",
-    "release": "0.2"
+    "release": "1.00"
   },
   "dev": {
     "firebaseMasterConfig": {

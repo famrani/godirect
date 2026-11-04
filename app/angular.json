@@ -46,10 +46,7 @@
               "node_modules/tippy.js/dist/tippy.css",
               "./src/styles.css"
             ],
-            "scripts": [
-              "./src/assets/js/jquery.min.js",
-              "./src/assets/js/scroll.js"
-            ],
+            "scripts": [],
             "aot": false,
             "vendorChunk": true,
             "extractLicenses": false,

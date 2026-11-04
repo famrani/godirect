@@ -5,6 +5,7 @@ import { SiteContentService } from '../site-content-service/site-content.service
 import { LanguageService, SiteLanguage } from '../../services/language.service';
 
 @Component({
+  standalone: false,
   selector: 'app-gallery',
   templateUrl: './gallery.component.html',
   styleUrls: ['./gallery.component.scss'],

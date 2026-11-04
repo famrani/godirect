@@ -1,0 +1,82 @@
+<ng-container *ngIf="asset; else loading">
+  <section class="car-landing">
+    <div class="car-landing__media">
+      <img
+        *ngIf="heroImage && !imageFailed"
+        class="car-landing__image no-image-zoom"
+        [src]="heroImage"
+        [alt]="title"
+        (error)="onImageError()"
+      >
+      <div class="car-landing__placeholder" *ngIf="!heroImage || imageFailed">
+        <div class="car-landing__placeholder-icon">🚗</div>
+        <strong>{{ title }}</strong>
+        <span>{{t('photo')}}</span>
+      </div>
+
+      <div class="car-landing__thumbs" *ngIf="galleryImages.length > 1">
+        <button
+          type="button"
+          *ngFor="let image of galleryImages; let i = index"
+          [class.active]="image === heroImage"
+          (click)="selectImage(image)"
+          [attr.aria-label]="'Afficher la photo ' + (i + 1)"
+        >
+          <img class="no-image-zoom" [src]="image" [alt]="title + ' - photo ' + (i + 1)" (error)="onGalleryImageError(image)">
+        </button>
+      </div>
+    </div>
+
+    <div class="car-landing__content">
+      <p class="eyebrow">{{t('car')}}</p>
+      <h1>{{ title }}</h1>
+      <p class="lead" *ngIf="intro">{{ intro }}</p>
+
+      <div class="car-landing__facts" *ngIf="features.length">
+        <span *ngFor="let feature of features">{{ feature }}</span>
+      </div>
+
+      <div class="car-landing__price" *ngIf="price.basePrice">
+        <span>{{t('from')}}</span>
+        <strong>{{ price.basePrice }} {{ price.currency || 'EUR' }}</strong>
+        <span>/ {{t('day')}}</span>
+      </div>
+
+      <p class="car-landing__description" *ngIf="description">{{ description }}</p>
+
+      <div class="car-landing__actions">
+        <a class="btn-primary" [routerLink]="'/reserver' | resourceRoute" queryParamsHandling="preserve">{{t('book')}}</a>
+        <a class="btn-secondary" [routerLink]="'/vehicle' | resourceRoute">{{t('details')}}</a>
+      </div>
+
+      <div class="car-landing__meta">
+        <span *ngIf="asset.location?.city">📍 {{ asset.location.city }}</span>
+        <span *ngIf="asset.paymentPolicy?.securityDeposit?.value">{{t('deposit')}}: {{ asset.paymentPolicy.securityDeposit.value }} {{ price.currency || 'EUR' }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="car-info">
+    <article>
+      <h2>{{ localized.descriptionTitle || t('about') }}</h2>
+      <p>{{ description }}</p>
+    </article>
+    <article>
+      <h2>{{ localized.rentalTitle || t('rental') }}</h2>
+      <p>{{ localized.rentalText || t('rentalText') }}</p>
+    </article>
+    <article>
+      <h2>{{t('features')}}</h2>
+      <ul *ngIf="features.length">
+        <li *ngFor="let feature of features">{{ feature }}</li>
+      </ul>
+    </article>
+  </section>
+</ng-container>
+
+<ng-template #loading>
+  <div class="loading">
+    <p *ngIf="!error">{{t('loading')}}</p>
+    <p *ngIf="error">{{ error | siteText }}</p>
+  </div>
+</ng-template>

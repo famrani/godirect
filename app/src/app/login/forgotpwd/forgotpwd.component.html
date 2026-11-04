@@ -15,7 +15,7 @@
       <button class="btn btn-primary w-100 my-4" type="submit" [disabled]="forgotpwdForm.invalid"
       (click)="forgotpwd()">{{ 'auto.login.forgotpwd.forgotpwd.component.send_reset_link' | siteText }}</button>
       <div class="text-center small">
-        <a [routerLink]="['/login']">{{ 'auto.login.forgotpwd.forgotpwd.component.back_to_login' | siteText }}</a>
+        <a [routerLink]="(['/login']) | resourceRoute">{{ 'auto.login.forgotpwd.forgotpwd.component.back_to_login' | siteText }}</a>
       </div>
     </form>
   </div>
@@ -27,11 +27,11 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="resetModalLabel">{{ 'auto.login.forgotpwd.forgotpwd.component.email_sent' | siteText }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" [aria-label]="'auto.login.forgotpwd.forgotpwd.component.close' | siteText"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" [attr.aria-label]="'auto.login.forgotpwd.forgotpwd.component.close' | siteText"></button>
       </div>
       <div class="modal-body">{{ 'auto.login.forgotpwd.forgotpwd.component.we_ve_sent_you_an_email_with_instructions_to_reset' | siteText }}</div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" routerLink="/home">{{ 'auto.login.forgotpwd.forgotpwd.component.ok' | siteText }}</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" [routerLink]="'/home' | resourceRoute">{{ 'auto.login.forgotpwd.forgotpwd.component.ok' | siteText }}</button>
       </div>
     </div>
   </div>

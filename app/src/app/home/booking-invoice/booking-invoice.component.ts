@@ -9,6 +9,7 @@ interface InvoiceLine {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-booking-invoice',
   templateUrl: './booking-invoice.component.html',
   styleUrls: ['./booking-invoice.component.scss']

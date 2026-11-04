@@ -1,0 +1,39 @@
+<main class="marketplace">
+  <section class="hero">
+    <p class="eyebrow">{{ "ui.pages.tb45b831d3cc5" | siteText }}</p>
+    <h1>{{ "ui.pages.t509d506c9c17" | siteText }}<br>{{ "ui.pages.ta8c7ed6da33e" | siteText }}</h1>
+    <p class="intro">{{ "ui.pages.td895c5fa52ac" | siteText }}</p>
+
+    <div class="categories" role="tablist" [attr.aria-label]="'ui.pages.te6f887fa4377' | siteText">
+      <button *ngFor="let category of categories"
+        [class.active]="criteria.assetType === category.value"
+        (click)="selectCategory(category.value)">
+        <ion-icon [name]="category.icon"></ion-icon>{{ category.label }}
+      </button>
+    </div>
+
+    <form class="search" (ngSubmit)="runSearch()">
+      <label><span>{{ "ui.pages.t1c255b91e71a" | siteText }}</span><ion-input name="geography" [(ngModel)]="criteria.geography" [placeholder]="'ui.pages.t95cdf0959d41' | siteText"></ion-input></label>
+      <label><span>{{ "ui.pages.t6e9816a8e9d0" | siteText }}</span><ion-select name="subtype" [(ngModel)]="criteria.subtype" interface="popover">
+        <ion-select-option *ngFor="let option of subtypeOptions[criteria.assetType === 'all' ? 'other' : criteria.assetType]" [value]="option">{{ option === 'all' ? ('ui.messages.tf269270c60bb' | siteText) : option }}</ion-select-option>
+      </ion-select></label>
+      <label><span>{{ "ui.pages.t196e36d8ce5e" | siteText }}</span><ion-select name="capacity" [(ngModel)]="criteria.capacity" interface="popover">
+        <ion-select-option [value]="null">{{ "ui.pages.t84f68e628d01" | siteText }}</ion-select-option>
+        <ion-select-option [value]="2">2+</ion-select-option><ion-select-option [value]="4">4+</ion-select-option><ion-select-option [value]="8">8+</ion-select-option>
+      </ion-select></label>
+      <button type="submit"><ion-icon name="search-outline"></ion-icon>{{ "ui.pages.tbce06414177f" | siteText }}</button>
+    </form>
+  </section>
+
+  <section class="results">
+    <header><div><p class="eyebrow">{{ "ui.pages.t6b8017b6769a" | siteText }}</p><h2>{{ searched ? assets.length + ' ' + ('ui.messages.t7ca60c196b59' | siteText) : ('ui.messages.t6e035884cf07' | siteText) }}</h2></div></header>
+    <div *ngIf="loading" class="state"><ion-spinner></ion-spinner><p>{{ "ui.pages.tfcf9e6fa5515" | siteText }}</p></div>
+    <div *ngIf="!loading && !assets.length" class="state"><ion-icon name="search-outline"></ion-icon><h3>{{ "ui.pages.t270f74dcca19" | siteText }}</h3><p>{{ "ui.pages.t4c7ec968b2a2" | siteText }}</p></div>
+    <div class="grid" *ngIf="!loading && assets.length">
+      <article *ngFor="let asset of assets; trackBy: trackByAssetId" (click)="open(asset)" tabindex="0" (keyup.enter)="open(asset)">
+        <div class="image"><img [src]="asset.imageUrl || '/api/media/object?path=assets%2Flogo-Alegria.png'" [alt]="asset.boatName"><span *ngIf="asset.search?.featured">{{ "ui.pages.tae31ad5d6f76" | siteText }}</span></div>
+        <div class="copy"><small>{{ asset.assetType | siteText }} · {{asset.search?.location?.area ? asset.search?.location?.area+' · ':''}}{{ asset.search?.location?.city || asset.defaultDepartureMarina }}</small><h3>{{ asset.boatName }}</h3><p>{{ asset.shortDescription || asset.manufacturer + ' ' + asset.model }}</p><footer><strong>{{ asset.defaultSkipperPrice || 0 | currency:asset.currency || 'EUR':'symbol':'1.0-0' }}</strong><span>{{ "ui.pages.t69a84cfb374d" | siteText }} {{ asset.maxGuests }} {{ "ui.pages.tf8122851dbc0" | siteText }}</span></footer></div>
+      </article>
+    </div>
+  </section>
+</main>

@@ -1,19 +1,36 @@
+import {RegistrationProfileService} from '../../services/registration-profile.service';
+import { FormControl } from '@angular/forms';
 import { Component } from '@angular/core';
 import { FormBuilder, Validators, FormArray, FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
+import {ActivatedRoute,Router } from '@angular/router';
 
 import { UsersService } from 'godigital-lib';               // adjust path if needed
 import { StoreDbService, OBJECTNAME } from 'godigital-lib'; // adjust path if needed
 import { UtilsService } from 'godigital-lib';
 
+export function registrationRole(value:any):string {return ['assetOwner','boatOwner','owner'].includes(String(value))?'assetOwner':value==='serviceProvider'?'serviceProvider':'customer';}
+
 type SocialLink = { label: string; url: string };
 
 @Component({
+  standalone: false,
   selector: 'app-signup',
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css'],
 })
 export class SignupComponent {
+  publishIntent=false;
+  roles:Array<{id:string,labelKey:string}>=[];
+  async ngOnInit():Promise<void>{this.publishIntent=this.route?.snapshot.queryParamMap.get('returnUrl')==='/owner/listings';try{this.roles=await this.registrationProfile.roles();if(this.publishIntent&&this.roles.some(r=>r.id==='assetOwner'))this.form.patchValue({role:'assetOwner'});}catch{this.error='Le catalogue des rôles est indisponible. Réessayez.';}}
+
+  socialControl(index: number, key: 'label' | 'url'): FormControl {
+    return this.socials.at(index).get(key) as FormControl;
+  }
+  onPhotosInput(event: Event): void {
+    void this.onPhotosSelected((event.target as HTMLInputElement | null)?.files || null);
+  }
+
+  emailActionWarning='';
   sending = false;
   success = false;                // shown only for email/password flow
   error?: string;                 // non-modal errors (rare)
@@ -37,7 +54,9 @@ export class SignupComponent {
     private users: UsersService,
     private storeDb: StoreDbService,
     public utilSvc: UtilsService,
-    private router: Router
+    private router: Router,
+    private registrationProfile:RegistrationProfileService,
+    private route:ActivatedRoute
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -49,7 +68,7 @@ export class SignupComponent {
       phone: [''],
       country: [''],
 
-      role: ['guest', [Validators.required]],
+      role: ['customer', [Validators.required]],
 
       socialnetwork: this.fb.array<ReturnType<typeof this.newSocial>>([]),
 
@@ -65,16 +84,13 @@ export class SignupComponent {
   addSocial() { this.socials.push(this.newSocial()); }
   removeSocial(i: number) { this.socials.removeAt(i); }
 
+  private firebaseUser():any {const db:any=this.storeDb;return db.firebaseauth?.currentUser||db.firebaseAuth?.currentUser||db.auth?.currentUser||null;}
   private isOwnerOrProvider(role: string | null | undefined) {
-    return role === 'boatOwner' || role === 'serviceProvider';
+    return ['assetOwner','boatOwner','owner','serviceProvider'].includes(String(role));
   }
 
   private buildStripeAuthorizeUrl(ownerId: string, role: string) {
-    const base = '/stripe/connect/authorize';
-    const url = new URL(base, window.location.origin);
-    url.searchParams.set('ownerId', ownerId);
-    url.searchParams.set('accountType', role);
-    return url.toString();
+    return new URL('/owner/payments',window.location.origin).toString();
   }
 
   // ---------- modal controls
@@ -132,7 +148,16 @@ export class SignupComponent {
         `${(v.firstname || '').toString().trim()} ${(v.lastname || '').toString().trim()}`.trim();
 
       // 1) create auth user
-      const { uid } = await this.users.registerWithEmail(v.email!, v.password!, displayName);
+      this.emailActionWarning='';
+      const previousUid=this.firebaseUser()?.uid;
+      let uid:string;
+      try {uid=(await this.users.registerWithEmail(v.email!, v.password!, displayName)).uid;}
+      catch(e:any){
+        const current=this.firebaseUser();
+        if(e?.code==='auth/unauthorized-continue-uri'&&current?.uid&&current.uid!==previousUid&&String(current.email||'').toLowerCase()===String(v.email).trim().toLowerCase()){
+          uid=current.uid;this.emailActionWarning='Le compte a été créé, mais Firebase a refusé l’envoi du courriel de validation. Ajoutez le domaine de l’URL de retour dans Authentication > Settings > Authorized domains, puis renvoyez le courriel. Le compte n’est pas marqué comme vérifié.';
+        }else throw e;
+      }
 
       // 2) profile
       const now = Date.now();
@@ -145,7 +170,7 @@ export class SignupComponent {
         stripeAccountStatus: '',
         email: v.email,
         phone: v.phone || '',
-        role: v.role || 'guest',
+        role: registrationRole(v.role),
         photos: this.photoUrls,
         socialnetwork: (v.socialnetwork || []).map((s: any) => ({
           label: s.label || '',
@@ -161,16 +186,10 @@ export class SignupComponent {
       };
 
       // 3) save to RTDB
-      await this.storeDb.updateObject(
-        this.utilSvc.backendFBstoreId,
-        this.utilSvc.mdb,
-        OBJECTNAME.bnUsers,
-        profile,
-        uid
-      );
+      await this.registrationProfile.save(profile);
 
       // 4) Either redirect to Stripe immediately, or show the success banner (as before)
-      if (this.connectStripeNow && this.isOwnerOrProvider(profile.role)) {
+      if (this.connectStripeNow && this.isOwnerOrProvider(profile.role) && !this.emailActionWarning) {
         window.location.href = this.buildStripeAuthorizeUrl(uid, profile.role);
         return;
       }
@@ -183,20 +202,20 @@ export class SignupComponent {
       }
 
       this.success = true;
-      this.form.reset({ role: 'guest', acceptTerms: false });
+      this.form.reset({ role: 'customer', acceptTerms: false });
       this.photoUrls = [];
       this.openSuccessModal(
-        'Account created successfully. Please check your inbox and your Junk/Spam folder for the password setup/reset email before signing in.',
+        this.emailActionWarning || 'Account created successfully. Please check your inbox and your Junk/Spam folder for the password setup/reset email before signing in.',
         'Account created successfully'
       );
 
       setTimeout(() => {
-        if (this.showSuccessModal) {
+        if (this.showSuccessModal && !this.emailActionWarning) {
           this.closeSuccessModal();
         }
       }, 2500);
     } catch (e: any) {
-      this.openErrorModal(e?.message || 'Sign-up failed.');
+      this.openErrorModal(e?.code==='auth/unauthorized-continue-uri'?'Firebase refuse le domaine de l’URL de retour. Dans Firebase Console > Authentication > Settings > Authorized domains, ajoutez le domaine utilisé (par exemple localhost pour vos tests). Le compte peut déjà avoir été créé : essayez de vous connecter avant de recommencer.':e?.code==='auth/email-already-in-use'?'Cette adresse possède déjà un compte. Connectez-vous ou utilisez Mot de passe oublié.':e?.message || 'Sign-up failed.');
     } finally {
       this.sending = false;
     }
@@ -216,7 +235,7 @@ export class SignupComponent {
       const displayName = (v.displayName || user.displayName || '').trim();
       const firstname = v.firstname || (displayName.split(' ')[0] || '');
       const lastname = v.lastname || (displayName.split(' ').slice(1).join(' ') || '');
-      const role = v.role || 'guest';
+      const role = user.role || registrationRole(v.role);
 
       const profile = {
         userId: uid,
@@ -242,13 +261,7 @@ export class SignupComponent {
         provider: 'google',
       };
 
-      await this.storeDb.updateObject(
-        this.utilSvc.backendFBstoreId,
-        this.utilSvc.mdb,
-        OBJECTNAME.bnUsers,
-        profile,
-        uid
-      );
+      await this.registrationProfile.save(profile);
 
       // IMMEDIATE redirect to home (no “user created” banner)
       // If you want to auto-open Stripe right after Google for owners/providers, uncomment below:
@@ -256,7 +269,8 @@ export class SignupComponent {
       //   window.location.href = this.buildStripeAuthorizeUrl(uid, role);
       //   return;
       // }
-      this.router.navigateByUrl('/');
+      if(this.publishIntent)try{sessionStorage.removeItem('redirectAfterLogin');}catch{}
+      this.router.navigateByUrl(this.publishIntent?'/owner/listings':'/');
     } catch (e: any) {
       this.openErrorModal(e?.message || 'Google sign-in failed.');
     } finally {

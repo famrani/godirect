@@ -17,11 +17,12 @@ class FeedbacksService {
             const feedbackId = cleanId(req.params.feedbackId || req.params.id);
             const requesterUserId = cleanId(req.body?.userId || req.query?.userId);
             const requesterEmail = cleanId(req.body?.email || req.query?.email);
+            const boatId = this.stbDbSvc.normalizeBoatId(req.body?.boatId || req.query?.boatId);
             if (!feedbackId) {
                 return res.status(400).json({ ok: false, message: 'feedbackId is required.' });
             }
             try {
-                const refPath = `${firebase_service_1.OBJECTNAME.bnFeedbacks}/${feedbackId}`;
+                const refPath = this.stbDbSvc.boatPath(firebase_service_1.OBJECTNAME.bnFeedbacks, boatId, feedbackId);
                 const ref = this.stbDbSvc.db.ref(refPath);
                 const snapshot = await ref.once('value');
                 const feedback = snapshot.val();

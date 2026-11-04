@@ -1,7 +1,7 @@
 <div class="container py-5 auth-shell">
   <div class="auth-brand">
-    <span class="auth-eyebrow">{{ 'auto.login.signup.signup.component.alegria_boat' | siteText }}</span>
-    <div class="auth-mark">⛵</div>
+    <span class="auth-eyebrow">{{ 'ui.signup.brand' | siteText:'GoDirect' }}</span>
+    <div class="auth-mark">G</div>
     <h1 class="h4 mb-1">{{ 'auto.login.signup.signup.component.create_your_account' | siteText }}</h1>
     <p class="text-muted small mb-4">{{ 'auto.login.signup.signup.component.prepare_your_charter_manage_your_details_and_confi' | siteText }}</p>
   </div>
@@ -52,16 +52,13 @@
       <div class="col-md-6">
         <label class="form-label small mb-1">{{ 'auto.login.signup.signup.component.account_type' | siteText }}</label>
         <select class="form-select form-select-sm" formControlName="role">
-          <option [value]="'auto.login.signup.signup.component.customer' | siteText">{{ 'auto.login.signup.signup.component.customer' | siteText }}</option>
-          <option [value]="'auto.login.signup.signup.component.owner' | siteText">{{ 'auto.login.signup.signup.component.boat_owner_host' | siteText }}</option>
-          <option [value]="'auto.login.signup.signup.component.provider' | siteText">{{ 'auto.login.signup.signup.component.service_partner' | siteText }}</option>
-          <option [value]="'auto.login.signup.signup.component.admin' | siteText">{{ 'auto.login.signup.signup.component.platform_admin' | siteText }}</option>
+          <option *ngFor="let r of roles" [value]="r.id">{{r.labelKey | siteText}}</option>
         </select>
         <div class="form-text small">{{ 'auto.login.signup.signup.component.admin_role_must_be_granted_by_the_platform' | siteText }}</div>
       </div>
 
       <!-- Stripe Connect opt-in (only shows for owner/provider) -->
-      <div class="col-12" *ngIf="form.value.role === 'boatOwner' || form.value.role === 'serviceProvider'">
+      <div class="col-12" *ngIf="form.value.role === 'assetOwner' || form.value.role === 'serviceProvider'">
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="connectStripe" [(ngModel)]="connectStripeNow"
             [ngModelOptions]="{standalone: true}">
@@ -77,10 +74,10 @@
 
         <div *ngFor="let s of socials.controls; let i = index" class="row g-2 align-items-center mb-2">
           <div class="col-md-3">
-            <input class="form-control form-control-sm" [formControl]="s.get('label')" [placeholder]="'auto.login.signup.signup.component.instagram' | siteText" />
+            <input class="form-control form-control-sm" [formControl]="socialControl(i, 'label')" [placeholder]="'auto.login.signup.signup.component.instagram' | siteText" />
           </div>
           <div class="col-md-8">
-            <input class="form-control form-control-sm" [formControl]="s.get('url')"
+            <input class="form-control form-control-sm" [formControl]="socialControl(i, 'url')"
               [placeholder]="'auto.login.signup.signup.component.https_instagram_com_yourname' | siteText" />
           </div>
           <div class="col-md-1 text-end">
@@ -94,7 +91,7 @@
       <!-- Photos upload -->
       <div class="col-12">
         <label class="form-label small mb-1">{{ 'auto.login.signup.signup.component.photos_optional' | siteText }}</label>
-        <input type="file" class="form-control form-control-sm" (change)="onPhotosSelected(($event.target).files)"
+        <input type="file" class="form-control form-control-sm" (change)="onPhotosInput($event)"
           multiple />
         <div class="form-text small">{{ 'auto.login.signup.signup.component.jpg_png_you_can_add_more_later' | siteText }}</div>
 
@@ -108,7 +105,7 @@
       <div class="col-12">
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="acceptTerms" formControlName="acceptTerms" />
-          <label class="form-check-label small" for="acceptTerms">{{ 'auto.login.signup.signup.component.i_agree_to_the' | siteText }}<a routerLink="/terms">{{ 'auto.login.signup.signup.component.terms' | siteText }}</a>{{ 'auto.login.signup.signup.component.amp' | siteText }}<a routerLink="/privacy">{{ 'auto.login.signup.signup.component.privacy' | siteText }}</a>.
+          <label class="form-check-label small" for="acceptTerms">{{ 'auto.login.signup.signup.component.i_agree_to_the' | siteText }}<a [routerLink]="'/terms' | resourceRoute">{{ 'auto.login.signup.signup.component.terms' | siteText }}</a>{{ 'auto.login.signup.signup.component.amp' | siteText }}<a [routerLink]="'/privacy' | resourceRoute">{{ 'auto.login.signup.signup.component.privacy' | siteText }}</a>.
           </label>
         </div>
         <div class="text-danger small mt-1" *ngIf="f.acceptTerms.touched && f.acceptTerms.invalid">{{ 'auto.login.signup.signup.component.you_must_accept_the_terms_to_create_an_account' | siteText }}</div>
@@ -117,7 +114,7 @@
 
     <div class="d-flex justify-content-end gap-2 mt-4">
       <button class="btn btn-dark btn-sm rounded-pill px-3" [disabled]="form.invalid || sending">
-        {{ sending ? 'Creating…' : 'Create account' }}
+        {{ sending ? ('ui.messages.t94d7d8ee473f' | siteText) : ('ui.messages.taaf374479756' | siteText) }}
       </button>
     </div>
   </form>
@@ -135,10 +132,11 @@
 
   <div class="text-center">
     <span class="text-muted me-1 small">{{ 'auto.login.signup.signup.component.already_have_an_account' | siteText }}</span>
-    <a routerLink="/login" class="text-decoration-none small">{{ 'auto.login.signup.signup.component.sign_in' | siteText }}</a>
+    <a [routerLink]="'/login' | resourceRoute" queryParamsHandling="preserve" class="text-decoration-none small">{{ 'auto.login.signup.signup.component.sign_in' | siteText }}</a>
   </div>
 </div>
 
+<div *ngIf="success && publishIntent" class="text-center my-3"><a class="btn btn-dark" routerLink="/owner/listings">{{ 'ui.discovery.manage' | siteText:'Mes annonces' }}</a></div>
 <!-- Error Modal (pure Angular + Bootstrap styles) -->
 <div class="modal-backdrop fade show" *ngIf="showErrorModal"></div>
 <div class="modal d-block" tabindex="-1" role="dialog" *ngIf="showErrorModal" (click)="closeErrorModal()">
@@ -146,7 +144,7 @@
     <div class="modal-content">
       <div class="modal-header py-2">
         <h5 class="modal-title">{{ errorModalTitle }}</h5>
-        <button type="button" class="btn-close" [aria-label]="'auto.login.signup.signup.component.close' | siteText" (click)="closeErrorModal()"></button>
+        <button type="button" class="btn-close" [attr.aria-label]="'auto.login.signup.signup.component.close' | siteText" (click)="closeErrorModal()"></button>
       </div>
       <div class="modal-body">
         <p class="mb-0">{{ errorModalMessage }}</p>
@@ -164,7 +162,7 @@
     <div class="modal-content">
       <div class="modal-header py-2">
         <h5 class="modal-title">{{ successModalTitle }}</h5>
-        <button type="button" class="btn-close" [aria-label]="'auto.login.signup.signup.component.close' | siteText" (click)="closeSuccessModal()"></button>
+        <button type="button" class="btn-close" [attr.aria-label]="'auto.login.signup.signup.component.close' | siteText" (click)="closeSuccessModal()"></button>
       </div>
       <div class="modal-body">
         <p class="mb-0">{{ successModalMessage }}<br><br><strong>{{ 'auto.login.signup.signup.component.please_also_check_your_junk_spam_folder' | siteText }}</strong></p>

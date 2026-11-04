@@ -1,4 +1,5 @@
-<section class="booking-page">
+<app-my-bookings [admin]="true"></app-my-bookings>
+<section class="booking-page" *ngIf="bookingApiResourceType === 'boat' && isAdmin">
   <div class="container booking-shell">
     <div class="section-head">
       <span class="eyebrow">{{ t('adminEyebrow') }}</span>
@@ -31,6 +32,7 @@
           <option [value]="'all'">{{ t('allStatuses') }}</option>
           <option [value]="'not_confirmed'">{{ t('notConfirmed') }}</option>
           <option [value]="'confirmed'">{{ t('confirmed') }}</option>
+          <option [value]="'payment_pending'">{{ t('auto.home.bookings.bookings.component.payment_pending') }}</option>
           <option [value]="'payment_done'">{{ t('paymentDone') }}</option>
         </select>
       </label>
@@ -77,7 +79,6 @@
       </label>
 
       <button class="btn btn-secondary" type="button" (click)="resetFilters()">{{ t('resetFilters') }}</button>
-      <a class="btn btn-secondary" routerLink="/admin/offers">{{ t('offers') }}</a>
       <button class="btn btn-primary" type="button" (click)="openCreateReservation()">{{ t('auto.home.bookings.bookings.component.new_reservation') }}</button>
       <button class="btn btn-secondary" type="button" (click)="loadBookings()">{{ t('refresh') }}</button>
     </div>
@@ -90,7 +91,7 @@
           <p>{{ t('auto.home.bookings.bookings.component.create_a_direct_click_boat_samboat_or_other_platfo') }}</p>
         </div>
         <div class="create-panel-actions">
-          <a class="btn btn-primary" routerLink="/my-external-bookings">{{ t('auto.home.bookings.bookings.component.open_reservation_form') }}</a>
+          <a class="btn btn-primary" [routerLink]="'/my-external-bookings' | resourceRoute">{{ t('auto.home.bookings.bookings.component.open_reservation_form') }}</a>
           <button class="btn btn-secondary" type="button" (click)="closeCreateReservation()">{{ t('auto.home.bookings.bookings.component.close') }}</button>
         </div>
       </div>
@@ -111,7 +112,7 @@
     <p *ngIf="loading" class="muted">{{ t('loadingBookings') }}</p>
     <p *ngIf="!loading && errorMessage" class="error-message">{{ errorMessage }}</p>
     <p *ngIf="!loading && !errorMessage && bookings.length === 0" class="muted">
-      {{ t('noBookingsFirebase') }} <strong>{{ t('auto.home.bookings.bookings.component.bnbookings') }}</strong>.
+      {{ t('noBookingsFirebase') }} <strong>bookings/{{ bookingApiResourceType }}/{{ bookingApiResourceId }}</strong>.
     </p>
 
     <div class="list-summary" *ngIf="!loading && bookings.length > 0">
@@ -142,7 +143,7 @@
 
         <span class="booking-platform">
           <strong>{{ getPlatformLabel(booking) }}</strong>
-          <small>{{ getPlatformReference(booking) || 'Platform' }}</small>
+          <small>{{ getPlatformReference(booking) || ('ui.messages.t123a7f2fcc9a' | siteText) }}</small>
         </span>
 
         <span class="booking-price">
@@ -161,17 +162,17 @@
       {{ t('noBookingMatch') }}
     </p>
     <div class="balance-modal-backdrop" *ngIf="false">
-      <div class="balance-modal">
+      <div class="balance-modal" *ngIf="selectedBalanceBooking">
         <h2>{{ t('recordRemainingPayment') }}</h2>
         <p>
-          <strong>{{ selectedBalanceBooking.customerName }}</strong><br />
-          Total: €{{ getCustomerTotal(selectedBalanceBooking) }}<br />
-          Deposit 10%: €{{ getDepositAmount(selectedBalanceBooking) }} · {{ isDepositPaid(selectedBalanceBooking) ? t('depositPaid') : t('depositPending') }}<br />
-          Warranty mode: {{ getWarrantyModeLabel(selectedBalanceBooking) }}<br />
-          {{ t('stripeWarrantyCard') }}: {{ getWarrantyCardLabel(selectedBalanceBooking) }}<br />
-          T&C: {{ isTermsAccepted(selectedBalanceBooking) ? 'accepted' : 'not accepted' }}<br />
-          Booking status: {{ getStatusLabel(selectedBalanceBooking) }}<br />
-          {{ t('remainingToCollect') }}: <strong>€{{ getBalanceAmount(selectedBalanceBooking) }}</strong>
+          <strong>{{ selectedBalanceBooking!.customerName }}</strong><br />
+          {{ "ui.pages.t970c355ed4b0" | siteText }}{{ getCustomerTotal(selectedBalanceBooking!) }}<br />
+          {{ "ui.pages.tc8362ac14be2" | siteText }}{{ getDepositAmount(selectedBalanceBooking!) }} · {{ isDepositPaid(selectedBalanceBooking!) ? t('depositPaid') : t('depositPending') }}<br />
+          {{ "ui.pages.tbbf1609c54b9" | siteText }} {{ getWarrantyModeLabel(selectedBalanceBooking!) }}<br />
+          {{ t('stripeWarrantyCard') }}: {{ getWarrantyCardLabel(selectedBalanceBooking!) }}<br />
+          T&C: {{ isTermsAccepted(selectedBalanceBooking!) ? 'accepted' : ('ui.messages.tb10e9e747675' | siteText) }}<br />
+          {{ "ui.pages.t55d4ff15ffae" | siteText }} {{ getStatusLabel(selectedBalanceBooking!) }}<br />
+          {{ t('remainingToCollect') }}: <strong>€{{ getBalanceAmount(selectedBalanceBooking!) }}</strong>
         </p>
 
         <label>
@@ -205,29 +206,34 @@
       <button class="modal-close" type="button" (click)="closeStatusModal()">×</button>
       <span class="eyebrow">{{ t('bookingStatus') }}</span>
       <h2>{{ getStatusLabel(selectedStatusBooking) }}</h2>
-      <p>{{ getStatusSummaryText(selectedStatusBooking) }}</p>
+      <p>{{ bookingApiResourceType === 'car' ? ('ui.messages.tfc2a14504861' | siteText) : getStatusSummaryText(selectedStatusBooking) }}</p>
 
-      <div class="status-timeline">
-        <div class="status-step" [ngClass]="getStatusStepClass(isDepositPaid(selectedStatusBooking))">
-          <strong>{{ t('deposit10') }}</strong>
-          <span>{{ getCompletedLabel(isDepositPaid(selectedStatusBooking)) }}</span>
-        </div>
-        <div class="status-step" [ngClass]="getStatusStepClass(isTermsAccepted(selectedStatusBooking))">
+      <div class="status-timeline" *ngIf="bookingApiResourceType === 'boat'">
+        <div class="status-step" [ngClass]="getStatusStepClass(getCanonicalState(selectedStatusBooking).termsAccepted)">
           <strong>{{ t('tc') }}</strong>
-          <span>{{ isTermsAccepted(selectedStatusBooking) ? t('accepted') : t('notAccepted') }}</span>
+          <span>{{ getCanonicalState(selectedStatusBooking).termsAccepted ? t('accepted') : t('notAccepted') }}</span>
         </div>
-        <div class="status-step" [ngClass]="getStatusStepClass(isWarrantySecured(selectedStatusBooking))">
+        <div class="status-step" [ngClass]="getStatusStepClass(getCanonicalState(selectedStatusBooking).alegriaPaymentComplete)">
+          <strong>{{ "ui.pages.t35ade5651991" | siteText }}</strong>
+          <span>{{ getCompletedLabel(getCanonicalState(selectedStatusBooking).alegriaPaymentComplete) }}</span>
+        </div>
+        <div class="status-step" [ngClass]="getStatusStepClass(getCanonicalState(selectedStatusBooking).skipperPaymentComplete)">
+          <strong>{{ "ui.pages.td47a8197e67c" | siteText }}</strong>
+          <span>{{ getCompletedLabel(getCanonicalState(selectedStatusBooking).skipperPaymentComplete) }}</span>
+        </div>
+        <div class="status-step" [ngClass]="getStatusStepClass(getCanonicalState(selectedStatusBooking).warrantyComplete)">
           <strong>{{ t('warrantyMode') }}</strong>
           <span>{{ getWarrantyModeLabel(selectedStatusBooking) }} · {{ getWarrantyCardLabel(selectedStatusBooking) }}</span>
-        </div>
-        <div class="status-step" [ngClass]="getStatusStepClass(isBalancePaid(selectedStatusBooking))">
-          <strong>{{ t('remaining90') }}</strong>
-          <span>{{ getCompletedLabel(isBalancePaid(selectedStatusBooking)) }}</span>
         </div>
         <div class="status-step" [ngClass]="getStatusStepClass(getDamageStatusLabel(selectedStatusBooking).includes('recorded'))">
           <strong>{{ t('damage') }}</strong>
           <span>{{ getDamageStatusLabel(selectedStatusBooking) }}</span>
         </div>
+      </div>
+
+      <div class="status-timeline" *ngIf="bookingApiResourceType === 'car'">
+        <div class="status-step"><strong>{{ "ui.pages.tf53fafc56b35" | siteText }}</strong><span>{{ selectedStatusBooking.status || ('ui.messages.te22586930a5b' | siteText) }}</span></div>
+        <div class="status-step"><strong>{{ "ui.pages.t0564e9bab50a" | siteText }}</strong><span>{{ selectedStatusBooking.paymentStatus || 'unpaid' }}</span></div>
       </div>
 
       <div class="modal-actions">

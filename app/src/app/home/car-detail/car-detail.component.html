@@ -1,0 +1,32 @@
+<section class="vehicle" *ngIf="asset; else loading">
+  <a class="back" [routerLink]="'/home' | resourceRoute">{{ "ui.pages.tca5f444ee7c8" | siteText }}</a>
+  <div class="intro">
+    <div>
+      <span class="eyebrow">{{details.eyebrow || ('ui.messages.t10b31fcfff37' | siteText)}}</span>
+      <h1>{{details.title || (p.brand + ' ' + p.model)}}</h1>
+      <p class="lead">{{details.intro || asset.description}}</p>
+    </div>
+    <div class="price"><small>{{ "ui.pages.tc0fd7660f17d" | siteText }}</small><strong>{{price.basePrice}} {{price.currency}}</strong><small>{{ "ui.pages.t156b9eb38835" | siteText }}</small></div>
+  </div>
+
+  <div class="gallery" *ngIf="images.length; else noPhotos">
+    <img class="main" [src]="selectedImage || images[0]" [alt]="p.brand + ' ' + p.model">
+    <div class="thumbs" *ngIf="images.length > 1">
+      <button type="button" *ngFor="let image of images" (click)="selectedImage=image" [class.active]="selectedImage===image"><img [src]="image" alt=""></button>
+    </div>
+  </div>
+  <ng-template #noPhotos><div class="photo-placeholder">{{ "ui.pages.tca8941199edb" | siteText }} </div></ng-template>
+
+  <div class="specs">
+    <div><b>{{p.brand}}</b><span>{{ "ui.pages.tb539addf71ad" | siteText }}</span></div><div><b>{{p.model}}</b><span>{{ "ui.pages.t9853170f16b4" | siteText }}</span></div><div><b>{{p.year}}</b><span>{{ "ui.pages.t1f910d98d7d2" | siteText }}</span></div>
+    <div><b>{{p.seats}}</b><span>{{ "ui.pages.t0cd3597453ab" | siteText }}</span></div><div><b>{{p.transmission}}</b><span>{{ "ui.pages.tace17e480781" | siteText }}</span></div><div><b>{{p.rangeKm}} km</b><span>{{ "ui.pages.ta138c5cf681a" | siteText }}</span></div>
+  </div>
+
+  <div class="content-grid">
+    <article><h2>{{details.descriptionTitle || ('ui.messages.t27e518f76490' | siteText)}}</h2><p>{{details.description || asset.description}}</p></article>
+    <article><h2>{{details.featuresTitle || ('ui.messages.t6d93dfc44200' | siteText)}}</h2><ul><li *ngFor="let item of details.features || []">{{item}}</li></ul></article>
+    <article><h2>{{details.rentalTitle || ('ui.pages.td219c68101f5' | siteText)}}</h2><p>{{details.rentalText || ('ui.messages.t25fba3860c7b' | siteText)}}</p></article>
+  </div>
+  <div class="cta"><a [routerLink]="'/reserver' | resourceRoute">{{ "ui.pages.t12f8e8d83303" | siteText }}</a></div>
+</section>
+<ng-template #loading><div class="loading">{{error || ('ui.pages.tb3bbf87d635d' | siteText)}}</div></ng-template>

@@ -11,6 +11,7 @@ import { LanguageService, SiteLanguage } from '../../services/language.service';
 type OfferTab = 'requests' | 'pending' | 'accepted' | 'declined' | 'expired';
 
 @Component({
+  standalone: false,
   selector: 'app-my-offers',
   templateUrl: './my-offers.component.html',
   styleUrls: ['./my-offers.component.scss']

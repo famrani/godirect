@@ -18,7 +18,7 @@ export interface SkipperResource {
 
 @Injectable({ providedIn: 'root' })
 export class SkipperService {
-  private readonly firebaseUrl = 'https://adn-dev-4d05d.firebaseio.com';
+  private readonly firebaseUrl = 'https://ailla-poc-default-rtdb.firebaseio.com';
   constructor(private http: HttpClient) {}
 
   async listSkippers(boatId?: string): Promise<SkipperResource[]> {

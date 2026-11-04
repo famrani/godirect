@@ -1,4 +1,12 @@
+import {inject} from '@angular/core';
+import {UiTextService} from '../../services/ui-text.service';
+import {AssetAccessService} from '../../services/asset-access.service';
+import { boatPath } from '../../services/boat-routing';
+import { ResourceContextService } from '../../services/resource-context.service';
 import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { StoreDbService } from 'godigital-lib';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LanguageService, SiteLanguage } from '../../services/language.service';
 import { SITE_CONTENT } from '../site-content';
@@ -17,6 +25,8 @@ type MoneyRow = {
 
 type BookingVm = {
   bookingId: string;
+  cancelled: boolean;
+  cancellationReason: string;
   isAdmin: boolean;
   isExternalBooking: boolean;
   isHistoricalBooking: boolean;
@@ -70,6 +80,7 @@ type BookingVm = {
   stripePaymentRecords: any[];
   totalOnboardCollections: number;
   alegriaRevenueTotal: number;
+  alegriaRecoveredAmount: number;
   boatRentalAmount: number;
   portFeesAmount: number;
   cateringAmount: number;
@@ -95,22 +106,80 @@ type BookingVm = {
 };
 
 @Component({
+  standalone: false,
   selector: 'app-booking-detail',
   templateUrl: './booking-detail.component.html',
   styleUrls: ['./booking-detail.component.scss'],
 })
 export class BookingDetailComponent implements OnInit {
+ private readonly uiText=inject(UiTextService);
   bookingId = '';
   loading = false;
   notFound = false;
   error = '';
   vm: BookingVm | null = null;
+  carBooking: any = null;
+  r21Edit = false;
+  r21Busy = false;
+  r21Message = '';
+  r21Form: any = {};
+  private async r21Headers(): Promise<HttpHeaders> {
+    const auth:any = this.storeDb as any;
+    const user=auth.firebaseauth?.currentUser || auth.firebaseAuth?.currentUser || auth.auth?.currentUser;
+    if (!user?.getIdToken) throw new Error('Connexion propriétaire requise');
+    return new HttpHeaders({Authorization:`Bearer ${await user.getIdToken()}`});
+  }
+  private r21Url(): string {
+    return `/api/admin/bookings/${encodeURIComponent(this.resourceContext.assetType)}/${encodeURIComponent(this.resourceContext.assetId)}/${encodeURIComponent(this.bookingId)}`;
+  }
+  r21StartEdit(): void {
+    const b=this.carBooking;if(!b)return;
+    this.r21Form={customerName:b.customerName||'',customerEmail:b.customerEmail||'',customerPhone:b.customerPhone||'',
+      comments:b.comments||'',startAt:b.startAt||'',endAt:b.endAt||'',status:b.status||'pending',
+      additionalDriver:!!b.extras?.additionalDriver,childSeat:!!b.extras?.childSeat,
+      pickupLocation:b.rental?.pickupLocation||'',returnLocation:b.rental?.returnLocation||''};
+    this.r21Edit=true;this.r21Message='';
+  }
+  async r21Save(): Promise<void> {
+    if(!this.carBooking||this.r21Busy)return;
+    this.r21Busy=true;this.r21Message='';
+    try{
+      if(this.r21Form.status==='cancelled')throw new Error('Utilisez Annuler et rembourser pour cette opération.');
+      const headers=(await this.r21Headers()).set('If-Match',String(this.carBooking.updatedAt||this.carBooking.createdAt||''));
+      this.carBooking=await firstValueFrom(this.http.patch<any>(this.r21Url(),this.r21Form,{headers}));
+      this.r21Edit=false;this.r21Message='Réservation enregistrée.';
+    }catch(e:any){this.r21Message=e?.error?.error||e?.message||'Enregistrement impossible';}
+    finally{this.r21Busy=false;}
+  }
+  async r21Cancel(): Promise<void> {
+    if(!this.carBooking||this.r21Busy||!window.confirm(this.uiText.text('Annuler et rembourser intégralement les paiements ? La réservation restera active jusqu’à confirmation des remboursements Stripe.')))return;
+    this.r21Busy=true;this.r21Message='';
+    try{
+      this.carBooking=await firstValueFrom(this.http.delete<any>(this.r21Url(),{headers:await this.r21Headers()}));
+      this.r21Edit=false;this.r21Message=this.carBooking.status==='cancelled'?'Réservation annulée, remboursements vérifiés.':'Annulation en cours : remboursements à confirmer. Actualisez ou reprenez l’action pour vérifier.';
+    }catch(e:any){this.r21Message=e?.error?.error||e?.message||'Annulation impossible';}
+    finally{this.r21Busy=false;}
+  }
+
+  r26RefundKind(kind:string):string{return ({booking_deposit:'Acompte',balance:'Solde',security_payment:'Caution payée',security_deposit:'Garantie par carte'} as any)[kind]||'Règlement';}
+  r26RefundStatus(status:string):string{return ({refunded:'Remboursé intégralement',no_charge:'Aucun débit à rembourser',refund_pending:'En attente',refund_failed:'Échec, nouvelle tentative nécessaire',processing:'Paiement en traitement'} as any)[status]||'À vérifier';}
+  async r26CheckRefunds(): Promise<void>{
+    if(!this.carBooking||this.r21Busy)return;this.r21Busy=true;this.r21Message='';
+    try{this.carBooking=await firstValueFrom(this.http.post<any>(this.r21Url()+'/cancellation/reconcile',{}, {headers:await this.r21Headers()}));}
+    catch(e:any){this.r21Message=e?.error?.error||e?.message||'Vérification impossible';}
+    finally{this.r21Busy=false;}
+  }
+  get isCarBooking(): boolean { return this.resourceContext.assetType === 'car'; }
+
   editMode = false;
   saving = false;
   deleting = false;
   payingAlegria = false;
   registeringWarrantyCard = false;
   payingSkipper = false;
+  skipperTipModalOpen = false;
+  skipperTipChoice: number | 'custom' = 0;
+  customSkipperTipAmount: number | null = null;
   selectingAlegriaCash = false;
   selectingSkipperCash = false;
   termsModalOpen = false;
@@ -132,12 +201,13 @@ export class BookingDetailComponent implements OnInit {
   adminRefundReason = '';
   adminRefundPaymentType = 'balance';
   adminRefundPaymentIntentId = '';
+  adminRefundItemId = '';
   adminRefunding = false;
   actionMessage = '';
   financialHistoryRows: any[] = [];
   additionalPaymentRows: any[] = [];
 
-  private readonly firebaseBaseUrl = 'https://adn-dev-4d05d.firebaseio.com';
+  private readonly firebaseBaseUrl = 'https://ailla-poc-default-rtdb.firebaseio.com';
 
   currentLanguage: SiteLanguage = 'fr';
   private financeText: any = (SITE_CONTENT as any).fr?.bookingFinance || {};
@@ -151,9 +221,14 @@ export class BookingDetailComponent implements OnInit {
     private bookingApi: BookingApiService,
     private bookingFinancial: BookingFinancialService,
     private bookingStateService: BookingStateService,
-  ) {}
+    private resourceContext: ResourceContextService,
+    private http: HttpClient,
+    private storeDb: StoreDbService,
+    public assetAccess:AssetAccessService
+) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.assetAccess.refresh();
     this.bookingId = this.route.snapshot.paramMap.get('bookingId') || this.route.snapshot.paramMap.get('id') || '';
     this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
@@ -177,130 +252,102 @@ export class BookingDetailComponent implements OnInit {
     const params = this.route.snapshot.queryParamMap;
     const sessionId = params.get('session_id') || params.get('checkoutSessionId') || '';
     const paymentType = String(params.get('paymentType') || params.get('payment') || '').toLowerCase();
+    const paymentResult = String(params.get('payment') || '').toLowerCase();
     const warrantyResult = String(params.get('warranty') || '').toLowerCase();
     if (!this.bookingId) return;
 
+    // A Stripe cancel URL intentionally has no Checkout Session id. Never call
+    // a completion endpoint and never infer payment from paymentType alone.
+    if (['cancelled', 'canceled', 'cancel'].includes(paymentResult)) {
+      if (paymentType === 'alegria_balance') {
+        this.markPendingAlegriaCheckoutCancelled().finally(() => this.loadBooking());
+      }
+      return;
+    }
+
     if (warrantyResult === 'success' && sessionId) {
-      this.bookingApi.completeWarrantySetup({ bookingId: this.bookingId, ownerId: 'alegria', sessionId, checkoutSessionId: sessionId }).subscribe({
+      this.bookingApi.completeWarrantySetup({ bookingId: this.bookingId, sessionId, checkoutSessionId: sessionId }).subscribe({
         next: () => this.loadBooking(),
         error: () => this.loadBooking(),
       });
       return;
     }
 
-    if (paymentType === 'deposit') {
-      this.bookingApi.completeDepositPayment({ bookingId: this.bookingId, ownerId: 'alegria', sessionId, checkoutSessionId: sessionId }).subscribe({
+    if (paymentType === 'deposit' && paymentResult === 'success' && sessionId) {
+      this.bookingApi.completeDepositPayment({ bookingId: this.bookingId, sessionId, checkoutSessionId: sessionId }).subscribe({
         next: () => this.loadBooking(),
         error: () => this.loadBooking(),
       });
       return;
     }
 
-    if (paymentType === 'balance' || paymentType === 'alegria_balance') {
-      this.bookingApi.completeBalancePayment({ bookingId: this.bookingId, ownerId: 'alegria', sessionId, checkoutSessionId: sessionId }).subscribe({
+    if ((paymentType === 'balance' || paymentType === 'alegria_balance') && paymentResult === 'success' && sessionId) {
+      this.bookingApi.completeBalancePayment({ bookingId: this.bookingId, sessionId, checkoutSessionId: sessionId }).subscribe({
         next: () => this.loadBooking(),
         error: () => this.loadBooking(),
       });
       return;
     }
 
-    if (paymentType === 'skipper_fee' || paymentType === 'skipper') {
-      this.markSkipperPaidAfterStripe(sessionId);
+    if ((paymentType === 'skipper_fee' || paymentType === 'skipper') && paymentResult === 'success' && sessionId) {
+      this.bookingApi.completeAdditionalPayment({ bookingId: this.bookingId, sessionId, checkoutSessionId: sessionId }).subscribe({
+        next: () => this.loadBooking(),
+        error: (error: any) => {
+          this.error = error?.error?.error || error?.message || this.t('stripeCheckoutError');
+          this.loadBooking();
+        },
+      });
       return;
     }
 
-    if (['ad_hoc', 'adhoc', 'ad-hoc', 'extra_service', 'extra', 'tip', 'damage_charge'].includes(paymentType)) {
-      const adhocPaymentId = params.get('adhocPaymentId') || params.get('extraServiceId') || '';
-      this.markAdditionalPaymentPaidAfterStripe(sessionId, paymentType || 'ad_hoc', adhocPaymentId);
+    if (paymentResult === 'success' && sessionId && ['ad_hoc', 'adhoc', 'ad-hoc', 'extra_service', 'extra', 'tip', 'damage_charge'].includes(paymentType)) {
+      this.bookingApi.completeAdditionalPayment({ bookingId: this.bookingId, sessionId, checkoutSessionId: sessionId }).subscribe({
+        next: () => this.loadBooking(),
+        error: (error: any) => {
+          this.error = error?.error?.error || error?.message || this.t('stripeCheckoutError');
+          this.loadBooking();
+        },
+      });
       return;
     }
   }
 
-  private async markSkipperPaidAfterStripe(sessionId: string): Promise<void> {
-    if (!this.bookingId) return;
+  private async markPendingAlegriaCheckoutCancelled(): Promise<void> {
     try {
       const current = await this.bookingApi.getBooking(this.bookingId).toPromise() as any;
       const raw = current?.raw || current || {};
       const payments = { ...(raw.payments || {}) };
-      const amount = this.number(raw.skipperCashAmount || raw.proposalSkipperPrice || payments.direct?.skipperCashAmount || payments.skipper?.amount || 0);
-      const now = Date.now();
+      const pending = payments.pendingAlegria;
+      const alegriaPayment = payments.alegria || {};
+      const unverifiedLocalPayment =
+        String(alegriaPayment.source || '').toLowerCase() === 'stripe_return' &&
+        !alegriaPayment.stripePaymentIntentId &&
+        !alegriaPayment.paymentIntentId;
+      const cancelledAmount = unverifiedLocalPayment
+        ? Number(alegriaPayment.amountEuros ?? alegriaPayment.amount ?? 0) || 0
+        : 0;
+
+      if (!pending && !unverifiedLocalPayment) return;
       await this.bookingApi.updateBooking(this.bookingId, {
-        skipperPaid: true,
-        skipperStatus: 'paid',
-        skipperPaymentStatus: 'paid',
-        skipperPaidAmount: amount,
-        skipperPaidAt: raw.skipperPaidAt || now,
+        ...(unverifiedLocalPayment ? {
+          alegriaPaid: false,
+          alegriaPaidAmount: Math.max(0, (Number(raw.alegriaPaidAmount || 0) || 0) - cancelledAmount),
+          alegriaPaymentStatus: 'pending',
+        } : {}),
         payments: {
           ...payments,
-          skipper: {
-            ...(payments.skipper || {}),
-            paid: true,
-            status: 'paid',
-            paymentStatus: 'paid',
-            paymentType: 'skipper_fee',
-            type: 'skipper_fee',
-            method: 'Stripe',
-            amount,
-            amount_total: Math.round(amount * 100),
-            currency: 'eur',
-            bookingId: this.bookingId,
-            checkoutSessionId: sessionId,
-            stripeCheckoutSessionId: sessionId,
-            paidAt: payments.skipper?.paidAt || now,
-            modifiedTS: now,
-            source: 'stripe_return',
-          },
-          direct: {
-            ...(payments.direct || {}),
-            skipperCashAmount: amount,
-            skipperPaid: true,
-            skipperStatus: 'paid',
-            skipperPaidAt: payments.direct?.skipperPaidAt || now,
-          },
+          ...(unverifiedLocalPayment ? { alegria: null } : {}),
+          ...(pending ? {
+            pendingAlegria: {
+              ...pending,
+              status: 'checkout_cancelled',
+              cancelledAt: Date.now(),
+            },
+          } : {}),
         },
       } as any);
-    } finally {
-      this.loadBooking();
-    }
-  }
-
-
-
-  private async markAdditionalPaymentPaidAfterStripe(sessionId: string, paymentType = 'ad_hoc', paymentId = ''): Promise<void> {
-    if (!this.bookingId) return;
-    try {
-      const current = await this.bookingApi.getBooking(this.bookingId).toPromise() as any;
-      const raw = current?.raw || current || {};
-      const payments = { ...(raw.payments || {}) };
-      const id = paymentId || `adhoc_${Date.now()}`;
-      const now = Date.now();
-      const normalizedType = paymentType === 'tip' ? 'tip' : (paymentType === 'damage_charge' ? 'damage_charge' : (paymentType.includes('extra') ? 'extra_service' : 'ad_hoc'));
-      const existing = payments.adHoc?.[id] || payments.extraServices?.[id] || {};
-      await this.bookingApi.updateBooking(this.bookingId, {
-        payments: {
-          ...payments,
-          adHoc: {
-            ...(payments.adHoc || {}),
-            [id]: {
-              ...existing,
-              id,
-              paid: true,
-              status: 'paid',
-              paymentStatus: 'paid',
-              paymentType: normalizedType,
-              type: normalizedType,
-              method: 'Stripe',
-              checkoutSessionId: sessionId,
-              stripeCheckoutSessionId: sessionId,
-              paidAt: now,
-              modifiedTS: now,
-              source: 'stripe_return',
-            }
-          }
-        }
-      } as any);
-    } finally {
-      this.loadBooking();
+    } catch {
+      // The cancellation remains non-paid even if the audit marker cannot be saved.
     }
   }
 
@@ -309,6 +356,11 @@ export class BookingDetailComponent implements OnInit {
     this.notFound = false;
     this.error = '';
     this.vm = null;
+    this.carBooking = null;
+    if (this.isCarBooking) {
+      await this.loadCarBooking();
+      return;
+    }
 
     const hardStop = window.setTimeout(() => {
       if (this.loading) {
@@ -325,9 +377,9 @@ export class BookingDetailComponent implements OnInit {
       }
 
       const attempts = [
-        { path: `bnBookings/${this.bookingId}`, type: 'booking' },
+        { path: this.resourceContext.scopedPath('bnBookings', this.bookingId), type: 'booking' },
         { path: this.bookingId, type: 'booking' },
-        { path: `bnProposals/${this.bookingId}`, type: 'offer' },
+        { path: this.resourceContext.scopedPath('bnProposals', this.bookingId), type: 'offer' },
       ];
 
       for (const attempt of attempts) {
@@ -356,6 +408,30 @@ export class BookingDetailComponent implements OnInit {
     }
   }
 
+
+  private async loadCarBooking(): Promise<void> {
+    this.loading = true;
+    this.notFound = false;
+    this.error = '';
+    try {
+      if (!this.bookingId || !/^[-A-Za-z0-9_]+$/.test(this.bookingId)) {
+        throw new Error('Invalid booking identifier');
+      }
+      const path = `bookings/car/${encodeURIComponent(this.resourceContext.assetId)}/${encodeURIComponent(this.bookingId)}`;
+      const data = await this.fetchJsonWithTimeout(path, 5000);
+      if (!data || data.assetType !== 'car' || data.assetId !== this.resourceContext.assetId) {
+        this.notFound = true;
+        this.error = `Réservation ${this.bookingId} introuvable pour ${this.resourceContext.assetId}.`;
+        return;
+      }
+      this.carBooking = data;
+    } catch (error: any) {
+      this.notFound = true;
+      this.error = error?.message || 'Impossible de charger la réservation.';
+    } finally {
+      this.loading = false;
+    }
+  }
 
   startEdit(): void {
     if (!this.vm?.display) return;
@@ -389,6 +465,14 @@ export class BookingDetailComponent implements OnInit {
       portFeesAmount: this.number(this.vm?.portFeesAmount || b.pricing?.portFeesAmount || b.portFeesAmount || b.harborFeesAmount),
       serviceFeesAmount: this.number(this.vm?.serviceFeesAmount || b.pricing?.serviceFeesAmount || b.serviceFeesAmount || b.platformServiceFees),
       rentalCommissionAmount: this.number(this.vm?.rentalCommissionAmount || b.pricing?.rentalCommissionAmount || b.rentalCommissionAmount || b.platformCommissionAmount || b.platformFees),
+      platformCommissionAmount: this.number(
+        this.vm?.totalCommission ||
+        b.pricing?.totalCommission ||
+        b.totalCommission ||
+        b.platformCommissionAmount ||
+        b.platformFees ||
+        (this.number(b.rentalCommissionAmount) + this.number(b.serviceFeesAmount))
+      ),
       totalAmount: b.totalAmount || b.totalPrice || 0,
       totalPrice: b.totalPrice || b.totalAmount || 0,
       externalPlatformTotalClientAmount: b.externalPlatformTotalClientAmount || b.payments?.platform?.totalClientAmount || b.raw?.externalPlatformTotalClientAmount || b.raw?.payments?.platform?.totalClientAmount || 0,
@@ -407,7 +491,9 @@ export class BookingDetailComponent implements OnInit {
       bookingStatus: b.bookingStatus || 'completed',
       status: b.status || 'completed',
       paymentStatusLabel: b.paymentStatusLabel || b.balanceStatus || 'fully_paid',
-      comments: b.comments || '',
+      offerMessage: b.offerMessage || b.bookingDescription || b.description || b.offerNotes?.customerMessage || b.raw?.offerMessage || '',
+      description: b.bookingDescription || b.description || b.offerNotes?.description || b.offerMessage || b.raw?.description || b.raw?.offerMessage || '',
+      comments: b.internalComments || b.comments || b.offerNotes?.internalComments || b.raw?.internalComments || b.raw?.comments || '',
     };
     this.recalculateEditCustomerTotal();
   }
@@ -417,6 +503,7 @@ export class BookingDetailComponent implements OnInit {
     const source = String(this.editForm.source || this.editForm.externalPlatform || '').toLowerCase();
     const direct = !source || source === 'direct' || source === 'alegria' || source === 'direct alegria';
     if (direct) {
+      this.editForm.platformCommissionAmount = 0;
       this.editForm.rentalCommissionAmount = 0;
       this.editForm.serviceFeesAmount = 0;
     }
@@ -427,8 +514,11 @@ export class BookingDetailComponent implements OnInit {
     ].map((value: any) => this.number(value));
     this.editForm.totalAmount = Math.round(values.reduce((sum: number, value: number) => sum + value, 0) * 100) / 100;
     this.editForm.totalPrice = this.editForm.totalAmount;
-    this.editForm.totalCommission = Math.round((this.number(this.editForm.rentalCommissionAmount) + this.number(this.editForm.serviceFeesAmount)) * 100) / 100;
-    this.editForm.alegriaRevenueTotal = Math.max(0, Math.round((this.editForm.totalAmount - this.editForm.totalCommission - this.number(this.editForm.skipperCashAmount)) * 100) / 100);
+    this.editForm.totalCommission = Math.round(this.number(this.editForm.platformCommissionAmount) * 100) / 100;
+    this.editForm.rentalCommissionAmount = this.editForm.totalCommission;
+    this.editForm.serviceFeesAmount = 0;
+    this.editForm.alegriaRecoveredAmount = Math.max(0, Math.round((this.editForm.totalAmount - this.editForm.totalCommission) * 100) / 100);
+    this.editForm.alegriaRevenueTotal = Math.max(0, Math.round((this.editForm.alegriaRecoveredAmount - this.number(this.editForm.skipperCashAmount)) * 100) / 100);
     this.editForm.skipperRevenueTotal = Math.round((this.number(this.editForm.skipperCashAmount) + this.number(this.editForm.tipsAmount)) * 100) / 100;
     if (!direct) this.editForm.externalPlatformTotalClientAmount = this.number(this.editForm.boatOutingCost);
   }
@@ -476,13 +566,14 @@ export class BookingDetailComponent implements OnInit {
       const drinks = this.number(this.editForm.drinksAmount);
       const waterToys = this.number(this.editForm.waterToysAmount);
       const other = this.number(this.editForm.otherOnboardAmount);
-      const rentalCommission = directBooking ? 0 : this.number(this.editForm.rentalCommissionAmount);
-      const serviceFees = directBooking ? 0 : this.number(this.editForm.serviceFeesAmount);
-      const platformFees = rentalCommission + serviceFees;
+      const platformFees = directBooking ? 0 : this.number(this.editForm.platformCommissionAmount);
+      const rentalCommission = platformFees;
+      const serviceFees = 0;
       const directTotal = skipper + fuel + portFees + catering + tips + drinks + waterToys + other;
       const platformCustomerAmount = directBooking ? 0 : boatOutingCost;
       const totalCollected = platformPaid + directTotal;
       const totalClientCost = boatOutingCost + directTotal;
+      const alegriaRecoveredAmount = Math.max(0, totalClientCost - platformFees);
       const alegriaRevenue = Math.max(0, totalClientCost - platformFees - skipper);
       const skipperRevenueTotal = skipper + tips;
       const paymentStatusLabel = this.editForm.paymentStatusLabel || 'fully_paid';
@@ -512,6 +603,7 @@ export class BookingDetailComponent implements OnInit {
         rentalCommissionAmount: rentalCommission,
         serviceFeesAmount: serviceFees,
         totalCommission: platformFees,
+        platformCommissionAmount: platformFees,
         boatRentalAmount: boatOutingCost,
         fuelAmount: fuel,
         portFeesAmount: portFees,
@@ -527,12 +619,14 @@ export class BookingDetailComponent implements OnInit {
         customerPaidThroughPlatform: platformCustomerAmount,
         customerPaidDirectly: directTotal,
         alegriaRevenueTotal: alegriaRevenue,
+        alegriaRecoveredAmount,
         skipperRevenueTotal,
         totalOutingPrice: totalClientCost,
         pricing: {
           boatRentalAmount: boatOutingCost, skipperAmount: skipper, fuelAmount: fuel, portFeesAmount: portFees,
           cateringAmount: catering, drinksAmount: drinks, waterToysAmount: waterToys, tipsAmount: tips, otherAmount: other,
           rentalCommissionAmount: rentalCommission, serviceFeesAmount: serviceFees, totalCommission: platformFees,
+          platformCommissionAmount: platformFees, alegriaRecoveredAmount,
           totalOutingPrice: totalClientCost, alegriaRevenue, skipperRevenue: skipperRevenueTotal,
         },
         remainingFeesAmount: 0,
@@ -611,7 +705,7 @@ export class BookingDetailComponent implements OnInit {
         },
       };
 
-      await this.writeJson(`bnBookings/${bookingId}`, payload);
+      await this.writeJson(this.resourceContext.scopedPath('bnBookings', bookingId), payload);
       this.vm = this.buildVm(this.normalize(payload));
       this.editMode = false;
     } catch (e: any) {
@@ -624,19 +718,22 @@ export class BookingDetailComponent implements OnInit {
   async deleteBooking(): Promise<void> {
     const id = this.vm?.bookingId || this.bookingId;
     if (!id) return;
-    const ok = window.confirm(`Delete booking ${id}? This cannot be undone.`);
+    const returnUrl = this.resourceContext.route(
+      this.vm?.isAdmin || this.isCurrentUserAdmin() ? '/admin/reservations' : '/my-bookings'
+    );
+    const ok = window.confirm(this.uiText.text('Supprimer définitivement cette réservation ?')+' '+id);
     if (!ok) return;
 
     this.deleting = true;
     this.error = '';
 
     try {
-      await this.writeJson(`bnBookings/${id}`, null);
+      await this.writeJson(this.resourceContext.scopedPath('bnBookings', id), null);
       // Also remove stale offer copy if one exists.
-      await this.writeJson(`bnProposals/${id}`, null).catch(() => undefined);
+      await this.writeJson(this.resourceContext.scopedPath('bnProposals', id), null).catch(() => undefined);
       this.vm = null;
       this.notFound = true;
-      this.error = `Booking ${id} deleted.`;
+      await this.router.navigateByUrl(returnUrl, { replaceUrl: true });
     } catch (e: any) {
       this.error = e?.message || 'Unable to delete booking.';
     } finally {
@@ -663,7 +760,7 @@ export class BookingDetailComponent implements OnInit {
     const bookingId = booking?.bookingId || this.bookingId;
     const offerId = booking?.offerId || booking?.relatedBookingId || bookingId;
     const ids = Array.from(new Set([bookingId, offerId].filter(Boolean)));
-    const collections = ['bnPayments', 'bnPayment', 'backendpayments'];
+    const collections = ['backendpayments'];
     const records: any[] = [];
 
     for (const collection of collections) {
@@ -692,14 +789,22 @@ export class BookingDetailComponent implements OnInit {
 
   private async fetchPaymentRecordsByBookingId(collection: string, bookingId: string): Promise<any | null> {
     const encodedCollection = encodeURIComponent(collection);
-    const encodedId = encodeURIComponent(bookingId);
-    const url = `${this.firebaseBaseUrl}/${encodedCollection}.json?orderBy=%22bookingId%22&equalTo=%22${encodedId}%22`;
+    const scopedCollection = this.resourceContext.scopedPath(collection);
+    const url = `${this.firebaseBaseUrl}/${scopedCollection.split('/').map((part) => encodeURIComponent(part)).join('/')}.json`;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 1800);
     try {
       const response = await fetch(url, { signal: controller.signal });
       if (!response.ok) return null;
-      return await response.json();
+      const values = await response.json();
+      if (!values || typeof values !== 'object') return null;
+      return Object.keys(values).reduce((matches: any, key: string) => {
+        const value = values[key];
+        if (value && String(value.bookingId || '') === String(bookingId || '')) {
+          matches[key] = value;
+        }
+        return matches;
+      }, {});
     } catch {
       return null;
     } finally {
@@ -926,11 +1031,14 @@ export class BookingDetailComponent implements OnInit {
     const totalCollected = this.number(booking.totalCollectedAmount || booking.raw?.totalCollectedAmount) || collectedViaPlatform + collectedDirectTotal;
     const totalRemaining = isHistoricalBooking ? 0 : totalRemainingCustomer;
     const totalOnboardCollections = onboardBoatBalanceCollected + onboardSkipperCollected + totalDirectCatering + totalDirectTips + totalDirectCleaningFuel + totalDirectDrinks + totalDirectWaterToys + totalDirectOther;
-    const alegriaRevenueTotal = f.alegriaRevenue;
+    const alegriaRecoveredAmount = Math.max(0, f.totalOutingPrice - f.totalCommission);
+    const alegriaRevenueTotal = Math.max(0, alegriaRecoveredAmount - f.skipperAmount);
     const alegriaPaidAmount = f.alegriaPaid;
     const remainingAlegriaRevenue = alegriaRemainingComputed;
 
     const canonicalState = this.bookingStateService.resolve(booking);
+    const cancelled = canonicalState.cancelled;
+    const cancellationReason = this.buildCancellationReason(booking);
     const termsAccepted = canonicalState.termsAccepted;
     const alegriaPaymentComplete = canonicalState.alegriaPaymentComplete;
     const skipperPaymentComplete = canonicalState.skipperPaymentComplete;
@@ -945,6 +1053,8 @@ export class BookingDetailComponent implements OnInit {
 
     return {
       bookingId: booking.bookingId || this.bookingId,
+      cancelled,
+      cancellationReason,
       isAdmin: this.isCurrentUserAdmin(),
       isExternalBooking,
       isHistoricalBooking,
@@ -998,6 +1108,7 @@ export class BookingDetailComponent implements OnInit {
       stripePaymentRecords,
       totalOnboardCollections,
       alegriaRevenueTotal,
+      alegriaRecoveredAmount,
       boatRentalAmount: f.boatRentalAmount,
       portFeesAmount: f.portFeesAmount,
       cateringAmount: f.cateringAmount,
@@ -1021,6 +1132,21 @@ export class BookingDetailComponent implements OnInit {
       customerJourneyComplete,
       customerJourneyStatus,
     };
+  }
+
+  private buildCancellationReason(booking: any): string {
+    const candidates = [
+      booking?.cancellationReason,
+      booking?.outingCancellationReason,
+      booking?.cancelReason,
+      booking?.cancellationDescription,
+      booking?.raw?.cancellationReason,
+      booking?.raw?.outingCancellationReason,
+      booking?.raw?.cancelReason,
+      booking?.raw?.cancellationDescription,
+    ];
+    const reason = candidates.find((value) => typeof value === 'string' && value.trim());
+    return reason ? String(reason).trim() : this.t('cancellationReasonNotProvided');
   }
 
   private buildPaymentRows(booking: any): MoneyRow[] {
@@ -1174,7 +1300,7 @@ export class BookingDetailComponent implements OnInit {
 
     this.payingAlegria = true;
     this.error = '';
-    const bookingUrl = `${window.location.origin}/bookings/${encodeURIComponent(bookingId)}`;
+    const bookingUrl = `${window.location.origin}${boatPath("/bookings")}/${encodeURIComponent(bookingId)}`;
     this.bookingApi.createDepositCheckout({
       ...this.termsAcceptanceMetadata(),
       bookingId,
@@ -1212,7 +1338,7 @@ export class BookingDetailComponent implements OnInit {
 
   canPayAlegriaOnline(): boolean {
     if (!this.vm || this.editMode) return false;
-    return this.vm.remainingAlegriaRevenue > 0;
+    return this.vm.remainingAlegriaRevenue > 0 && !this.selectingAlegriaCash;
   }
 
   payAlegriaOnline(): void {
@@ -1224,9 +1350,7 @@ export class BookingDetailComponent implements OnInit {
 
     this.payingAlegria = true;
     this.error = '';
-    const bookingUrl = `${window.location.origin}/bookings/${encodeURIComponent(bookingId)}`;
-    this.savePendingAlegriaPayment(bookingId, amount);
-
+    const bookingUrl = `${window.location.origin}${boatPath("/bookings")}/${encodeURIComponent(bookingId)}`;
     this.bookingApi.createBalanceCheckout({
       ...this.termsAcceptanceMetadata(),
       bookingId,
@@ -1261,28 +1385,6 @@ export class BookingDetailComponent implements OnInit {
       }
     });
   }
-  private async savePendingAlegriaPayment(bookingId: string, amount: number): Promise<void> {
-    if (!bookingId || amount <= 0) return;
-    try {
-      const current = await this.bookingApi.getBooking(bookingId).toPromise() as any;
-      const raw = current?.raw || current || this.vm?.display || {};
-      const payments = { ...(raw.payments || {}) };
-      await this.bookingApi.updateBooking(bookingId, {
-        payments: {
-          ...payments,
-          pendingAlegria: {
-            amount,
-            status: 'checkout_started',
-            paymentType: 'alegria_balance',
-            createdAt: Date.now(),
-          },
-        },
-      } as any);
-    } catch {
-      // Non-blocking: the Stripe return handler and webhook/reconciliation can still update the booking.
-    }
-  }
-
   private pendingAlegriaCashAmount(): number {
     const booking: any = this.vm?.display || {};
     const payments = booking.payments || {};
@@ -1303,6 +1405,7 @@ export class BookingDetailComponent implements OnInit {
     // balancePaid may describe an old payment phase and must not hide the admin
     // cash-entry control when a boat/Alegria balance remains outstanding.
     return (this.vm.isAdmin || this.isCurrentUserAdmin()) &&
+      this.isAlegriaCashSelected() &&
       Number(this.vm.remainingAlegriaRevenue || 0) > 0.009;
   }
 
@@ -1314,7 +1417,7 @@ export class BookingDetailComponent implements OnInit {
 
     const remaining = Math.max(0, Number(this.vm.remainingAlegriaRevenue || 0));
     const amount = Math.min(remaining, Math.max(0, Number(this.adminAlegriaCashAmount || 0)));
-    if (amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
       this.error = this.t('enterValidAmount');
       return;
     }
@@ -1328,7 +1431,7 @@ export class BookingDetailComponent implements OnInit {
     const fullyPaid = amount >= remaining - 0.009;
 
     try {
-      await this.bookingApi.updateBooking(bookingId, {
+      await this.bookingApi.updateCashPayment(bookingId, {
         balancePaid: fullyPaid,
         balanceStatus: fullyPaid ? 'paid' : 'partially_paid',
         balancePaidAmount: Math.round((Number(booking.balancePaidAmount || 0) + amount) * 100) / 100,
@@ -1341,23 +1444,22 @@ export class BookingDetailComponent implements OnInit {
         alegriaCashReceivedAmount: cumulativeCash,
         alegriaCashReceivedAt: now,
         payments: {
-          ...payments,
           alegria: {
-            ...(payments.alegria || {}),
             method: this.vm.alegriaPaidAmount > 0 ? 'mixed' : 'cash',
             status: fullyPaid ? 'paid' : 'partially_paid',
             paid: fullyPaid,
             cashAmountPaid: cumulativeCash,
-            amountPaid: Math.round((Number(this.vm.alegriaPaidAmount || 0) + amount) * 100) / 100,
+            amountPaid: Math.round((Number(booking.balancePaidAmount || payments.alegria?.amountPaid || payments.balance?.amountPaid || 0) + amount) * 100) / 100,
+            amountDue: Math.max(0, remaining - amount),
             receivedAt: now,
           },
           balance: {
-            ...(payments.balance || {}),
             method: this.vm.alegriaPaidAmount > 0 ? 'mixed' : 'cash',
             status: fullyPaid ? 'paid' : 'partially_paid',
             paid: fullyPaid,
             cashAmountPaid: cumulativeCash,
-            amountPaid: Math.round((Number(this.vm.alegriaPaidAmount || 0) + amount) * 100) / 100,
+            amountPaid: Math.round((Number(booking.balancePaidAmount || payments.alegria?.amountPaid || payments.balance?.amountPaid || 0) + amount) * 100) / 100,
+            amountDue: Math.max(0, remaining - amount),
             paidAt: now,
           },
         },
@@ -1387,10 +1489,14 @@ export class BookingDetailComponent implements OnInit {
 
   canConfirmSkipperPaid(): boolean {
     if (!this.vm || this.editMode) return false;
-    const booking: any = this.vm.display || {};
-    const alreadyPaid = booking.skipperPaid === true ||
-      String(booking.skipperStatus || booking.skipperPaymentStatus || booking.payments?.skipper?.status || booking.payments?.direct?.skipperStatus || '').toLowerCase() === 'paid';
-    return (this.vm.isAdmin || this.isCurrentUserAdmin()) && !alreadyPaid && this.pendingSkipperCashAmount() > 0;
+    // The canonical remaining amount is the source of truth. Imported bookings
+    // can carry a stale skipperPaid/status flag while their normalized financial
+    // balance still shows an amount due. That legacy flag must not hide the cash
+    // confirmation control.
+    return (this.vm.isAdmin || this.isCurrentUserAdmin()) &&
+      this.isSkipperCashSelected() &&
+      Number(this.vm.remainingSkipperFee || 0) > 0.009 &&
+      this.pendingSkipperCashAmount() > 0;
   }
 
   async confirmSkipperPaid(): Promise<void> {
@@ -1401,7 +1507,7 @@ export class BookingDetailComponent implements OnInit {
 
     const remaining = Math.max(0, Number(this.vm.remainingSkipperFee || 0));
     const amount = Math.min(remaining, Math.max(0, Number(this.adminSkipperCashAmount || 0)));
-    if (amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
       this.error = this.t('enterValidAmount');
       return;
     }
@@ -1414,24 +1520,23 @@ export class BookingDetailComponent implements OnInit {
     const cumulativeCash = Math.round((previousCash + amount) * 100) / 100;
     const fullyPaid = amount >= remaining - 0.009;
     payments.direct = {
-      ...(payments.direct || {}),
       skipperPaid: fullyPaid,
       skipperStatus: fullyPaid ? 'paid' : 'partially_paid',
       skipperCashPaidAmount: cumulativeCash,
       skipperPaidAt: now,
     };
     payments.skipper = {
-      ...(payments.skipper || {}),
       method: this.vm.skipperPaidAmount > 0 ? 'mixed' : 'cash',
       status: fullyPaid ? 'paid' : 'partially_paid',
       paid: fullyPaid,
       cashAmountPaid: cumulativeCash,
       amountPaid: Math.round((Number(this.vm.skipperPaidAmount || 0) + amount) * 100) / 100,
+      amountDue: Math.max(0, remaining - amount),
       paidAt: now,
     };
 
     try {
-      await this.bookingApi.updateBooking(bookingId, {
+      await this.bookingApi.updateCashPayment(bookingId, {
         skipperPaid: fullyPaid,
         skipperStatus: fullyPaid ? 'paid' : 'partially_paid',
         skipperPaidAt: now,
@@ -1439,7 +1544,7 @@ export class BookingDetailComponent implements OnInit {
         skipperPaymentStatus: fullyPaid ? 'paid' : 'partially_paid',
         skipperPaidAmount: Math.round((Number(this.vm.skipperPaidAmount || 0) + amount) * 100) / 100,
         skipperCashReceivedAmount: cumulativeCash,
-        payments,
+        payments: { direct: payments.direct, skipper: payments.skipper },
       } as any);
       this.adminSkipperCashAmount = null;
       await this.loadBooking();
@@ -1469,29 +1574,28 @@ export class BookingDetailComponent implements OnInit {
       payments.balance?.status ||
       ''
     ).toLowerCase();
-    return method === 'cash' || status === 'cash_selected' || status === 'cash_pending';
+    return method === 'cash' || (method === 'mixed' && Number(this.vm?.remainingAlegriaRevenue || 0) > 0) || status === 'cash_selected' || status === 'cash_pending';
   }
 
   async selectAlegriaCash(): Promise<void> {
-    if (!this.vm || this.editMode || this.vm.remainingAlegriaRevenue <= 0 || this.selectingAlegriaCash) return;
+    if (!this.vm || this.editMode || this.vm.remainingAlegriaRevenue <= 0 || this.selectingAlegriaCash || this.payingAlegria || this.isAlegriaCashSelected()) return;
     const booking: any = this.vm.display || {};
     const bookingId = this.vm.bookingId || booking.bookingId || this.bookingId;
     if (!bookingId) return;
 
     this.selectingAlegriaCash = true;
+    this.adminAlegriaCashAmount = Math.round(Number(this.vm.remainingAlegriaRevenue || 0) * 100) / 100;
     this.error = '';
     const payments = { ...(booking.payments || {}) };
     const now = Date.now();
     try {
-      await this.bookingApi.updateBooking(bookingId, {
+      await this.bookingApi.updateCashPayment(bookingId, {
         alegriaPaymentMethod: 'cash',
         balancePaymentMethod: 'cash',
         alegriaPaymentStatus: 'cash_selected',
         balancePaymentStatus: 'cash_selected',
         payments: {
-          ...payments,
           alegria: {
-            ...(payments.alegria || {}),
             method: 'cash',
             status: 'cash_selected',
             amountDue: this.vm.remainingAlegriaRevenue,
@@ -1501,6 +1605,7 @@ export class BookingDetailComponent implements OnInit {
       } as any);
       this.actionMessage = this.t('cashPaymentSelected');
       await this.loadBooking();
+      this.adminAlegriaCashAmount = Math.round(Number(this.vm?.remainingAlegriaRevenue || 0) * 100) / 100;
     } catch (error: any) {
       this.error = error?.message || this.t('saveError');
     } finally {
@@ -1524,27 +1629,26 @@ export class BookingDetailComponent implements OnInit {
       payments.direct?.skipperStatus ||
       ''
     ).toLowerCase();
-    return method === 'cash' || status === 'cash_selected' || status === 'cash_pending';
+    return method === 'cash' || (method === 'mixed' && Number(this.vm?.remainingSkipperFee || 0) > 0) || status === 'cash_selected' || status === 'cash_pending';
   }
 
   async selectSkipperCash(): Promise<void> {
-    if (!this.vm || this.editMode || this.vm.remainingSkipperFee <= 0 || this.selectingSkipperCash) return;
+    if (!this.vm || this.editMode || this.vm.remainingSkipperFee <= 0 || this.selectingSkipperCash || this.payingSkipper || this.isSkipperCashSelected()) return;
     const booking: any = this.vm.display || {};
     const bookingId = this.vm.bookingId || booking.bookingId || this.bookingId;
     if (!bookingId) return;
 
     this.selectingSkipperCash = true;
+    this.adminSkipperCashAmount = Math.round(Number(this.vm.remainingSkipperFee || 0) * 100) / 100;
     this.error = '';
     const payments = { ...(booking.payments || {}) };
     const now = Date.now();
     try {
-      await this.bookingApi.updateBooking(bookingId, {
+      await this.bookingApi.updateCashPayment(bookingId, {
         skipperPaymentMethod: 'cash',
         skipperPaymentStatus: 'cash_selected',
         payments: {
-          ...payments,
           skipper: {
-            ...(payments.skipper || {}),
             method: 'cash',
             status: 'cash_selected',
             amountDue: this.vm.remainingSkipperFee,
@@ -1554,6 +1658,7 @@ export class BookingDetailComponent implements OnInit {
       } as any);
       this.actionMessage = this.t('cashPaymentSelected');
       await this.loadBooking();
+      this.adminSkipperCashAmount = Math.round(Number(this.vm?.remainingSkipperFee || 0) * 100) / 100;
     } catch (error: any) {
       this.error = error?.message || this.t('saveError');
     } finally {
@@ -1565,26 +1670,67 @@ export class BookingDetailComponent implements OnInit {
 
   canPaySkipperOnline(): boolean {
     if (!this.vm || this.editMode) return false;
-    return this.vm.remainingSkipperFee > 0;
+    return this.vm.remainingSkipperFee > 0 && !this.selectingSkipperCash;
   }
 
   paySkipperOnline(): void {
     if (!this.vm || !this.canPaySkipperOnline() || this.payingSkipper) return;
+    this.skipperTipChoice = 0;
+    this.customSkipperTipAmount = null;
+    this.skipperTipModalOpen = true;
+  }
+
+  closeSkipperTipModal(): void {
+    if (this.payingSkipper) return;
+    this.skipperTipModalOpen = false;
+  }
+
+  selectSkipperTip(choice: number | 'custom'): void {
+    this.skipperTipChoice = choice;
+    if (choice !== 'custom') this.customSkipperTipAmount = null;
+  }
+
+  skipperTipBaseAmount(): number {
+    if (!this.vm) return 0;
+    return Math.max(0, Number(this.vm.totalOutingPrice || this.vm.totalCustomerCost || 0));
+  }
+
+  skipperTipAmount(): number {
+    const outingAmount = this.skipperTipBaseAmount();
+    const rawTip = this.skipperTipChoice === 'custom'
+      ? Math.max(0, Number(this.customSkipperTipAmount || 0))
+      : outingAmount * Number(this.skipperTipChoice || 0) / 100;
+    return Math.round(rawTip * 100) / 100;
+  }
+
+  skipperCheckoutTotal(): number {
+    return Math.round((Math.max(0, Number(this.vm?.remainingSkipperFee || 0)) + this.skipperTipAmount()) * 100) / 100;
+  }
+
+  confirmSkipperCardPayment(): void {
+    if (!this.vm || !this.canPaySkipperOnline() || this.payingSkipper) return;
     const booking = this.vm.display || {};
     const bookingId = this.vm.bookingId || booking.bookingId || this.bookingId;
-    const amount = this.vm.remainingSkipperFee;
-    if (!bookingId || amount <= 0) return;
+    const skipperAmount = Math.round(Number(this.vm.remainingSkipperFee || 0) * 100) / 100;
+    const tipAmount = this.skipperTipAmount();
+    const amount = this.skipperCheckoutTotal();
+    if (!bookingId || skipperAmount <= 0 || amount <= 0) return;
 
     this.payingSkipper = true;
     this.error = '';
-    const bookingUrl = `${window.location.origin}/bookings/${encodeURIComponent(bookingId)}`;
+    const bookingUrl = `${window.location.origin}${boatPath("/bookings")}/${encodeURIComponent(bookingId)}`;
     this.bookingApi.createSkipperFeeCheckout({
       ...this.termsAcceptanceMetadata(),
       bookingId,
       offerId: booking.offerId || bookingId,
-      ownerId: booking.ownerId || 'alegria',
+      ownerId: booking.ownerId || booking.boatId || 'alegria',
+      boatId: booking.boatId || booking.ownerId || 'alegria',
       amount,
-      skipperAmount: amount,
+      skipperAmount,
+      tipAmount,
+      tipBaseAmount: this.skipperTipBaseAmount(),
+      tipPercentage: this.skipperTipChoice === 'custom' ? null : this.skipperTipChoice,
+      tipMode: this.skipperTipChoice === 'custom' ? 'custom' : 'percentage',
       totalAmount: this.vm.totalCustomerCost,
       currency: 'eur',
       customerEmail: booking.email || booking.customerEmail || '',
@@ -1598,6 +1744,7 @@ export class BookingDetailComponent implements OnInit {
       next: (response: any) => {
         const url = response?.url || response?.checkoutUrl || response?.sessionUrl;
         if (url) {
+          this.skipperTipModalOpen = false;
           window.location.href = url;
           return;
         }
@@ -1630,7 +1777,7 @@ export class BookingDetailComponent implements OnInit {
     const adhocPaymentId = `${idPrefix}_${Date.now()}`;
     const description = (this.extraPaymentDescription || '').trim()
       || (kind === 'tip' ? this.t('tipPayment') : kind === 'damage_charge' ? this.t('damagePayment') : this.t('extraServicePayment'));
-    const bookingUrl = `${window.location.origin}/bookings/${encodeURIComponent(bookingId)}`;
+    const bookingUrl = `${window.location.origin}${boatPath("/bookings")}/${encodeURIComponent(bookingId)}`;
 
     this.payingExtra = true;
     this.error = '';
@@ -1839,6 +1986,14 @@ export class BookingDetailComponent implements OnInit {
     }
 
     const display: any = this.vm.display || {};
+    if (this.isAlegriaCashSelected() && Number(this.vm.remainingAlegriaRevenue || 0) > 0.009 &&
+        Number(this.adminAlegriaCashAmount || 0) <= 0) {
+      this.adminAlegriaCashAmount = Math.round(Number(this.vm.remainingAlegriaRevenue) * 100) / 100;
+    }
+    if (this.isSkipperCashSelected() && Number(this.vm.remainingSkipperFee || 0) > 0.009 &&
+        Number(this.adminSkipperCashAmount || 0) <= 0) {
+      this.adminSkipperCashAmount = Math.round(Number(this.vm.remainingSkipperFee) * 100) / 100;
+    }
     const rows: any[] = (this.vm.paymentHistoryRows || []).map((row: any) => ({
       ...row,
       kind: 'payment',
@@ -1960,6 +2115,7 @@ export class BookingDetailComponent implements OnInit {
       amount,
       paymentType: this.adminRefundPaymentType || 'balance',
       reason: (this.adminRefundReason || '').trim(),
+      extraServiceId: (this.adminRefundItemId || '').trim() || undefined,
       paymentIntentId: (this.adminRefundPaymentIntentId || '').trim() || undefined,
     } as any).subscribe({
       next: () => {
@@ -1967,6 +2123,7 @@ export class BookingDetailComponent implements OnInit {
         this.adminRefundAmount = null;
         this.adminRefundReason = '';
         this.adminRefundPaymentIntentId = '';
+        this.adminRefundItemId = '';
         this.adminRefunding = false;
         this.loadBooking();
       },
@@ -2009,7 +2166,7 @@ export class BookingDetailComponent implements OnInit {
     } catch (error) {
       // Continue to Stripe setup even if the local pre-save failed; the completion callback will update the booking.
     }
-    const bookingUrl = `${window.location.origin}/bookings/${encodeURIComponent(bookingId)}`;
+    const bookingUrl = `${window.location.origin}${boatPath("/bookings")}/${encodeURIComponent(bookingId)}`;
     this.bookingApi.createWarrantySetup({
       ...this.termsAcceptanceMetadata(),
       bookingId,
@@ -2109,7 +2266,14 @@ export class BookingDetailComponent implements OnInit {
     const amount = this.number(booking?.warrantyAmount || booking?.cautionAmount || booking?.securityDepositAmount || 500);
     if (amount <= 0) return true;
     const status = String(booking?.warrantyStatus || '').toLowerCase();
-    return this.hasWarrantyCardRegistered(booking) || status.includes('cash_received') || booking?.warrantyCashReceived === true || booking?.warrantyCashConfirmed === true;
+    // Selecting the cash warranty completes the "Caution" booking step. Receipt
+    // of the physical cash remains a separate operational state for the outing.
+    return this.hasWarrantyCardRegistered(booking) ||
+      this.isCashWarrantySelected(booking) ||
+      booking?.warrantyCashSelected === true ||
+      status.includes('cash_received') ||
+      booking?.warrantyCashReceived === true ||
+      booking?.warrantyCashConfirmed === true;
   }
 
   private isTermsAccepted(booking: any): boolean {
@@ -2326,6 +2490,10 @@ export class BookingDetailComponent implements OnInit {
       otherPricing: { en: 'Other', fr: 'Autres', es: 'Otros', it: 'Altro', de: 'Sonstiges', nl: 'Overig', ru: 'Другое' },
       totalOutingPrice: { en: 'Total outing price', fr: 'Total prix de la sortie', es: 'Precio total de la salida', it: 'Prezzo totale uscita', de: 'Gesamtpreis Ausflug', nl: 'Totale prijs uitstap', ru: 'Итоговая стоимость' },
       commission: { en: 'Commission', fr: 'Commission', es: 'Comisión', it: 'Commissione', de: 'Provision', nl: 'Commissie', ru: 'Комиссия' },
+      platformCommission: { en: 'Platform commission', fr: 'Commission plateforme', es: 'Comisión de la plataforma', it: 'Commissione piattaforma', de: 'Plattformprovision', nl: 'Platformcommissie', ru: 'Комиссия платформы' },
+      alegriaRecovered: { en: 'Amount received by Alegria', fr: 'Prix récupéré par Alegria', es: 'Importe recibido por Alegria', it: 'Importo ricevuto da Alegria', de: 'Von Alegria erhaltener Betrag', nl: 'Door Alegria ontvangen bedrag', ru: 'Сумма, полученная Alegria' },
+      alegriaNetRevenue: { en: 'Alegria net revenue', fr: 'Revenu net Alegria', es: 'Ingreso neto de Alegria', it: 'Ricavo netto Alegria', de: 'Alegria-Nettoerlös', nl: 'Netto-inkomsten Alegria', ru: 'Чистый доход Alegria' },
+      skipperToReverse: { en: 'Payable to skipper', fr: 'À reverser au skipper', es: 'A pagar al patrón', it: 'Da versare allo skipper', de: 'An den Skipper zu zahlen', nl: 'Te betalen aan de schipper', ru: 'К выплате шкиперу' },
       rentalCommission: { en: 'Commission on rental', fr: 'Commission sur la location', es: 'Comisión sobre el alquiler', it: 'Commissione sul noleggio', de: 'Provision auf Miete', nl: 'Commissie op verhuur', ru: 'Комиссия с аренды' },
       serviceFeesLabel: { en: 'Service fees', fr: 'Frais de service', es: 'Gastos de servicio', it: 'Spese di servizio', de: 'Servicegebühren', nl: 'Servicekosten', ru: 'Сервисные сборы' },
       totalCommission: { en: 'Total commission', fr: 'Total commission', es: 'Comisión total', it: 'Commissione totale', de: 'Gesamtprovision', nl: 'Totale commissie', ru: 'Общая комиссия' },
@@ -2379,6 +2547,9 @@ export class BookingDetailComponent implements OnInit {
       fullyPaid: { en: 'Fully paid', fr: 'Tout est réglé', es: 'Todo pagado', it: 'Tutto pagato', de: 'Vollständig bezahlt', nl: 'Volledig betaald', ru: 'Полностью оплачено' },
       paymentPending: { en: 'Payment pending', fr: 'Paiement en attente', es: 'Pago pendiente', it: 'Pagamento in sospeso', de: 'Zahlung ausstehend', nl: 'Betaling in behandeling', ru: 'Ожидает оплаты' },
       cancelled: { en: 'Cancelled', fr: 'Annulée', es: 'Cancelada', it: 'Annullata', de: 'Storniert', nl: 'Geannuleerd', ru: 'Отменено' },
+      cancellationNotice: { en: 'Outing cancelled', fr: 'Sortie annulée', es: 'Salida cancelada', it: 'Uscita annullata', de: 'Ausfahrt storniert', nl: 'Uitstap geannuleerd', ru: 'Прогулка отменена' },
+      cancellationReason: { en: 'Cancellation reason', fr: 'Motif de l’annulation', es: 'Motivo de la cancelación', it: 'Motivo dell’annullamento', de: 'Stornierungsgrund', nl: 'Reden van annulering', ru: 'Причина отмены' },
+      cancellationReasonNotProvided: { en: 'No cancellation reason was provided.', fr: 'Aucun motif d’annulation n’a été renseigné.', es: 'No se indicó ningún motivo de cancelación.', it: 'Non è stato indicato alcun motivo di annullamento.', de: 'Es wurde kein Stornierungsgrund angegeben.', nl: 'Er is geen reden voor annulering opgegeven.', ru: 'Причина отмены не указана.' },
       chooseWarrantyCash: { en: 'Use cash warranty', fr: 'Caution en espèces', es: 'Garantía en efectivo', it: 'Cauzione in contanti', de: 'Barkaution nutzen', nl: 'Contante waarborg', ru: 'Залог наличными' },
       additionalPayments: { en: 'Additional payments', fr: 'Paiements additionnels', es: 'Pagos adicionales', it: 'Pagamenti aggiuntivi', de: 'Zusätzliche Zahlungen', nl: 'Extra betalingen', ru: 'Дополнительные платежи' },
       additionalPaymentsHelp: { en: 'Pay a tip, an extra service or another amount requested by Alegria.', fr: 'Réglez un pourboire, un service additionnel ou un autre montant demandé par Alegria.', es: 'Pague una propina, un servicio extra u otro importe solicitado por Alegria.', it: 'Paga una mancia, un servizio extra o un altro importo richiesto da Alegria.', de: 'Zahlen Sie ein Trinkgeld, eine Zusatzleistung oder einen anderen von Alegria angeforderten Betrag.', nl: 'Betaal een fooi, extra dienst of ander bedrag dat door Alegria is gevraagd.', ru: 'Оплатите чаевые, дополнительную услугу или другую сумму, запрошенную Alegria.' },
@@ -2387,6 +2558,9 @@ export class BookingDetailComponent implements OnInit {
       extraServicePayment: { en: 'Extra service', fr: 'Service additionnel', es: 'Servicio extra', it: 'Servizio extra', de: 'Zusatzleistung', nl: 'Extra dienst', ru: 'Дополнительная услуга' },
       damagePayment: { en: 'Damage payment', fr: 'Paiement dommages', es: 'Pago por daños', it: 'Pagamento danni', de: 'Schadenszahlung', nl: 'Schadebetaling', ru: 'Оплата ущерба' },
       description: { en: 'Description', fr: 'Description', es: 'Descripción', it: 'Descrizione', de: 'Beschreibung', nl: 'Beschrijving', ru: 'Описание' },
+      bookingNotes: { en: 'Booking notes', fr: 'Notes de la réservation', es: 'Notas de la reserva', it: 'Note della prenotazione', de: 'Buchungsnotizen', nl: 'Boekingsnotities', ru: 'Примечания к бронированию' },
+      offerDescription: { en: 'Offer description / customer message', fr: 'Description de l’offre / message client', es: 'Descripción de la oferta / mensaje al cliente', it: 'Descrizione offerta / messaggio cliente', de: 'Angebotsbeschreibung / Kundennachricht', nl: 'Offertebeschrijving / klantbericht', ru: 'Описание предложения / сообщение клиенту' },
+      internalNotes: { en: 'Internal notes', fr: 'Notes internes', es: 'Notas internas', it: 'Note interne', de: 'Interne Notizen', nl: 'Interne notities', ru: 'Внутренние заметки' },
       payAdditionalNow: { en: 'Pay additional amount', fr: 'Payer un montant additionnel', es: 'Pagar importe adicional', it: 'Paga importo aggiuntivo', de: 'Zusätzlichen Betrag zahlen', nl: 'Extra bedrag betalen', ru: 'Оплатить дополнительную сумму' },
       adminPaymentActions: { en: 'Admin payment actions', fr: 'Actions paiement admin', es: 'Acciones de pago admin', it: 'Azioni pagamento admin', de: 'Admin-Zahlungsaktionen', nl: 'Admin betalingsacties', ru: 'Админ-действия с платежами' },
       chargeWarrantyForDamages: { en: 'Charge warranty for damages', fr: 'Débiter la caution pour dommages', es: 'Cargar garantía por daños', it: 'Addebita cauzione per danni', de: 'Kaution für Schäden belasten', nl: 'Waarborg aanrekenen voor schade', ru: 'Списать залог за ущерб' },
@@ -2499,8 +2673,8 @@ export class BookingDetailComponent implements OnInit {
 
   private isCurrentUserAdmin(): boolean {
     const user = this.readCachedUser();
-    const role = String(user?.role || '').toLowerCase();
-    return role === 'admin' || role === 'owner' || user?.isAdmin === true;
+
+    return this.assetAccess.canManage(user);
   }
 
   private readCachedUser(): any {
@@ -2541,11 +2715,17 @@ export class BookingDetailComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate([this.vm?.isAdmin ? '/admin/bookings' : '/my-bookings']);
+    const target = this.vm?.isAdmin || this.isCurrentUserAdmin()
+      ? '/admin/reservations'
+      : '/my-bookings';
+    this.router.navigateByUrl(this.resourceContext.route(target));
   }
 
   openEdit(): void {
     if (!this.vm?.bookingId) return;
-    this.router.navigate(['/admin/bookings', this.vm.bookingId], { queryParams: { edit: true } });
+    this.router.navigate(
+      [this.resourceContext.route(`/admin/reservations/${encodeURIComponent(this.vm.bookingId)}`)],
+      { queryParams: { edit: true } }
+    );
   }
 }

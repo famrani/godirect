@@ -195,8 +195,8 @@ export class StoreDbService {
     // Persist sessions locally
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => { });
 
-    // Pick up Google redirect results
-    auth.getRedirectResult().catch(() => { });
+    // Redirect results are intentionally NOT consumed here.
+    // The authentication flow that starts a redirect must own getRedirectResult().
 
     // Track auth state
     auth.onAuthStateChanged(user => {

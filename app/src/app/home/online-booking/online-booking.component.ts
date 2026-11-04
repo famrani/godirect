@@ -1,3 +1,5 @@
+import {localDateTime} from '../../services/discovery-search';
+import {AssetAccessService} from '../../services/asset-access.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -23,6 +25,7 @@ interface OnlineBookingForm {
   outingDate: string;
   startTime: string;
   endTime: string;
+  requestedDurationHours: number | null;
   passengers: number | null;
   startMarina: string;
   destination: string;
@@ -33,11 +36,17 @@ interface OnlineBookingForm {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-online-booking',
   templateUrl: './online-booking.component.html',
   styleUrls: ['./online-booking.component.scss'],
 })
 export class OnlineBookingComponent implements OnInit, OnDestroy {
+  get minimumBookingDate(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }
+
   content: SiteContent = SITE_CONTENT.fr;
   currentLanguage: SiteLanguage = 'fr';
   private allSiteContent = SITE_CONTENT;
@@ -72,6 +81,7 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
     outingDate: '',
     startTime: '',
     endTime: '',
+    requestedDurationHours: 7,
     passengers: null,
     startMarina: '',
     destination: '',
@@ -89,9 +99,11 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
     private languageService: LanguageService,
     private bookingApi: BookingApiService,
     private offerApi: OfferApiService,
-  ) {}
+    public assetAccess:AssetAccessService
+) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.assetAccess.refresh();
     this.restoreWizardState();
     this.prefillDateFromCalendar();
     this.watchLoggedUser();
@@ -105,7 +117,8 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
   }
 
   private prefillDateFromCalendar(): void {
-    const date = String(this.route.snapshot.queryParamMap.get('date') || '').trim();
+    const searched=localDateTime(this.route.snapshot.queryParamMap.get('startAt')||'').slice(0,10);
+    const date = String(this.route.snapshot.queryParamMap.get('date') || searched || '').trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
     this.form = { ...this.form, outingDate: date };
     this.currentStep = 1;
@@ -195,8 +208,8 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
 
   get isAdminUser(): boolean {
     const user = this.currentUser;
-    const role = String(user?.role || '').toLowerCase();
-    return role === 'admin' || role === 'owner' || user?.isAdmin === true;
+
+    return this.assetAccess.canManage(user);
   }
 
   get isAdminRequestMode(): boolean {
@@ -251,6 +264,52 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
       { id: 'sunset', label: this.currentLanguage === 'fr' ? 'Coucher de soleil' : this.currentLanguage === 'es' ? 'Puesta de sol' : 'Sunset' },
       { id: 'evening', label: this.currentLanguage === 'fr' ? 'Soirée' : this.currentLanguage === 'es' ? 'Noche' : 'Evening' },
     ];
+  }
+
+  get durationChoices(): number[] {
+    return [3, 4, 5, 7, 8];
+  }
+
+  get durationLabel(): string {
+    if (this.currentLanguage === 'fr') return 'Durée souhaitée';
+    if (this.currentLanguage === 'es') return 'Duración deseada';
+    return 'Requested duration';
+  }
+
+  get itineraryLabel(): string {
+    if (this.currentLanguage === 'fr') return 'Itinéraire ou destination souhaitée';
+    if (this.currentLanguage === 'es') return 'Ruta o destino preferido';
+    return 'Preferred itinerary or destination';
+  }
+
+  get flexibleItineraryLabel(): string {
+    if (this.currentLanguage === 'fr') return 'À définir avec le capitaine';
+    if (this.currentLanguage === 'es') return 'A definir con el capitán';
+    return 'To be discussed with the captain';
+  }
+
+  onScheduleChanged(): void {
+    const start = this.parseTimeToMinutes(this.form.startTime);
+    const duration = Number(this.form.requestedDurationHours || 0);
+    if (start === null || duration <= 0) {
+      this.form.endTime = '';
+      return;
+    }
+
+    const end = start + Math.round(duration * 60);
+    const hours = Math.floor(end / 60) % 24;
+    const minutes = end % 60;
+    this.form.endTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    this.form.pricePeriod = this.derivedPricePeriod;
+    this.persistWizardState();
+  }
+
+  get derivedPricePeriod(): 'day' | 'halfDay' | 'sunset' | 'evening' {
+    const duration = Number(this.form.requestedDurationHours || 0);
+    const start = this.parseTimeToMinutes(this.form.startTime) || 0;
+    if (duration <= 3 && start >= 17 * 60) return 'sunset';
+    if (duration <= 5) return 'halfDay';
+    return 'day';
   }
 
   get stepLabels(): string[] {
@@ -310,7 +369,7 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
   }
 
   get shouldShowEstimatedPrice(): boolean {
-    return !!this.form.pricePeriod;
+    return Number(this.form.requestedDurationHours || 0) > 0;
   }
 
   get formattedBookingTotal(): string {
@@ -318,7 +377,7 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
   }
 
   get selectedPeriodLabel(): string {
-    return this.pricePeriods.find((item) => item.id === this.form.pricePeriod)?.label || '-';
+    return `${this.form.requestedDurationHours || '-'}h`;
   }
 
   get boatCustomerTotalAmount(): number {
@@ -427,7 +486,7 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
   }
 
   get basePrice(): number {
-    const periodKey = this.normalizePricePeriodKey(this.form.pricePeriod);
+    const periodKey = this.form.requestedDurationHours ? this.derivedPricePeriod : this.normalizePricePeriodKey(this.form.pricePeriod);
     const model: any = this.pricingModel || {};
 
     const candidateKeys: Record<string, string[]> = {
@@ -525,12 +584,12 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
   }
 
   get durationHours(): number {
-    return Math.round((this.durationMinutes / 60) * 100) / 100;
+    return Number(this.form.requestedDurationHours || 0) || Math.round((this.durationMinutes / 60) * 100) / 100;
   }
 
   get maxDurationHours(): number {
     const model: any = this.pricingModel || {};
-    const period = this.normalizePricePeriodKey(this.form.pricePeriod);
+    const period = this.form.requestedDurationHours ? this.derivedPricePeriod : this.normalizePricePeriodKey(this.form.pricePeriod);
 
     if (period === 'halfDay') return Number(model.halfDayMaxHours || model.halfDayMaximumHours || 5);
     if (period === 'day') return Number(model.dayMaxHours || model.dayMaximumHours || 8);
@@ -592,8 +651,8 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
   get step1ValidationErrors(): string[] {
     const errors: string[] = [];
 
-    if (!this.form.pricePeriod) {
-      errors.push(this.bookingText?.missingPeriod || '');
+    if (!this.form.requestedDurationHours || Number(this.form.requestedDurationHours) <= 0) {
+      errors.push(this.currentLanguage === 'fr' ? 'Veuillez sélectionner une durée.' : 'Please select a duration.');
     }
 
     if (!this.form.outingDate) {
@@ -608,11 +667,7 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
       errors.push(this.bookingText?.missingStartTime || '');
     }
 
-    if (!this.form.endTime) {
-      errors.push(this.bookingText?.missingEndTime || '');
-    }
-
-    if (this.form.startTime && this.form.endTime) {
+    if (this.form.startTime && this.form.requestedDurationHours) {
       const start = this.parseTimeToMinutes(this.form.startTime);
       const end = this.parseTimeToMinutes(this.form.endTime);
 
@@ -637,14 +692,6 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
 
     if (!this.form.startMarina) {
       errors.push(this.bookingText?.missingMarina || '');
-    }
-
-    if (!this.form.destination) {
-      errors.push(this.bookingText?.missingDestination || '');
-    }
-
-    if (this.form.startMarina && this.form.destination && this.form.startMarina === this.form.destination) {
-      errors.push(this.bookingText?.destinationMustDiffer || '');
     }
 
     return errors.filter(Boolean);
@@ -757,7 +804,9 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
       status: 'requested',
     }));
 
-    const periodLabel = this.pricePeriods.find((item) => item.id === this.form.pricePeriod)?.label || this.form.pricePeriod || 'Online offer request';
+    this.form.pricePeriod = this.derivedPricePeriod;
+    this.onScheduleChanged();
+    const periodLabel = `${this.durationHours}h private boat request`;
     const now = Date.now();
 
     const offerRequest = await this.offerApi.saveOffer({
@@ -769,7 +818,7 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
       customerName: this.form.customerName,
       customerEmail: this.form.customerEmail,
       customerPhone: this.form.customerPhone,
-      outingType: periodLabel,
+      outingType: 'private_boat_request',
       bookingPricePeriod: this.normalizePricePeriodKey(this.form.pricePeriod),
       bookingPricePeriodLabel: periodLabel,
       outingDate: this.form.outingDate,
@@ -781,7 +830,7 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
       timePeriod: `${this.form.startTime} - ${this.form.endTime}`,
       passengers: Number(this.form.passengers || 0),
       startMarina: this.form.startMarina,
-      destination: this.form.destination,
+      destination: this.form.destination || this.flexibleItineraryLabel,
       selectedOptions,
       estimatedPrice: this.bookingTotal,
       estimatedBoatPrice: this.estimatedBoatPriceAmount,
@@ -812,7 +861,7 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
       comments: [
         'Offer request - no payment yet',
         'Admin must finalize boat price, skipper price and extra services, then send the offer to the client.',
-        `Requested period: ${periodLabel}`,
+        `Requested duration: ${this.durationHours}h`,
         `Requested time: ${this.form.startTime} - ${this.form.endTime}`,
         `Duration: ${this.durationHours}h`,
         `Estimated price: €${this.bookingTotal}`,
@@ -821,7 +870,7 @@ export class OnlineBookingComponent implements OnInit, OnDestroy {
         `Options price: €${this.selectedOptionsTotal}`,
         `Extra guests price: €${this.extraGuestsAmount}`,
         `Start marina: ${this.form.startMarina}`,
-        `Destination: ${this.form.destination}`,
+        `Preferred itinerary: ${this.form.destination || this.flexibleItineraryLabel}`,
         `Options: ${selectedOptions.map((item) => item.label).join(', ') || 'none'}`,
         this.form.comments ? `Customer comments: ${this.form.comments}` : '',
       ].filter(Boolean).join('\n'),

@@ -3,8 +3,10 @@ import { Subscription } from 'rxjs';
 import { SITE_CONTENT, SiteContent } from '../site-content';
 import { LanguageService, SiteLanguage } from '../../services/language.service';
 import { SiteContentService } from '../site-content-service/site-content.service';
+import { PrivateMediaService } from '../../services/private-media.service';
 
 @Component({
+  standalone: false,
   selector: 'app-boat',
   templateUrl: './boat.component.html',
   styleUrls: ['./boat.component.scss'],
@@ -13,7 +15,7 @@ export class BoatComponent implements OnInit, OnDestroy {
   content: SiteContent = SITE_CONTENT.fr;
   currentLanguage: SiteLanguage = 'fr';
   private allSiteContent = SITE_CONTENT;
-  images = SITE_CONTENT.fr.galleryImages.slice(0, 13);
+  images: string[] = [];
   private languageSub?: Subscription;
 
   specs: string[] = [];
@@ -66,14 +68,18 @@ export class BoatComponent implements OnInit, OnDestroy {
     }
   } as const;
 
-  constructor(private languageService: LanguageService, private siteContentService: SiteContentService) {}
+  constructor(
+    private languageService: LanguageService,
+    private siteContentService: SiteContentService,
+    private privateMedia: PrivateMediaService,
+  ) {}
 
   ngOnInit(): void {
     this.loadSiteContent();
     this.languageSub = this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
       this.content = this.allSiteContent[language] || SITE_CONTENT[language];
-      this.images = this.content.galleryImages.slice(0, 13);
+      this.setBoatImages();
       const localized = this.localizedData[language];
       this.specsTitle = localized.specsTitle;
       this.servicesTitle = localized.servicesTitle;
@@ -90,12 +96,39 @@ export class BoatComponent implements OnInit, OnDestroy {
 
   private async loadSiteContent(): Promise<void> {
     try {
-      this.allSiteContent = await this.siteContentService.getContent();
+      this.allSiteContent = await this.siteContentService.getContent(true);
       this.content = this.allSiteContent[this.currentLanguage] || SITE_CONTENT[this.currentLanguage];
-      this.images = this.content.galleryImages.slice(0, 13);
+      this.setBoatImages();
     } catch {
       this.allSiteContent = SITE_CONTENT;
     }
+  }
+
+  private setBoatImages(): void {
+    const hero = String(this.content?.boatHeroImage || '').trim();
+    const gallery = Array.isArray(this.content?.galleryImages)
+      ? this.content.galleryImages.filter((image) => !!String(image || '').trim())
+      : [];
+
+    // The CMS stores the primary boat photo separately from the gallery.
+    // Discover the boat should show both, with the primary image first and
+    // without rendering it twice when it also exists in the gallery.
+    const ordered = hero
+      ? [hero, ...gallery.filter((image) => image !== hero)]
+      : gallery;
+
+    this.images = ordered
+      .slice(0, 13)
+      .map((image) => this.privateMedia.objectUrl(image));
+  }
+
+
+  get boatImageAlt(): string {
+    const brand: any = this.content?.brand as any;
+    if (typeof brand === 'string' && brand.trim()) return brand.trim();
+    if (brand && typeof brand === 'object' && typeof brand.name === 'string' && brand.name.trim()) return brand.name.trim();
+    const title = String(this.content?.boatPage?.title || '').trim();
+    return title || 'Alegria';
   }
 
   ngOnDestroy(): void {

@@ -1,3 +1,5 @@
+import {AssetAccessService} from '../../services/asset-access.service';
+import { boatPath } from '../../services/boat-routing';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ServicesService } from 'godigital-lib';
@@ -5,6 +7,7 @@ import { SITE_CONTENT, SiteContent } from '../site-content';
 import { LanguageService, SiteLanguage } from '../../services/language.service';
 import { BookingApiService, AlegriaBooking } from '../bookings/booking-api.service';
 import { SiteContentService } from '../site-content-service/site-content.service';
+import { ResourceContextService } from '../../services/resource-context.service';
 
 interface CustomerPaymentView {
   id: string;
@@ -44,6 +47,7 @@ interface CustomerBookingPaymentGroup {
   visiblePayments: CustomerPaymentView[];
 }
 @Component({
+  standalone: false,
   selector: 'app-account-summary',
   templateUrl: './account-summary.component.html',
   styleUrls: ['./account-summary.component.scss'],
@@ -74,19 +78,22 @@ export class AccountSummaryComponent implements OnInit {
     private router: Router,
     private mainSvc: ServicesService,
     private bookingApi: BookingApiService,
-    private siteContentService: SiteContentService
-  ) {}
+    private siteContentService: SiteContentService,
+    private resourceContext: ResourceContextService,
+    public assetAccess:AssetAccessService
+) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.assetAccess.refresh();
     this.section = this.route.snapshot.data['section'] || 'bookings';
     const svc = this.mainSvc as any;
     this.loggedUser = svc.bnUser || svc.currentUser || null;
-    const role = String(this.loggedUser?.role || '').toLowerCase();
-    const isAdmin = role === 'admin' || role === 'owner' || this.loggedUser?.isAdmin === true;
+
+    const isAdmin = this.assetAccess.canManage(this.loggedUser);
     // Admin users may use the shared AccountSummaryComponent for /admin/payments.
     // Only redirect admin users away from customer-only sections, not from payments.
     if (isAdmin && (this.section === 'bookings' || this.section === 'feedbacks')) {
-      this.router.navigate(['/admin/bookings']);
+      this.router.navigate(['/admin/reservations']);
       return;
     }
 
@@ -124,8 +131,8 @@ export class AccountSummaryComponent implements OnInit {
   }
 
   loadCustomerPayments(): void {
-    const role = String(this.loggedUser?.role || '').toLowerCase();
-    const isAdmin = role === 'admin' || role === 'owner' || this.loggedUser?.isAdmin === true;
+
+    const isAdmin = this.assetAccess.canManage(this.loggedUser);
     const email = isAdmin ? undefined : String(this.loggedUser?.email || '').trim();
     this.loading = true;
 
@@ -218,10 +225,11 @@ export class AccountSummaryComponent implements OnInit {
     }
 
     const paymentId = `standalone_${Date.now()}`;
-    const returnUrl = `${window.location.origin}/my-payments`;
+    const returnUrl = `${window.location.origin}${boatPath("/my-payments")}`;
     this.standalonePaymentLoading = true;
     this.bookingApi.createAdhocCheckout({
-      ownerId: 'alegria',
+      ownerId: this.resourceContext.boatId,
+      boatId: this.resourceContext.boatId,
       bookingId: '',
       adhocPaymentId: paymentId,
       amount,
@@ -835,8 +843,8 @@ export class AccountSummaryComponent implements OnInit {
 
   get title(): string {
     if (this.section === 'payments') {
-      const role = String(this.loggedUser?.role || '').toLowerCase();
-      const isAdmin = role === 'admin' || role === 'owner' || this.loggedUser?.isAdmin === true;
+
+      const isAdmin = this.assetAccess.canManage(this.loggedUser);
       return this.paymentPageText(isAdmin ? 'adminTitle' : 'title');
     }
     const labels: any = {
@@ -849,8 +857,8 @@ export class AccountSummaryComponent implements OnInit {
 
   get intro(): string {
     if (this.section === 'payments') {
-      const role = String(this.loggedUser?.role || '').toLowerCase();
-      const isAdmin = role === 'admin' || role === 'owner' || this.loggedUser?.isAdmin === true;
+
+      const isAdmin = this.assetAccess.canManage(this.loggedUser);
       return this.paymentPageText(isAdmin ? 'adminIntro' : 'intro');
     }
     const labels: any = {

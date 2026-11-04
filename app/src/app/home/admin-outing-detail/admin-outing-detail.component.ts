@@ -1,3 +1,4 @@
+import {AssetAccessService} from '../../services/asset-access.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -59,6 +60,7 @@ interface AdminOuting {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-admin-outing-detail',
   templateUrl: './admin-outing-detail.component.html',
   styleUrls: ['./admin-outing-detail.component.scss'],
@@ -78,7 +80,7 @@ export class AdminOutingDetailComponent implements OnInit, OnDestroy {
   editingAnchorageId = '';
   loading = false;
   private readonly restDatabaseUrls = [
-    'https://adn-dev-4d05d.firebaseio.com',
+    'https://ailla-poc-default-rtdb.firebaseio.com',
   ];
   saving = false;
   saved = false;
@@ -100,10 +102,12 @@ export class AdminOutingDetailComponent implements OnInit, OnDestroy {
     private mainSvc: ServicesService,
     private storeDb: StoreDbService,
     private utilSvc: UtilsService,
-    private http: HttpClient
-  ) {}
+    private http: HttpClient,
+    public assetAccess:AssetAccessService
+) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.assetAccess.refresh();
     this.outingId = this.route.snapshot.paramMap.get('outingId') || '';
     this.languageSub = this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
@@ -133,8 +137,8 @@ export class AdminOutingDetailComponent implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    const role = String(this.loggedUser?.role || '').toLowerCase();
-    return role === 'admin' || this.loggedUser?.isAdmin === true;
+
+    return this.assetAccess.canManage(this.loggedUser);
   }
 
   get departureComplete(): boolean {

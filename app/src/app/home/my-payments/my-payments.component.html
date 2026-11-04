@@ -1,0 +1,24 @@
+<section class="customer-payments">
+  <h1>{{ "ui.pages.t1f4577fece83" | siteText }}</h1>
+  <p>{{ "ui.pages.t1cc9102c6321" | siteText }}</p>
+  <p class="notice">{{ "ui.pages.t70b3f001cd9d" | siteText }}</p>
+  <p *ngIf="loading">{{ "ui.pages.t01cba1dfba2e" | siteText }}</p>
+  <p *ngIf="error" role="alert">{{ error | siteText }}</p>
+  <button type="button" (click)="refresh()">{{ "ui.pages.t9d3b2a7d8b0d" | siteText }}</button>
+  <ng-container *ngIf="!loading">
+    <p *ngIf="!bookings.length">{{ "ui.pages.t114e3a426569" | siteText }}</p>
+    <article *ngFor="let b of bookings" class="payment-card">
+      <h2>{{ b.assetType | siteText }} · {{ b.assetId }}</h2>
+      <p>{{ "ui.pages.t99a3685914b7" | siteText }} {{ b.id || b.bookingId }}</p>
+      <p>{{ "ui.pages.t9d7119be0b80" | siteText }} <strong>{{ b.paymentStatus || ('ui.messages.t9ccfe1f15e3e' | siteText) }}</strong></p>
+      <p>{{ "ui.pages.t35451c531a90" | siteText }} {{ total(b) | number:'1.2-2' }} {{ b.currency || 'EUR' }}</p>
+      <p>{{ "ui.pages.t00835136a6a3" | siteText }} {{ deposit(b) | number:'1.2-2' }} {{ b.currency || 'EUR' }}</p>
+      <p>{{ "ui.pages.t57b1dffe6820" | siteText }} {{ balance(b) | number:'1.2-2' }} {{ b.currency || 'EUR' }}</p>
+      <p *ngIf="b.cancellationRequestStatus === 'pending'">{{ "ui.pages.t90c183f657d2" | siteText }}</p>
+      <section *ngIf="b.cancellation">
+        <p><strong>{{b.cancellation.status==='completed'?('ui.messages.t5054909d01fe' | siteText):('ui.messages.t1c982b9ca67d' | siteText)}}</strong></p>
+        <p *ngFor="let item of b.cancellation.items">{{ "ui.pages.ta8b05381dd8d" | siteText }} {{item.refunded / 100 | number:'1.2-2'}} / {{item.collected / 100 | number:'1.2-2'}} {{item.currency || b.currency | uppercase}}<span *ngIf="item.pending"> — {{item.pending / 100 | number:'1.2-2'}} {{ "ui.pages.t5fba9c16f0e5" | siteText }}</span></p>
+      </section>
+    </article>
+  </ng-container>
+</section>

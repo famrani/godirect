@@ -9,7 +9,7 @@
     </div>
 
     <div class="notice error" *ngIf="!isAdmin">{{ t('adminOnly') }}</div>
-    <div class="notice error" *ngIf="error">{{ error }}</div>
+    <div class="notice error" *ngIf="error">{{ error | siteText }}</div>
     <div class="notice success" *ngIf="saved">{{ t('saved') }}</div>
 
     <ng-container *ngIf="isAdmin && outing">

@@ -1,3 +1,4 @@
+import { boatPath } from '../../services/boat-routing';
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,6 +9,7 @@ import { LanguageService, SiteLanguage } from '../../services/language.service';
 import { Subscription } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-admin-offers',
   templateUrl: './admin-offers.component.html',
   styleUrls: ['./admin-offers.component.scss']
@@ -95,7 +97,20 @@ export class AdminOffersComponent implements OnInit, OnDestroy {
     return this.priceTitles?.[key] || this.t(key) || key;
   }
 
-  t(key: string): string { return this.pageText?.[key] || key; }
+  t(key: string): string {
+    const value = String(this.pageText?.[key] || key);
+    const replacements: Record<SiteLanguage, Array<[RegExp, string]>> = {
+      fr: [[/\boffres\b/gi, 'demandes de réservation'], [/\boffre\b/gi, 'demande de réservation']],
+      en: [[/\boffers\b/gi, 'reservation requests'], [/\boffer\b/gi, 'reservation request']],
+      es: [[/\bofertas\b/gi, 'solicitudes de reserva'], [/\boferta\b/gi, 'solicitud de reserva']],
+      it: [[/\bofferte\b/gi, 'richieste di prenotazione'], [/\bofferta\b/gi, 'richiesta di prenotazione']],
+      de: [[/\bangebote\b/gi, 'Reservierungsanfragen'], [/\bangebot\b/gi, 'Reservierungsanfrage']],
+      nl: [[/\boffertes\b/gi, 'reserveringsaanvragen'], [/\bofferte\b/gi, 'reserveringsaanvraag']],
+      ru: [[/предложения/gi, 'запросы на бронирование'], [/предложение/gi, 'запрос на бронирование']],
+    };
+    return (replacements[this.currentLanguage] || replacements.fr)
+      .reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), value);
+  }
 
   get filteredOffers(): AlegriaOffer[] {
     const term = this.normalize(this.searchTerm);
@@ -158,7 +173,7 @@ export class AdminOffersComponent implements OnInit, OnDestroy {
   }
 
   get offerLink(): string {
-    return this.form.offerId ? `${window.location.origin}/offer/${this.form.offerId}` : '';
+    return this.form.offerId ? `${window.location.origin}${boatPath("/offer")}/${this.form.offerId}` : '';
   }
 
   load(): void {
@@ -320,30 +335,31 @@ export class AdminOffersComponent implements OnInit, OnDestroy {
 
   applyFinalPricingToForm(): void {
     const form: any = this.form || {};
-    const boatPrice = Number(form.proposalBoatPrice || 0);
-    const skipperPrice = Number(form.proposalSkipperPrice || 0);
+    const boatPrice = Number(form.proposalBoatPrice ?? 0);
+    const skipperPrice = Number(form.proposalSkipperPrice ?? 0);
     const fuelPrice = Number(form.proposalFuelPrice ?? form.fuelPrice ?? form.fuelAmount ?? form.offerCleaningPrice ?? 0);
-    const extraServicesPrice = Number(form.proposalExtraServicesPrice || 0);
+    const extraServicesPrice = Number(form.proposalExtraServicesPrice ?? 0);
     const finalTotal = boatPrice + skipperPrice + fuelPrice + extraServicesPrice;
     const onlinePayableAmount = Math.max(0, Math.round((finalTotal - skipperPrice) * 100) / 100);
+    const depositRate = Number(form.depositRate ?? 0.10);
+    const depositAmount = Math.round(onlinePayableAmount * depositRate * 100) / 100;
 
-    if (finalTotal > 0) {
-      const depositRate = Number(form.depositRate || 0.10);
-      const depositAmount = Math.round(onlinePayableAmount * depositRate * 100) / 100;
-      this.form = {
-        ...this.form,
-        totalAmount: Math.round(finalTotal * 100) / 100,
-        skipperCashAmount: skipperPrice,
-        proposalFuelPrice: fuelPrice,
-        fuelPrice: fuelPrice,
-        fuelAmount: fuelPrice,
-        onlinePayableAmount,
-        appPayableAmount: onlinePayableAmount,
-        depositRate,
-        depositAmount,
-        balanceAmount: Math.round((onlinePayableAmount - depositAmount) * 100) / 100,
-      } as any;
-    }
+    // Zero is a valid quoted price (for example, a complimentary outing).
+    // Always replace previously persisted/default financial values, including
+    // when the newly calculated total is exactly zero.
+    this.form = {
+      ...this.form,
+      totalAmount: Math.round(finalTotal * 100) / 100,
+      skipperCashAmount: skipperPrice,
+      proposalFuelPrice: fuelPrice,
+      fuelPrice: fuelPrice,
+      fuelAmount: fuelPrice,
+      onlinePayableAmount,
+      appPayableAmount: onlinePayableAmount,
+      depositRate,
+      depositAmount,
+      balanceAmount: Math.round((onlinePayableAmount - depositAmount) * 100) / 100,
+    } as any;
   }
 
   async saveOffer(): Promise<void> {
@@ -427,18 +443,19 @@ export class AdminOffersComponent implements OnInit, OnDestroy {
   }
 
   edit(p: AlegriaOffer): void { this.form = { ...p }; window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  openClientLink(p: AlegriaOffer): void { window.open(`/offer/${p.offerId}`, '_blank'); }
+  openClientLink(p: AlegriaOffer): void { window.open(boatPath(`/offer/${p.offerId}`), '_blank'); }
   copyLink(): void { if (this.offerLink) navigator.clipboard?.writeText(this.offerLink); this.message = this.t('linkCopied'); }
 
   sendCurrentOfferByEmail(): void {
     this.error = '';
     if (!this.validateOfferForm()) return;
     if (!this.form.offerId) return;
+    this.applyFinalPricingToForm();
     this.sendOfferByEmail(this.form as AlegriaOffer);
   }
 
   sendOfferByEmail(offer: AlegriaOffer): void {
-    const link = `${window.location.origin}/offer/${offer.offerId}`;
+    const link = `${window.location.origin}${boatPath("/offer")}/${offer.offerId}`;
     const subject = `Alegria Boat offer - ${offer.outingType || 'Your outing'}`;
     const f = this.offerFinancials(offer);
     const body = [
@@ -488,6 +505,14 @@ export class AdminOffersComponent implements OnInit, OnDestroy {
 
   openWhatsappDialog(offer: Partial<AlegriaOffer>, event?: Event): void {
     event?.stopPropagation();
+    // The editor can contain unsaved pricing changes. Recalculate the current
+    // form before producing a customer-facing message so the preview and the
+    // displayed total always agree, including for a free offer.
+    if (offer === this.form || (!!offer.offerId && offer.offerId === this.form.offerId)) {
+      this.applyFinalPricingToForm();
+      this.prepareWhatsappDialog(this.form);
+      return;
+    }
     this.prepareWhatsappDialog(offer);
   }
 
@@ -508,7 +533,7 @@ export class AdminOffersComponent implements OnInit, OnDestroy {
 
   private buildWhatsappMessage(offer: Partial<AlegriaOffer>): string {
     const f = this.offerFinancials(offer);
-    const link = `${window.location.origin}/offer/${offer.offerId}`;
+    const link = `${window.location.origin}${boatPath("/offer")}/${offer.offerId}`;
     return [
       `Bonjour ${offer.customerName || ''} 👋`,
       `Votre offre Alegria Boat pour ${offer.outingType || 'votre sortie'}${offer.outingDate ? ` le ${offer.outingDate}` : ''} est prête.`,
@@ -607,7 +632,7 @@ export class AdminOffersComponent implements OnInit, OnDestroy {
     event?.stopPropagation();
     const bookingId = (offer as any)?.relatedBookingId || offer?.offerId;
     if (!bookingId) return;
-    this.router.navigate(['/admin/bookings', bookingId]);
+    this.router.navigate(['/admin/reservations', bookingId]);
   }
 
   reset(): void { this.form = this.emptyForm(); this.message = ''; this.error = ''; }
@@ -624,7 +649,7 @@ export class AdminOffersComponent implements OnInit, OnDestroy {
       departureTime: '10:00',
       arrivalTime: '18:00',
       passengers: 2,
-      totalAmount: 1000,
+      totalAmount: 0,
       warrantyAmount: 500,
       offerMessage: '',
       comments: '',

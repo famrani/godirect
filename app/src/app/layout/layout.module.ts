@@ -13,6 +13,7 @@ import { LayoutRoutingModule } from './layout.router.module';
 import { CookieConsentComponent } from './cookie-consent/cookie-consent.component';
 import { SiteTextPipe } from '../home/site-text.pipe';
 
+import { ResourceRoutePipe } from '../services/resource-route.pipe';
 @NgModule({
   declarations: [
     HomelayoutComponent,
@@ -22,11 +23,8 @@ import { SiteTextPipe } from '../home/site-text.pipe';
     CookieConsentComponent,
   ],
   imports: [
-    HomelayoutComponent,
-    HomeheaderComponent,
-    HomefooterComponent,
-    LayoutnoneComponent,
     CommonModule,
+    ResourceRoutePipe,
     RouterModule,
     IonicModule,
     FormsModule,

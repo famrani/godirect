@@ -16,6 +16,10 @@
         <div>{{ tour.duration }}</div>
         <div>{{ tour.guests }}</div>
       </div>
+      <div class="price-box" *ngIf="tour.price || tour.priceDetails">
+        <strong *ngIf="tour.price">{{ tour.price }}</strong>
+        <p *ngIf="tour.priceDetails">{{ tour.priceDetails }}</p>
+      </div>
     </div>
 
     <div>
@@ -91,7 +95,7 @@
 
     <div class="cta-card">
       <p>{{ tour.contactNote }}</p>
-      <a routerLink="/calendar" class="btn">{{ tour.cta }}</a>
+      <a [routerLink]="'/calendar' | resourceRoute" class="btn">{{ tour.cta }}</a>
     </div>
   </div>
 </section>

@@ -10,16 +10,6 @@ import { Users } from './service-service';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 
-// IMPORTANT: fix spelling (storageBucket)
-export const firebaseConfig = {
-  apiKey: 'AIzaSyAFIiBNkBda_tNdkppBmdzCzZhizmFOgKc',
-  authDomain: 'backend-prod-e4d4e.firebaseapp.com',
-  databaseURL: 'https://backend-prod-e4d4e.firebaseio.com',
-  projectId: 'backend-prod-e4d4e',
-  storageBucket: 'backend-prod-e4d4e.appspot.com',
-  messagingSenderId: '981006637106'
-};
-
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   public userInfo!: Users;
@@ -117,11 +107,18 @@ export class UsersService {
    * Sign in with Google, upsert RTDB profile, then return RTDB user.
    */
 async signInWithGoogleAndLoadProfile(): Promise<Users> {
-  const maf = this.utilSvc.mauth;
-  const provider = new firebase.auth.GoogleAuthProvider();
+  // Always use the same Auth instance initialized by StoreDbService.
+  // Email/password, Google, logout and password reset must all be bound
+  // to the same Firebase app/project selected by the host application.
+  const auth = this.storeDbSvc.firebaseauth;
+  if (!auth) {
+    throw new Error('Firebase Auth has not been initialized');
+  }
 
-  // Popup (you can also support redirect similarly)
-  const result = await maf.signInWithPopup(provider);
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  const result = await auth.signInWithPopup(provider);
   const user = result.user!;
   const info = result.additionalUserInfo;
 

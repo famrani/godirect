@@ -1,10 +1,11 @@
+import { boatPath } from '../../services/boat-routing';
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, from, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { UtilsService } from 'godigital-lib';
-import { BoatContextService } from '../../services/boat-context.service';
+import { ResourceContextService } from '../../services/resource-context.service';
 
 export type WarrantyPaymentChoice = 'stripe_card' | 'cash_on_board';
 export type OfferStatus = 'request' | 'draft' | 'sent' | 'accepted' | 'expired' | 'cancelled';
@@ -100,6 +101,8 @@ export interface AlegriaOffer {
   validUntil: number;
   offerMessage?: string;
   comments?: string;
+  description?: string;
+  internalComments?: string;
   depositStatus?: string;
   depositPaid?: boolean;
   depositPaidAmount?: number;
@@ -140,12 +143,12 @@ export interface AlegriaOffer {
 export class OfferApiService {
   private readonly offersCollection = 'bnProposals';
   private readonly bookingsCollection = 'bnBookings';
-  private readonly firebaseUrl = 'https://adn-dev-4d05d.firebaseio.com';
+  private readonly firebaseUrl = 'https://ailla-poc-default-rtdb.firebaseio.com';
 
   constructor(
     private http: HttpClient,
     private utilsSvc: UtilsService,
-    private boatContext: BoatContextService,
+    private resourceContext: ResourceContextService,
   ) {}
 
   getOffers(): Observable<AlegriaOffer[]> {
@@ -185,8 +188,8 @@ export class OfferApiService {
     if (!String(input.arrivalTime || '').trim()) errors.push('Return time is required.');
     if (!isExternalBooking && Number(input.passengers || 0) <= 0)
       errors.push('Passengers must be greater than zero.');
-    if (!isExternalBooking && Number(input.totalAmount || 0) <= 0)
-      errors.push('Total amount must be greater than zero.');
+    if (!isExternalBooking && Number(input.totalAmount ?? 0) < 0)
+      errors.push('Total amount cannot be negative.');
     if (Number(input.warrantyAmount || 0) < 0) errors.push('Warranty amount cannot be negative.');
     if (!isExternalBooking && !String((input as any).offerMessage || '').trim())
       errors.push('Offer message is required.');
@@ -215,6 +218,9 @@ export class OfferApiService {
   async saveOffer(input: Partial<AlegriaOffer>): Promise<AlegriaOffer> {
     this.validateOfferInput(input);
     const now = Date.now();
+    const boatId = String(input.boatId || this.resourceContext.boatId);
+    const fleetBoat = await this.readFirebasePath(`/${this.resourceContext.scopedPath('bnFleet')}`).catch(() => ({}));
+    const ownerId = String(input.ownerId || (fleetBoat as any)?.ownerId || boatId);
     const offerId = input.offerId || `offer_${now}_${Math.random().toString(36).slice(2, 8)}`;
     const skipperCashAmount = this.getSkipperCashAmount(input);
     const proposalBoatPrice = Number((input as any).proposalBoatPrice ?? (input as any).estimatedBoatPrice ?? 0) || 0;
@@ -228,8 +234,8 @@ export class OfferApiService {
     const balanceAmount = Math.round((onlinePayableAmount - depositAmount) * 100) / 100;
     const offer: AlegriaOffer = {
       offerId,
-      boatId: input.boatId || this.boatContext.boatId,
-      ownerId: input.ownerId || this.boatContext.boatId,
+      boatId,
+      ownerId,
       skipperId: input.skipperId || '',
       source: input.source || 'direct',
       bookingSource: (input as any).bookingSource || '',
@@ -311,6 +317,8 @@ export class OfferApiService {
       validUntil: input.validUntil || now + 24 * 60 * 60 * 1000,
       offerMessage: input.offerMessage || '',
       comments: input.comments || '',
+      description: (input as any).description || input.offerMessage || '',
+      internalComments: (input as any).internalComments || input.comments || '',
       depositStatus: input.depositStatus || 'pending',
       depositPaid: input.depositPaid === true,
       depositPaidAmount: input.depositPaid === true ? Number((input as any).depositPaidAmount || depositAmount || 0) : 0,
@@ -460,6 +468,8 @@ export class OfferApiService {
     const hydrated = await this.readOfferWithPaymentState(offerId);
     if (!hydrated) throw new Error('Offer not found');
 
+    const onlinePayableAmount = this.getOnlinePayableAmount(hydrated);
+    const paymentRequired = onlinePayableAmount > 0.005;
     const depositPaid =
       hydrated.depositPaid === true ||
       hydrated.depositStatus === 'paid' ||
@@ -473,7 +483,7 @@ export class OfferApiService {
       hydrated.warrantyStatus === 'warranty_card_saved';
 
     if (!hydrated.tncAccepted) throw new Error('Terms and Conditions must be accepted first.');
-    if (!depositPaid) throw new Error('Deposit must be paid first.');
+    if (paymentRequired && !depositPaid) throw new Error('Deposit must be paid first.');
     if (!warrantyOk) throw new Error('Warranty card must be registered or cash warranty accepted first.');
 
     const bookingId = hydrated.relatedBookingId || hydrated.offerId;
@@ -486,11 +496,11 @@ export class OfferApiService {
         ? 'cash_selected'
         : (hydrated.warrantyStatus || 'card_registered'),
       warrantyRegistered: warrantyPaymentChoice === 'cash_on_board' ? true : hydrated.warrantyRegistered === true,
-      depositPaid: true,
-      depositStatus: 'paid',
-      depositPaidAmount: Number(hydrated.depositAmount || 0),
-      paidDepositAmount: Number(hydrated.depositAmount || 0),
-      paymentStatus: 'paid',
+      depositPaid: paymentRequired ? true : false,
+      depositStatus: paymentRequired ? 'paid' : 'not_required',
+      depositPaidAmount: paymentRequired ? Number(hydrated.depositAmount || 0) : 0,
+      paidDepositAmount: paymentRequired ? Number(hydrated.depositAmount || 0) : 0,
+      paymentStatus: paymentRequired ? 'paid' : 'not_required',
       acceptedTS: Date.now(),
       bookingRequestStatus: 'confirmed',
       modifiedTS: Date.now(),
@@ -709,10 +719,13 @@ export class OfferApiService {
     const totalPrice = directTotal || platformTotalClientAmount || (platformPaidAmount + onlinePayableAmount + cashOnBoardAmount);
     const boatPrice = Number(input.proposalBoatPrice || input.estimatedBoatPrice || Math.max(0, totalPrice - skipperCashAmount)) || 0;
 
+    const boatId = String(input.boatId || this.resourceContext.boatId);
+    const fleetBoat = await this.readFirebasePath(`/${this.resourceContext.scopedPath('bnFleet')}`).catch(() => ({}));
+    const ownerId = String(input.ownerId || (fleetBoat as any)?.ownerId || boatId);
     const booking: any = {
-      bookingId, offerId: bookingId, relatedBookingId: bookingId, ownerId: 'alegria',
+      bookingId, offerId: bookingId, relatedBookingId: bookingId, ownerId,
       source, bookingSource: isExternal ? 'external' : 'direct',
-      boatId: String(input.boatId || 'alegria'),
+      boatId,
       boatName: String(input.boatName || 'Alegria'),
       boatType: String(input.boatType || 'Catamaran'),
       boatManufacturer: String(input.boatManufacturer || ''),
@@ -787,7 +800,7 @@ export class OfferApiService {
       createdTS: input.createdTS || now, modifiedTS: now, updatedAt: now,
       payments: {
         deposit: { amount: 0, paid: true, status: 'not_required', depositPaid: true, depositStatus: 'not_required', paymentStatus: 'not_required', paidAt: now, source: 'manual_historical_import' },
-        balance: { amount: Math.round(onlinePayableAmount * 100), amount_total: Math.round(onlinePayableAmount * 100), bookingId, currency: 'eur', customerEmail: String(input.customerEmail || input.email || ''), customerName: String(input.customerName || ''), customerPhone: String(input.customerPhone || input.phone || ''), modifiedTS: now, outingDate: String(input.outingDate || ''), outingType: String(input.outingType || 'Journée en mer'), ownerId: 'alegria', paymentType: 'balance', status: input.balancePaid === false ? 'pending' : 'paid', source: 'manual_historical_import' }
+        balance: { amount: Math.round(onlinePayableAmount * 100), amount_total: Math.round(onlinePayableAmount * 100), bookingId, currency: 'eur', customerEmail: String(input.customerEmail || input.email || ''), customerName: String(input.customerName || ''), customerPhone: String(input.customerPhone || input.phone || ''), modifiedTS: now, outingDate: String(input.outingDate || ''), outingType: String(input.outingType || 'Journée en mer'), ownerId, paymentType: 'balance', status: input.balancePaid === false ? 'pending' : 'paid', source: 'manual_historical_import' }
       },
       raw: { ...input, bookingId, source, bookingSource: isExternal ? 'external' : 'direct', importedManually: true, importedAt: now }
     };
@@ -805,6 +818,20 @@ export class OfferApiService {
     const onlinePayable = Number(anyOffer.externalRemainingOnboardAmount || anyOffer.totalAmount || anyOffer.onlinePayableAmount || 0) || 0;
     const cashOnBoard = Number(anyOffer.externalCashOnBoardAmount || anyOffer.skipperCashAmount || anyOffer.proposalSkipperPrice || 0) || 0;
     const totalRemaining = Number(anyOffer.externalTotalRemainingAmount || (onlinePayable + cashOnBoard)) || 0;
+    const platformCustomerAmount = Number(
+      anyOffer.externalPlatformTotalClientAmount ||
+      anyOffer.payments?.platform?.totalClientAmount ||
+      0
+    ) || 0;
+    const platformPaidAmount = Number(
+      anyOffer.externalPlatformPaidAmount ||
+      anyOffer.payments?.platform?.paidAmount ||
+      0
+    ) || 0;
+    const completeCustomerTotal = platformCustomerAmount > 0
+      ? platformCustomerAmount + totalRemaining
+      : Number(anyOffer.totalCustomerCost || anyOffer.customerTotal || anyOffer.totalPrice || totalRemaining) || totalRemaining;
+    const platformCommissionAmount = Math.max(0, platformCustomerAmount - platformPaidAmount);
     const depositAmount = Number(anyOffer.depositAmount || Math.round(onlinePayable * 0.10 * 100) / 100) || 0;
     const balanceAmount = Number(anyOffer.balanceAmount || Math.max(0, Math.round((onlinePayable - depositAmount) * 100) / 100)) || 0;
 
@@ -813,7 +840,7 @@ export class OfferApiService {
       bookingId,
       offerId: anyOffer.offerId || bookingId,
       relatedOfferId: anyOffer.offerId || bookingId,
-      ownerId: 'alegria',
+      ownerId: anyOffer.ownerId || this.resourceContext.boatId,
       bookingSource: 'external',
       source: anyOffer.source || anyOffer.externalPlatform || 'clickandboat',
       externalPlatform: anyOffer.externalPlatform || anyOffer.source || 'clickandboat',
@@ -829,8 +856,17 @@ export class OfferApiService {
       departureTime: anyOffer.departureTime || '',
       arrivalTime: anyOffer.arrivalTime || '',
       passengers: Number(anyOffer.passengers || 0) || 0,
-      totalPrice: totalRemaining,
-      totalAmount: totalRemaining,
+      // Keep the complete price paid by the customer separate from the amount
+      // still to collect directly. Reopening the booking must not change its price.
+      totalPrice: completeCustomerTotal,
+      totalAmount: completeCustomerTotal,
+      totalCustomerCost: completeCustomerTotal,
+      customerTotal: completeCustomerTotal,
+      totalCustomerPrice: completeCustomerTotal,
+      proposalBoatPrice: platformCustomerAmount || Number(anyOffer.proposalBoatPrice || 0),
+      boatRentalAmount: platformCustomerAmount || Number(anyOffer.boatRentalAmount || anyOffer.proposalBoatPrice || 0),
+      platformCommissionAmount,
+      rentalCommissionAmount: platformCommissionAmount,
       onlinePayableAmount: onlinePayable,
       appPayableAmount: onlinePayable,
       skipperCashAmount: cashOnBoard,
@@ -860,9 +896,11 @@ export class OfferApiService {
         platform: {
           source: anyOffer.externalPlatform || anyOffer.source || 'clickandboat',
           reference: anyOffer.externalPlatformBookingRef || anyOffer.platformBookingReference || '',
-          paidAmount: Number(anyOffer.externalPlatformPaidAmount || 0),
+          paidAmount: platformPaidAmount,
           netOwnerAmount: Number(anyOffer.externalPlatformNetOwnerAmount || 0),
-          totalClientAmount: Number(anyOffer.externalPlatformTotalClientAmount || 0),
+          totalClientAmount: platformCustomerAmount,
+          fees: platformCommissionAmount,
+          feeAmount: platformCommissionAmount,
           remainingOwnerAmount: Number(anyOffer.externalPlatformRemainingOwnerAmount || 0),
           portAmount: Number(anyOffer.externalPortAmount || 0),
           status: 'recorded',
@@ -971,6 +1009,21 @@ export class OfferApiService {
     if (!current) {
       throw new Error('Offer not found');
     }
+    const sessionId = String(payload.sessionId || payload.session_id || payload.checkoutSessionId || '').trim();
+    if (!sessionId) throw new Error('Missing Stripe Checkout session id.');
+    const verified = await this.postFirstAvailable([
+      `${this.baseUrl}/pay/outing-deposit-complete`,
+      `${this.baseUrl}/api/payments/complete-deposit-payment`,
+      `${this.baseUrl}/stripe/deposit-complete`,
+    ], {
+      // Checkout creation uses offerId as the Stripe metadata bookingId.
+      // Keep the exact same identifier for ownership/session verification.
+      bookingId: offerId,
+      offerId,
+      ownerId: current.ownerId || this.resourceContext.boatId,
+      checkoutSessionId: sessionId,
+      sessionId,
+    }).toPromise();
 
     const patch: Partial<AlegriaOffer> = {
       depositPaid: true,
@@ -978,8 +1031,8 @@ export class OfferApiService {
       depositPaidAmount: Number(current.depositAmount || 0),
       paidDepositAmount: Number(current.depositAmount || 0),
       paymentStatus: 'paid',
-      stripeCheckoutSessionId: payload.sessionId || payload.checkoutSessionId || current.stripeCheckoutSessionId || '',
-      stripePaymentIntentId: payload.paymentIntentId || current.stripePaymentIntentId || '',
+      stripeCheckoutSessionId: verified?.stripeCheckoutSessionId || sessionId,
+      stripePaymentIntentId: verified?.stripePaymentIntentId || current.stripePaymentIntentId || '',
       modifiedTS: Date.now(),
     };
 
@@ -1011,7 +1064,20 @@ export class OfferApiService {
     const skipperCashAmount = Number((offer as any).skipperCashAmount ?? (offer as any).proposalSkipperPrice ?? (offer as any).estimatedSkipperPrice ?? 0) || 0;
     const computedTotalAmount = proposalBoatPrice + proposalFuelPrice + skipperCashAmount + Number((offer as any).proposalExtraServicesPrice || 0);
     const onlinePlusSkipperAmount = Number((offer as any).onlinePayableAmount || 0) + skipperCashAmount;
-    const totalAmount = Number((offer as any).totalAmount ?? (offer as any).totalPrice ?? (onlinePlusSkipperAmount || computedTotalAmount)) || 0;
+    // The complete customer total always includes the skipper, even though the
+    // skipper is paid separately. Some older offers stored only Alegria's
+    // online amount in totalAmount/totalPrice.
+    const explicitTotals = [
+      (offer as any).totalCustomerCost,
+      (offer as any).customerTotal,
+      (offer as any).totalAmount,
+      (offer as any).totalPrice,
+      onlinePlusSkipperAmount,
+      computedTotalAmount,
+    ]
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value) && value > 0);
+    const totalAmount = explicitTotals.length ? Math.max(...explicitTotals) : 0;
     const onlinePayableAmount = Number((offer as any).onlinePayableAmount ?? (offer as any).appPayableAmount ?? Math.max(0, totalAmount - skipperCashAmount)) || 0;
     const balanceAmount = Number((offer as any).balanceAmount ?? (offer as any).remainingFeesAmount ?? Math.max(0, onlinePayableAmount - Number(offer.depositAmount || 0))) || 0;
 
@@ -1019,7 +1085,7 @@ export class OfferApiService {
       ...(existing || {}),
       bookingId,
       offerId,
-      ownerId: 'alegria',
+      ownerId: (offer as any).ownerId || existing?.ownerId || this.resourceContext.boatId,
       source: (offer as any).source || existing?.source || 'direct',
       bookingSource: (offer as any).source === 'direct' || !(offer as any).source ? 'direct' : (existing?.bookingSource || 'external'),
       customerName: (offer as any).customerName || existing?.customerName || '',
@@ -1065,7 +1131,7 @@ export class OfferApiService {
     return this.http.post<any>(`${this.baseUrl}/pay/outing-deposit-checkout`, {
       bookingId: offer.offerId,
       offerId: offer.offerId,
-      ownerId: 'alegria',
+      ownerId: offer.ownerId || this.resourceContext.boatId,
       customerName: offer.customerName,
       customerEmail: offer.customerEmail,
       customerPhone: offer.customerPhone,
@@ -1078,8 +1144,8 @@ export class OfferApiService {
       skipperCashAmount: (offer as any).proposalSkipperPrice || (offer as any).estimatedSkipperPrice || 0,
       paymentType: 'deposit',
       currency: 'eur',
-      successUrl: `${window.location.origin}/offer/${offer.offerId}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${window.location.origin}/offer/${offer.offerId}?payment=cancelled`,
+      successUrl: `${window.location.origin}${boatPath("/offer")}/${offer.offerId}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${window.location.origin}${boatPath("/offer")}/${offer.offerId}?payment=cancelled`,
     }, { withCredentials: true });
   }
 
@@ -1091,7 +1157,11 @@ export class OfferApiService {
     let backendResult: any = {};
     if (sessionId) {
       try {
-        backendResult = await this.completeWarrantySetup(offerId, sessionId, 'alegria').toPromise();
+        backendResult = await this.completeWarrantySetup(
+          offerId,
+          sessionId,
+          current.ownerId || this.resourceContext.boatId
+        ).toPromise();
       } catch {
         // Keep the local fallback below, but without a payment method the admin screen will clearly show that the card is not chargeable.
         backendResult = {};
@@ -1160,7 +1230,7 @@ export class OfferApiService {
     const payload = {
       bookingId: offer.offerId,
       offerId: offer.offerId,
-      ownerId: 'alegria',
+      ownerId: offer.ownerId || this.resourceContext.boatId,
       customerName: offer.customerName,
       customerEmail: offer.customerEmail,
       customerPhone: offer.customerPhone,
@@ -1171,8 +1241,8 @@ export class OfferApiService {
       paymentType: 'warranty',
       checkoutType: 'warranty_setup',
       currency: 'eur',
-      successUrl: `${window.location.origin}/offer/${offer.offerId}?warranty=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${window.location.origin}/offer/${offer.offerId}?warranty=cancelled`,
+      successUrl: `${window.location.origin}${boatPath("/offer")}/${offer.offerId}?warranty=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${window.location.origin}${boatPath("/offer")}/${offer.offerId}?warranty=cancelled`,
     };
 
     return this.postFirstAvailable([
@@ -1185,7 +1255,7 @@ export class OfferApiService {
   }
 
 
-  completeWarrantySetup(offerId: string, sessionId: string, ownerId = 'alegria'): Observable<any> {
+  completeWarrantySetup(offerId: string, sessionId: string, ownerId = this.resourceContext.boatId): Observable<any> {
     const payload = {
       bookingId: offerId,
       offerId,
@@ -1204,7 +1274,7 @@ export class OfferApiService {
   chargeWarranty(offer: AlegriaOffer, amount: number, reason: string): Observable<any> {
     const payload = {
       bookingId: offer.offerId,
-      ownerId: 'alegria',
+      ownerId: offer.ownerId || this.resourceContext.boatId,
       amount,
       reason,
       currency: 'eur',
@@ -1234,12 +1304,39 @@ export class OfferApiService {
     const proposalSkipperPrice = firstPositive(anyP.proposalSkipperPrice, anyP.estimatedSkipperPrice, anyP.skipperCashAmount, raw.proposalSkipperPrice, raw.estimatedSkipperPrice);
     const proposalExtraServicesPrice = firstPositive(anyP.proposalExtraServicesPrice, anyP.estimatedExtraGuestsAmount, anyP.estimatedOptionsPrice, raw.proposalExtraServicesPrice, raw.estimatedExtraGuestsAmount, raw.estimatedOptionsPrice);
     const computedTotal = proposalBoatPrice + proposalFuelPrice + proposalSkipperPrice + proposalExtraServicesPrice;
-    const totalAmount = firstPositive(anyP.totalAmount, anyP.totalPrice, anyP.estimatedPrice, raw.totalAmount, raw.totalPrice, raw.estimatedPrice, computedTotal);
+    // Keep Alegria's payable amount and the complete customer price distinct.
+    // The complete booking total must include the separately paid skipper.
+    const explicitCustomerTotals = [
+      anyP.totalCustomerCost,
+      anyP.customerTotal,
+      anyP.totalAmount,
+      anyP.totalPrice,
+      anyP.estimatedPrice,
+      raw.totalCustomerCost,
+      raw.customerTotal,
+      raw.totalAmount,
+      raw.totalPrice,
+      raw.estimatedPrice,
+      computedTotal,
+    ]
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value) && value > 0);
+    const totalAmount = explicitCustomerTotals.length ? Math.max(...explicitCustomerTotals) : 0;
     const skipperCashAmount = firstPositive(anyP.skipperCashAmount, proposalSkipperPrice, raw.skipperCashAmount);
     // Alegria direct workflow: skipper is not paid online. Only the boat/app amount is paid online.
     const onlinePayableAmount = firstPositive(anyP.onlinePayableAmount, anyP.appPayableAmount, raw.onlinePayableAmount, raw.appPayableAmount, Math.max(0, totalAmount - skipperCashAmount));
     const depositAmount = firstPositive(anyP.depositAmount, raw.depositAmount, Math.round(onlinePayableAmount * 0.10 * 100) / 100);
     const balanceAmount = firstPositive(anyP.balanceAmount, anyP.remainingFeesAmount, raw.balanceAmount, raw.remainingFeesAmount, Math.max(0, Math.round((onlinePayableAmount - depositAmount) * 100) / 100));
+    const paymentRequired = onlinePayableAmount > 0.005;
+    const paymentComplete = !paymentRequired || p.depositPaid === true || p.depositStatus === 'paid';
+    const storedDepositStatus = paymentRequired
+      ? (p.depositStatus || (p.depositPaid ? 'paid' : 'pending'))
+      : 'not_required';
+    const storedPaymentStatus = paymentRequired
+      ? (p.paymentStatus || (p.depositPaid === true || p.depositStatus === 'paid' ? 'paid' : 'pending'))
+      : 'not_required';
+    const warrantyComplete = p.warrantyRegistered === true || p.warrantyPaymentChoice === 'cash_on_board';
+    const bookingConfirmed = p.tncAccepted === true && paymentComplete && warrantyComplete;
 
     await this.writeItem(this.bookingsCollection, p.offerId, {
       bookingId: p.relatedBookingId || p.offerId,
@@ -1282,18 +1379,18 @@ export class OfferApiService {
       extraServicesOnboardAmount: 0,
       remainingFeesAmount: balanceAmount,
       warrantyAmount: p.warrantyAmount || 500,
-      depositStatus: p.depositStatus || (p.depositPaid ? 'paid' : 'pending'),
-      depositPaid: p.depositPaid === true || p.depositStatus === 'paid',
-      paymentStatus: p.paymentStatus || (p.depositPaid === true || p.depositStatus === 'paid' ? 'paid' : 'pending'),
+      depositStatus: storedDepositStatus,
+      depositPaid: paymentRequired && (p.depositPaid === true || p.depositStatus === 'paid'),
+      paymentStatus: storedPaymentStatus,
       warrantyStatus: p.warrantyStatus || (p.warrantyPaymentChoice === 'cash_on_board' ? 'cash_selected' : 'card_registered'),
       warrantyRegistered: p.warrantyRegistered === true || p.warrantyPaymentChoice === 'cash_on_board',
       warrantyPaymentChoice: p.warrantyPaymentChoice || null,
       customerUid: p.customerUid || '',
       customerAuthProvider: p.customerAuthProvider || '',
       customerAccountCreated: p.customerAccountCreated === true,
-      bookingStatus: (p.depositPaid === true || p.depositStatus === 'paid') && p.tncAccepted ? 'confirmed' : 'not_confirmed',
-      status: (p.depositPaid === true || p.depositStatus === 'paid') && p.tncAccepted ? 'confirmed' : 'not_confirmed',
-      bookingRequestStatus: (p.depositPaid === true || p.depositStatus === 'paid') && p.tncAccepted ? 'confirmed' : 'not_confirmed',
+      bookingStatus: bookingConfirmed ? 'confirmed' : 'not_confirmed',
+      status: bookingConfirmed ? 'confirmed' : 'not_confirmed',
+      bookingRequestStatus: bookingConfirmed ? 'confirmed' : 'not_confirmed',
       offerStatus: 'accepted',
       termsAccepted: p.tncAccepted === true && !!p.tncAcceptedAt,
       tncAccepted: p.tncAccepted === true && !!p.tncAcceptedAt,
@@ -1312,11 +1409,11 @@ export class OfferApiService {
         termsAcceptedAt: p.tncAccepted === true ? (p.termsAcceptedAt || p.tncAcceptedAt) : null,
         termsAcceptedBy: (p as any).termsAcceptedBy || (p as any).tncAcceptedBy || '',
         termsAcceptedSource: (p as any).termsAcceptedSource || (p as any).tncAcceptedSource || '',
-        depositPaid: p.depositPaid === true || p.depositStatus === 'paid',
+        depositPaid: paymentComplete,
         alegriaPaid: false,
         skipperPaid: false,
         warrantyCompleted: p.warrantyRegistered === true || p.warrantyPaymentChoice === 'cash_on_board',
-        bookingConfirmed: (p.tncAccepted === true) && (p.depositPaid === true || p.depositStatus === 'paid') && (p.warrantyRegistered === true || p.warrantyPaymentChoice === 'cash_on_board'),
+        bookingConfirmed,
       },
       bookingWorkflow: {
         offerIssued: true,
@@ -1324,13 +1421,24 @@ export class OfferApiService {
         termsAcceptedAt: p.tncAccepted === true ? (p.termsAcceptedAt || p.tncAcceptedAt) : null,
         termsAcceptedBy: (p as any).termsAcceptedBy || (p as any).tncAcceptedBy || '',
         termsAcceptedSource: (p as any).termsAcceptedSource || (p as any).tncAcceptedSource || '',
-        depositPaid: p.depositPaid === true || p.depositStatus === 'paid',
+        depositPaid: paymentComplete,
         alegriaPaid: false,
         skipperPaid: false,
         warrantyCompleted: p.warrantyRegistered === true || p.warrantyPaymentChoice === 'cash_on_board',
-        bookingConfirmed: (p.tncAccepted === true) && (p.depositPaid === true || p.depositStatus === 'paid') && (p.warrantyRegistered === true || p.warrantyPaymentChoice === 'cash_on_board'),
+        bookingConfirmed,
       },
-      comments: p.comments || '',
+      // Preserve all editorial information entered while creating the offer.
+      // offerMessage is customer-facing; comments/internalComments stay admin-only.
+      offerMessage: p.offerMessage || '',
+      description: (p as any).description || p.offerMessage || '',
+      bookingDescription: (p as any).bookingDescription || (p as any).description || p.offerMessage || '',
+      comments: p.comments || (p as any).internalComments || '',
+      internalComments: (p as any).internalComments || p.comments || '',
+      offerNotes: {
+        customerMessage: p.offerMessage || '',
+        description: (p as any).description || p.offerMessage || '',
+        internalComments: (p as any).internalComments || p.comments || '',
+      },
       payments: {
         deposit: {
           paymentType: 'deposit',
@@ -1341,10 +1449,10 @@ export class OfferApiService {
           customerPhone: p.customerPhone || '',
           outingDate: p.outingDate || '',
           outingType: p.outingType || '',
-          paid: p.depositPaid === true || p.depositStatus === 'paid',
-          status: p.depositPaid === true || p.depositStatus === 'paid' ? 'paid' : 'pending',
-          depositPaid: p.depositPaid === true || p.depositStatus === 'paid',
-          depositStatus: p.depositPaid === true || p.depositStatus === 'paid' ? 'paid' : 'pending',
+          paid: paymentRequired && (p.depositPaid === true || p.depositStatus === 'paid'),
+          status: storedDepositStatus,
+          depositPaid: paymentRequired && (p.depositPaid === true || p.depositStatus === 'paid'),
+          depositStatus: storedDepositStatus,
           stripeCheckoutSessionId: p.stripeCheckoutSessionId || '',
           stripePaymentIntentId: p.stripePaymentIntentId || '',
           source: 'offer_finalization',
@@ -1404,7 +1512,7 @@ export class OfferApiService {
 
   private buildOfferLink(offerId: string): string {
     const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : '';
-    return `${origin}/offer/${encodeURIComponent(offerId)}`;
+    return `${origin}${boatPath("/offer")}/${encodeURIComponent(offerId)}`;
   }
 
   private buildOfferNotificationPayload(offer: AlegriaOffer, offerLink: string): any {
@@ -1535,8 +1643,8 @@ export class OfferApiService {
       emailTemplate: 'offerReady',
       whatsappTemplate: 'offerReady',
       createdTS: Date.now(),
-      boatId: offer.boatId || this.boatContext.boatId,
-      ownerId: offer.ownerId || this.boatContext.boatId,
+      boatId: offer.boatId || this.resourceContext.boatId,
+      ownerId: offer.ownerId || this.resourceContext.boatId,
     };
   }
 
@@ -1570,8 +1678,8 @@ export class OfferApiService {
       createdTS: now,
       modifiedTS: now,
       source: 'admin_offer',
-      boatId: offer.boatId || this.boatContext.boatId,
-      ownerId: offer.ownerId || this.boatContext.boatId,
+      boatId: offer.boatId || this.resourceContext.boatId,
+      ownerId: offer.ownerId || this.resourceContext.boatId,
     });
   }
 
@@ -1634,25 +1742,33 @@ export class OfferApiService {
     };
   }
 
+  private async readFirebasePath(path: string): Promise<any> {
+    const normalizedPath = String(path || '').replace(/^\/+|\/+$/g, '');
+    if (!normalizedPath) return undefined;
+    return this.http.get<any>(`${this.firebaseUrl}/${normalizedPath}.json`).toPromise();
+  }
+
+  private scopedCollection(collection: string): string { const p=String(collection||'').replace(/^\/+|\/+$/g,'').split('/'); const root=p.shift()||''; return this.resourceContext.scopedPath(root,p.join('/')); }
+
   private async readCollection(collection: string): Promise<AlegriaOffer[]> {
-    const value = await this.http.get<any>(`${this.firebaseUrl}/${collection}.json`).toPromise();
+    const value = await this.http.get<any>(`${this.firebaseUrl}/${this.scopedCollection(collection)}.json`).toPromise();
     if (!value) return [];
     return Object.keys(value)
       .map((key) => ({ ...value[key], offerId: value[key]?.offerId || key }))
-      .filter((offer) => String(offer.boatId || 'alegria') === this.boatContext.boatId);
+      .filter((offer) => String(offer.boatId || 'alegria') === this.resourceContext.boatId);
   }
 
   private async readItem(collection: string, id: string): Promise<any> {
-    const value = await this.http.get<any>(`${this.firebaseUrl}/${collection}/${id}.json`).toPromise();
+    const value = await this.http.get<any>(`${this.firebaseUrl}/${this.scopedCollection(collection)}/${id}.json`).toPromise();
     return value ? { ...value, offerId: value.offerId || id } : undefined;
   }
 
 
   private async deleteItem(collection: string, id: string): Promise<void> {
-    await this.http.delete(`${this.firebaseUrl}/${collection}/${id}.json`).toPromise();
+    await this.http.delete(`${this.firebaseUrl}/${this.scopedCollection(collection)}/${id}.json`).toPromise();
   }
 
   private async writeItem(collection: string, id: string, value: any): Promise<void> {
-    await this.http.put(`${this.firebaseUrl}/${collection}/${id}.json`, value).toPromise();
+    await this.http.put(`${this.firebaseUrl}/${this.scopedCollection(collection)}/${id}.json`, value).toPromise();
   }
 }

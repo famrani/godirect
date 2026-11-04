@@ -52,7 +52,7 @@
         </label>
 
         <div class="form-actions">
-          <button class="btn btn-primary" type="submit" [disabled]="contactForm.invalid || isSending">{{ isSending ? 'Envoi...' : content.contactPage.sendEmail }}</button>
+          <button class="btn btn-primary" type="submit" [disabled]="contactForm.invalid || isSending">{{ isSending ? ('ui.messages.t5a377e56fb25' | siteText) : content.contactPage.sendEmail }}</button>
           <a class="btn btn-secondary" [href]="whatsappHref" target="_blank" rel="noreferrer">{{ content.contactPage.prepareWhatsapp }}</a>
         </div>
 

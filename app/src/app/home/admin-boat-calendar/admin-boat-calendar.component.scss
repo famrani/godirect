@@ -51,3 +51,12 @@
   .events small { display:none; }
   .usage-card { align-items:flex-start; flex-direction:column; }
 }
+
+.day-cell.today-date { background:#fff4d6; box-shadow:inset 0 0 0 2px #d69a37; }
+.day-cell.today-date .day-number { color:#7e4c0b; font-weight:800; }
+.day-cell.today-date.selected { box-shadow:inset 0 0 0 3px #a36a1c; }
+
+.booking-overlay { position: fixed; inset: 0; z-index: 1200; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.booking-dialog { position: relative; background: white; color: #182b38; width: min(650px, 100%); max-height: 90vh; overflow: auto; border-radius: 12px; padding: 26px; box-shadow: 0 16px 60px rgba(0,0,0,.25); }
+.booking-close { position: absolute; right: 14px; top: 10px; border: 0; background: transparent; font-size: 30px; cursor: pointer; }
+.booking-json { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; padding: 12px; background: #f4f5f7; border-radius: 6px; }

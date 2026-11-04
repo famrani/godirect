@@ -26,26 +26,20 @@
         <h2>{{ bookingText.step1Title }}</h2>
         <div class="field-grid">
           <label>
-            <span>{{ bookingText.pricePeriod }}</span>
-            <select name="pricePeriod" [(ngModel)]="form.pricePeriod">
-              <option value="">{{ bookingText.selectPlaceholder }}</option>
-              <option *ngFor="let period of pricePeriods" [value]="period.id">{{ period.label }}</option>
-            </select>
-          </label>
-
-          <label>
             <span>{{ bookingText.date }}</span>
             <input type="date" name="outingDate" [min]="minimumBookingDate" [(ngModel)]="form.outingDate" required />
           </label>
 
           <label>
             <span>{{ bookingText.startTime }}</span>
-            <input type="time" name="startTime" [(ngModel)]="form.startTime" required />
+            <input type="time" name="startTime" [(ngModel)]="form.startTime" (change)="onScheduleChanged()" required />
           </label>
 
           <label>
-            <span>{{ bookingText.endTime }}</span>
-            <input type="time" name="endTime" [(ngModel)]="form.endTime" required />
+            <span>{{ durationLabel }}</span>
+            <select name="requestedDurationHours" [(ngModel)]="form.requestedDurationHours" (change)="onScheduleChanged()" required>
+              <option *ngFor="let hours of durationChoices" [ngValue]="hours">{{ hours }}h</option>
+            </select>
           </label>
 
           <label>
@@ -62,9 +56,9 @@
           </label>
 
           <label>
-            <span>{{ bookingText.destination }}</span>
-            <select name="destination" [(ngModel)]="form.destination" required>
-              <option value="">{{ bookingText.selectPlaceholder }}</option>
+            <span>{{ itineraryLabel }}</span>
+            <select name="destination" [(ngModel)]="form.destination">
+              <option value="">{{ flexibleItineraryLabel }}</option>
               <option *ngFor="let destination of destinations" [value]="destination">{{ destination }}</option>
             </select>
           </label>
@@ -80,7 +74,7 @@
 
           <div class="price-estimate-grid">
             <div>
-              <small>{{ bookingText.selectedPeriod }}</small>
+              <small>{{ durationLabel }}</small>
               <span>{{ selectedPeriodLabel }}</span>
             </div>
             <div>
@@ -104,12 +98,12 @@
               <span>€{{ cleaningPriceAmount }}</span>
             </div>
             <div>
-              <small>{{ bookingText.optionsPrice || 'Options' }}</small>
+              <small>{{ bookingText.optionsPrice || ('ui.messages.t6bf5da9c080b' | siteText) }}</small>
               <span>€{{ selectedOptionsTotal }}</span>
             </div>
             <div>
               <small>{{ bookingText.duration }}</small>
-              <span>{{ durationHours }}h / {{ maxDurationHours }}h max</span>
+              <span>{{ durationHours }}h / {{ maxDurationHours }}{{ "ui.pages.ta0d13c969d8a" | siteText }}</span>
             </div>
           </div>
 
@@ -188,7 +182,7 @@
         </div>
 
         <button class="btn btn-primary" type="button" [disabled]="saving" (click)="finalSubmit()">
-          {{ saving ? (bookingText.saving || '...') : (bookingText.submitRequestButton || bookingText.next || 'Send request') }}
+          {{ saving ? (bookingText.saving || '...') : (bookingText.submitRequestButton || bookingText.next || ('ui.messages.ta89d64179469' | siteText)) }}
         </button>
 </section>
 
@@ -203,17 +197,18 @@
         </button>
       </div>
 
-      <p class="success" *ngIf="message">{{ message }}</p>
-      <p class="error-message" *ngIf="error">{{ error }}</p>
+      <p class="success" *ngIf="message">{{ message | siteText }}</p>
+      <p class="error-message" *ngIf="error">{{ error | siteText }}</p>
     </div>
 
     <aside class="summary-card">
       <h2>{{ bookingText.summaryTitle }}</h2>
 <div class="summary-line"><strong>{{ bookingText.date }}</strong><span>{{ form.outingDate || '-' }}</span></div>
-      <div class="summary-line"><strong>{{ bookingText.timePeriod }}</strong><span>{{ form.timePeriod || '-' }}</span></div>
+      <div class="summary-line"><strong>{{ bookingText.startTime }}</strong><span>{{ form.startTime || '-' }}</span></div>
+      <div class="summary-line"><strong>{{ durationLabel }}</strong><span>{{ form.requestedDurationHours ? (form.requestedDurationHours + 'h') : '-' }}</span></div>
       <div class="summary-line"><strong>{{ bookingText.passengers }}</strong><span>{{ form.passengers || '-' }}</span></div>
       <div class="summary-line"><strong>{{ bookingText.startMarina }}</strong><span>{{ form.startMarina || '-' }}</span></div>
-      <div class="summary-line"><strong>{{ bookingText.destination }}</strong><span>{{ form.destination || '-' }}</span></div>
+      <div class="summary-line"><strong>{{ itineraryLabel }}</strong><span>{{ form.destination || flexibleItineraryLabel }}</span></div>
       <div class="summary-line"><strong>{{ bookingText.optionsTitle }}</strong><span>{{ optionsSummary }}</span></div>
 
       <div class="summary-pricing" *ngIf="shouldShowEstimatedPrice">

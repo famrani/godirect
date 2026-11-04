@@ -79,7 +79,7 @@ class StripeService {
     async resolveConnectPaymentContext(requestedOwnerId, bookingId, amount, paymentType, requestedBoatId = 'alegria') {
         let booking = null;
         if (bookingId) {
-            const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+            const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
             booking = bookingSnap.val() || null;
         }
         const boatId = String(booking?.boatId || requestedBoatId || 'alegria');
@@ -90,7 +90,7 @@ class StripeService {
             : (boat.ownerId || requestedOwnerId || 'alegria'));
         const ownerSnap = await this.stbDbSvc.db.ref(`/backendowners/${ownerId}`).once('value');
         const owner = ownerSnap.val() || {};
-        const platformConnectSnap = await this.stbDbSvc.db.ref('/platformSettings/stripeConnect').once('value');
+        const platformConnectSnap = await this.stbDbSvc.db.ref('/platform/settings/stripeConnect').once('value');
         const platformConnect = platformConnectSnap.val() || {};
         const stripeStandard = owner.stripeStandard || {};
         const connect = owner.connect || owner.stripeConnect || {};
@@ -349,7 +349,7 @@ class StripeService {
                 cancel_url: this.appendCheckoutParams(cancelUrl, { bookingId }),
                 metadata: { bookingId },
             });
-            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payment`).update({
+            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payment`).update({
                 status: 'init',
                 checkoutSessionId: session.id,
                 updatedAt: Date.now(),
@@ -370,7 +370,7 @@ class StripeService {
             if (!ownerId || !bookingId || !amount) {
                 return res.status(400).json({ error: 'ownerId, bookingId, amount required' });
             }
-            const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+            const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
             if (!bookingSnap.exists())
                 return res.status(404).json({ error: 'Booking not found' });
             const booking = bookingSnap.val();
@@ -380,7 +380,7 @@ class StripeService {
                 return res.status(400).json({ error: 'No saved payment method/customer — complete checkout setup first' });
             }
             // Mark confirmed (your business choice)
-            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                 status: 'confirmed',
                 updatedAt: Date.now(),
             });
@@ -395,7 +395,7 @@ class StripeService {
                 description: `Booking #${bookingId}`,
                 metadata: { bookingId },
             });
-            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payment`).update({
+            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payment`).update({
                 status: 'charge_processing',
                 paymentIntentId: pi.id,
                 updatedAt: Date.now(),
@@ -406,12 +406,12 @@ class StripeService {
             console.error('[acceptAndCharge] error:', e?.message || e);
             const { bookingId } = (req.body || {});
             if (bookingId) {
-                await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payment`).update({
+                await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payment`).update({
                     status: 'charge_failed',
                     lastError: e?.message || 'Charge failed',
                     updatedAt: Date.now(),
                 });
-                await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                     status: 'pending',
                     updatedAt: Date.now(),
                 });
@@ -504,8 +504,8 @@ class StripeService {
             bookingCandidates.push({ value, source });
         };
         // 1) Direct Firebase key lookup.
-        const directBookingSnap = await db.ref(`/bnBookings/${id}`).once('value');
-        addCandidate(directBookingSnap.val(), `/bnBookings/${id}`);
+        const directBookingSnap = await db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${id}`).once('value');
+        addCandidate(directBookingSnap.val(), `/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${id}`);
         // 2) Resolve legacy/new identifiers. Some screens send bookingId, offerId,
         // proposalId or relatedBookingId, and those values are not always equal to
         // the Firebase node key.
@@ -518,9 +518,9 @@ class StripeService {
         ];
         for (const field of bookingLookupFields) {
             try {
-                const snap = await db.ref('/bnBookings').orderByChild(field).equalTo(id).once('value');
+                const snap = await db.ref(this.stbDbSvc.boatPath('bnBookings')).orderByChild(field).equalTo(id).once('value');
                 const matches = snap.val() || {};
-                Object.keys(matches).forEach((key) => addCandidate(matches[key], `/bnBookings/${key} via ${field}`));
+                Object.keys(matches).forEach((key) => addCandidate(matches[key], `/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${key} via ${field}`));
             }
             catch (queryError) {
                 console.warn('[terms-guard] booking lookup failed', { id, field, queryError });
@@ -557,8 +557,8 @@ class StripeService {
             offerCandidates.push({ value, source });
         };
         for (const offerId of relatedOfferIds) {
-            const directOfferSnap = await db.ref(`/bnProposals/${offerId}`).once('value');
-            addOffer(directOfferSnap.val(), `/bnProposals/${offerId}`);
+            const directOfferSnap = await db.ref(`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${offerId}`).once('value');
+            addOffer(directOfferSnap.val(), `/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${offerId}`);
         }
         const offerLookupFields = [
             'offerId',
@@ -569,9 +569,9 @@ class StripeService {
         for (const lookupId of relatedOfferIds) {
             for (const field of offerLookupFields) {
                 try {
-                    const snap = await db.ref('/bnProposals').orderByChild(field).equalTo(lookupId).once('value');
+                    const snap = await db.ref(this.stbDbSvc.boatPath('bnProposals')).orderByChild(field).equalTo(lookupId).once('value');
                     const matches = snap.val() || {};
-                    Object.keys(matches).forEach((key) => addOffer(matches[key], `/bnProposals/${key} via ${field}`));
+                    Object.keys(matches).forEach((key) => addOffer(matches[key], `/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${key} via ${field}`));
                 }
                 catch (queryError) {
                     console.warn('[terms-guard] offer lookup failed', { lookupId, field, queryError });
@@ -652,7 +652,7 @@ class StripeService {
         // payment action. Terms may have been accepted on the offer before the
         // canonical booking document was created or synchronized.
         const acceptedEntity = await this.assertTermsAcceptedBeforeCustomerAction(bookingId);
-        const directBookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+        const directBookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
         const directBooking = directBookingSnap.val();
         const booking = directBooking || acceptedEntity || {};
         // Backfill the canonical booking with the accepted terms state so future
@@ -674,7 +674,7 @@ class StripeService {
                 bookingWorkflow: { ...(directBooking?.bookingWorkflow || {}), termsAccepted: true, termsAcceptedAt: acceptedAt, termsAcceptedBy: acceptedBy, termsAcceptedSource: 'customer_portal' },
                 modifiedTS: Date.now()
             };
-            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update(termsPatch);
+            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update(termsPatch);
             Object.assign(booking, termsPatch);
         }
         const outingDate = booking.outingDate || booking.date || booking.bookingDate || body.outingDate || body.date;
@@ -718,8 +718,8 @@ class StripeService {
     }
     buildBookingPaymentPath(bookingId, child) {
         return child
-            ? `/bnBookings/${bookingId}/payments/${child}`
-            : `/bnBookings/${bookingId}/payments`;
+            ? `/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/${child}`
+            : `/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments`;
     }
     appendCheckoutParams(url, params) {
         const separator = url.includes('?') ? '&' : '?';
@@ -814,7 +814,7 @@ class StripeService {
                     },
                 }).catch(() => null)
                 : null;
-            const paymentRef = this.stbDbSvc.db.ref('/backendpayments').push();
+            const paymentRef = this.stbDbSvc.db.ref(this.stbDbSvc.boatPath('backendpayments')).push();
             const paymentId = paymentRef.key;
             const session = await stripe.checkout.sessions.create({
                 mode: 'payment',
@@ -891,7 +891,7 @@ class StripeService {
             };
             await paymentRef.set(payload);
             await this.stbDbSvc.db.ref(this.buildBookingPaymentPath(bookingId, 'deposit')).set(payload);
-            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/connectFinancials/${paymentId}`).set({
+            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/connectFinancials/${paymentId}`).set({
                 paymentType: payload.paymentType,
                 grossAmount: payload.grossAmount,
                 commissionBps: payload.commissionBps,
@@ -932,12 +932,12 @@ class StripeService {
             }
             // Load the booking once so legacy/imported records can supply missing
             // owner, amount and customer context.
-            const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+            const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
             let booking = bookingSnap.val() || null;
             if (!booking) {
                 const lookupFields = ['bookingId', 'offerId', 'proposalId', 'relatedBookingId'];
                 for (const field of lookupFields) {
-                    const snap = await this.stbDbSvc.db.ref('/bnBookings').orderByChild(field).equalTo(bookingId).once('value');
+                    const snap = await this.stbDbSvc.db.ref(this.stbDbSvc.boatPath('bnBookings')).orderByChild(field).equalTo(bookingId).once('value');
                     const matches = snap.val() || {};
                     const firstKey = Object.keys(matches)[0];
                     if (firstKey) {
@@ -983,7 +983,7 @@ class StripeService {
                     metadata: { bookingId, ownerId, source: 'alegria-warranty' },
                 }).catch(() => null)
                 : null;
-            const paymentRef = this.stbDbSvc.db.ref('/backendpayments').push();
+            const paymentRef = this.stbDbSvc.db.ref(this.stbDbSvc.boatPath('backendpayments')).push();
             const paymentId = paymentRef.key;
             const session = await stripe.checkout.sessions.create({
                 mode: 'setup',
@@ -1046,7 +1046,7 @@ class StripeService {
             if (!checkoutSessionId)
                 return res.status(400).json({ error: 'checkoutSessionId is required' });
             if (!ownerId) {
-                const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+                const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
                 const booking = bookingSnap.val() || {};
                 ownerId = booking.ownerId || booking.raw?.ownerId || booking.owner || 'alegria';
             }
@@ -1104,9 +1104,9 @@ class StripeService {
                 source: 'stripe_checkout_complete',
             };
             await Promise.all([
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/balance`).update(paymentPayload),
-                paymentId ? this.stbDbSvc.db.ref(`/backendpayments/${paymentId}`).update(paymentPayload) : Promise.resolve(null),
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/balance`).update(paymentPayload),
+                paymentId ? this.stbDbSvc.db.ref(`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${paymentId}`).update(paymentPayload) : Promise.resolve(null),
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                     balanceStatus: 'paid',
                     balancePaid: true,
                     remainingPaid: true,
@@ -1129,7 +1129,7 @@ class StripeService {
                     modifiedTS: now,
                     updatedAt: now,
                 }),
-                this.stbDbSvc.db.ref(`/bnProposals/${bookingId}`).update({
+                this.stbDbSvc.db.ref(`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                     balanceStatus: 'paid',
                     balancePaid: true,
                     remainingPaid: true,
@@ -1177,7 +1177,7 @@ class StripeService {
             if (!checkoutSessionId)
                 return res.status(400).json({ error: 'checkoutSessionId is required' });
             if (!ownerId) {
-                const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+                const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
                 const booking = bookingSnap.val() || {};
                 ownerId = booking.ownerId || booking.raw?.ownerId || booking.owner || 'alegria';
             }
@@ -1239,8 +1239,8 @@ class StripeService {
                 updatedAt: now,
             };
             await Promise.all([
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update(cardPayload),
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/warranty`).update({
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update(cardPayload),
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warranty`).update({
                     ...cardPayload,
                     status: 'warranty_card_saved',
                     paymentType: 'warranty',
@@ -1252,7 +1252,7 @@ class StripeService {
                     cardLast4,
                     cardBrand,
                 }),
-                this.stbDbSvc.db.ref(`/bnProposals/${bookingId}`).update(cardPayload).catch(() => null),
+                this.stbDbSvc.db.ref(`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update(cardPayload).catch(() => null),
             ]);
             return res.json({
                 ok: true,
@@ -1292,7 +1292,7 @@ class StripeService {
             const warrantyPath = this.buildBookingPaymentPath(bookingId, 'warranty');
             const [warrantySnap, bookingSnap] = await Promise.all([
                 this.stbDbSvc.db.ref(warrantyPath).once('value'),
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value'),
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value'),
             ]);
             const booking = bookingSnap.val() || {};
             const warranty = warrantySnap.val() || {};
@@ -1315,7 +1315,7 @@ class StripeService {
             }
             const cashWarranty = warrantyMethod.includes('cash') || warrantyStatus.includes('cash');
             if (cashWarranty) {
-                const chargeId = this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/warrantyCharges`).push().key || `damage_${Date.now()}`;
+                const chargeId = this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyCharges`).push().key || `damage_${Date.now()}`;
                 const now = Date.now();
                 const totalChargedCents = alreadyChargedCents + amountCents;
                 const chargeRecord = {
@@ -1337,8 +1337,8 @@ class StripeService {
                     modifiedTS: now,
                 };
                 const updates = {};
-                updates[`/bnBookings/${bookingId}/payments/warrantyCharges/${chargeId}`] = chargeRecord;
-                updates[`/bnBookings/${bookingId}/payments/warrantyCharge`] = {
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyCharges/${chargeId}`] = chargeRecord;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyCharge`] = {
                     ...chargeRecord,
                     warrantyChargeAmount: amountCents,
                     warrantyChargeAmountCents: amountCents,
@@ -1346,34 +1346,34 @@ class StripeService {
                     warrantyChargeReason: reason,
                     totalWarrantyChargedAmount: totalChargedCents,
                 };
-                updates[`/bnBookings/${bookingId}/warrantyStatus`] = totalChargedCents >= maxWarrantyCents && maxWarrantyCents > 0 ? 'fully_charged' : 'partially_charged';
-                updates[`/bnBookings/${bookingId}/damageReported`] = true;
-                updates[`/bnBookings/${bookingId}/damageCharged`] = true;
-                updates[`/bnBookings/${bookingId}/warrantyChargedAmount`] = totalChargedCents;
-                updates[`/bnBookings/${bookingId}/lastWarrantyChargeAmount`] = amountCents;
-                updates[`/bnBookings/${bookingId}/lastWarrantyChargeAmountCents`] = amountCents;
-                updates[`/bnBookings/${bookingId}/lastWarrantyChargeAmountEuros`] = amountCents / 100;
-                updates[`/bnBookings/${bookingId}/lastWarrantyChargeStatus`] = 'paid';
-                updates[`/bnBookings/${bookingId}/lastWarrantyChargeAt`] = now;
-                updates[`/bnBookings/${bookingId}/lastWarrantyChargePaymentMethod`] = 'cash';
-                updates[`/bnBookings/${bookingId}/warrantyChargeAmountCents`] = amountCents;
-                updates[`/bnBookings/${bookingId}/warrantyChargeAmountEuros`] = amountCents / 100;
-                updates[`/bnBookings/${bookingId}/warrantyChargeReason`] = reason;
-                updates[`/bnBookings/${bookingId}/pendingWarrantyChargeAmount`] = amountCents / 100;
-                updates[`/bnBookings/${bookingId}/pendingWarrantyChargeAmountCents`] = amountCents;
-                updates[`/bnBookings/${bookingId}/pendingWarrantyChargeReason`] = reason;
-                updates[`/bnBookings/${bookingId}/pendingWarrantyChargeStatus`] = 'paid';
-                updates[`/bnBookings/${bookingId}/pendingWarrantyChargeError`] = null;
-                updates[`/bnBookings/${bookingId}/pendingWarrantyChargeModifiedAt`] = now;
-                updates[`/bnBookings/${bookingId}/warrantyChargePaymentIntentId`] = null;
-                updates[`/bnBookings/${bookingId}/warrantyChargeRecordedAt`] = now;
-                updates[`/bnBookings/${bookingId}/modifiedTS`] = now;
-                updates[`/bnProposals/${bookingId}/warrantyChargedAmount`] = totalChargedCents;
-                updates[`/bnProposals/${bookingId}/lastWarrantyChargeAmount`] = amountCents;
-                updates[`/bnProposals/${bookingId}/warrantyChargeReason`] = reason;
-                updates[`/bnProposals/${bookingId}/warrantyChargeStatus`] = 'paid';
-                updates[`/bnProposals/${bookingId}/modifiedTS`] = now;
-                updates[`/backendpayments/${chargeId}`] = chargeRecord;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyStatus`] = totalChargedCents >= maxWarrantyCents && maxWarrantyCents > 0 ? 'fully_charged' : 'partially_charged';
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/damageReported`] = true;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/damageCharged`] = true;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargedAmount`] = totalChargedCents;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeAmount`] = amountCents;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeAmountCents`] = amountCents;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeAmountEuros`] = amountCents / 100;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeStatus`] = 'paid';
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeAt`] = now;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargePaymentMethod`] = 'cash';
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeAmountCents`] = amountCents;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeAmountEuros`] = amountCents / 100;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeReason`] = reason;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeAmount`] = amountCents / 100;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeAmountCents`] = amountCents;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeReason`] = reason;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeStatus`] = 'paid';
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeError`] = null;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeModifiedAt`] = now;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargePaymentIntentId`] = null;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeRecordedAt`] = now;
+                updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/modifiedTS`] = now;
+                updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargedAmount`] = totalChargedCents;
+                updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeAmount`] = amountCents;
+                updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeReason`] = reason;
+                updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeStatus`] = 'paid';
+                updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/modifiedTS`] = now;
+                updates[`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${chargeId}`] = chargeRecord;
                 await this.stbDbSvc.db.ref().update(updates);
                 return res.json({
                     ok: true,
@@ -1396,7 +1396,7 @@ class StripeService {
                 return res.status(400).json({ error: 'No reusable Stripe warranty card is registered for this booking' });
             }
             const stripe = await this.getStripeForOwner(ownerId);
-            const chargeId = this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/warrantyCharges`).push().key || `damage_${Date.now()}`;
+            const chargeId = this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyCharges`).push().key || `damage_${Date.now()}`;
             const now = Date.now();
             // Save the requested amount before Stripe. The amount and reason therefore
             // remain visible even if Stripe rejects the off-session charge.
@@ -1417,20 +1417,20 @@ class StripeService {
                 modifiedTS: now,
             };
             await this.stbDbSvc.db.ref().update({
-                [`/bnBookings/${bookingId}/payments/warrantyCharges/${chargeId}`]: requestedChargeRecord,
-                [`/bnBookings/${bookingId}/payments/warrantyCharge`]: {
+                [`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyCharges/${chargeId}`]: requestedChargeRecord,
+                [`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyCharge`]: {
                     ...requestedChargeRecord,
                     warrantyChargeAmount: amountCents,
                     warrantyChargeAmountCents: amountCents,
                     warrantyChargeAmountEuros: amountCents / 100,
                     warrantyChargeReason: reason,
                 },
-                [`/bnBookings/${bookingId}/pendingWarrantyChargeAmount`]: amountCents / 100,
-                [`/bnBookings/${bookingId}/pendingWarrantyChargeAmountCents`]: amountCents,
-                [`/bnBookings/${bookingId}/pendingWarrantyChargeReason`]: reason,
-                [`/bnBookings/${bookingId}/pendingWarrantyChargeStatus`]: 'processing',
-                [`/bnBookings/${bookingId}/pendingWarrantyChargeRequestedAt`]: now,
-                [`/bnBookings/${bookingId}/modifiedTS`]: now,
+                [`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeAmount`]: amountCents / 100,
+                [`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeAmountCents`]: amountCents,
+                [`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeReason`]: reason,
+                [`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeStatus`]: 'processing',
+                [`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeRequestedAt`]: now,
+                [`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/modifiedTS`]: now,
             });
             const pi = await stripe.paymentIntents.create({
                 amount: amountCents,
@@ -1474,37 +1474,37 @@ class StripeService {
                 modifiedTS: now,
             };
             const updates = {};
-            updates[`/bnBookings/${bookingId}/payments/warrantyCharges/${chargeId}`] = chargeRecord;
-            updates[`/bnBookings/${bookingId}/payments/warrantyCharge`] = {
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyCharges/${chargeId}`] = chargeRecord;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyCharge`] = {
                 ...chargeRecord,
                 warrantyChargeAmount: amountCents,
                 warrantyChargeReason: reason,
                 totalWarrantyChargedAmount: totalChargedCents,
             };
-            updates[`/bnBookings/${bookingId}/warrantyStatus`] = totalChargedCents >= maxWarrantyCents && maxWarrantyCents > 0 ? 'fully_charged' : 'partially_charged';
-            updates[`/bnBookings/${bookingId}/damageReported`] = true;
-            updates[`/bnBookings/${bookingId}/damageCharged`] = true;
-            updates[`/bnBookings/${bookingId}/warrantyChargedAmount`] = totalChargedCents;
-            updates[`/bnBookings/${bookingId}/lastWarrantyChargeAmount`] = amountCents;
-            updates[`/bnBookings/${bookingId}/lastWarrantyChargeAmountCents`] = amountCents;
-            updates[`/bnBookings/${bookingId}/lastWarrantyChargeAmountEuros`] = amountCents / 100;
-            updates[`/bnBookings/${bookingId}/warrantyChargeAmountCents`] = amountCents;
-            updates[`/bnBookings/${bookingId}/warrantyChargeAmountEuros`] = amountCents / 100;
-            updates[`/bnBookings/${bookingId}/warrantyChargeReason`] = reason;
-            updates[`/bnBookings/${bookingId}/pendingWarrantyChargeAmount`] = amountCents / 100;
-            updates[`/bnBookings/${bookingId}/pendingWarrantyChargeAmountCents`] = amountCents;
-            updates[`/bnBookings/${bookingId}/pendingWarrantyChargeReason`] = reason;
-            updates[`/bnBookings/${bookingId}/pendingWarrantyChargeStatus`] = chargeRecord.status;
-            updates[`/bnBookings/${bookingId}/pendingWarrantyChargeModifiedAt`] = now;
-            updates[`/bnBookings/${bookingId}/warrantyChargePaymentIntentId`] = pi.id;
-            updates[`/bnBookings/${bookingId}/warrantyChargeRecordedAt`] = now;
-            updates[`/bnBookings/${bookingId}/modifiedTS`] = now;
-            updates[`/bnProposals/${bookingId}/warrantyChargedAmount`] = totalChargedCents;
-            updates[`/bnProposals/${bookingId}/lastWarrantyChargeAmount`] = amountCents;
-            updates[`/bnProposals/${bookingId}/warrantyChargeReason`] = reason;
-            updates[`/bnProposals/${bookingId}/warrantyChargeStatus`] = chargeRecord.status;
-            updates[`/bnProposals/${bookingId}/modifiedTS`] = now;
-            updates[`/backendpayments/${chargeId}`] = chargeRecord;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyStatus`] = totalChargedCents >= maxWarrantyCents && maxWarrantyCents > 0 ? 'fully_charged' : 'partially_charged';
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/damageReported`] = true;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/damageCharged`] = true;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargedAmount`] = totalChargedCents;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeAmount`] = amountCents;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeAmountCents`] = amountCents;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeAmountEuros`] = amountCents / 100;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeAmountCents`] = amountCents;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeAmountEuros`] = amountCents / 100;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeReason`] = reason;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeAmount`] = amountCents / 100;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeAmountCents`] = amountCents;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeReason`] = reason;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeStatus`] = chargeRecord.status;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/pendingWarrantyChargeModifiedAt`] = now;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargePaymentIntentId`] = pi.id;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeRecordedAt`] = now;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/modifiedTS`] = now;
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargedAmount`] = totalChargedCents;
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/lastWarrantyChargeAmount`] = amountCents;
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeReason`] = reason;
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyChargeStatus`] = chargeRecord.status;
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/modifiedTS`] = now;
+            updates[`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${chargeId}`] = chargeRecord;
             await this.stbDbSvc.db.ref().update(updates);
             return res.json({
                 ok: true,
@@ -1524,7 +1524,7 @@ class StripeService {
                 const failedAmountCents = this.normalizeAmountToCents((req.body || {}).amount);
                 const failedReason = String((req.body || {}).reason || '').trim();
                 if (failedBookingId && failedAmountCents > 0) {
-                    await this.stbDbSvc.db.ref(`/bnBookings/${failedBookingId}`).update({
+                    await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${failedBookingId}`).update({
                         pendingWarrantyChargeAmount: failedAmountCents / 100,
                         pendingWarrantyChargeAmountCents: failedAmountCents,
                         pendingWarrantyChargeReason: failedReason,
@@ -1554,7 +1554,7 @@ class StripeService {
             if (!bookingId)
                 return res.status(400).json({ error: 'bookingId is required' });
             const [bookingSnap, warrantySnap] = await Promise.all([
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value'),
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value'),
                 this.stbDbSvc.db.ref(this.buildBookingPaymentPath(bookingId, 'warranty')).once('value'),
             ]);
             const booking = bookingSnap.val() || {};
@@ -1606,7 +1606,7 @@ class StripeService {
                 }
             }
             const now = Date.now();
-            const releaseId = this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/warrantyReleases`).push().key || `release_${now}`;
+            const releaseId = this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyReleases`).push().key || `release_${now}`;
             const releaseRecord = {
                 releaseId,
                 ownerId,
@@ -1625,30 +1625,30 @@ class StripeService {
                 modifiedTS: now,
             };
             const updates = {};
-            updates[`/bnBookings/${bookingId}/payments/warrantyReleases/${releaseId}`] = releaseRecord;
-            updates[`/bnBookings/${bookingId}/payments/warranty/status`] = 'released';
-            updates[`/bnBookings/${bookingId}/payments/warranty/releasedAt`] = now;
-            updates[`/bnBookings/${bookingId}/payments/warranty/releasedBy`] = releaseRecord.releasedBy;
-            updates[`/bnBookings/${bookingId}/payments/warranty/noDamageObserved`] = true;
-            updates[`/bnBookings/${bookingId}/payments/warranty/paymentMethodDetached`] = false;
-            updates[`/bnBookings/${bookingId}/payments/warranty/canChargeWarranty`] = false;
-            updates[`/bnBookings/${bookingId}/warrantyStatus`] = 'released';
-            updates[`/bnBookings/${bookingId}/warrantyReleased`] = true;
-            updates[`/bnBookings/${bookingId}/warrantyReleasedAt`] = now;
-            updates[`/bnBookings/${bookingId}/warrantyReleasedBy`] = releaseRecord.releasedBy;
-            updates[`/bnBookings/${bookingId}/warrantyNoDamageObserved`] = true;
-            updates[`/bnBookings/${bookingId}/warrantyActive`] = false;
-            updates[`/bnBookings/${bookingId}/canChargeWarranty`] = false;
-            updates[`/bnBookings/${bookingId}/warrantyPaymentMethodDetached`] = false;
-            updates[`/bnBookings/${bookingId}/releasedWarrantyPaymentMethodId`] = paymentMethodId;
-            updates[`/bnBookings/${bookingId}/releasedWarrantySetupIntentId`] = setupIntentId;
-            updates[`/bnBookings/${bookingId}/modifiedTS`] = now;
-            updates[`/bnProposals/${bookingId}/warrantyStatus`] = 'released';
-            updates[`/bnProposals/${bookingId}/warrantyReleased`] = true;
-            updates[`/bnProposals/${bookingId}/warrantyReleasedAt`] = now;
-            updates[`/bnProposals/${bookingId}/canChargeWarranty`] = false;
-            updates[`/bnProposals/${bookingId}/modifiedTS`] = now;
-            updates[`/backendpayments/${releaseId}`] = releaseRecord;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warrantyReleases/${releaseId}`] = releaseRecord;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warranty/status`] = 'released';
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warranty/releasedAt`] = now;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warranty/releasedBy`] = releaseRecord.releasedBy;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warranty/noDamageObserved`] = true;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warranty/paymentMethodDetached`] = false;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warranty/canChargeWarranty`] = false;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyStatus`] = 'released';
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyReleased`] = true;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyReleasedAt`] = now;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyReleasedBy`] = releaseRecord.releasedBy;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyNoDamageObserved`] = true;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyActive`] = false;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/canChargeWarranty`] = false;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyPaymentMethodDetached`] = false;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/releasedWarrantyPaymentMethodId`] = paymentMethodId;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/releasedWarrantySetupIntentId`] = setupIntentId;
+            updates[`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/modifiedTS`] = now;
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyStatus`] = 'released';
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyReleased`] = true;
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/warrantyReleasedAt`] = now;
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/canChargeWarranty`] = false;
+            updates[`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/modifiedTS`] = now;
+            updates[`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${releaseId}`] = releaseRecord;
             await this.stbDbSvc.db.ref().update(updates);
             return res.json({
                 ok: true,
@@ -1774,10 +1774,10 @@ class StripeService {
             updatedAt: now,
         };
         await Promise.all([
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}/payments/deposit`).update(updatePayload),
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}/payment`).update(updatePayload),
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}/payments/deposit`).update(updatePayload),
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}`).update({
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}/payments/deposit`).update(updatePayload),
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}/payment`).update(updatePayload),
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}/payments/deposit`).update(updatePayload),
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}`).update({
                 depositStatus: 'authorized',
                 depositAuthorized: true,
                 depositPaid: false,
@@ -1793,13 +1793,13 @@ class StripeService {
             }),
         ]);
         if (params.paymentId) {
-            await this.stbDbSvc.db.ref(`/backendpayments/${params.paymentId}`).update(updatePayload);
+            await this.stbDbSvc.db.ref(`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${params.paymentId}`).update(updatePayload);
         }
     }
     async markDepositPaidFromStripe(params) {
         const now = Date.now();
-        const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}`).once('value').catch(() => null);
-        const offerSnap = await this.stbDbSvc.db.ref(`/bnProposals/${params.bookingId}`).once('value').catch(() => null);
+        const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}`).once('value').catch(() => null);
+        const offerSnap = await this.stbDbSvc.db.ref(`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}`).once('value').catch(() => null);
         const existingBooking = bookingSnap?.val?.() || {};
         const existingOffer = offerSnap?.val?.() || {};
         const termsAccepted = this.hasExplicitCustomerTermsAcceptance(existingBooking) || this.hasExplicitCustomerTermsAcceptance(existingOffer);
@@ -1819,10 +1819,10 @@ class StripeService {
             updatedAt: now,
         };
         await Promise.all([
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}/payments/deposit`).update(updatePayload),
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}/payment`).update(updatePayload),
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}/payments/deposit`).update(updatePayload),
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}`).update({
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}/payments/deposit`).update(updatePayload),
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}/payment`).update(updatePayload),
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}/payments/deposit`).update(updatePayload),
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}`).update({
                 depositStatus: 'paid',
                 depositPaid: true,
                 paymentStatus: 'deposit_paid',
@@ -1833,7 +1833,7 @@ class StripeService {
                 modifiedTS: now,
                 updatedAt: now,
             }),
-            this.stbDbSvc.db.ref(`/bnProposals/${params.bookingId}`).update({
+            this.stbDbSvc.db.ref(`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}`).update({
                 depositStatus: 'paid',
                 depositPaid: true,
                 paymentStatus: 'deposit_paid',
@@ -1847,7 +1847,7 @@ class StripeService {
             }),
         ]);
         if (params.paymentId) {
-            await this.stbDbSvc.db.ref(`/backendpayments/${params.paymentId}`).update(updatePayload);
+            await this.stbDbSvc.db.ref(`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${params.paymentId}`).update(updatePayload);
         }
     }
     async markWarrantySavedFromStripe(params) {
@@ -1870,10 +1870,10 @@ class StripeService {
             updatedAt: now,
         };
         await Promise.all([
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}/payments/warranty`).update(updatePayload),
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}/payment`).update(updatePayload),
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}/payments/warranty`).update(updatePayload),
-            this.stbDbSvc.db.ref(`/bnBookings/${params.bookingId}`).update({
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}/payments/warranty`).update(updatePayload),
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}/payment`).update(updatePayload),
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}/payments/warranty`).update(updatePayload),
+            this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}`).update({
                 warrantyStatus: 'card_registered',
                 warrantyRegistered: true,
                 warrantyPaymentChoice: 'stripe_card',
@@ -1885,7 +1885,7 @@ class StripeService {
                 modifiedTS: now,
                 updatedAt: now,
             }),
-            this.stbDbSvc.db.ref(`/bnProposals/${params.bookingId}`).update({
+            this.stbDbSvc.db.ref(`/bnProposals/${this.stbDbSvc.normalizeBoatId()}/${params.bookingId}`).update({
                 warrantyStatus: 'card_registered',
                 warrantyRegistered: true,
                 warrantyPaymentChoice: 'stripe_card',
@@ -1899,7 +1899,7 @@ class StripeService {
             }),
         ]);
         if (params.paymentId) {
-            await this.stbDbSvc.db.ref(`/backendpayments/${params.paymentId}`).update(updatePayload);
+            await this.stbDbSvc.db.ref(`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${params.paymentId}`).update(updatePayload);
         }
     }
     async handleOwnerWebhook(req, res) {
@@ -1968,7 +1968,7 @@ class StripeService {
                             updatedAt: now,
                         };
                         if (paymentId) {
-                            await this.stbDbSvc.db.ref(`/backendpayments/${paymentId}`).update(updatePayload);
+                            await this.stbDbSvc.db.ref(`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${paymentId}`).update(updatePayload);
                             if (customerUserId) {
                                 await this.stbDbSvc.db.ref(`/backendusers/${customerUserId}/payments/${paymentId}`).update(updatePayload);
                             }
@@ -2026,18 +2026,18 @@ class StripeService {
                             modifiedTS: now,
                             updatedAt: now,
                         };
-                        await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/warranty`).update(updatePayload);
-                        await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/warranty`).update(updatePayload);
-                        await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                        await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warranty`).update(updatePayload);
+                        await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/warranty`).update(updatePayload);
+                        await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                             warrantyStatus: 'card_registered',
                             warrantyRegistered: true,
                             modifiedTS: now,
                         });
                         if (paymentId) {
-                            await this.stbDbSvc.db.ref(`/backendpayments/${paymentId}`).update(updatePayload);
+                            await this.stbDbSvc.db.ref(`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${paymentId}`).update(updatePayload);
                         }
                         // Keep backward compatibility with older booking.payment shape.
-                        await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payment`).update({
+                        await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payment`).update({
                             status: 'pm_saved',
                             setupIntentId: si.id,
                             paymentMethodId,
@@ -2068,7 +2068,7 @@ class StripeService {
                             || (!paymentType && !!bookingId && !isDepositPayment && !isWarrantyPayment && !isAdditionalPayment && !isSkipperPayment);
                         if (isBalancePayment) {
                             const paidAmountEuros = Number(session.amount_total || 0) / 100;
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/balance`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/balance`).update({
                                 ...updatePayload,
                                 paid: true,
                                 paymentStatus: 'paid',
@@ -2076,7 +2076,7 @@ class StripeService {
                                 method: 'Stripe',
                                 amountEuros: paidAmountEuros,
                             });
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/alegria`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/alegria`).update({
                                 ...updatePayload,
                                 paid: true,
                                 paymentStatus: 'paid',
@@ -2084,7 +2084,7 @@ class StripeService {
                                 method: 'Stripe',
                                 amountEuros: paidAmountEuros,
                             });
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                                 balanceStatus: 'paid',
                                 balancePaid: true,
                                 remainingPaid: true,
@@ -2108,7 +2108,7 @@ class StripeService {
                         }
                         else if (isSkipperPayment) {
                             const paidAmountEuros = Number(session.amount_total || 0) / 100;
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/skipper`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/skipper`).update({
                                 ...updatePayload,
                                 paid: true,
                                 paymentStatus: 'paid',
@@ -2116,7 +2116,7 @@ class StripeService {
                                 method: 'Stripe',
                                 amountEuros: paidAmountEuros,
                             });
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                                 skipperPaid: true,
                                 skipperStatus: 'paid',
                                 skipperPaymentStatus: 'paid',
@@ -2129,30 +2129,30 @@ class StripeService {
                         }
                         else if (paymentType === 'extra_service') {
                             const extraServiceId = (session.metadata && session.metadata['extraServiceId']) || null;
-                            const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+                            const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
                             const booking = bookingSnap.val() || {};
                             const extraServices = Array.isArray(booking.extraServices) ? booking.extraServices : [];
                             const updatedExtraServices = extraServices.map((item) => item.id === extraServiceId ? { ...item, status: 'paid', paid: true, paidAt: now, stripeCheckoutSessionId: session.id, stripePaymentIntentId, amount: (session.amount_total || item.amount) } : item);
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/extraServices`).set(updatedExtraServices);
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/extraServices/${extraServiceId}`).update(updatePayload);
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/extraServices`).set(updatedExtraServices);
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/extraServices/${extraServiceId}`).update(updatePayload);
                         }
                         else if (paymentType === 'ad_hoc') {
                             const adhocPaymentId = (session.metadata && (session.metadata['adhocPaymentId'] || session.metadata['extraServiceId'])) || null;
                             if (adhocPaymentId) {
-                                await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/adHoc/${adhocPaymentId}`).update(updatePayload);
+                                await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/adHoc/${adhocPaymentId}`).update(updatePayload);
                             }
                         }
                         else {
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/deposit`).update({ ...updatePayload, status: 'deposit_paid' });
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/deposit`).update({ ...updatePayload, status: 'deposit_paid' });
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/deposit`).update({ ...updatePayload, status: 'deposit_paid' });
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/deposit`).update({ ...updatePayload, status: 'deposit_paid' });
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                                 depositStatus: 'paid',
                                 depositPaid: true,
                                 modifiedTS: now,
                             });
                         }
                         if (paymentId) {
-                            await this.stbDbSvc.db.ref(`/backendpayments/${paymentId}`).update(updatePayload);
+                            await this.stbDbSvc.db.ref(`/backendpayments/${this.stbDbSvc.normalizeBoatId()}/${paymentId}`).update(updatePayload);
                         }
                     }
                     break;
@@ -2178,9 +2178,9 @@ class StripeService {
                                 amount: pi.amount_received || pi.amount || null, amountEuros,
                                 currency: pi.currency || 'eur', paidAt: now, modifiedTS: now, updatedAt: now,
                             };
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/balance`).update({ ...common, paymentType: 'balance' });
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/alegria`).update({ ...common, paymentType: 'alegria_balance' });
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/balance`).update({ ...common, paymentType: 'balance' });
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/alegria`).update({ ...common, paymentType: 'alegria_balance' });
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                                 balancePaid: true, balanceStatus: 'paid', balancePaymentStatus: 'paid', balancePaymentMethod: 'Stripe',
                                 remainingPaid: true, remainingStatus: 'paid', alegriaPaid: true, alegriaPaymentStatus: 'paid', alegriaPaymentMethod: 'Stripe',
                                 balancePaidAmount: amountEuros, alegriaPaidAmount: amountEuros,
@@ -2190,18 +2190,18 @@ class StripeService {
                             });
                         }
                         else if (isSkipper) {
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/skipper`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/skipper`).update({
                                 status: 'paid', paid: true, paymentStatus: 'paid', method: 'Stripe', paymentType: 'skipper_fee',
                                 paymentIntentId: pi.id, stripePaymentIntentId: pi.id, amount: pi.amount_received || pi.amount || null,
                                 amountEuros, currency: pi.currency || 'eur', paidAt: now, modifiedTS: now, updatedAt: now,
                             });
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                                 skipperPaid: true, skipperStatus: 'paid', skipperPaymentStatus: 'paid', skipperPaymentMethod: 'Stripe',
                                 skipperPaidAmount: amountEuros, skipperPaidAt: now, modifiedTS: now, updatedAt: now,
                             });
                         }
                         else {
-                            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                                 paymentPaymentIntentId: pi.id, modifiedTS: now, updatedAt: now,
                             });
                         }
@@ -2213,13 +2213,13 @@ class StripeService {
                     const bookingId = (pi.metadata && pi.metadata['bookingId']) || null;
                     const message = (pi.last_payment_error && pi.last_payment_error.message) || 'Payment failed';
                     if (bookingId) {
-                        await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payment`).update({
+                        await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payment`).update({
                             status: 'charge_failed',
                             lastError: message,
                             paymentIntentId: pi.id,
                             updatedAt: Date.now(),
                         });
-                        await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update({
+                        await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update({
                             status: 'pending',
                             updatedAt: Date.now(),
                         });
@@ -2255,7 +2255,7 @@ class StripeService {
             const { bookingId, ownerId = 'alegria', adminId, note } = req.body || {};
             if (!bookingId)
                 return res.status(400).json({ error: 'bookingId is required' });
-            const snap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+            const snap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
             if (!snap.exists())
                 return res.status(404).json({ error: 'Booking not found' });
             const booking = snap.val() || {};
@@ -2282,8 +2282,8 @@ class StripeService {
                 updatedAt: now,
             };
             await Promise.all([
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update(updatePayload),
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/deposit`).update({
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update(updatePayload),
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/deposit`).update({
                     status: 'captured',
                     depositStatus: 'paid',
                     depositPaid: true,
@@ -2293,8 +2293,8 @@ class StripeService {
                     modifiedTS: now,
                     updatedAt: now,
                 }),
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update(updatePayload).catch(() => undefined),
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/deposit`).update({
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update(updatePayload).catch(() => undefined),
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/deposit`).update({
                     status: 'captured',
                     depositStatus: 'paid',
                     depositPaid: true,
@@ -2319,7 +2319,7 @@ class StripeService {
                 return res.status(400).json({ error: 'bookingId is required' });
             if (!reason)
                 return res.status(400).json({ error: 'A rejection reason is required.' });
-            const snap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+            const snap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
             if (!snap.exists())
                 return res.status(404).json({ error: 'Booking not found' });
             const booking = snap.val() || {};
@@ -2351,8 +2351,8 @@ class StripeService {
                 updatedAt: now,
             };
             await Promise.all([
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update(updatePayload),
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/deposit`).update({
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update(updatePayload),
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/deposit`).update({
                     status: 'authorization_cancelled',
                     depositStatus: 'authorization_cancelled',
                     depositPaid: false,
@@ -2363,7 +2363,7 @@ class StripeService {
                     modifiedTS: now,
                     updatedAt: now,
                 }),
-                this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).update(updatePayload).catch(() => undefined),
+                this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).update(updatePayload).catch(() => undefined),
             ]);
             return res.json({ ok: true, bookingId, paymentIntent: cancelledPaymentIntent ? { id: cancelledPaymentIntent.id, status: cancelledPaymentIntent.status } : null });
         }
@@ -2429,7 +2429,7 @@ class StripeService {
             const data = snap.val();
             const ownerSnap = await this.stbDbSvc.db.ref(`/backendowners/${ownerId}/connect`).once('value');
             const connect = ownerSnap.val() || {};
-            const platformConnectSnap = await this.stbDbSvc.db.ref('/platformSettings/stripeConnect').once('value');
+            const platformConnectSnap = await this.stbDbSvc.db.ref('/platform/settings/stripeConnect').once('value');
             const platformConnect = platformConnectSnap.val() || {};
             const commissionBps = Math.max(0, Math.min(5000, Number(connect.commissionBps ?? platformConnect.defaultCommissionBps ?? 0)));
             if (ownerId === 'alegria' || ownerId === 'platform') {
@@ -2631,7 +2631,7 @@ class StripeService {
                     },
                 }).catch(() => null)
                 : null;
-            const paymentRef = this.stbDbSvc.db.ref('/backendpayments').push();
+            const paymentRef = this.stbDbSvc.db.ref(this.stbDbSvc.boatPath('backendpayments')).push();
             const paymentId = paymentRef.key;
             const session = await stripe.checkout.sessions.create({
                 mode: 'payment',
@@ -2705,8 +2705,8 @@ class StripeService {
             };
             await paymentRef.set(payload);
             await this.stbDbSvc.db.ref(this.buildBookingPaymentPath(bookingId, 'balance')).set(payload);
-            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/balance`).set(payload);
-            await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/connectFinancials/${paymentId}`).set({
+            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/balance`).set(payload);
+            await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/connectFinancials/${paymentId}`).set({
                 paymentType: 'balance',
                 grossAmount: payload.grossAmount,
                 commissionBps: payload.commissionBps,
@@ -2785,7 +2785,7 @@ class StripeService {
                     },
                 }).catch(() => null)
                 : null;
-            const paymentRef = this.stbDbSvc.db.ref('/backendpayments').push();
+            const paymentRef = this.stbDbSvc.db.ref(this.stbDbSvc.boatPath('backendpayments')).push();
             const paymentId = paymentRef.key;
             const session = await stripe.checkout.sessions.create({
                 mode: 'payment',
@@ -2885,7 +2885,7 @@ class StripeService {
             };
             await paymentRef.set(payload);
             if (bookingId) {
-                await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/connectFinancials/${paymentId}`).set({
+                await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/connectFinancials/${paymentId}`).set({
                     paymentType: normalizedPaymentType,
                     grossAmount: payload.grossAmount,
                     commissionBps: payload.commissionBps,
@@ -2897,10 +2897,10 @@ class StripeService {
                 });
             }
             if (isSkipperFeePayment && bookingId) {
-                await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/skipper`).set(payload);
+                await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/skipper`).set(payload);
             }
             else if (isAdHocPayment && bookingId) {
-                await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/adHoc/${extraServiceId}`).set(payload);
+                await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/adHoc/${extraServiceId}`).set(payload);
             }
             else if (isAdHocPayment && standalonePayment) {
                 // Standalone payments are not attached to a booking. Keep a customer index
@@ -2911,8 +2911,8 @@ class StripeService {
                 }
             }
             else {
-                await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/payments/extraServices/${extraServiceId}`).set(payload);
-                const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`).once('value');
+                await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/extraServices/${extraServiceId}`).set(payload);
+                const bookingSnap = await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`).once('value');
                 const booking = bookingSnap.val() || {};
                 const extraServices = Array.isArray(booking.extraServices) ? [...booking.extraServices] : [];
                 const index = extraServices.findIndex((item) => item.id === extraServiceId || item.extraServiceId === extraServiceId);
@@ -2935,7 +2935,7 @@ class StripeService {
                 else {
                     extraServices.push(extraPayload);
                 }
-                await this.stbDbSvc.db.ref(`/bnBookings/${bookingId}/extraServices`).set(extraServices);
+                await this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/extraServices`).set(extraServices);
             }
             return res.json({ ok: true, url: session.url, id: session.id, paymentId, extraServiceId, adhocPaymentId: isAdHocPayment ? extraServiceId : '', paymentType: normalizedPaymentType, standalonePayment });
         }
@@ -2977,7 +2977,7 @@ class StripeService {
                     received: { amount: body.amount, refundAmount: body.refundAmount, amountCents: body.amountCents }
                 });
             }
-            const bookingRef = this.stbDbSvc.db.ref(`/bnBookings/${bookingId}`);
+            const bookingRef = this.stbDbSvc.db.ref(`/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}`);
             const bookingSnap = await bookingRef.once('value');
             if (!bookingSnap.exists()) {
                 return res.status(404).json({ error: 'Booking not found', bookingId });
@@ -2985,17 +2985,17 @@ class StripeService {
             const booking = bookingSnap.val() || {};
             let paymentPath = '';
             if (paymentType === 'deposit') {
-                paymentPath = `/bnBookings/${bookingId}/payments/deposit`;
+                paymentPath = `/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/deposit`;
             }
             else if (paymentType === 'balance') {
-                paymentPath = `/bnBookings/${bookingId}/payments/balance`;
+                paymentPath = `/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/balance`;
             }
             else if (paymentType === 'skipper_fee') {
-                paymentPath = `/bnBookings/${bookingId}/payments/skipper`;
+                paymentPath = `/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/skipper`;
             }
             else if (paymentType === 'extra_service') {
                 if (extraServiceId) {
-                    paymentPath = `/bnBookings/${bookingId}/payments/extraServices/${extraServiceId}`;
+                    paymentPath = `/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/extraServices/${extraServiceId}`;
                 }
                 else {
                     return res.status(400).json({ error: 'extraServiceId is required to refund an extra service payment' });
@@ -3003,7 +3003,7 @@ class StripeService {
             }
             else if (paymentType === 'ad_hoc') {
                 if (extraServiceId) {
-                    paymentPath = `/bnBookings/${bookingId}/payments/adHoc/${extraServiceId}`;
+                    paymentPath = `/bnBookings/${this.stbDbSvc.normalizeBoatId()}/${bookingId}/payments/adHoc/${extraServiceId}`;
                 }
                 else {
                     return res.status(400).json({ error: 'adhocPaymentId/extraServiceId is required to refund an ad hoc payment' });

@@ -1,14 +1,17 @@
-var gulp = require("gulp");
-var ts = require("gulp-typescript");
-var sourcemaps = require("gulp-sourcemaps");
+import gulp from 'gulp';
+import ts from 'gulp-typescript';
+import sourcemaps from 'gulp-sourcemaps';
 
-var tsProject = ts.createProject("tsconfig.json");
+const tsProject = ts.createProject('tsconfig.json');
 
-gulp.task("build", function () {
-  return gulp.src(["src/**/*.ts"], { base: "src" })   // ✅ explicit inputs
+gulp.task('build', function () {
+  return gulp
+    .src(['src/**/*.ts'], { base: 'src' })
     .pipe(sourcemaps.init())
     .pipe(tsProject())
     .js
-    .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest("dist2"));                        // ✅ your chosen output
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest('dist2'));
 });
+
+gulp.task('default', gulp.series('build'));

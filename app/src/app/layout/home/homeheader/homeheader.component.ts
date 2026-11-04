@@ -1,3 +1,6 @@
+import {assetView} from '../../../services/asset-navigation';
+import {PLATFORM_HOME_TEXT} from '../../../services/platform-home-text';
+import {AssetAccessService} from '../../../services/asset-access.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -5,14 +8,22 @@ import { ServicesService } from 'godigital-lib';
 import { SITE_CONTENT, SiteContent } from '../../../home/site-content';
 import { LanguageService, SiteLanguage } from '../../../services/language.service';
 import { SiteContentService } from '../../../home/site-content-service/site-content.service';
+import { PrivateMediaService } from '../../../services/private-media.service';
+import { ResourceContextService } from '../../../services/resource-context.service';
 
 @Component({
+  standalone: false,
   selector: 'app-homeheader',
   templateUrl: './homeheader.component.html',
   styleUrls: ['./homeheader.component.scss'],
 })
 export class HomeheaderComponent implements OnInit, OnDestroy {
+  get goDirectHomeLabel():string {return this.siteContentService.tFromContent(this.allSiteContent,'ui.platform.home',this.currentLanguage,PLATFORM_HOME_TEXT[this.currentLanguage]||PLATFORM_HOME_TEXT.en);}
+
+  private readonly ownerViewStorageKey = 'alegria-owner-view';
+  readonly logoUrl: string;
   menuOpen = false;
+  ownerView: 'admin' | 'customer' = 'admin';
   currentLanguage: SiteLanguage = 'fr';
   content: SiteContent = SITE_CONTENT.fr;
   private allSiteContent = SITE_CONTENT;
@@ -20,8 +31,7 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
 
   private languageSub?: Subscription;
   private accountSub?: Subscription;
-  private routerSub?: Subscription;
-  isMarketplace = true;
+  private routeSub?: Subscription;
 
   private readonly headerText: Record<SiteLanguage, Record<string, string>> = {
     fr: {
@@ -324,19 +334,20 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
     private languageService: LanguageService,
     private router: Router,
     private mainSvc: ServicesService,
-    private siteContentService: SiteContentService
-  ) {}
+    private siteContentService: SiteContentService,
+    private privateMedia: PrivateMediaService,
+    public resourceContext: ResourceContextService,
+    public assetAccess:AssetAccessService
+) {
+    this.logoUrl = this.privateMedia.objectUrl('/api/media/object?path=assets%2Flogo-Alegria.png');
+  }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.assetAccess.refresh();
+    this.restoreOwnerView();
+    this.routeSub = this.router.events.subscribe(event => { if(event instanceof NavigationEnd){ this.restoreOwnerView(); this.closeMenu(); } });
     this.currentLanguage = this.languageService.currentLanguage || 'fr';
-    this.updateRouteContext(this.router.url);
     this.loadSiteContent();
-    this.routerSub = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.updateRouteContext(event.urlAfterRedirects);
-        if (!this.isMarketplace) this.loadSiteContent(true);
-      }
-    });
     this.languageSub = this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
       this.content = this.allSiteContent[language] || SITE_CONTENT[language] || SITE_CONTENT.fr;
@@ -352,15 +363,17 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
     if (userObservable && typeof userObservable.subscribe === 'function') {
       this.accountSub = userObservable.subscribe((user: any) => {
         this.loggedUser = user || null;
+        this.restoreOwnerView();
       });
     } else if (svc.bnUser) {
       this.loggedUser = svc.bnUser;
+      this.restoreOwnerView();
     }
   }
 
-  private async loadSiteContent(forceRefresh = false): Promise<void> {
+  private async loadSiteContent(): Promise<void> {
     try {
-      this.allSiteContent = await this.siteContentService.getContent(forceRefresh);
+      this.allSiteContent = await this.siteContentService.getContent();
       this.content = this.allSiteContent[this.currentLanguage] || SITE_CONTENT[this.currentLanguage] || SITE_CONTENT.fr;
     } catch {
       this.allSiteContent = SITE_CONTENT;
@@ -371,29 +384,7 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.languageSub?.unsubscribe();
     this.accountSub?.unsubscribe();
-    this.routerSub?.unsubscribe();
-  }
-
-  private updateRouteContext(url: string): void {
-    const path = String(url || '/').split('?')[0].replace(/\/+$/, '') || '/';
-    this.isMarketplace = path === '/';
-  }
-
-  get platformBrand(): string {
-    return 'Boat Marketplace';
-  }
-
-  get platformTagline(): string {
-    const values: Record<string, string> = {
-      fr: 'Bateaux et expériences en mer',
-      en: 'Boats and sea experiences',
-      es: 'Barcos y experiencias en el mar',
-      it: 'Barche ed esperienze in mare',
-      de: 'Boote und Erlebnisse auf See',
-      nl: 'Boten en ervaringen op zee',
-      ru: 'Суда и морские прогулки',
-    };
-    return values[this.currentLanguage] || values.en;
+    this.routeSub?.unsubscribe();
   }
 
   t(key: string, fallback = ''): string {
@@ -418,6 +409,21 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
       || this.headerText.en[key]
       || fallback
       || key;
+  }
+
+
+  get isCarResource(): boolean { return this.resourceContext.resourceType === 'car'; }
+  get isParkingResource(): boolean { return this.resourceContext.resourceType === 'parking'; }
+  get isPropertyResource(): boolean { return this.resourceContext.resourceType === 'property'; }
+  get isPoolResource(): boolean { return this.resourceContext.resourceType === 'pool'; }
+  get isNonBoatResource(): boolean { return ['car','parking','property','pool'].includes(this.resourceContext.resourceType); }
+  get resourceBrandName(): string { if(this.isCarResource)return 'Riviera EV'; if(this.isParkingResource)return 'Port Antibes Parking'; if(this.isPropertyResource)return 'Villa Azur'; if(this.isPoolResource)return 'Azure Pool'; return this.t('brand.name', this.t('brand')); }
+  get resourceTagline(): string {
+    if (this.isCarResource) return ({fr: "Location de voiture", en: "Car rental", es: "Alquiler de coches", de: "Autovermietung", it: "Noleggio auto", nl: "Autoverhuur", ru: "Аренда автомобилей"} as Record<SiteLanguage,string>)[this.currentLanguage];
+    if (this.isParkingResource) return ({fr: "Location de parking", en: "Parking rental", es: "Alquiler de aparcamiento", de: "Parkplatzvermietung", it: "Affitto parcheggio", nl: "Parkeerplaatsverhuur", ru: "Аренда парковки"} as Record<SiteLanguage,string>)[this.currentLanguage];
+    if (this.isPropertyResource) return ({fr: "Location de logement", en: "Property rental", es: "Alquiler de alojamiento", de: "Ferienunterkunft", it: "Affitto alloggi", nl: "Accommodatieverhuur", ru: "Аренда жилья"} as Record<SiteLanguage,string>)[this.currentLanguage];
+    if (this.isPoolResource) return ({fr: "Location de piscine", en: "Pool rental", es: "Alquiler de piscinas", de: "Poolvermietung", it: "Affitto piscina", nl: "Zwembadverhuur", ru: "Аренда бассейна"} as Record<SiteLanguage,string>)[this.currentLanguage];
+    return this.t('brandTagline');
   }
 
   toggleMenu(): void {
@@ -454,7 +460,39 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
     this.closeMenu();
   }
 
-  logout(): void {
+  private restoreOwnerView(): void {
+    let preferred:'admin'|'customer'='admin';
+    try { preferred=localStorage.getItem(this.ownerViewStorageKey)==='customer'?'customer':'admin'; } catch {}
+    this.ownerView=assetView(this.router.url,this.isAdmin,preferred);
+  }
+
+  private rememberView(view:'admin'|'customer'):void {
+    this.ownerView=view;
+    try {localStorage.setItem(this.ownerViewStorageKey,view);}catch{}
+    if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('alegria-owner-view-change',{detail:view}));
+    this.closeMenu();
+  }
+
+  openClientView():void {this.rememberView('customer');}
+
+  switchOwnerView(): void {
+    const next=this.showAdminNavigation?'customer':'admin';
+    this.rememberView(next);
+    void this.router.navigateByUrl(this.resourceContext.route(next==='customer'?'/home':'/admin/reservations'));
+  }
+
+  get assetPaymentsRoute(): string {
+    const type = this.resourceContext.resourceType;
+    const id = this.resourceContext.resourceId;
+    return type && id ? `/${type}/${id}/owner/payments` : '/owner/payments';
+  }
+
+  get homeRoute(): string {
+    return this.showAdminNavigation ? '/admin/reservations' : '/home';
+  }
+
+  async logout(): Promise<void> {
+    await this.assetAccess.signOut();
     const svc = this.mainSvc as any;
     const userId = this.loggedUser?.userId || this.loggedUser?.uid;
 
@@ -480,12 +518,20 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    const role = String(this.loggedUser?.role || '').toLowerCase();
-    return role === 'admin' || role === 'owner' || this.loggedUser?.isAdmin === true;
+
+    return this.assetAccess.canManage(this.loggedUser);
   }
 
   get isCustomer(): boolean {
     return this.isLoggedIn && !this.isAdmin;
+  }
+
+  get showCustomerNavigation(): boolean {
+    return assetView(this.router.url,this.isAdmin,this.ownerView)==='customer';
+  }
+
+  get showAdminNavigation(): boolean {
+    return assetView(this.router.url,this.isAdmin,this.ownerView)==='admin';
   }
 
   get firstName(): string {
@@ -520,16 +566,104 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
   get loginLabel(): string { return this.t('nav.login'); }
   get signupLabel(): string { return this.t('nav.signup'); }
   get guestLabel(): string { return this.t('nav.login'); }
-  get myBookingsLabel(): string { return this.reservationsLabel; }
-  get myPaymentsLabel(): string { return this.paymentsLabel; }
+  get myBookingsLabel(): string { return ({fr:'Mes réservations',en:'My bookings',es:'Mis reservas',it:'Le mie prenotazioni',de:'Meine Buchungen',nl:'Mijn boekingen',ru:'Мои бронирования'} as Record<SiteLanguage,string>)[this.currentLanguage]; }
+  get myPaymentsLabel(): string { return ({fr:'Mes paiements',en:'My payments',es:'Mis pagos',it:'I miei pagamenti',de:'Meine Zahlungen',nl:'Mijn betalingen',ru:'Мои платежи'} as Record<SiteLanguage,string>)[this.currentLanguage]; }
   get myProfileLabel(): string { return this.t('nav.myProfile'); }
   get myFeedbacksLabel(): string { return this.t('nav.myFeedbacks'); }
   get adminBookingsLabel(): string { return this.reservationsLabel; }
   get adminFeedbacksLabel(): string { return this.t('nav.feedbacks'); }
   get adminOutingsLabel(): string { return this.boatLogManagerLabel; }
   get adminPublicOutingsLabel(): string { return this.managePublicOutingsLabel; }
+  get siteContentLabel(): string {
+    const labels: Record<SiteLanguage, string> = {
+      fr: 'Contenu du site',
+      en: 'Website content',
+      es: 'Contenido del sitio',
+      it: 'Contenuto del sito',
+      de: 'Website-Inhalte',
+      nl: 'Website-inhoud',
+      ru: 'Контент сайта',
+    };
+    return labels[this.currentLanguage] || labels.fr;
+  }
   get logoutLabel(): string { return this.t('nav.logout'); }
   get galleryLabel(): string { return this.t('nav.gallery'); }
+  get discoverLabel(): string {
+    const labels: Record<SiteLanguage, string> = {
+      fr: 'Découvrir', en: 'Discover', es: 'Descubrir', it: 'Scoprire',
+      de: 'Entdecken', nl: 'Ontdekken', ru: 'Узнать',
+    };
+    return labels[this.currentLanguage] || labels.fr;
+  }
+  get boatMenuLabel(): string {
+    if (this.isCarResource) return ({fr: "La voiture", en: "The car", es: "El coche", de: "Das Auto", it: "L’auto", nl: "De auto", ru: "Автомобиль"} as Record<SiteLanguage,string>)[this.currentLanguage];
+    if (this.isParkingResource) return ({fr: "Le parking", en: "The parking", es: "El aparcamiento", de: "Der Parkplatz", it: "Il parcheggio", nl: "De parkeerplaats", ru: "Парковка"} as Record<SiteLanguage,string>)[this.currentLanguage];
+    if (this.isPropertyResource) return ({fr: "Le logement", en: "The property", es: "El alojamiento", de: "Die Unterkunft", it: "L’alloggio", nl: "De accommodatie", ru: "Жильё"} as Record<SiteLanguage,string>)[this.currentLanguage];
+    if (this.isPoolResource) return ({fr: "La piscine", en: "The pool", es: "La piscina", de: "Der Pool", it: "La piscina", nl: "Het zwembad", ru: "Бассейн"} as Record<SiteLanguage,string>)[this.currentLanguage];
+    const labels: Record<SiteLanguage, string> = {
+      fr: 'Bateau', en: 'Boat', es: 'Barco', it: 'Barca',
+      de: 'Boot', nl: 'Boot', ru: 'Катамаран',
+    };
+    return labels[this.currentLanguage] || labels.fr;
+  }
+  get itinerariesMenuLabel(): string {
+    if (this.isCarResource) return this.currentLanguage === 'fr' ? 'Informations' : 'Information';
+    const labels: Record<SiteLanguage, string> = {
+      fr: 'Itinéraires', en: 'Itineraries', es: 'Itinerarios', it: 'Itinerari',
+      de: 'Routen', nl: 'Routes', ru: 'Маршруты',
+    };
+    return labels[this.currentLanguage] || labels.fr;
+  }
+  get reserveLabel(): string {
+    const labels: Record<SiteLanguage, string> = {
+      fr: 'Réserver', en: 'Book', es: 'Reservar', it: 'Prenotare',
+      de: 'Buchen', nl: 'Boeken', ru: 'Забронировать',
+    };
+    return labels[this.currentLanguage] || labels.fr;
+  }
+  get managementLabel(): string {
+    const labels: Record<SiteLanguage, string> = {
+      fr: 'Gestion', en: 'Management', es: 'Gestión', it: 'Gestione',
+      de: 'Verwaltung', nl: 'Beheer', ru: 'Управление',
+    };
+    return labels[this.currentLanguage] || labels.fr;
+  }
+  get switchOwnerViewLabel(): string {
+    const customerLabels: Record<SiteLanguage, string> = {
+      fr: 'Vue client', en: 'Customer view', es: 'Vista cliente', it: 'Vista cliente',
+      de: 'Kundenansicht', nl: 'Klantweergave', ru: 'Вид клиента',
+    };
+    const adminLabels: Record<SiteLanguage, string> = {
+      fr: 'Vue admin', en: 'Admin view', es: 'Vista admin', it: 'Vista admin',
+      de: 'Adminansicht', nl: 'Beheerweergave', ru: 'Вид администратора',
+    };
+    const labels = this.showAdminNavigation ? customerLabels : adminLabels;
+    return labels[this.currentLanguage] || labels.fr;
+  }
+  get destinationsLabel(): string {
+    const labels: Record<SiteLanguage, string> = {
+      fr: 'Destinations & itinéraires', en: 'Destinations & itineraries',
+      es: 'Destinos e itinerarios', it: 'Destinazioni e itinerari',
+      de: 'Ziele & Routen', nl: 'Bestemmingen & routes', ru: 'Направления и маршруты',
+    };
+    return labels[this.currentLanguage] || labels.fr;
+  }
+  get manageItinerariesLabel(): string {
+    const labels: Record<SiteLanguage, string> = {
+      fr: 'Gérer les itinéraires', en: 'Manage itineraries',
+      es: 'Gestionar itinerarios', it: 'Gestire gli itinerari',
+      de: 'Routen verwalten', nl: 'Routes beheren', ru: 'Управление маршрутами',
+    };
+    return labels[this.currentLanguage] || labels.fr;
+  }
+  get bookingRequestsLabel(): string {
+    const labels: Record<SiteLanguage, string> = {
+      fr: 'Demandes de réservation', en: 'Booking requests',
+      es: 'Solicitudes de reserva', it: 'Richieste di prenotazione',
+      de: 'Buchungsanfragen', nl: 'Boekingsaanvragen', ru: 'Запросы на бронирование',
+    };
+    return labels[this.currentLanguage] || labels.fr;
+  }
   get crewLabel(): string { return this.t('nav.crew'); }
   get contactLabel(): string { return this.t('nav.contact'); }
   get reservationsSectionLabel(): string { return this.reservationsLabel; }
@@ -538,7 +672,19 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
   get externalBookingsLabel(): string { return this.reservationsLabel; }
   get boatLogsSectionLabel(): string { return this.boatLogManagerLabel; }
   get boatLogManagerLabel(): string { return this.t('nav.boatLogManager'); }
-  get calendarLabel(): string { return this.t('nav.calendar'); }
+  get ownerPaymentsLabel(): string {
+    return ({fr:'Paiements / Stripe Connect',en:'Payments / Stripe Connect',es:'Pagos / Stripe Connect',it:'Pagamenti / Stripe Connect',de:'Zahlungen / Stripe Connect',nl:'Betalingen / Stripe Connect',ru:'Платежи / Stripe Connect'} as Record<SiteLanguage,string>)[this.currentLanguage] || 'Payments / Stripe Connect';
+  }
+  get calendarLabel(): string {
+    if (!this.isNonBoatResource) return this.t('nav.calendar');
+    const labels: Record<string, Record<SiteLanguage,string>> = {
+      property:{fr:'Calendrier des réservations',en:'Booking calendar',es:'Calendario de reservas',it:'Calendario prenotazioni',de:'Buchungskalender',nl:'Boekingskalender',ru:'Календарь бронирований'},
+      car:{fr:'Calendrier des locations',en:'Rental calendar',es:'Calendario de alquileres',it:'Calendario noleggi',de:'Mietkalender',nl:'Verhuurkalender',ru:'Календарь аренды'},
+      parking:{fr:'Calendrier des disponibilités',en:'Availability calendar',es:'Calendario de disponibilidad',it:'Calendario disponibilità',de:'Verfügbarkeitskalender',nl:'Beschikbaarheidskalender',ru:'Календарь доступности'},
+      pool:{fr:'Calendrier des réservations',en:'Booking calendar',es:'Calendario de reservas',it:'Calendario prenotazioni',de:'Buchungskalender',nl:'Boekingskalender',ru:'Календарь бронирований'}
+    };
+    return labels[this.resourceContext.resourceType]?.[this.currentLanguage] || 'Booking calendar';
+  }
   get publicOutingInfoSectionLabel(): string { return this.managePublicOutingsLabel; }
   get managePublicOutingsLabel(): string { return this.t('nav.managePublicOutings'); }
   get accountSectionLabel(): string { return this.t('nav.account'); }

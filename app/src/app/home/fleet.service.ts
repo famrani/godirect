@@ -1,9 +1,30 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { StoreDbService, UtilsService } from 'godigital-lib';
+import { ResourceContextService } from '../services/resource-context.service';
+
+export type AssetType = 'boat' | 'car' | 'property' | 'parking' | 'pool' | 'other';
+
+export interface AssetLocation {
+  area?:string;
+  country?: string;
+  region?: string;
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface AssetSearchMetadata {
+  searchable?: boolean;
+  featured?: boolean;
+  tags?: string[];
+  location?: AssetLocation;
+}
 
 export interface AlegriaBoatResource {
   boatId: string;
+  assetId?: string;
+  assetType?: AssetType;
   ownerId?: string;
   defaultSkipperId?: string;
   boatName: string;
@@ -30,13 +51,10 @@ export interface AlegriaBoatResource {
   draft?: string;
   engines?: string;
   imageUrl?: string;
-  coverImageUrl?: string;
   shortDescription?: string;
-  location?: string;
-  startingPrice?: number;
-  marketplaceVisible?: boolean;
-  featured?: boolean;
   gallery?: string[];
+  search?: AssetSearchMetadata;
+  attributes?: Record<string, string | number | boolean | string[]>;
   extraServices?: Record<string, any>;
   active?: boolean;
   createdTS?: number;
@@ -46,18 +64,21 @@ export interface AlegriaBoatResource {
 @Injectable({ providedIn: 'root' })
 export class FleetService {
   private readonly collectionPath = 'bnFleet';
-  private readonly firebaseUrl = 'https://adn-dev-4d05d.firebaseio.com';
+  private readonly firebaseUrl = 'https://ailla-poc-default-rtdb.firebaseio.com';
 
   constructor(
     private http: HttpClient,
     private storeDb: StoreDbService,
     private utilsSvc: UtilsService,
+    private resourceContext: ResourceContextService,
   ) {}
 
   getDefaultBoat(): AlegriaBoatResource {
     const now = Date.now();
     return {
       boatId: 'alegria',
+      assetId: 'alegria',
+      assetType: 'boat',
       ownerId: 'alegria',
       defaultSkipperId: 'alegria-default',
       boatName: 'Alegria',
@@ -83,13 +104,14 @@ export class FleetService {
       beam: '',
       draft: '',
       engines: '',
-      imageUrl: 'assets/img/logo-Alegria.png',
-      coverImageUrl: 'assets/img/boat/bali4.1/bali-41-2.jpg',
-      shortDescription: '',
-      location: 'Marina Baie des Anges',
-      startingPrice: 600,
-      marketplaceVisible: true,
-      featured: false,
+      imageUrl: '/api/media/object?path=assets%2Flogo-Alegria.png',
+      shortDescription: 'Private Bali 4.1 catamaran on the French Riviera',
+      search: {
+        searchable: true,
+        featured: true,
+        tags: ['catamaran', 'day charter', 'French Riviera'],
+        location: { country: 'France', region: 'Provence-Alpes-Côte d’Azur', city: 'Antibes' },
+      },
       extraServices: {},
       active: true,
       createdTS: now,
@@ -98,13 +120,13 @@ export class FleetService {
   }
 
   async listBoats(): Promise<AlegriaBoatResource[]> {
-    const raw = await this.readPath(this.collectionPath).catch(() => null);
+    const raw = await this.readPath(`${this.collectionPath}/${this.resourceContext.assetType}`).catch(() => null);
     let boats: AlegriaBoatResource[] = [];
 
     if (Array.isArray(raw)) {
       boats = raw.filter(Boolean);
     } else if (raw && typeof raw === 'object') {
-      boats = Object.keys(raw).map((key) => ({ boatId: key, ...(raw[key] || {}) }));
+      boats = Object.keys(raw).map((key) => ({ boatId: key, assetId: key, assetType: 'boat', ...(raw[key] || {}) }));
     }
 
     if (!boats.length) {
@@ -116,9 +138,9 @@ export class FleetService {
       .sort((a, b) => String(a.boatName || '').localeCompare(String(b.boatName || '')));
   }
 
-  async getBoat(boatId = 'alegria'): Promise<AlegriaBoatResource> {
-    const raw = await this.readPath(`${this.collectionPath}/${boatId}`).catch(() => null);
-    return { ...this.getDefaultBoat(), ...(raw || {}), boatId };
+  async getBoat(boatId = this.resourceContext.assetId): Promise<AlegriaBoatResource> {
+    const raw = await this.readPath(`${this.collectionPath}/${this.resourceContext.assetType}/${boatId}`).catch(() => null);
+    return { ...this.getDefaultBoat(), ...(raw || {}), boatId, assetId: raw?.assetId || boatId, assetType: raw?.assetType || 'boat' };
   }
 
   async saveBoat(boat: Partial<AlegriaBoatResource>): Promise<AlegriaBoatResource> {
@@ -128,42 +150,32 @@ export class FleetService {
       ...this.getDefaultBoat(),
       ...(boat as any),
       boatId,
+      assetId: boat.assetId || boatId,
+      assetType: boat.assetType || 'boat',
       defaultWarranty: Number(boat.defaultWarranty ?? 500),
       defaultSkipperPrice: Number(boat.defaultSkipperPrice ?? 300),
       defaultCleaningPrice: Number(boat.defaultCleaningPrice ?? 150),
       maxGuests: Number(boat.maxGuests ?? 12),
       cabins: Number(boat.cabins ?? 0),
       bathrooms: Number(boat.bathrooms ?? 0),
-      startingPrice: Number(boat.startingPrice ?? 0),
-      marketplaceVisible: boat.marketplaceVisible !== false,
-      featured: boat.featured === true,
       active: boat.active !== false,
       createdTS: boat.createdTS || now,
       modifiedTS: now,
     };
 
-    await this.writePath(`${this.collectionPath}/${boatId}`, payload);
+    await this.writePath(`${this.collectionPath}/${this.resourceContext.assetType}/${boatId}`, payload);
     return payload;
   }
 
   private async readPath(path: string): Promise<any> {
-    // The marketplace has one canonical public database. Read it first so an
-    // obsolete Firebase app initialized by godigital-lib cannot shadow bnFleet
-    // with an empty snapshot from another project.
-    try {
-      const restValue = await this.http.get<any>(`${this.firebaseUrl}/${path}.json`).toPromise();
-      if (restValue !== null && restValue !== undefined) return restValue;
-    } catch {}
-
     for (const db of this.getRealtimeDatabaseCandidates()) {
       try {
         const snap = await db.ref(path).once('value');
-        const value = snap && typeof snap.val === 'function' ? snap.val() : null;
-        if (value !== null && value !== undefined) return value;
+        return snap && typeof snap.val === 'function' ? snap.val() : null;
       } catch {}
     }
 
-    return null;
+    return this.http.get<any>(`${this.firebaseUrl}/${path}.json`).toPromise();
   }
 
   private async writePath(path: string, payload: any): Promise<void> {

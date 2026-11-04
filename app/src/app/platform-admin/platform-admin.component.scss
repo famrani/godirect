@@ -1,0 +1,21 @@
+:host{display:block}.owner-dashboard{max-width:1200px;padding:36px 24px 60px;margin:auto;color:#103f68}.dashboard-heading,.section-heading,.reservation-row{display:flex;justify-content:space-between;align-items:center;gap:24px}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:2px;font-weight:700}h1{font:400 clamp(30px,4vw,48px)/1.2 Georgia,serif;margin:12px 0}h2{font-size:20px;margin:0 0 14px}h3{font-size:16px;margin:0}p{line-height:1.6;color:#526b80}.dashboard-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}a{color:#103f68}button,.button{display:inline-block;border:0;border-radius:9px;background:#103f68;color:white;padding:12px 16px;text-decoration:none;font:600 13px/1.4 Arial,sans-serif;cursor:pointer}.secondary{background:white;color:#103f68;border:1px solid #c9d8e5}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:28px 0}.metrics a{padding:24px;background:white;border:1px solid #dbe5ed;border-radius:14px;text-decoration:none}.metrics span{font-size:13px}.metrics strong{display:block;font-size:36px;margin-top:14px}.panel{background:white;border:1px solid #dbe5ed;border-radius:14px;padding:25px;margin-bottom:24px}.management-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.attention{padding:24px;background:#fff3e5;border:1px solid #edc295;border-radius:14px;margin-bottom:24px}.attention p{margin:8px 0}.attention h2{color:#854309}.panel small{display:block;margin:6px 0;color:#526b80}.panel .button{margin-top:15px}.needs-setup{color:#854309}.reservation-row{padding:18px 0;border-top:1px solid #dbe5ed}.reservation-row .button{margin-top:0}.table-scroll{overflow:auto}table{border-collapse:collapse;min-width:680px;width:100%;font-size:13px}td,th{text-align:left;padding:18px 12px;border-bottom:1px solid #dbe5ed;line-height:1.6}.error{background:#fff0ed;color:#862c20;padding:14px;border-radius:8px}button:disabled{opacity:.6;cursor:wait}a:focus-visible,button:focus-visible{outline:3px solid #c0641b;outline-offset:3px}#owner-reservations{scroll-margin-top:140px}@media(max-width:800px){.metrics{grid-template-columns:1fr 1fr}.dashboard-heading,.section-heading,.reservation-row{align-items:flex-start;flex-direction:column}.management-grid{grid-template-columns:1fr;gap:0}}@media(max-width:440px){.owner-dashboard{padding:24px 16px}.metrics{gap:10px}.metrics a{padding:16px}.panel{padding:20px 16px}}
+.admin-shell{max-width:1280px;margin:auto;padding:35px 24px 60px;color:#103f68}.admin-shell>header{display:flex;justify-content:space-between;align-items:center;gap:20px}.metrics>div{padding:24px;background:white;border:1px solid #dbe5ed;border-radius:14px}.tabs,.filters,.pagination{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0;align-items:center}.tabs button[aria-pressed=true]{background:#a64c11}.filters input,.filters select{padding:12px;border:1px solid #c9d8e5;border-radius:8px;font:inherit;min-width:0}.filters input{flex:1}.table-scroll{background:white;border:1px solid #dbe5ed;border-radius:14px;padding:12px}td small{display:block;color:#526b80;overflow-wrap:anywhere}.notice{padding:16px;background:#edf4fa;border-radius:10px}@media(max-width:650px){.admin-shell{padding:24px 16px}.admin-shell>header{flex-direction:column;align-items:start}.filters{align-items:stretch;flex-direction:column}}
+
+.review-description{white-space:pre-wrap}.review-photos{display:flex;gap:12px;flex-wrap:wrap}.review-photos img{width:220px;height:150px;object-fit:cover;border-radius:8px}.panel textarea{display:block;width:100%;box-sizing:border-box;min-height:90px;margin-top:8px;padding:12px}.reject{background:#9a3027}dl{display:grid;grid-template-columns:auto 1fr;gap:8px 18px}dd{margin:0}
+
+.archive-toggle{display:flex;gap:8px;align-items:center;margin:14px 0}
+
+/* Keep each asset action distinct, including when Angular removes whitespace. */
+.asset-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  margin-top: 6px;
+}
+.asset-links > a {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-underline-offset: 3px;
+}

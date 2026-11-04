@@ -5,6 +5,7 @@ import { SiteContentService } from '../home/site-content-service/site-content.se
 import { LanguageService, SiteLanguage } from '../services/language.service';
 
 @Component({
+  standalone: false,
   selector: 'app-page404',
   templateUrl: './page404.component.html',
   styleUrls: ['./page404.component.scss'],

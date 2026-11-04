@@ -1,8 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.app = void 0;
-const main_1 = require("./app/main/main");
-let app = new main_1.MainComponent();
-exports.app = app;
+import 'dotenv/config';
+import { MainComponent } from './app/main/main.js';
+const main = new MainComponent();
+main.start().catch((error) => {
+    console.error('[GoDirect] fatal startup error', error);
+    process.exit(1);
+});
 
 //# sourceMappingURL=index.js.map

@@ -4,6 +4,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 
 @Component({
+  standalone: false,
   selector: 'app-homelayout',
   templateUrl: './homelayout.component.html',
   styleUrls: ['./homelayout.component.scss'],

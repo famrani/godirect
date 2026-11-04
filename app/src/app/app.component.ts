@@ -21,6 +21,7 @@ import { filter } from 'rxjs/operators';
 declare let what3words: any;
 
 @Component({
+  standalone: false,
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['./app.component.css'],
@@ -93,7 +94,7 @@ export class AppComponent implements OnInit {
     this.utilSvc.appName = 'Alegria';
 
     let platform = await this.utilSvc.getPlatformEnv() as string;
-    if (platform !== 'dev ' && platform !== 'test ' && platform !== 'prod') {
+    if (platform !== 'dev' && platform !== 'test' && platform !== 'prod') {
       platform = 'test';
     }
 

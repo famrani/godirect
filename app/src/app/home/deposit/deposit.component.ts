@@ -1,3 +1,5 @@
+import {AssetAccessService} from '../../services/asset-access.service';
+import { boatPath } from '../../services/boat-routing';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
@@ -100,6 +102,7 @@ const COPY: Partial<Record<SiteLanguage, DepositCopy>> & { fr: DepositCopy } = {
 };
 
 @Component({
+  standalone: false,
   selector: 'app-deposit',
   templateUrl: './deposit.component.html',
   styleUrls: ['./deposit.component.scss']
@@ -144,10 +147,12 @@ export class DepositComponent implements OnInit, OnDestroy {
     private languageService: LanguageService,
     private utilsSvc: UtilsService,
     private bookingApi: BookingApiService,
-    private mainSvc: ServicesService
-  ) {}
+    private mainSvc: ServicesService,
+    public assetAccess:AssetAccessService
+) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await this.assetAccess.refresh();
     this.languageSub = this.languageService.language$.subscribe((language) => {
       this.currentLanguage = language;
       this.copy = COPY[language] || COPY.fr;
@@ -228,8 +233,8 @@ export class DepositComponent implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    const role = String(this.loggedUser?.role || '').toLowerCase();
-    return role === 'admin' || this.loggedUser?.isAdmin === true;
+
+    return this.assetAccess.canManage(this.loggedUser);
   }
 
   get isWarrantyAdminMode(): boolean {
@@ -562,7 +567,7 @@ export class DepositComponent implements OnInit, OnDestroy {
         this.paymentStatus = state || this.paymentStatus;
 
         // Keep the page aligned with bnBookings as the source of truth.
-        // Stripe details are kept separately in state.stripePayments, coming from bnPayment.
+        // Stripe details are kept separately in state.stripePayments, coming from backendpayments.
         if (state?.booking) {
           this.booking = { ...(this.booking || {}), ...(state.booking || {}) } as any;
           this.customerName = state.booking.customerName || this.customerName;
@@ -587,7 +592,7 @@ export class DepositComponent implements OnInit, OnDestroy {
     }
 
     this.isWarrantyLoading = true;
-    const baseReturnUrl = `${window.location.origin}/payment/${this.bookingId}`;
+    const baseReturnUrl = `${window.location.origin}${boatPath("/payment")}/${this.bookingId}`;
 
     this.bookingApi.createWarrantySetup({
       bookingId: this.bookingId,
@@ -686,7 +691,7 @@ export class DepositComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    const baseReturnUrl = `${window.location.origin}/bookings/${this.bookingId}`;
+    const baseReturnUrl = `${window.location.origin}${boatPath("/bookings")}/${this.bookingId}`;
 
     this.bookingApi.createBalanceCheckout({
       bookingId: this.bookingId,
@@ -740,7 +745,7 @@ export class DepositComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    const baseReturnUrl = `${window.location.origin}/payment/${this.bookingId}`;
+    const baseReturnUrl = `${window.location.origin}${boatPath("/payment")}/${this.bookingId}`;
 
     this.bookingApi.createDepositCheckout({
       customerName: this.customerName.trim(),

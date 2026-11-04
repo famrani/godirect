@@ -492,12 +492,13 @@ class BookingsService {
     /** Index (or reindex) a booking on each day it spans */
     async indexBookingOnCalendar(booking) {
         const { bookingId, start, end } = booking;
+        const boatId = this.storeDbc.normalizeBoatId(booking.boatId);
         const days = this.eachDateUTC(start, end);
         const updates = {};
         for (const day of days) {
-            updates[`/backendcalendar/${day}/${bookingId}`] = {
+            updates[`/${this.storeDbc.boatPath('backendcalendar', boatId, `${day}/${bookingId}`)}`] = {
                 bookingId,
-                boatId: booking.boatId || 'alegria',
+                boatId,
                 start,
                 end,
                 status: booking.status,
@@ -514,18 +515,18 @@ class BookingsService {
         await this.storeDbc.db.ref('/').update(updates);
     }
     /** Remove calendar index of a booking (used before reindexing or deleting) */
-    async unindexBookingFromCalendar(bookingId, startISO, endISO) {
+    async unindexBookingFromCalendar(bookingId, startISO, endISO, boatId = 'alegria') {
         const days = this.eachDateUTC(startISO, endISO);
         const updates = {};
         for (const day of days) {
-            updates[`/backendcalendar/${day}/${bookingId}`] = null;
+            updates[`/${this.storeDbc.boatPath('backendcalendar', boatId, `${day}/${bookingId}`)}`] = null;
         }
         await this.storeDbc.db.ref('/').update(updates);
     }
     async createBooking(raw) {
-        const ref = this.storeDbc.db.ref(firebase_service_1.OBJECTNAME.bnBookings).push();
+        const boatId = this.storeDbc.normalizeBoatId(raw.boatId);
+        const ref = this.storeDbc.db.ref(this.storeDbc.boatPath(firebase_service_1.OBJECTNAME.bnBookings, boatId)).push();
         const bookingId = ref.key;
-        const boatId = String(raw.boatId || 'alegria');
         const boat = await this.storeDbc.db.ref(`${firebase_service_1.OBJECTNAME.bnFleet}/${boatId}`).once('value')
             .then(s => s.val()).catch(() => null);
         if (!boat)
@@ -537,7 +538,7 @@ class BookingsService {
         const startISO = raw.start || `${raw.date}T${raw.time || '00:00'}:00.000Z`;
         const endISO = raw.end || startISO; // or compute with duration
         const now = Date.now();
-        const ownerStripeData = await this.storeDbc.db.ref(`/backendowners/${raw.ownerId}/stripeStandard`)
+        const ownerStripeData = await this.storeDbc.db.ref(`/${this.storeDbc.boatPath('backendowners', boatId, 'stripeStandard')}`)
             .once('value')
             .then(s => s.val());
         const notConnected = !ownerStripeData?.stripe_user_id;
@@ -579,10 +580,10 @@ class BookingsService {
                 }
             };
             const updates = {};
-            updates[`${firebase_service_1.OBJECTNAME.bnBookings}/${bookingId}`] = booking;
+            updates[this.storeDbc.boatPath(firebase_service_1.OBJECTNAME.bnBookings, boatId, bookingId)] = booking;
             // calendar index: use day of start (simple approach)
             const d = dayKey(startISO);
-            updates[`${firebase_service_1.OBJECTNAME.backendcalendar}/${d}/${bookingId}`] = {
+            updates[this.storeDbc.boatPath(firebase_service_1.OBJECTNAME.backendcalendar, boatId, `${d}/${bookingId}`)] = {
                 bookingId,
                 boatId,
                 start: startISO,
@@ -604,32 +605,33 @@ class BookingsService {
             return { bookingId, booking: {} };
         }
     }
-    async updateBookingStatus(bookingId, newStatus, moderatorUid, reason) {
-        const snap = await this.storeDbc.db.ref(`${firebase_service_1.OBJECTNAME.bnBookings}/${bookingId}`).once('value');
+    async updateBookingStatus(bookingId, newStatus, moderatorUid, reason, boatId = 'alegria') {
+        const bookingPath = this.storeDbc.boatPath(firebase_service_1.OBJECTNAME.bnBookings, boatId, bookingId);
+        const snap = await this.storeDbc.db.ref(bookingPath).once('value');
         if (!snap.exists())
             throw new Error('Booking not found');
         const current = snap.val();
         const now = Date.now();
         const d = dayKey(current.start);
         const updates = {};
-        updates[`${firebase_service_1.OBJECTNAME.bnBookings}/${bookingId}/status`] = newStatus;
-        updates[`${firebase_service_1.OBJECTNAME.bnBookings}/${bookingId}/statusReason`] = reason || null;
-        updates[`${firebase_service_1.OBJECTNAME.bnBookings}/${bookingId}/updatedAt`] = now;
-        updates[`${firebase_service_1.OBJECTNAME.bnBookings}/${bookingId}/statusHistory/${now}`] = {
+        updates[`${bookingPath}/status`] = newStatus;
+        updates[`${bookingPath}/statusReason`] = reason || null;
+        updates[`${bookingPath}/updatedAt`] = now;
+        updates[`${bookingPath}/statusHistory/${now}`] = {
             at: now, to: newStatus, by: moderatorUid || 'host', reason: reason || null
         };
-        updates[`${firebase_service_1.OBJECTNAME.backendcalendar}/${d}/${bookingId}/status`] = newStatus;
+        updates[`${this.storeDbc.boatPath(firebase_service_1.OBJECTNAME.backendcalendar, boatId, `${d}/${bookingId}`)}/status`] = newStatus;
         await this.storeDbc.db.ref().update(updates);
     }
     // read /backendcalendar for a range (inclusive)
-    async getCalendarRange(from, to) {
+    async getCalendarRange(from, to, boatId = 'alegria') {
         // naive daily walk (range is typically small for UI views)
         const out = {};
         const start = new Date(from + 'T00:00:00Z');
         const end = new Date(to + 'T00:00:00Z');
         for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
             const key = d.toISOString().slice(0, 10);
-            const daySnap = await this.storeDbc.db.ref(`${firebase_service_1.OBJECTNAME.backendcalendar}/${key}`).once('value');
+            const daySnap = await this.storeDbc.db.ref(this.storeDbc.boatPath(firebase_service_1.OBJECTNAME.backendcalendar, boatId, key)).once('value');
             out[key] = daySnap.val() || null;
         }
         return out;
@@ -680,7 +682,7 @@ class BookingsService {
             .sort((a, b) => Number(a.sortOrder ?? 999) - Number(b.sortOrder ?? 999));
     }
     async notifyCustomerRequestChange(req, kind, source, id, patchPayload = {}) {
-        const path = source === 'booking' ? `/bnBookings/${id}` : `/bnProposals/${id}`;
+        const path = source === 'booking' ? `/bnBookings/${this.storeDbc.normalizeBoatId()}/${id}` : `/bnProposals/${this.storeDbc.normalizeBoatId()}/${id}`;
         const snap = await this.storeDbc.db.ref(path).once('value');
         const record = snap.val();
         if (!record)
@@ -754,7 +756,7 @@ class BookingsService {
         await this.storeDbc.db.ref(path).update(update).catch(() => undefined);
     }
     async notifyBookingRequestCreated(req, offerId) {
-        const snap = await this.storeDbc.db.ref(`/bnProposals/${offerId}`).once('value');
+        const snap = await this.storeDbc.db.ref(`/bnProposals/${this.storeDbc.normalizeBoatId()}/${offerId}`).once('value');
         const offer = snap.val();
         if (!offer)
             throw new Error('Offer request not found');
@@ -800,7 +802,7 @@ class BookingsService {
             await this.mailer.sendToGuest(email, customerSubject, customerHtml);
             customerSent = true;
         }
-        await this.storeDbc.db.ref(`/bnProposals/${offerId}`).update({
+        await this.storeDbc.db.ref(`/bnProposals/${this.storeDbc.normalizeBoatId()}/${offerId}`).update({
             requestEmailSentAt: Date.now(),
             requestAdminEmailSentTo: adminEmail,
             requestCustomerEmailSentTo: customerSent ? email : null,
@@ -809,7 +811,7 @@ class BookingsService {
         });
     }
     async notifyOfferReady(req, offerId) {
-        const snap = await this.storeDbc.db.ref(`/bnProposals/${offerId}`).once('value');
+        const snap = await this.storeDbc.db.ref(`/bnProposals/${this.storeDbc.normalizeBoatId()}/${offerId}`).once('value');
         const offer = snap.val();
         if (!offer)
             throw new Error('Offer not found');
@@ -844,7 +846,7 @@ class BookingsService {
         const subject = renderTemplateString(template.subject || 'Votre offre Alegria est prête', data, false);
         const html = wrapEmailLayout(template, data);
         await this.mailer.sendToGuest(email, subject, html);
-        await this.storeDbc.db.ref(`/bnProposals/${offerId}`).update({
+        await this.storeDbc.db.ref(`/bnProposals/${this.storeDbc.normalizeBoatId()}/${offerId}`).update({
             proposalEmailSentAt: Date.now(),
             proposalEmailSentTo: email,
             proposalEmailTemplateKey: 'offerReady',
@@ -852,7 +854,7 @@ class BookingsService {
         });
     }
     async notifyBookingConfirmed(req, bookingId) {
-        const snap = await this.storeDbc.db.ref(`${firebase_service_1.OBJECTNAME.bnBookings}/${bookingId}`).once('value');
+        const snap = await this.storeDbc.db.ref(`${this.storeDbc.boatPath(firebase_service_1.OBJECTNAME.bnBookings)}/${bookingId}`).once('value');
         const booking = snap.val();
         if (!booking)
             throw new Error('Booking not found');
@@ -887,7 +889,7 @@ class BookingsService {
         const subject = renderTemplateString(template.subject || 'Votre réservation Alegria est confirmée', data, false);
         const html = wrapEmailLayout(template, data);
         await this.mailer.sendToGuest(email, subject, html);
-        await this.storeDbc.db.ref(`${firebase_service_1.OBJECTNAME.bnBookings}/${bookingId}`).update({
+        await this.storeDbc.db.ref(`${this.storeDbc.boatPath(firebase_service_1.OBJECTNAME.bnBookings)}/${bookingId}`).update({
             bookingConfirmationEmailSentAt: Date.now(),
             bookingConfirmationEmailSentTo: email,
             bookingConfirmationEmailTemplateKey: 'bookingConfirmed',
@@ -1015,9 +1017,9 @@ class BookingsService {
                     backendReceivedAt: now,
                 };
                 const eventBase = payload.bookingId
-                    ? `/bnBookings/${payload.bookingId}/events/${eventId}`
+                    ? `/bnBookings/${this.storeDbc.normalizeBoatId()}/${payload.bookingId}/events/${eventId}`
                     : payload.offerId
-                        ? `/bnProposals/${payload.offerId}/events/${eventId}`
+                        ? `/bnProposals/${this.storeDbc.normalizeBoatId()}/${payload.offerId}/events/${eventId}`
                         : `/bnFleet/${payload.boatId || 'alegria'}/events/${eventId}`;
                 await this.storeDbc.db.ref(eventBase).update(normalizedPayload).catch(() => undefined);
                 const adminMail = buildNotificationEmail(normalizedPayload, 'admin', baseUrl);
@@ -1054,9 +1056,9 @@ class BookingsService {
                 const eventId = String(req.body?.eventId || '').trim();
                 if (eventId) {
                     const failedBase = req.body?.bookingId
-                        ? `/bnBookings/${req.body.bookingId}/events/${eventId}`
+                        ? `/bnBookings/${this.storeDbc.normalizeBoatId()}/${req.body.bookingId}/events/${eventId}`
                         : req.body?.offerId
-                            ? `/bnProposals/${req.body.offerId}/events/${eventId}`
+                            ? `/bnProposals/${this.storeDbc.normalizeBoatId()}/${req.body.offerId}/events/${eventId}`
                             : `/bnFleet/${req.body?.boatId || 'alegria'}/events/${eventId}`;
                     await this.storeDbc.db.ref(failedBase).update({
                         status: 'failed',

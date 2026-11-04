@@ -14,10 +14,12 @@ import { GodigitalbModule } from 'godigital-lib';
 import { LoginRoutingModule } from './login.router.module';
 import { SiteTextPipe } from '../home/site-text.pipe';
 
+import { ResourceRoutePipe } from '../services/resource-route.pipe';
 @NgModule({
   declarations: [LoginComponent, SignupComponent, ForgotPasswordComponent],
   imports: [
     CommonModule,
+    ResourceRoutePipe,
     IonicModule,
     LoginRoutingModule,
     FormsModule, ReactiveFormsModule,

@@ -37,7 +37,7 @@
       </div>
 
       <p class="success full" *ngIf="saved">{{ t('saved') }}</p>
-      <p class="error full" *ngIf="error">{{ error }}</p>
+      <p class="error full" *ngIf="error">{{ error | siteText }}</p>
     </form>
   </div>
 </section>

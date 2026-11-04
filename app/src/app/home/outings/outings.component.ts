@@ -6,6 +6,7 @@ import { DynamicOuting, OutingsDataService } from '../outings-data.service';
 import { SiteContentService } from '../site-content-service/site-content.service';
 
 @Component({
+  standalone: false,
   selector: 'app-outings',
   templateUrl: './outings.component.html',
   styleUrls: ['./outings.component.scss'],

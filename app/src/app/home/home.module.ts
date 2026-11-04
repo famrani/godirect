@@ -29,6 +29,7 @@ import { GuestFaqComponent } from './guest-faq/guest-faq.component';
 import { GuestJourneyComponent } from './guest-journey/guest-journey.component';
 import { BookingsComponent } from './bookings/bookings.component';
 import { MyBookingsComponent } from './my-bookings/my-bookings.component';
+import { MyPaymentsComponent } from './my-payments/my-payments.component';
 import { MyOffersComponent } from './my-offers/my-offers.component';
 import { BookingDetailComponent } from './booking-detail/booking-detail.component';
 import { BookingInvoiceComponent } from './booking-invoice/booking-invoice.component';
@@ -44,9 +45,12 @@ import { AdminFleetComponent } from './admin-fleet/admin-fleet.component';
 import { SiteTextPipe } from './site-text.pipe';
 import { AdminSiteContentComponent } from './admin-site-content/admin-site-content.component';
 import { AdminBoatCalendarComponent } from './admin-boat-calendar/admin-boat-calendar.component';
-import { AdminStripeConnectComponent } from './admin-stripe-connect/admin-stripe-connect.component';
-import { PlatformHomeComponent } from './platform-home/platform-home.component';
+import { ResourceHomeComponent } from './resource-home/resource-home.component';
+import { ResourceBookingComponent } from './resource-booking/resource-booking.component';
+import { GenericAssetHomeComponent } from './generic-asset-home/generic-asset-home.component';
+import { GenericAssetBookingComponent } from './generic-asset-booking/generic-asset-booking.component';
 
+import { ResourceRoutePipe } from '../services/resource-route.pipe';
 @NgModule({
   declarations: [
     HomeComponent,
@@ -73,6 +77,7 @@ import { PlatformHomeComponent } from './platform-home/platform-home.component';
     GuestJourneyComponent,
     BookingsComponent,
     MyBookingsComponent,
+    MyPaymentsComponent,
     MyOffersComponent,
     BookingDetailComponent,
     BookingInvoiceComponent,
@@ -87,11 +92,14 @@ import { PlatformHomeComponent } from './platform-home/platform-home.component';
     SeaToysComponent,
     AdminSiteContentComponent,
     AdminBoatCalendarComponent,
-    AdminStripeConnectComponent,
-    PlatformHomeComponent,
+    ResourceHomeComponent,
+    ResourceBookingComponent,
+    GenericAssetHomeComponent,
+    GenericAssetBookingComponent,
   ],
   imports: [
     CommonModule,
+    ResourceRoutePipe,
     FormsModule,
     RouterModule,
     IonicModule,

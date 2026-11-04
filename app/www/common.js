@@ -323,6 +323,49 @@ const startFocusVisible = rootEl => {
 
 /***/ }),
 
+/***/ 16272:
+/*!*********************************************!*\
+  !*** ./src/app/services/ui-text.service.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   UiTextService: () => (/* binding */ UiTextService)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _language_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./language.service */ 48756);
+/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../home/site-content-service/site-content.service */ 73196);
+
+
+
+
+let UiTextService = class UiTextService {
+  language;
+  source;
+  content;
+  constructor(language, source) {
+    this.language = language;
+    this.source = source;
+    void source.getContent().then(value => this.content = value).catch(() => {});
+  }
+  text(value) {
+    return this.source.tFromContent(this.content, value, this.language.currentLanguage, value);
+  }
+  static ctorParameters = () => [{
+    type: _language_service__WEBPACK_IMPORTED_MODULE_0__.LanguageService
+  }, {
+    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_1__.SiteContentService
+  }];
+};
+UiTextService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Injectable)({
+  providedIn: 'root'
+})], UiTextService);
+
+
+/***/ }),
+
 /***/ 17280:
 /*!***********************************************************!*\
   !*** ./node_modules/@ionic/core/dist/esm/dir-babeabeb.js ***!

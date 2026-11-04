@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { SiteLanguage } from '../../services/language.service';
-import { BoatContextService } from '../../services/boat-context.service';
+import { ResourceContextService } from '../../services/resource-context.service';
 
 export interface GuestFaqItem {
   question: string;
@@ -1227,19 +1227,19 @@ export const DEFAULT_GUEST_INFO_CONTENT: GuestInfoFirebaseContent = {
 @Injectable({ providedIn: 'root' })
 export class GuestContentService {
   private readonly restDatabaseUrls = [
-    'https://adn-dev-4d05d.firebaseio.com',
+    'https://ailla-poc-default-rtdb.firebaseio.com',
   ];
 
   private cached?: GuestInfoFirebaseContent;
 
-  constructor(private http: HttpClient, private boatContext: BoatContextService) {}
+  constructor(private http: HttpClient, private resourceContext: ResourceContextService) {}
 
   async getContent(forceRefresh = false): Promise<GuestInfoFirebaseContent> {
     if (this.cached && !forceRefresh) return this.cached;
 
     for (const baseUrl of this.restDatabaseUrls) {
       try {
-        const url = `${baseUrl}/guestInfo/${encodeURIComponent(this.boatContext.boatId)}.json`;
+        const url = `${baseUrl}/${this.resourceContext.scopedPath('guestInfo')}.json`;
         const value = await firstValueFrom(this.http.get<any | null>(url));
         const content = this.unwrapGuestInfo(value);
         if (content?.guestFaq || content?.guestJourney || content?.offerInfo || content?.bookingInfo) {

@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<body>
+  <button id="login">Google Login</button>
+  <pre id="result"></pre>
+
+  <script type="module">
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      authDomain: "ailla-poc.firebaseapp.com",
+      databaseURL: "https://ailla-poc-default-rtdb.firebaseio.com",
+      projectId: "ailla-poc",
+      storageBucket: "ailla-poc.appspot.com",
+      messagingSenderId: "483464582410",
+      appId: "1:483464582410:web:010d025e452b5a9b4b16f3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("login").onclick = async () => {
+      const output = document.getElementById("result");
+
+      try {
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: "select_account"
+        });
+
+        const result = await signInWithPopup(auth, provider);
+
+        output.textContent =
+          "SUCCESS\n" +
+          result.user.email + "\n" +
+          result.user.uid;
+
+        console.log("GOOGLE LOGIN SUCCESS", result.user);
+      } catch (e) {
+        output.textContent =
+          "ERROR\n" +
+          e.code + "\n" +
+          e.message;
+
+        console.error("GOOGLE LOGIN ERROR", e);
+      }
+    };
+  </script>
+</body>
+</html>

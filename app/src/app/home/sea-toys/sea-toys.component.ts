@@ -14,6 +14,7 @@ interface SeaToyItem {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-sea-toys',
   templateUrl: './sea-toys.component.html',
   styleUrls: ['./sea-toys.component.scss']
