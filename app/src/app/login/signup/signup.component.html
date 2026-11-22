@@ -101,19 +101,12 @@
         </div>
       </div>
 
-      <!-- Terms -->
-      <div class="col-12">
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="acceptTerms" formControlName="acceptTerms" />
-          <label class="form-check-label small" for="acceptTerms">{{ 'auto.login.signup.signup.component.i_agree_to_the' | siteText }}<a [routerLink]="'/terms' | resourceRoute">{{ 'auto.login.signup.signup.component.terms' | siteText }}</a>{{ 'auto.login.signup.signup.component.amp' | siteText }}<a [routerLink]="'/privacy' | resourceRoute">{{ 'auto.login.signup.signup.component.privacy' | siteText }}</a>.
-          </label>
-        </div>
-        <div class="text-danger small mt-1" *ngIf="f.acceptTerms.touched && f.acceptTerms.invalid">{{ 'auto.login.signup.signup.component.you_must_accept_the_terms_to_create_an_account' | siteText }}</div>
-      </div>
+      <!-- Firebase-sourced localized versioned acceptance -->
+      <div class="col-12"><h2 class="h5">{{legalLabels.conditions}}</h2><p *ngIf="legalError" role="alert">{{legalError}}</p><p>{{legalLabels.signupIntro}} {{legalCatalog?.language}}</p><ul><li *ngFor="let d of legalCatalog?.documents"><a routerLink="/legal" [queryParams]="{role:legalCatalog.role}" target="_blank" rel="noopener">{{d.title}} — {{d.version}}</a></li></ul><label class="form-label" for="legalName">{{legalLabels.name}}</label><input id="legalName" class="form-control" formControlName="legalName" autocomplete="name" maxlength="240"><label class="d-flex gap-2 mt-3"><input type="checkbox" formControlName="adultConfirmed">{{legalLabels.adult}}</label><label class="d-flex gap-2 mt-3"><input type="checkbox" id="acceptTerms" formControlName="acceptTerms">{{legalLabels.agree}}</label><p class="small">{{legalLabels.signIntro}} {{legalLabels.noMarketing}}</p><p class="text-danger" *ngIf="f.acceptTerms.touched && f.acceptTerms.invalid">{{legalLabels.required}}</p></div>
     </div>
 
     <div class="d-flex justify-content-end gap-2 mt-4">
-      <button class="btn btn-dark btn-sm rounded-pill px-3" [disabled]="form.invalid || sending">
+      <button class="btn btn-dark btn-sm rounded-pill px-3" [disabled]="form.invalid || sending || !legalCatalog?.accepting">
         {{ sending ? ('ui.messages.t94d7d8ee473f' | siteText) : ('ui.messages.taaf374479756' | siteText) }}
       </button>
     </div>
@@ -122,7 +115,7 @@
   <div class="text-center text-muted my-3 small">{{ 'auto.login.signup.signup.component.or' | siteText }}</div>
 
   <div class="d-grid">
-    <button class="btn btn-outline-dark btn-sm rounded-pill" (click)="signupWithGoogle()" [disabled]="sending">
+    <button class="btn btn-outline-dark btn-sm rounded-pill" (click)="signupWithGoogle()" [disabled]="sending || !legalCatalog?.accepting || !form.value.acceptTerms || !form.value.adultConfirmed || f.legalName.invalid">
       <span class="d-inline-flex align-items-center gap-2">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16" height="16" alt="">{{ 'auto.login.signup.signup.component.continue_with_google' | siteText }}</span>
     </button>

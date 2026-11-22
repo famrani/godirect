@@ -1,20 +1,7 @@
 <footer class="site-footer-simple">
   <div class="container footer-simple">
-    <div class="footer-left">
-      © {{ year }} {{ resourceName }}
-    </div>
-
-    <div class="footer-center">
-      {{ releaseLabel }} {{ mainSvc.version }}
-    </div>
-
-    <div class="footer-right">
-      <a routerLink="/">{{goDirectHomeLabel}}</a>
-      <a [routerLink]="'/contact' | resourceRoute">{{ content?.footer?.contact || content?.nav?.contact }}</a>
-      <a [routerLink]="'/booking-process' | resourceRoute">{{ bookingProcessLabel }}</a>
-      <a [routerLink]="'/sea-toys' | resourceRoute">{{ seaToysLabel }}</a>
-      <a [routerLink]="'/terms' | resourceRoute">{{ termsLabel }}</a>
-      <a [routerLink]="'/safety' | resourceRoute">{{ safetyLabel }}</a>
+    <div class="footer-right"><a routerLink="/legal">{{'ui.legal.conditions' | siteText}}</a><a routerLink="/faq">{{'ui.legal.faq' | siteText}}</a>
+      <a *ngIf="!isDedicatedAssetSite" routerLink="/">{{goDirectHomeLabel}}</a>
     </div>
   </div>
 </footer>

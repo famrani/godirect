@@ -1,3 +1,4 @@
+import {ListingDescriptionComponent} from '../../shared/listing-description.component';
 import {SiteTextPipe} from '../../home/site-text.pipe';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -10,6 +11,6 @@ import { PropertyDetailsComponent } from './pages/details/property-details.compo
 
 @NgModule({
  declarations:[PropertyHomeComponent,PropertyDetailsComponent],
- imports: [SiteTextPipe,CommonModule,LayoutModule,SharedModule,ResourceRoutePipe,PropertyRoutingModule]
+ imports: [ListingDescriptionComponent,SiteTextPipe,CommonModule,LayoutModule,SharedModule,ResourceRoutePipe,PropertyRoutingModule]
 })
 export class PropertyModule {}

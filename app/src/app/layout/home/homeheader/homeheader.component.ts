@@ -1,3 +1,7 @@
+import {MessageNotificationsService} from '../../../messaging/message-notifications.service';import {unreadConversation} from '../../../messaging/message-unread';
+import {messagingText} from '../../../messaging/messaging-text';
+import {accountHeaderText} from '../../../services/account-header';
+import { dedicatedAsset } from '../../../services/asset-domain';
 import {assetView} from '../../../services/asset-navigation';
 import {PLATFORM_HOME_TEXT} from '../../../services/platform-home-text';
 import {AssetAccessService} from '../../../services/asset-access.service';
@@ -18,6 +22,9 @@ import { ResourceContextService } from '../../../services/resource-context.servi
   styleUrls: ['./homeheader.component.scss'],
 })
 export class HomeheaderComponent implements OnInit, OnDestroy {
+ messageQuery(){const pending=unreadConversation(this.messageNotifications.summary.value);if(pending)return {threadId:pending.id};return this.assetAccess.canManageFor(this.bookingAssetType,this.bookingAssetId)?{}:{contactType:this.bookingAssetType,contactAsset:this.bookingAssetId};}
+ messageLabel(){return messagingText(this.currentLanguage,0);}
+  readonly isDedicatedAssetSite=!!dedicatedAsset();
   get goDirectHomeLabel():string {return this.siteContentService.tFromContent(this.allSiteContent,'ui.platform.home',this.currentLanguage,PLATFORM_HOME_TEXT[this.currentLanguage]||PLATFORM_HOME_TEXT.en);}
 
   private readonly ownerViewStorageKey = 'alegria-owner-view';
@@ -337,7 +344,8 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
     private siteContentService: SiteContentService,
     private privateMedia: PrivateMediaService,
     public resourceContext: ResourceContextService,
-    public assetAccess:AssetAccessService
+    public assetAccess:AssetAccessService,
+    private messageNotifications:MessageNotificationsService
 ) {
     this.logoUrl = this.privateMedia.objectUrl('/api/media/object?path=assets%2Flogo-Alegria.png');
   }
@@ -475,11 +483,7 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
 
   openClientView():void {this.rememberView('customer');}
 
-  switchOwnerView(): void {
-    const next=this.showAdminNavigation?'customer':'admin';
-    this.rememberView(next);
-    void this.router.navigateByUrl(this.resourceContext.route(next==='customer'?'/home':'/admin/reservations'));
-  }
+  switchOwnerView(): void {this.closeMenu();void this.assetAccess.switchView();}
 
   get assetPaymentsRoute(): string {
     const type = this.resourceContext.resourceType;
@@ -540,12 +544,10 @@ export class HomeheaderComponent implements OnInit, OnDestroy {
     return String(fromName).split(' ')[0] || this.t('nav.account');
   }
 
-  get accountSummaryLabel(): string {
-    if (this.isLoggedIn) {
-      return `${this.t('hi')} ${this.firstName}`;
-    }
-    return this.t('nav.account');
-  }
+  get bookingAssetType(){return this.resourceContext.resourceType;}
+  get bookingAssetId(){return this.resourceContext.resourceId;}
+  accountText(key:string){return accountHeaderText(this.currentLanguage,key);}
+  get accountSummaryLabel():string{return this.accountText('account');}
 
   get allOutingsLabel(): string { return this.t('nav.allOutings'); }
   get dayAtSeaLabel(): string { return this.t('nav.dayAtSea'); }

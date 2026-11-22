@@ -1,0 +1,24 @@
+services:
+  godirect:
+    environment:
+      HTTPS_ENABLED: "true"
+      SSL_KEY: /run/ssl/alldigitalnetwork.com.key
+      SSL_CERT: /run/ssl/alldigitalnetwork.com.crt
+      SSL_CA: /run/ssl/GandiCert.pem
+      FRONTEND_URL: https://localhost:2000
+      BILLING_RETURN_URL: https://localhost:2000
+      CORS_ORIGINS: https://localhost:2000
+
+    volumes:
+      - ./server/sslKeys/kamli.net:/run/ssl:ro
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "const r=require('https').get({host:'127.0.0.1',port:2000,path:'/',rejectUnauthorized:false},s=>{s.resume();process.exit(s.statusCode===200?0:1)});r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3

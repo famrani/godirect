@@ -1,3 +1,4 @@
+import {queueNotification,queueBookingChange,emitNotification} from './email-notifications.js';
 import { createHash, randomUUID } from 'node:crypto';
 import type { FirebaseService } from './firebase.service.js';
 import type Stripe from 'stripe';
@@ -90,7 +91,7 @@ export class CancellationService {
         return {...current,...(complete?{status:'cancelled',cancelledAt:stamp(),cancellationRequestStatus:'completed'}:{}),cancellation:{...current.cancellation,status:state,items,verifiedAt:stamp(),lockToken:null,lockUntil:0,error:null},updatedAt:stamp()};
       });
       if(!saved.committed)throw fail('cancellation_changed_retry');
-      return saved.snapshot.val();
+      const booking=saved.snapshot.val();if(complete){await emitNotification(this.firebase,{key:booking.id+'|cancelled',kind:'booking.cancelled',type:booking.assetType,assetId:booking.assetId,ownerId:booking.ownerId,bookingId:booking.id}).catch(()=>undefined);for(const item of items)if(item.refunded>0)await emitNotification(this.firebase,{key:item.intentId+'|'+item.refunded,kind:'payment.refunded',type:booking.assetType,assetId:booking.assetId,ownerId:booking.ownerId,bookingId:booking.id,amount:item.refunded/100,currency:item.currency}).catch(()=>undefined);}return booking;
     }catch(e:any){
       await updateExisting(ref,(current:any)=>current.cancellation?.lockToken===token?{...current,cancellation:{...current.cancellation,status:String(e.message||'').includes('review')||String(e.message||'').includes('scope')?'review_required':'refund_failed',items,error:e.code||e.message||'refund_failed',lockToken:null,lockUntil:0},updatedAt:stamp()}:undefined);
       throw e;

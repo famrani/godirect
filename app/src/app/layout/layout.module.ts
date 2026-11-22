@@ -1,3 +1,5 @@
+import {MessageBadgeComponent} from '../messaging/message-badge.component';
+import {AssetContactButtonComponent} from '../messaging/asset-contact-button.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -22,7 +24,7 @@ import { ResourceRoutePipe } from '../services/resource-route.pipe';
     LayoutnoneComponent,
     CookieConsentComponent,
   ],
-  imports: [
+  imports: [MessageBadgeComponent,AssetContactButtonComponent,
     CommonModule,
     ResourceRoutePipe,
     RouterModule,

@@ -1,0 +1,12 @@
+import {localDateTime} from '../services/discovery-search';
+const FIELDS=['guests','pickupLocation','returnLocation','additionalDriver','childSeat','driverAge','licenseCountry','vehiclePlate'];
+export function inquiryFromForm(type:string,form:any):any {
+ const date=(day:string,time:string)=>{const s=`${day}T${time}`;const d=new Date(s+':00');if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)||!Number.isFinite(d.getTime())||localDateTime(d.toISOString())!==s)throw Error('invalid_prebooking_dates');return d.toISOString();};
+ const startAt=date(form.startDate,form.startTime),endAt=date(form.endDate,form.endTime);if(Date.parse(endAt)<=Date.parse(startAt))throw Error('invalid_prebooking_dates');const p:any={startAt,endAt};
+ const fields=type==='car'?['pickupLocation','returnLocation','additionalDriver','childSeat','driverAge','licenseCountry']:type==='parking'?['vehiclePlate']:['guests'];for(const key of fields)if(form[key]!==undefined)p[key]=form[key];return p;
+}
+export function inquiryQuery(type:string,assetId:string,p:any):any {return {contactType:type,contactAsset:assetId,prebooking:JSON.stringify(p)};}
+export function inquiryFromQuery(q:{get:(k:string)=>string|null}):any|null {const raw=q.get('prebooking');if(!raw)return null;if(raw.length>4096)throw Error('invalid_prebooking_details');const p=JSON.parse(raw),a=localDateTime(p?.startAt||''),b=localDateTime(p?.endAt||'');if(!a||!b||Date.parse(p.endAt)<=Date.parse(p.startAt))throw Error('invalid_prebooking_dates');return {startAt:new Date(p.startAt).toISOString(),endAt:new Date(p.endAt).toISOString(),...Object.fromEntries(FIELDS.filter(k=>p[k]!==undefined).map(k=>[k,p[k]]))};}
+export function applyInquiryForm(form:any,q:{get:(k:string)=>string|null}):void {try{const p=inquiryFromQuery(q);if(!p)return;for(const k of FIELDS)if(p[k]!==undefined)form[k]=p[k];}catch{/* Server validates the eventual request; ignore malformed optional prefills. */}}
+export function prebookingRelation(q:{get:(k:string)=>string|null},startAt:string,endAt:string):any {const id=q.get('prebookingThreadId');return id&&/^[a-f0-9]{64}$/.test(id)&&Date.parse(q.get('startAt')||'')===Date.parse(startAt)&&Date.parse(q.get('endAt')||'')===Date.parse(endAt)?{prebookingThreadId:id}:{};}
+export function bookingQuery(thread:any):any {const p=thread.prebooking;return p?{startAt:p.startAt,endAt:p.endAt,prebooking:JSON.stringify(p),prebookingThreadId:thread.id}:{};}

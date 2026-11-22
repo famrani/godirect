@@ -1,46 +1,21 @@
 <header class="site-header">
-  <div class="platform-return"><div class="container"><a routerLink="/" (click)="closeMenu()"><span aria-hidden="true">←</span> {{goDirectHomeLabel}}</a></div></div>
+  <div class="platform-return" *ngIf="!isDedicatedAssetSite"><div class="container"><a routerLink="/" (click)="closeMenu()"><span aria-hidden="true">←</span> {{goDirectHomeLabel}}</a></div></div>
   <div class="container header-bar">
     <a class="brand" [routerLink]="(homeRoute) | resourceRoute" (click)="closeMenu()">
       <img class="brand-logo" [src]="logoUrl" [alt]="resourceBrandName" />
       <span class="brand-text">
         <strong>{{ resourceBrandName }}</strong>
-        <small>{{ resourceTagline }}</small>
+
       </span>
     </a>
 
+      <span class="account-identity" *ngIf="assetAccess.isAuthenticated"><strong>{{assetAccess.displayName}}</strong><small>{{accountText(assetAccess.accountMode)}}</small><small *ngIf="assetAccess.isManager">{{accountText(assetAccess.viewMode==='client'?'clientViewMode':(assetAccess.accountMode==='concierge'?'conciergeView':'ownerViewMode'))}}</small></span><button class="workspace-view-switch" type="button" *ngIf="assetAccess.isManager" (click)="assetAccess.switchView()" [disabled]="assetAccess.switchingView">⇄ {{accountText(assetAccess.viewMode==='client'?(assetAccess.accountMode==='concierge'?'conciergeView':'ownerViewMode'):'clientViewMode')}}</button>
+    <app-asset-contact-button [type]="bookingAssetType" [assetId]="bookingAssetId"></app-asset-contact-button>
     <button class="menu-toggle" type="button" (click)="toggleMenu()" [attr.aria-label]="t('nav.openMenu')">
       ☰
     </button>
 
     <nav class="main-nav" [class.open]="menuOpen">
-      <details class="nav-dropdown" *ngIf="showCustomerNavigation && !isNonBoatResource" (toggle)="onDropdownToggle($event)">
-        <summary>{{ discoverLabel }}</summary>
-        <div class="dropdown-panel">
-          <a [routerLink]="'/bateau' | resourceRoute" routerLinkActive="active" (click)="openClientView()">{{ boatMenuLabel }}</a>
-          <a [routerLink]="'/crew' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ crewLabel }}</a>
-          <a [routerLink]="'/sorties' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ itinerariesMenuLabel }}</a>
-        </div>
-      </details>
-      <a *ngIf="isNonBoatResource" [routerLink]="'/details' | resourceRoute" routerLinkActive="active" (click)="openClientView()">{{ boatMenuLabel }}</a>
-      <a *ngIf="showCustomerNavigation" [routerLink]="'/reserver' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ reserveLabel }}</a>
-
-      <details class="nav-dropdown" *ngIf="showAdminNavigation" (toggle)="onDropdownToggle($event)">
-        <summary>{{ managementLabel }}</summary>
-        <div class="dropdown-panel admin-navigation-panel"><a [routerLink]="assetAccess.isPlatformAdmin ? '/platform/admin' : '/owner/listings'" (click)="closeMenu()">{{ assetAccess.isPlatformAdmin ? goDirectHomeLabel : ("ui.pages.t85f3d8ebb393" | siteText) }}</a>
-          <a [routerLink]="'/admin/reservations' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ reservationsLabel }}</a>
-          <a [routerLink]="'/admin/calendar' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ calendarLabel }}</a>
-          <a [routerLink]="'/admin/site-content' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ siteContentLabel }}</a>
-          <a [routerLink]="'/admin/pricing-model' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ pricingModelLabel }}</a>
-          <a [routerLink]="'/admin/feedbacks' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ adminFeedbacksLabel }}</a>
-          <a [routerLink]="assetPaymentsRoute" routerLinkActive="active" (click)="closeMenu()">{{ ownerPaymentsLabel }}</a>
-        </div>
-      </details>
-
-      <button *ngIf="isAdmin" class="owner-view-switch" type="button" (click)="switchOwnerView()">
-        <span aria-hidden="true">⇄</span>{{ switchOwnerViewLabel }}
-      </button>
-
       <div class="language-switcher">
         <select [value]="currentLanguage" (change)="changeLanguage($any($event.target).value)" [attr.aria-label]="t('nav.languageSelector')">
           <option value="fr">{{ 'layout.languages.fr' | siteText:'Français' }}</option>
@@ -53,29 +28,12 @@
         </select>
       </div>
 
-      <details class="nav-dropdown account-dropdown" (toggle)="onDropdownToggle($event)">
-        <summary>{{ accountSummaryLabel }}</summary>
 
-        <div class="dropdown-panel dropdown-panel-right" *ngIf="!isLoggedIn">
-          <a [routerLink]="'/login' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ loginLabel }}</a>
-          <a [routerLink]="'/signup' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ signupLabel }}</a>
-        </div>
+      <a [routerLink]="'/home' | resourceRoute" (click)="closeMenu()">{{accountText('clientView')}}</a><a *ngIf="!assetAccess.isPlatformAdmin" [routerLink]="'/reserver' | resourceRoute" (click)="closeMenu()">{{reserveLabel}}</a>
+      <details class="nav-dropdown" *ngIf="isAdmin && assetAccess.viewMode==='owner'" (toggle)="onDropdownToggle($event)"><summary>{{accountText('assetManagement')}}</summary><div class="dropdown-panel"><a [routerLink]="assetAccess.isPlatformAdmin?'/platform/admin/assets/'+bookingAssetType+'/'+bookingAssetId:assetAccess.ownsCurrentAsset?'/owner/listings':'/concierge'" (click)="closeMenu()">{{accountText('assets')}}</a><a *ngIf="assetAccess.isConcierge" routerLink="/concierge">{{accountText('concierge')}}</a><a *ngIf="assetAccess.isOwner && !assetAccess.isPlatformAdmin" routerLink="/owner/delegations">{{accountText('delegations')}}</a><button class="dropdown-action" type="button" (click)="switchOwnerView()">{{switchOwnerViewLabel}}</button></div></details>
+      <details class="nav-dropdown" *ngIf="isLoggedIn && !assetAccess.isPlatformAdmin" (toggle)="onDropdownToggle($event)"><summary>{{accountText('reservations')}}</summary><div class="dropdown-panel"><ng-container *ngIf="isAdmin && assetAccess.viewMode==='owner'; else customerBookingLinks"><a *ngIf="assetAccess.canUse('bookings')" [routerLink]="'/admin/reservations' | resourceRoute" (click)="closeMenu()">{{reservationsLabel}}</a><a *ngIf="assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin" [routerLink]="'/admin/calendar' | resourceRoute" (click)="closeMenu()">{{calendarLabel}}</a><a *ngIf="assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin" routerLink="/owner/activity/ratings" [queryParams]="{type:bookingAssetType,id:bookingAssetId}" (click)="closeMenu()">{{accountText('ratings')}}</a><a *ngIf="assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin" routerLink="/owner/activity/payments" [queryParams]="{type:bookingAssetType,id:bookingAssetId}" (click)="closeMenu()">{{accountText('payments')}}</a><a *ngIf="assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin" routerLink="/owner/customers">{{accountText('customers')}}</a><a *ngIf="assetAccess.canConcierge('bookings')" routerLink="/concierge/activity/reservations">{{accountText('concierge')}} — {{accountText('reservations')}}</a><a *ngIf="assetAccess.canConcierge('customers')" routerLink="/concierge/customers">{{accountText('customers')}}</a><a *ngIf="assetAccess.canConcierge('payments')" routerLink="/concierge" fragment="payments">{{accountText('payments')}}</a></ng-container><ng-template #customerBookingLinks><a [routerLink]="'/my-bookings' | resourceRoute" (click)="closeMenu()">{{myBookingsLabel}}</a><a routerLink="/account/ratings" (click)="closeMenu()">{{accountText('ratings')}}</a><a routerLink="/account/payments" (click)="closeMenu()">{{myPaymentsLabel}}</a></ng-template></div></details>
+      <details class="nav-dropdown account-dropdown" (toggle)="onDropdownToggle($event)"><summary>{{accountText('account')}}</summary><div class="dropdown-panel dropdown-panel-right"><ng-container *ngIf="isLoggedIn; else guestAccount"><a routerLink="/messages" [queryParams]="messageQuery()" (click)="closeMenu()"><span style="position:relative;display:inline-flex;margin-right:12px">{{messageLabel()}}<app-message-badge></app-message-badge></span></a><a routerLink="/account/profile" (click)="closeMenu()">{{myProfileLabel}}</a><a *ngIf="assetAccess.isOwner && !assetAccess.isPlatformAdmin" routerLink="/owner/payments" (click)="closeMenu()">{{accountText('stripe')}}</a><button class="dropdown-action" type="button" (click)="logout()">{{logoutLabel}}</button></ng-container><ng-template #guestAccount><a [routerLink]="'/login' | resourceRoute" (click)="closeMenu()">{{loginLabel}}</a><a [routerLink]="'/signup' | resourceRoute" (click)="closeMenu()">{{signupLabel}}</a></ng-template></div></details>
 
-        <div class="dropdown-panel dropdown-panel-right account-admin-panel" *ngIf="isLoggedIn && showAdminNavigation">
-          <a [routerLink]="'/my-profile' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ myProfileLabel }}</a>
-          <a [routerLink]="assetPaymentsRoute" routerLinkActive="active" (click)="closeMenu()">{{ ownerPaymentsLabel }}</a>
-          <button class="dropdown-action" type="button" (click)="switchOwnerView()">{{ switchOwnerViewLabel }}</button>
-          <button class="dropdown-action" type="button" (click)="logout()">{{ logoutLabel }}</button>
-        </div>
-
-        <div class="dropdown-panel dropdown-panel-right account-customer-panel" *ngIf="isLoggedIn && showCustomerNavigation">
-          <a [routerLink]="'/my-profile' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ myProfileLabel }}</a>
-          <a [routerLink]="'/my-bookings' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ myBookingsLabel }}</a>
-          <a [routerLink]="'/my-payments' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ myPaymentsLabel }}</a>
-          <a [routerLink]="'/my-feedbacks' | resourceRoute" routerLinkActive="active" (click)="closeMenu()">{{ myFeedbacksLabel }}</a>
-          <button class="dropdown-action" type="button" (click)="logout()">{{ logoutLabel }}</button>
-        </div>
-      </details>
     </nav>
   </div>
 </header>

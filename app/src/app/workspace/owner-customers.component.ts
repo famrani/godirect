@@ -1,0 +1,24 @@
+import {Component,OnInit} from '@angular/core';import {CommonModule} from '@angular/common';import {FormsModule} from '@angular/forms';import {RouterModule,ActivatedRoute} from '@angular/router';import {HttpClient} from '@angular/common/http';import {firstValueFrom} from 'rxjs';
+import {PlatformLayoutComponent} from '../layout/platform-layout/platform-layout.component';import {ReservationAuthService} from '../services/reservation-auth.service';import {AssetAccessService} from '../services/asset-access.service';import {LanguageService} from '../services/language.service';
+import {OWNER_CUSTOMERS_TEXT} from '../services/owner-customers-text';
+@Component({selector:'app-owner-customers',standalone:true,imports:[CommonModule,FormsModule,RouterModule,PlatformLayoutComponent],templateUrl:'./owner-customers.component.html',styleUrls:['./owner-customers.component.scss']})
+export class OwnerCustomersComponent implements OnInit{
+ rows:any[]=[];selected:any=null;query='';uid='';busy=false;error='';message='';draft:any=null;private request=0;
+ constructor(private http:HttpClient,private auth:ReservationAuthService,public access:AssetAccessService,public language:LanguageService,private route?:ActivatedRoute){}
+ private delegatedRows:any[]=[];get concierge(){return this.route?.snapshot?.data?.['concierge']===true;}
+ t(key:string){return OWNER_CUSTOMERS_TEXT[this.language.currentLanguage]?.[key]||OWNER_CUSTOMERS_TEXT.en[key]||key;}
+ status(value:string){return this.t('status_'+value);}
+ get filtered(){const q=this.query.trim().toLowerCase();return this.rows.filter(r=>(r.profile.name+' '+r.profile.email).toLowerCase().includes(q));}
+ ngOnInit(){void this.refresh();}
+ async refresh(){if(this.busy)return;this.busy=true;this.error='';const request=++this.request;try{const u=await this.auth.user();this.uid=u.uid;const rows=await firstValueFrom(this.http.get<any[]>(this.concierge?'/api/concierge/customers':'/api/owner/customers',{headers:await this.auth.headers()}));if(request!==this.request||(await this.auth.user()).uid!==this.uid)return;this.delegatedRows=this.concierge?rows:[];this.rows=this.concierge?rows.map(r=>({...r,bookingCount:r.bookings.length,paymentCount:r.payments.length,lastTransactionAt:r.payments.map((p:any)=>p.createdAt||'').sort().at(-1)||null})):rows;if(this.selected){const id=this.selected.id;this.selected=null;await this.detail(id);}}catch{this.error=this.t('error');this.rows=[];this.selected=null;}finally{this.busy=false;}}
+ async detail(id:string){if(this.concierge){this.selected=this.delegatedRows.find(r=>r.id===id)||null;return;}const uid=(await this.auth.user()).uid;const row=await firstValueFrom(this.http.get<any>('/api/owner/customers/'+encodeURIComponent(id),{headers:await this.auth.headers()}));if(uid===(await this.auth.user()).uid&&uid===this.uid)this.selected=row;}
+ async select(id:string){if(this.busy)return;this.busy=true;this.error='';this.draft=null;try{await this.detail(id);}catch{this.error=this.t('error');}finally{this.busy=false;}}
+ bookingLink(b:any){return ['/',b.assetType,b.assetId,'admin','reservations'];}
+ endpoint(b:any){return '/api/owner/bookings/'+[b.assetType,b.assetId,b.id].map(encodeURIComponent).join('/')+'/warranty-charges';}
+ openCharge(b:any){this.error='';this.message='';this.draft={booking:b,amount:'',reason:'',requestId:crypto.randomUUID(),review:false};}
+ get amountMinor(){const n=Number(this.draft?.amount);return Number.isFinite(n)?Math.round(n*100):0;}
+ review(){if(!this.draft||this.amountMinor<=0||this.amountMinor>this.draft.booking.warranty.remainingMinor||this.draft.reason.trim().length<10){this.error=this.t('invalid');return;}this.error='';this.draft.review=true;}
+ async charge(){if(this.concierge||this.busy||!this.draft?.review)return;this.busy=true;this.error='';const d=this.draft;try{if((await this.auth.user()).uid!==this.uid)throw Error('auth');const result=await firstValueFrom(this.http.post<any>(this.endpoint(d.booking),{requestId:d.requestId,amountMinor:this.amountMinor,reason:d.reason.trim(),acknowledged:true},{headers:await this.auth.headers()}));this.message=this.status(result.status);this.draft=null;await this.detail(this.selected.id);}catch(e:any){this.error=this.problem(e);}finally{this.busy=false;}}
+ async reconcile(b:any,c:any){if(this.busy)return;this.busy=true;this.error='';try{const result=await firstValueFrom(this.http.post<any>(this.endpoint(b)+'/'+encodeURIComponent(c.id)+'/reconcile',{}, {headers:await this.auth.headers()}));this.message=this.status(result.status);await this.detail(this.selected.id);}catch(e:any){this.error=this.problem(e);}finally{this.busy=false;}}
+ problem(e:any){const code=e?.error?.error||'';return code==='warranty_limit_exceeded'?this.t('limitChanged'):code==='warranty_consent_required'?this.t('needsConsent'):code==='warranty_request_changed'?this.t('requestChanged'):this.t('error');}
+}

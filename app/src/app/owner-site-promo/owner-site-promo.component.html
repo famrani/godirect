@@ -1,0 +1,7 @@
+<section id="owner-website" class="owner-site" aria-labelledby="owner-site-title">
+ <div class="site-intro"><p class="eyebrow">{{copy.eyebrow}}</p><h2 id="owner-site-title">{{copy.title}}</h2><p class="lead">{{copy.intro}}</p>
+  <div class="address-example"><span>{{copy.addressLabel}}</span><strong>monbien.godirect.fr</strong><p>{{copy.addressNote}}</p></div>
+  <button class="site-cta" type="button" (click)="createSite.emit()">{{copy.cta}} ↗</button><p class="pricing">{{copy.pricing}}</p>
+ </div>
+ <div class="site-benefits"><div class="feature-grid"><article *ngFor="let feature of copy.features;let i=index"><span class="feature-number" aria-hidden="true">0{{i+1}}</span><h3>{{feature.title}}</h3><p>{{feature.description}}</p></article></div><p class="publication">{{copy.publication}}</p></div>
+</section>

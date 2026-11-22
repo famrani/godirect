@@ -279,3 +279,99 @@ const COMPLETE_DISCOVERY:Record<string,Record<string,string>>={
   }
 };
 for(const [language,copy]of Object.entries(COMPLETE_DISCOVERY))DISCOVERY_TEXT[language]={...DISCOVERY_TEXT[language],...copy};
+
+// Direct rental campaign. Editable at uiTranslations/{lang}/ui/discovery.
+const DIRECT_RENTAL_COPY:Record<string,Record<string,string>>={"fr": {"directEyebrow": "La location, directement entre vous", "directTitle": "Vous connaissez le bien.", "directAccent": "Passez GoDirect.", "directIntro": "Une voiture déjà louée, un appartement où vous aimez revenir, un bateau et son propriétaire que vous connaissez : retrouvez son site GoDirect et réservez directement auprès de lui.", "directTypes": "Voitures · Parkings · Appartements et maisons · Bateaux · Piscines", "directBadge": "0 % de commission GoDirect sur les locations", "directFees": "Le propriétaire paie un abonnement par annonce. Les frais de traitement Stripe restent distincts.", "directArt": "Votre prochaine location. En direct.", "directHeading": "Vous vous connaissez déjà ? Gardez le contact.", "directText": "Quand vous connaissez déjà le bien et son propriétaire, GoDirect vous permet de réserver auprès de lui, sans repasser par une plateforme qui prélève une commission sur la réservation.", "directStep1": "Retrouvez le bien", "directStep1Text": "Ouvrez le lien GoDirect partagé par le propriétaire ou recherchez son annonce.", "directStep2": "Réservez en direct", "directStep2Text": "Consultez les photos, le prix et les disponibilités, puis envoyez votre demande au propriétaire.", "directStep3": "Payez au propriétaire", "directStep3Text": "Les paiements en ligne sont traités par Stripe sur le compte connecté du propriétaire. GoDirect ne prélève aucune commission sur la location."}, "en": {"directEyebrow": "Rent directly from the owner", "directTitle": "Know the rental?", "directAccent": "GoDirect.", "directIntro": "A car you have rented before, an apartment you love returning to, a boat and an owner you know: find their GoDirect website and book directly with them.", "directTypes": "Cars · Parking spaces · Apartments and houses · Boats · Pools", "directBadge": "0% GoDirect commission on rentals", "directFees": "Owners pay a subscription per listing. Stripe processing fees are separate.", "directArt": "Your next rental. Direct.", "directHeading": "Already know each other? Stay connected.", "directText": "When you already know the rental and its owner, GoDirect lets you book directly without returning to a platform that charges a booking commission.", "directStep1": "Find the rental", "directStep1Text": "Open the GoDirect link shared by the owner or search for their listing.", "directStep2": "Book directly", "directStep2Text": "View photos, prices and availability, then send your request to the owner.", "directStep3": "Pay the owner", "directStep3Text": "Online payments are processed by Stripe on the owner’s connected account. GoDirect takes no rental commission."}, "es": {"directEyebrow": "Alquila directamente al propietario", "directTitle": "¿Ya conoces el alojamiento o vehículo?", "directAccent": "Pásate a GoDirect.", "directIntro": "Un coche que ya has alquilado, una casa a la que te gusta volver, un barco y un propietario que conoces: encuentra su web GoDirect y reserva directamente.", "directTypes": "Coches · Aparcamientos · Apartamentos y casas · Barcos · Piscinas", "directBadge": "0 % de comisión GoDirect en alquileres", "directFees": "El propietario paga una suscripción por anuncio. Los gastos de Stripe son independientes.", "directArt": "Tu próximo alquiler. Directo.", "directHeading": "¿Ya os conocéis? Seguid en contacto.", "directText": "Si ya conoces el bien y su propietario, reserva directamente con GoDirect sin volver a una plataforma que cobre comisión por reserva.", "directStep1": "Encuentra el bien", "directStep1Text": "Abre el enlace GoDirect del propietario o busca su anuncio.", "directStep2": "Reserva directamente", "directStep2Text": "Consulta fotos, precios y disponibilidad y envía tu solicitud al propietario.", "directStep3": "Paga al propietario", "directStep3Text": "Stripe procesa los pagos en la cuenta conectada del propietario. GoDirect no cobra comisión por el alquiler."}, "it": {"directEyebrow": "Affitta direttamente dal proprietario", "directTitle": "Conosci già il bene?", "directAccent": "Passa a GoDirect.", "directIntro": "Un’auto già noleggiata, una casa dove ami tornare, una barca e un proprietario che conosci: trova il suo sito GoDirect e prenota direttamente.", "directTypes": "Auto · Parcheggi · Appartamenti e case · Barche · Piscine", "directBadge": "0% di commissioni GoDirect sugli affitti", "directFees": "Il proprietario paga un abbonamento per annuncio. Le spese Stripe restano separate.", "directArt": "Il prossimo noleggio. Diretto.", "directHeading": "Vi conoscete già? Restate in contatto.", "directText": "Se conosci già il bene e il proprietario, prenota con GoDirect senza tornare su una piattaforma che applica commissioni sulla prenotazione.", "directStep1": "Trova il bene", "directStep1Text": "Apri il link GoDirect del proprietario o cerca il suo annuncio.", "directStep2": "Prenota direttamente", "directStep2Text": "Consulta foto, prezzi e disponibilità e invia una richiesta al proprietario.", "directStep3": "Paga il proprietario", "directStep3Text": "Stripe elabora i pagamenti sul conto connesso del proprietario. GoDirect non trattiene commissioni sull’affitto."}, "de": {"directEyebrow": "Direkt beim Eigentümer mieten", "directTitle": "Sie kennen das Mietobjekt?", "directAccent": "Dann GoDirect.", "directIntro": "Ein bereits gemietetes Auto, eine vertraute Ferienwohnung, ein Boot und dessen Eigentümer: Finden Sie deren GoDirect-Website und buchen Sie direkt.", "directTypes": "Autos · Parkplätze · Wohnungen und Häuser · Boote · Pools", "directBadge": "0 % GoDirect-Provision auf Vermietungen", "directFees": "Eigentümer zahlen ein Abonnement pro Anzeige. Stripe-Zahlungsgebühren fallen separat an.", "directArt": "Ihre nächste Miete. Direkt.", "directHeading": "Sie kennen sich schon? Bleiben Sie in Kontakt.", "directText": "Wenn Sie das Mietobjekt und den Eigentümer bereits kennen, buchen Sie mit GoDirect direkt statt erneut über eine Plattform mit Buchungsprovision.", "directStep1": "Mietobjekt finden", "directStep1Text": "Öffnen Sie den GoDirect-Link des Eigentümers oder suchen Sie seine Anzeige.", "directStep2": "Direkt buchen", "directStep2Text": "Sehen Sie Fotos, Preise und Verfügbarkeit und senden Sie Ihre Anfrage an den Eigentümer.", "directStep3": "Eigentümer bezahlen", "directStep3Text": "Stripe verarbeitet Zahlungen auf dem verbundenen Konto des Eigentümers. GoDirect erhebt keine Mietprovision."}, "nl": {"directEyebrow": "Huur rechtstreeks van de eigenaar", "directTitle": "Ken je het huurobject al?", "directAccent": "Ga GoDirect.", "directIntro": "Een eerder gehuurde auto, een vertrouwd vakantiehuis, een boot en een eigenaar die je kent: vind hun GoDirect-website en boek rechtstreeks.", "directTypes": "Auto’s · Parkeerplaatsen · Appartementen en huizen · Boten · Zwembaden", "directBadge": "0% GoDirect-commissie op verhuur", "directFees": "Eigenaren betalen een abonnement per advertentie. Stripe-verwerkingskosten zijn apart.", "directArt": "Je volgende huur. Rechtstreeks.", "directHeading": "Kennen jullie elkaar al? Houd contact.", "directText": "Ken je het huurobject en de eigenaar al? Boek rechtstreeks met GoDirect zonder opnieuw via een platform met boekingscommissie te gaan.", "directStep1": "Vind het huurobject", "directStep1Text": "Open de GoDirect-link van de eigenaar of zoek de advertentie.", "directStep2": "Boek rechtstreeks", "directStep2Text": "Bekijk foto’s, prijzen en beschikbaarheid en stuur je aanvraag naar de eigenaar.", "directStep3": "Betaal de eigenaar", "directStep3Text": "Stripe verwerkt betalingen op de gekoppelde rekening van de eigenaar. GoDirect rekent geen verhuurcommissie."}, "ru": {"directEyebrow": "Аренда напрямую у владельца", "directTitle": "Уже знаете объект?", "directAccent": "Выбирайте GoDirect.", "directIntro": "Знакомый автомобиль, любимая квартира, лодка и её владелец: найдите их сайт GoDirect и бронируйте напрямую.", "directTypes": "Автомобили · Парковки · Квартиры и дома · Лодки · Бассейны", "directBadge": "0% комиссии GoDirect за аренду", "directFees": "Владелец оплачивает подписку за объявление. Комиссии Stripe взимаются отдельно.", "directArt": "Следующая аренда. Напрямую.", "directHeading": "Уже знакомы? Оставайтесь на связи.", "directText": "Если вы уже знаете объект и владельца, GoDirect позволяет бронировать напрямую, не возвращаясь на платформу с комиссией за бронирование.", "directStep1": "Найдите объект", "directStep1Text": "Откройте ссылку GoDirect от владельца или найдите объявление.", "directStep2": "Бронируйте напрямую", "directStep2Text": "Посмотрите фотографии, цены и доступность и отправьте заявку владельцу.", "directStep3": "Платите владельцу", "directStep3Text": "Stripe обрабатывает платежи на подключённом счёте владельца. GoDirect не берёт комиссию за аренду."}};
+for(const [lang,copy] of Object.entries(DIRECT_RENTAL_COPY))DISCOVERY_TEXT[lang]={...(DISCOVERY_TEXT[lang]||DISCOVERY_TEXT.en),...copy};
+
+// Stripe payment reassurance. Editable at uiTranslations/{lang}/ui/discovery.
+const STRIPE_PAYMENT_COPY:Record<string,Record<string,string>>={
+  "fr": {
+    "stripeBadge": "Paiements sécurisés par Stripe",
+    "stripeTitle": "Réservez en direct. Payez en toute confiance avec Stripe.",
+    "stripeIntro": "GoDirect utilise Stripe, l’un des leaders mondiaux du paiement en ligne, pour sécuriser les paiements entre locataires et propriétaires.",
+    "stripeDeposit": "Votre acompte en ligne",
+    "stripeDepositText": "Payez votre acompte en ligne sur la page sécurisée Stripe pour réserver votre bien auprès du propriétaire.",
+    "stripeWarranty": "Votre carte enregistrée pour la caution",
+    "stripeWarrantyText": "Votre carte est enregistrée de manière sécurisée pour la caution, sans débit ni blocage des fonds lors de l’enregistrement.",
+    "stripeBalance": "Votre solde en toute sécurité",
+    "stripeBalanceText": "Lorsque le paiement en ligne du solde est proposé, réglez-le avec Stripe depuis votre réservation.",
+    "stripeNote": "Vos données de carte sont traitées par Stripe. Le propriétaire ne reçoit pas votre numéro de carte complet. Tout débit ultérieur de caution reste soumis aux conditions acceptées. GoDirect ne prélève aucune commission sur la location."
+  },
+  "en": {
+    "stripeBadge": "Payments secured by Stripe",
+    "stripeTitle": "Book direct. Pay with confidence with Stripe.",
+    "stripeIntro": "GoDirect uses Stripe, one of the world’s leading payment platforms, to secure your online payments.",
+    "stripeDeposit": "Your deposit online",
+    "stripeDepositText": "Pay your deposit by card on Stripe’s secure checkout page.",
+    "stripeWarranty": "Your security card, no immediate charge",
+    "stripeWarrantyText": "Your card is securely saved for the security deposit, with no charge or funds blocked when saved.",
+    "stripeBalance": "Your balance, paid securely",
+    "stripeBalanceText": "When online balance payment is offered, pay securely with Stripe from your booking.",
+    "stripeNote": "The owner does not receive your full card number. Any later security-deposit charge remains subject to the rental terms you accept."
+  },
+  "es": {
+    "stripeBadge": "Pagos seguros con Stripe",
+    "stripeTitle": "Reserva directamente. Paga con confianza con Stripe.",
+    "stripeIntro": "GoDirect utiliza Stripe, una de las principales plataformas de pago del mundo, para proteger tus pagos online.",
+    "stripeDeposit": "Tu anticipo online",
+    "stripeDepositText": "Paga tu anticipo con tarjeta en la página segura de Stripe.",
+    "stripeWarranty": "Garantía sin cargo inmediato",
+    "stripeWarrantyText": "Tu tarjeta se guarda de forma segura para la garantía, sin cargo ni bloqueo de fondos al registrarla.",
+    "stripeBalance": "Tu saldo, con seguridad",
+    "stripeBalanceText": "Si se ofrece el pago online del saldo, págalo con Stripe desde tu reserva.",
+    "stripeNote": "El propietario no recibe el número completo de tu tarjeta. Cualquier cargo posterior por la garantía está sujeto a las condiciones de alquiler aceptadas."
+  },
+  "it": {
+    "stripeBadge": "Pagamenti sicuri con Stripe",
+    "stripeTitle": "Prenota direttamente. Paga con fiducia con Stripe.",
+    "stripeIntro": "GoDirect utilizza Stripe, una delle principali piattaforme di pagamento al mondo, per proteggere i pagamenti online.",
+    "stripeDeposit": "Il tuo acconto online",
+    "stripeDepositText": "Paga l’acconto con carta sulla pagina sicura di Stripe.",
+    "stripeWarranty": "Cauzione senza addebito immediato",
+    "stripeWarrantyText": "La carta viene salvata in modo sicuro per la cauzione, senza addebiti né blocco dei fondi al momento della registrazione.",
+    "stripeBalance": "Il saldo in sicurezza",
+    "stripeBalanceText": "Se è disponibile il pagamento online del saldo, paga con Stripe dalla prenotazione.",
+    "stripeNote": "Il proprietario non riceve il numero completo della carta. Eventuali addebiti successivi per la cauzione sono soggetti alle condizioni di noleggio accettate."
+  },
+  "de": {
+    "stripeBadge": "Sichere Zahlungen mit Stripe",
+    "stripeTitle": "Direkt buchen. Sicher mit Stripe bezahlen.",
+    "stripeIntro": "GoDirect nutzt Stripe, eine der weltweit führenden Zahlungsplattformen, für sichere Onlinezahlungen.",
+    "stripeDeposit": "Ihre Anzahlung online",
+    "stripeDepositText": "Bezahlen Sie Ihre Anzahlung per Karte auf der sicheren Stripe-Zahlungsseite.",
+    "stripeWarranty": "Kaution ohne sofortige Abbuchung",
+    "stripeWarrantyText": "Ihre Karte wird für die Kaution sicher gespeichert. Beim Speichern erfolgt weder eine Abbuchung noch eine Geldreservierung.",
+    "stripeBalance": "Restbetrag sicher bezahlen",
+    "stripeBalanceText": "Wenn eine Online-Restzahlung angeboten wird, bezahlen Sie diese über Stripe in Ihrer Buchung.",
+    "stripeNote": "Der Eigentümer erhält nicht Ihre vollständige Kartennummer. Spätere Kautionsabbuchungen unterliegen den akzeptierten Mietbedingungen."
+  },
+  "nl": {
+    "stripeBadge": "Veilig betalen met Stripe",
+    "stripeTitle": "Boek direct. Betaal met vertrouwen via Stripe.",
+    "stripeIntro": "GoDirect gebruikt Stripe, een van de toonaangevende betaalplatforms ter wereld, voor veilige online betalingen.",
+    "stripeDeposit": "Je aanbetaling online",
+    "stripeDepositText": "Betaal je aanbetaling per kaart op de beveiligde betaalpagina van Stripe.",
+    "stripeWarranty": "Borg zonder directe afschrijving",
+    "stripeWarrantyText": "Je kaart wordt veilig opgeslagen voor de borg, zonder afschrijving of blokkering van geld bij het opslaan.",
+    "stripeBalance": "Je saldo veilig betalen",
+    "stripeBalanceText": "Als online betaling van het saldo wordt aangeboden, betaal je dit via Stripe vanuit je boeking.",
+    "stripeNote": "De eigenaar ontvangt niet je volledige kaartnummer. Latere afschrijvingen voor de borg vallen onder de geaccepteerde huurvoorwaarden."
+  },
+  "ru": {
+    "stripeBadge": "Безопасные платежи через Stripe",
+    "stripeTitle": "Бронируйте напрямую. Платите уверенно со Stripe.",
+    "stripeIntro": "GoDirect использует Stripe, одну из ведущих платёжных платформ мира, для безопасных онлайн-платежей.",
+    "stripeDeposit": "Предоплата онлайн",
+    "stripeDepositText": "Оплатите аванс картой на защищённой платёжной странице Stripe.",
+    "stripeWarranty": "Залог без немедленного списания",
+    "stripeWarrantyText": "Карта безопасно сохраняется для залога без списания или блокировки средств при сохранении.",
+    "stripeBalance": "Безопасная оплата остатка",
+    "stripeBalanceText": "Если доступна онлайн-оплата остатка, оплатите его через Stripe в своём бронировании.",
+    "stripeNote": "Владелец не получает полный номер вашей карты. Последующие списания по залогу регулируются принятыми условиями аренды."
+  }
+};
+for(const [lang,copy] of Object.entries(STRIPE_PAYMENT_COPY))DISCOVERY_TEXT[lang]={...DISCOVERY_TEXT[lang],...copy};
+
+const CAROUSEL_COPY:Record<string,Record<string,string>>={"fr": {"carouselLabel": "Des biens à louer en direct", "carouselPrevious": "Photo précédente", "carouselNext": "Photo suivante", "carouselPause": "Mettre le défilement en pause", "carouselPlay": "Démarrer le défilement"}, "en": {"carouselLabel": "Rent directly from owners", "carouselPrevious": "Previous photo", "carouselNext": "Next photo", "carouselPause": "Pause slideshow", "carouselPlay": "Play slideshow"}, "es": {"carouselLabel": "Alquileres directos", "carouselPrevious": "Foto anterior", "carouselNext": "Foto siguiente", "carouselPause": "Pausar presentación", "carouselPlay": "Iniciar presentación"}, "it": {"carouselLabel": "Affitti diretti", "carouselPrevious": "Foto precedente", "carouselNext": "Foto successiva", "carouselPause": "Pausa presentazione", "carouselPlay": "Avvia presentazione"}, "de": {"carouselLabel": "Direkt mieten", "carouselPrevious": "Vorheriges Foto", "carouselNext": "Nächstes Foto", "carouselPause": "Diashow pausieren", "carouselPlay": "Diashow starten"}, "nl": {"carouselLabel": "Rechtstreeks huren", "carouselPrevious": "Vorige foto", "carouselNext": "Volgende foto", "carouselPause": "Diavoorstelling pauzeren", "carouselPlay": "Diavoorstelling starten"}, "ru": {"carouselLabel": "Аренда напрямую", "carouselPrevious": "Предыдущее фото", "carouselNext": "Следующее фото", "carouselPause": "Приостановить показ", "carouselPlay": "Начать показ"}};
+for(const [lang,copy]of Object.entries(CAROUSEL_COPY))DISCOVERY_TEXT[lang]={...DISCOVERY_TEXT[lang],...copy};

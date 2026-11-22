@@ -10,6 +10,8 @@ export function gcsPhotoPath(value: string): string | null {
     try { p = decodeURIComponent(m[2].split(/[?#]/)[0]); } catch { return null; }
   } else if (/^https?:|^\/\//i.test(p)) return null;
   p = p.replace(/^\//, '');
+  // Documents can be JPEG/PNG too: never expose them through public media aliases.
+  if (p.split('/').some(segment => segment.toLowerCase() === 'documents')) return null;
   if (p.includes('..') || !/^[a-zA-Z0-9._/-]+\.(avif|gif|jpe?g|png|svg|webp)$/i.test(p)) return null;
   const dirs: Record<string, string> = {
     boat: 'boats', boats: 'boats', car: 'cars', cars: 'cars',
@@ -48,5 +50,6 @@ export function gcsPhotoPath(value: string): string | null {
     `assets/boats/alegria/${match.includes('events') ? 'outings' : 'homepage'}/`);
   p = p.replace(/^assets\/boats\/bali4\.1\//, 'assets/boats/alegria/boat/');
   p = p.replace(/^(assets\/boats\/[a-zA-Z0-9_-]+\/boat\/)bali4\.1\//, '$1');
+  if (p.split('/').some(segment => segment.toLowerCase() === 'documents')) return null;
   return p.startsWith('assets/') && p.length <= 512 ? p : null;
 }

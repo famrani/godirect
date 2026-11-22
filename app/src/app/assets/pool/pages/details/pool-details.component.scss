@@ -54,3 +54,5 @@ h1 { margin: 10px 0 8px; font-size: clamp(2rem, 3.5vw, 3rem); line-height: 1.05;
   .asset-page { grid-template-columns: 1fr; gap: 24px; padding: 24px 16px 40px; }
   .copy { padding: 22px; }
 }
+
+.asset-description{box-sizing:border-box;max-width:1120px;margin:0 auto 56px;padding:32px;background:white;border:1px solid #e6e2da;border-radius:18px}.asset-description app-listing-description{max-width:76ch;margin:auto}@media(max-width:700px){.asset-description{margin:0 16px 32px;padding:24px 18px}}

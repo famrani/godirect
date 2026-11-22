@@ -1,0 +1,26 @@
+export const CONCIERGE_PERMISSIONS = ['content', 'bookings', 'customers', 'payments'];
+export function activeDelegation(root, uid, type, id) {
+    const a = root?.assets?.[type]?.[id], g = root?.assetDelegations?.[type]?.[id]?.[uid];
+    return a && !a.deletedAt && g?.active === true && g.conciergeId === uid && g.ownerId === a.ownerId && g.assetType === type && g.assetId === id && g.ownerId !== uid ? g : null;
+}
+export function delegatedPermission(root, uid, type, id, permission) { return activeDelegation(root, uid, type, id)?.permissions?.[permission] === true; }
+export function platformManagement(root, uid, claims) { const p = root?.backendusers?.[uid] || {}; return !!uid && ((claims?.uid === uid && (claims.admin === true || claims.role === 'admin')) || p.isAdmin === true || p.roles?.admin === true || ['admin', 'superadmin'].includes(String(p.role || '').trim().toLowerCase())); }
+export function assetPermission(root, uid, type, id, permission, claims) { const a = root?.assets?.[type]?.[id]; return !!a && ((permission === 'content' && platformManagement(root, uid, claims)) || a.ownerId === uid || (!a.deletedAt && delegatedPermission(root, uid, type, id, permission))); }
+export function delegatedAssets(root, uid) { const out = []; for (const type of ['boat', 'car', 'property', 'parking', 'pool'])
+    for (const [id, a] of Object.entries(root?.assets?.[type] || {})) {
+        const g = activeDelegation(root, uid, type, id);
+        if (g)
+            out.push({ id, assetType: type, name: String(a.name || id), ownerId: a.ownerId, ownerName: String(root.backendusers?.[a.ownerId]?.displayName || root.backendusers?.[a.ownerId]?.email || a.ownerId), prefix: String(a.prefix || id), permissions: Object.fromEntries(CONCIERGE_PERMISSIONS.map(p => [p, g.permissions?.[p] === true])) });
+    } return out; }
+export async function hasAssetPermission(store, uid, type, id, permission, claims) {
+    const [asset, grant, profile] = await Promise.all([store.db.ref(`assets/${type}/${id}`).once('value'), store.db.ref(`assetDelegations/${type}/${id}/${uid}`).once('value'), store.db.ref(`backendusers/${uid}`).once('value')]);
+    return assetPermission({ backendusers: { [uid]: profile.val() }, assets: { [type]: { [id]: asset.val() } }, assetDelegations: { [type]: { [id]: { [uid]: grant.val() } } } }, uid, type, id, permission, claims);
+}
+export function conciergeBookingView(b) { const view = { ...b, managementPermissions: { financial: false } }; if (view.workflow) {
+    view.workflow = { ...view.workflow };
+    for (const field of ['depositPaidProof', 'balancePaidProof', 'warrantyProvidedProof'])
+        if (view.workflow[field])
+            view.workflow[field] = { kind: view.workflow[field].kind };
+} delete view.warrantyConsent; delete view.checkoutOperations; delete view.warrantyCharges; return view; }
+
+//# sourceMappingURL=asset-delegation.js.map

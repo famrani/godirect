@@ -1,3 +1,4 @@
+import { provisionTestOwner, testProvisioningEnabled } from './test-owner-provisioning.js';
 import { createHash, randomBytes } from 'node:crypto';
 import { ownerStripeTestMode, ownerStripeAccountId, assertOwnerTestAccount, stripeTestNamespace } from './owner-stripe-mode.js';
 import { findAsset } from './asset-paths.service.js';
@@ -40,6 +41,12 @@ export class OwnersService {
             await this.firebase.db.ref(`stripeOAuthStates/${key}`).set({ ownerId, namespace, paymentPath, expiresAt: Date.now() + 10 * 60 * 1000, previousAccountId: ownerStripeAccountId(owner) });
             const url = new URL('https://connect.stripe.com/oauth/authorize');
             url.search = new URLSearchParams({ response_type: 'code', client_id: clientId, scope: 'read_write', redirect_uri: redirectUri, state }).toString();
+            // Use the authenticated Firebase email, preserving Gmail + aliases exactly.
+            const identity = await this.firebase.auth.getUser(ownerId);
+            if (identity.email)
+                url.searchParams.set('stripe_user[email]', identity.email);
+            url.searchParams.set('stripe_user[country]', String(process.env.STRIPE_TEST_ACCOUNT_COUNTRY || 'FR'));
+            res.setHeader('Cache-Control', 'no-store');
             return res.json({ mode: 'test', perOwnerTestAccount: true, url: url.toString() });
         }
         let accountId = owner?.stripe?.connectedAccountId || owner?.stripeAccountId;
@@ -92,6 +99,9 @@ export class OwnersService {
         const accountId = String(token.stripe_user_id || '');
         if (token.livemode !== false || token.scope !== 'read_write' || !/^acct_[a-zA-Z0-9]+$/.test(accountId))
             return res.status(409).json({ error: 'stripe_test_oauth_invalid_account' });
+        const platform = await this.stripeSvc.stripe.accounts.retrieve();
+        if (accountId === platform.id)
+            return res.status(409).json({ error: 'stripe_platform_account_cannot_be_owner' });
         const a = await this.stripeSvc.stripe.accounts.retrieve(accountId);
         if (a.deleted || ('type' in a && a.type !== 'standard'))
             return res.status(409).json({ error: 'stripe_test_oauth_invalid_account' });
@@ -116,6 +126,15 @@ export class OwnersService {
             return res.status(409).json({ error: 'stripe_test_connection_changed_retry' });
         return res.redirect(`${returnUrl}?stripeOAuth=connected`);
     };
+    provisionTest = async (req, res) => {
+        const ownerId = String(req.params.ownerId);
+        await requireOwner(req, this.firebase, ownerId);
+        res.setHeader('Cache-Control', 'no-store');
+        if (req.body?.acceptSyntheticTestData !== true)
+            return res.status(400).json({ error: 'stripe_test_fixture_consent_required' });
+        await provisionTestOwner(this.firebase, this.stripeSvc.stripe, ownerId, req.body?.replaceExisting === true);
+        return this.status(req, res);
+    };
     status = async (req, res) => {
         const ownerId = String(req.params.ownerId);
         await requireOwner(req, this.firebase, ownerId);
@@ -125,11 +144,11 @@ export class OwnersService {
         const sandbox = ownerStripeTestMode();
         const accountId = ownerStripeAccountId(owner);
         if (!accountId)
-            return res.json({ connected: false, mode: sandbox ? 'test' : undefined, perOwnerTestAccount: sandbox });
+            return res.json({ connected: false, mode: sandbox ? 'test' : undefined, testProvisioningEnabled: testProvisioningEnabled(), perOwnerTestAccount: sandbox });
         const a = await this.stripeSvc.stripe.accounts.retrieve(accountId);
         if (sandbox)
             assertOwnerTestAccount(a, ownerId);
-        return res.json({ connected: true, accountId, mode: sandbox ? 'test' : (String(process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_') ? 'test' : 'live'), perOwnerTestAccount: sandbox, chargesEnabled: !!a.charges_enabled, payoutsEnabled: !!a.payouts_enabled, detailsSubmitted: !!a.details_submitted, requirementsCurrentlyDue: a.requirements?.currently_due || [], requirementsPastDue: a.requirements?.past_due || [], requirementsPendingVerification: a.requirements?.pending_verification || [], disabledReason: a.requirements?.disabled_reason || null, onboardingComplete: !!(a.charges_enabled && a.payouts_enabled) });
+        return res.json({ connected: true, accountId, mode: sandbox ? 'test' : (String(process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_') ? 'test' : 'live'), testProvisioningEnabled: testProvisioningEnabled(), perOwnerTestAccount: sandbox, chargesEnabled: !!a.charges_enabled, payoutsEnabled: !!a.payouts_enabled, detailsSubmitted: !!a.details_submitted, requirementsCurrentlyDue: a.requirements?.currently_due || [], requirementsPastDue: a.requirements?.past_due || [], requirementsPendingVerification: a.requirements?.pending_verification || [], disabledReason: a.requirements?.disabled_reason || null, onboardingComplete: !!(a.charges_enabled && a.payouts_enabled) });
     };
 }
 

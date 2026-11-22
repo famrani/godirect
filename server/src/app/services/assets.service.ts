@@ -1,3 +1,7 @@
+import {domainScope,matchesSite,siteOrigin} from './portal-sites.js';
+import {AssetCalendarService} from './asset-calendar.js';
+import {hasAssetPermission} from './asset-delegation.js';
+import { domainAssetId } from './asset-domain.js';
 import {platformAdministrator} from './account-access.service.js';
 import {parseAssetSearch,locationMatches,overlapsSearch,legacySearchInterval} from './asset-search.service.js';
 import {listingPublic} from './listing-billing.service.js';
@@ -6,18 +10,26 @@ import { Request, Response } from 'express';
 import { FirebaseService } from './firebase.service.js';
 import { Asset } from '../models/domain.models.js';
 
-export function publicAsset(a:any):any{if(!a)return a;const raw=a.location;const location=raw&&typeof raw==='object'?Object.fromEntries(['city','area','region','country'].filter(k=>typeof raw[k]==='string').map(k=>[k,raw[k]])):{};return {...a,location};}
+export function publicAsset(a:any):any{if(!a)return a;const raw=a.location;const location=raw&&typeof raw==='object'?Object.fromEntries(['city','area','region','country'].filter(k=>typeof raw[k]==='string').map(k=>[k,raw[k]])):{};return {...a,location,siteUrl:siteOrigin(a,String(a.id||''))};}
 export class AssetsService {
-  constructor(private readonly firebase: FirebaseService) {}
+  readonly calendar:AssetCalendarService;
+  constructor(private readonly firebase: FirebaseService) {this.calendar=new AssetCalendarService(firebase);}
   private async accessible(req:Request,a:any,id:string):Promise<boolean>{
-    if(!a||a.deletedAt)return false;
-    if(await listingPublic(this.firebase,a?.assetType||a?.type,id,a))return true;
+    if(!a||!await matchesSite(this.firebase,String(req.headers.host||''),String(a.assetType||a.type),id))return false;
+    if(!a.deletedAt&&await listingPublic(this.firebase,a?.assetType||a?.type,id,a))return true;
     const token=/^Bearer\s+(.+)$/i.exec(String(req.headers.authorization||''))?.[1];if(!token)return false;
-    try{const u=await this.firebase.auth.verifyIdToken(token);if(u.uid===a.ownerId)return true;const p=(await this.firebase.db.ref(`backendusers/${u.uid}`).once('value')).val()||{};return platformAdministrator(u,p);}catch{return false;}
+    try{const u=await this.firebase.auth.verifyIdToken(token);if(a.deletedAt){const p=(await this.firebase.db.ref(`backendusers/${u.uid}`).once('value')).val()||{};return platformAdministrator(u,p);}if(u.uid===a.ownerId)return true;for(const permission of ['content','bookings','customers','payments'] as const)if(await hasAssetPermission(this.firebase,u.uid,String(a.assetType||a.type),id,permission))return true;const p=(await this.firebase.db.ref(`backendusers/${u.uid}`).once('value')).val()||{};return platformAdministrator(u,p);}catch{return false;}
   }
+  resolveDomain = async (req:Request,res:Response) => {
+    res.setHeader('Cache-Control','no-store');
+    const scope=await domainScope(this.firebase,String(req.headers.host||''));
+    return scope?res.json(scope):res.status(404).json({error:'asset_domain_not_found'});
+  };
   list = async (req: Request, res: Response) => {
     const snap = await this.firebase.db.ref('assets').once('value');
     let rows = Object.entries(snap.val() || {}).filter(([t])=>isAssetType(t)).flatMap(([t,group]:any) => Object.entries(group || {}).map(([id, value]) => ({ ...(value as object), id, assetType:t }))) as Asset[];
+    const scope=domainAssetId(String(req.headers.host||''))?await domainScope(this.firebase,String(req.headers.host||'')):null;
+    if(domainAssetId(String(req.headers.host||'')))rows=rows.filter(a=>scope?.assetType===a.assetType&&scope?.assetId===a.id);
     const filter=parseAssetSearch(req.query);
     if(filter.type)rows=rows.filter(a=>a.assetType===filter.type);
     rows=rows.filter(a=>locationMatches(a,filter.location));
@@ -55,6 +67,7 @@ export class AssetsService {
       .map(([id, value]) => ({ ...(value as object), id, assetType:type }) as Asset)
       .filter((a) => String(a.assetType || (a as any).type || '').toLowerCase() === type)
       .filter((a) => a.enabled !== false && a.published !== false && a.status !== 'disabled');
+    if(domainAssetId(String(req.headers.host||''))){const scope=await domainScope(this.firebase,String(req.headers.host||''));rows=rows.filter(a=>scope?.assetType===type&&scope?.assetId===a.id);}
     rows = (await Promise.all(rows.map(async a=>(await listingPublic(this.firebase,type,String(a.id),a))?a:null))).filter(Boolean) as Asset[];
     return res.json(rows.map(publicAsset));
   };

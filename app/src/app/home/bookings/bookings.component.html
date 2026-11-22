@@ -1,5 +1,5 @@
 <app-my-bookings [admin]="true"></app-my-bookings>
-<section class="booking-page" *ngIf="bookingApiResourceType === 'boat' && isAdmin">
+<section class="booking-page" *ngIf="bookingApiResourceType === 'boat' && isAdmin && assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin">
   <div class="container booking-shell">
     <div class="section-head">
       <span class="eyebrow">{{ t('adminEyebrow') }}</span>

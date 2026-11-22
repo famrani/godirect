@@ -1,3 +1,4 @@
+import {AssetAccessService} from '../../services/asset-access.service';
 import {PHOTO_PERSISTENCE_TEXT,PHOTO_UPLOAD_HINT} from '../../services/photo-persistence-text';
 import {SiteContentService} from '../site-content-service/site-content.service';
 import {editableAssetMedia} from '../../services/asset-photos';
@@ -25,7 +26,10 @@ interface LanguageOption { id: LanguageCode; label: string; }
   styleUrls: ['./admin-site-content.component.scss'],
 })
 export class AdminSiteContentComponent implements OnInit {
- private readonly uiText=inject(UiTextService);
+ readonly access=inject<AssetAccessService>(AssetAccessService);
+ get moderationLink(){return ['/platform/admin/assets',this.resourceContext.resourceType,this.resourceContext.resourceId];}
+ contentLoaded=false;private revision='';
+ private readonly uiText=inject<UiTextService>(UiTextService);
   private readonly firebaseDatabaseUrl = 'https://ailla-poc-default-rtdb.firebaseio.com';
   private readonly rawFirebaseOptions = {
     headers: new HttpHeaders({ 'X-Skip-Media-Resolution': 'true' }),
@@ -43,8 +47,8 @@ export class AdminSiteContentComponent implements OnInit {
 
   activeTab: CmsTab = 'home';
   selectedLanguage: LanguageCode = 'fr';
-  boatId = 'alegria';
-  ownerId = 'alegria';
+  boatId = '';
+  ownerId = '';
   boats: AlegriaBoatResource[] = [];
 
   siteContent: any = {};
@@ -69,9 +73,9 @@ export class AdminSiteContentComponent implements OnInit {
     this.boatId = this.resourceContext.boatId;
   }
 
-  private readonly contentCache=inject(SiteContentService);
-  get isBoat():boolean { return this.resourceContext.resourceType==='boat'; }
-  get assetLabel():string { return ({pool:'Piscine',parking:'Parking',property:'Logement',car:'Voiture'} as Record<string,string>)[this.resourceContext.resourceType] || 'Bien'; }
+  private readonly contentCache=inject<SiteContentService>(SiteContentService);
+  get isBoat():boolean { return false; }
+  get assetLabel():string { return ({boat:'Bateau',pool:'Piscine',parking:'Parking',property:'Logement',car:'Voiture'} as Record<string,string>)[this.resourceContext.resourceType] || 'Bien'; }
   assetDraft:any=null;
   private assetMediaDirty=false;
   get assetText():any { const translations=this.assetDraft.translations||(this.assetDraft.translations={});return translations[this.selectedLanguage]||(translations[this.selectedLanguage]={}); }
@@ -127,13 +131,13 @@ export class AdminSiteContentComponent implements OnInit {
   }
   private cmsUrl():string { return `/api/manage/assets/${encodeURIComponent(this.resourceContext.resourceType)}/${encodeURIComponent(this.resourceContext.resourceId)}/content`; }
   private async cmsData():Promise<any>{return firstValueFrom(this.http.get<any>(this.cmsUrl(),{...this.rawFirebaseOptions,headers:(await this.reservationAuth.headers()).set('X-Skip-Media-Resolution','true')}).pipe(timeout(15000)));}
-  private async cmsSave(data:any):Promise<any>{const result=await firstValueFrom(this.http.patch(this.cmsUrl(),data,{headers:await this.reservationAuth.headers()}).pipe(timeout(15000)));this.contentCache.invalidate?.();return result;}
+  private async cmsSave(data:any):Promise<any>{const result=await firstValueFrom(this.http.patch<any>(this.cmsUrl(),{...data,...(this.revision?{expectedRevision:this.revision}:{})},{headers:await this.reservationAuth.headers()}).pipe(timeout(15000)));if(result?.revision)this.revision=result.revision;this.contentCache.invalidate?.();return result;}
   private assetUrl():string { return `${this.firebaseDatabaseUrl}/assets/${encodeURIComponent(this.resourceContext.resourceType)}/${encodeURIComponent(this.resourceContext.resourceId)}.json`; }
   private async loadAssetContent():Promise<void> {
-    this.loading=true;this.error='';this.message='';this.assetDraft=null;
+    this.loading=true;this.contentLoaded=false;this.error='';this.message='';this.assetDraft=null;
     try {
-      const asset=(await this.cmsData()).asset;
-      this.assetDraft=this.clone(asset);this.assetDraft.media=editableAssetMedia(asset,this.resourceContext.resourceType,this.resourceContext.resourceId);this.assetDraft.properties ||= {};this.assetDraft.pricing ||= {};if(!this.assetDraft.location||typeof this.assetDraft.location!=='object')this.assetDraft.location={};this.assetMediaDirty=JSON.stringify(this.assetDraft.media)!==JSON.stringify(asset.media||{});this.dirty=false;
+      const data=await this.cmsData();const asset=data.asset;this.revision=data.revision||'';
+      this.assetDraft=this.clone(asset);this.assetDraft.media=editableAssetMedia(asset,this.resourceContext.resourceType,this.resourceContext.resourceId);this.assetDraft.properties ||= {};this.assetDraft.pricing ||= {};if(!this.assetDraft.location||typeof this.assetDraft.location!=='object')this.assetDraft.location={};this.assetMediaDirty=JSON.stringify(this.assetDraft.media)!==JSON.stringify(asset.media||{});this.dirty=false;this.contentLoaded=true;
     }catch(e:any){this.error=e?.message||'Impossible de charger le contenu du bien.';}finally{this.loading=false;}
   }
   private async saveAssetContent():Promise<void> {
@@ -209,7 +213,7 @@ export class AdminSiteContentComponent implements OnInit {
 
   get brand(): any {
     if (!this.current.brand || typeof this.current.brand !== 'object') {
-      this.current.brand = { name: typeof this.current.brand === 'string' ? this.current.brand : 'Alegria' };
+      this.current.brand = { name: typeof this.current.brand === 'string' ? this.current.brand : (this.assetDraft?.name||this.boatId) };
     }
     return this.current.brand;
   }
@@ -319,13 +323,14 @@ export class AdminSiteContentComponent implements OnInit {
 
   async load(): Promise<void> {
     if (!this.isBoat) { await this.loadAssetContent(); return; }
-    this.loading = true;
+    this.loading = true;this.contentLoaded=false;
     this.message = '';
     this.error = '';
     try {
       const data=await this.cmsData();
+      this.revision=data.revision||'';this.assetDraft=this.clone(data.asset);
       const site=data.siteContent,operationalPricing=data.pricing;
-      const profile=data.fleet||{boatId:this.boatId,ownerId:data.asset.ownerId,boatName:data.asset.name};
+      const profile={...(data.fleet||{}),boatId:this.boatId,ownerId:data.asset.ownerId,boatName:data.asset.name};
       const boats=[profile];
       this.siteContent = hydrateBoatOutings(site,data.outings,this.boatId);
       this.boats = boats;
@@ -337,7 +342,7 @@ export class AdminSiteContentComponent implements OnInit {
         this.defaultPricing()
       );
       this.ensureLanguageShapes();
-      this.dirty = false;
+      this.dirty = false;this.contentLoaded=true;
     } catch (e: any) {
       this.error = e?.error?.message || 'Impossible de charger le contenu depuis Firebase.';
     } finally {
@@ -430,6 +435,7 @@ export class AdminSiteContentComponent implements OnInit {
   }
 
   async saveCurrentTab(): Promise<void> {
+    if (!this.contentLoaded||this.loading||this.saving||this.uploadingKey)return;
     if (!this.isBoat) { await this.saveAssetContent(); return; }
     this.saving = true;
     this.message = '';
@@ -571,7 +577,9 @@ export class AdminSiteContentComponent implements OnInit {
       lang.contactInfo = lang.contactInfo || {};
       lang.homePage = lang.homePage || {};
       lang.homePage.pricing = lang.homePage.pricing || {};
-      if (!lang.brand || typeof lang.brand !== 'object') lang.brand = { name: lang.brand || 'Alegria' };
+      if (!lang.brand || typeof lang.brand !== 'object') lang.brand = { name: lang.brand || this.assetDraft?.name || this.boatId };
+      lang.homePage.hero ||= {};lang.homePage.hero.title ||= this.assetDraft?.name||'';lang.homePage.hero.intro ||= lang.homePage.hero.description||this.assetDraft?.description||'';
+      lang.boatPage.title ||= this.assetDraft?.name||'';lang.boatPage.description ||= this.assetDraft?.description||'';
     }
   }
 

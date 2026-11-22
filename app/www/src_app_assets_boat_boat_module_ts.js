@@ -60,7 +60,7 @@ const routes = [{
   canActivateChild: [_services_listing_publication_guard__WEBPACK_IMPORTED_MODULE_1__.ListingPublicationGuard],
   children: [{
     path: '',
-    loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_home_home_module_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_services_asset-photos_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ../../home/home.module */ 45055)).then(m => m.HomeModule)
+    loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_services_owner-customers-text_ts"), __webpack_require__.e("default-src_app_home_home_module_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_services_asset-page-i18n_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ../../home/home.module */ 45055)).then(m => m.HomeModule)
   }, {
     path: '',
     loadChildren: () => __webpack_require__.e(/*! import() */ "src_app_login_login_module_ts").then(__webpack_require__.bind(__webpack_require__, /*! ../../login/login.module */ 91307)).then(m => m.LoginModule)

@@ -2,7 +2,7 @@
   "application": {
     "name": "godirect back-end",
     "platform": "test",
-    "release": "1.00"
+    "release": "1.02"
   },
   "dev": {
     "firebaseMasterConfig": {

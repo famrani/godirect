@@ -1,3 +1,4 @@
+import {ListingDescriptionComponent} from '../../shared/listing-description.component';
 import {SiteTextPipe} from '../../home/site-text.pipe';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -10,6 +11,6 @@ import { ParkingDetailsComponent } from './pages/details/parking-details.compone
 
 @NgModule({
  declarations:[ParkingHomeComponent,ParkingDetailsComponent],
- imports: [SiteTextPipe,CommonModule,LayoutModule,SharedModule,ResourceRoutePipe,ParkingRoutingModule]
+ imports: [ListingDescriptionComponent,SiteTextPipe,CommonModule,LayoutModule,SharedModule,ResourceRoutePipe,ParkingRoutingModule]
 })
 export class ParkingModule {}

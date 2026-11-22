@@ -1,3 +1,4 @@
+import {descriptionPlainText} from './listing-description';
 import {mediaObjectUrl} from './media-routes';
 import { Injectable } from '@angular/core';
 import {firstValueFrom,timeout} from 'rxjs';
@@ -6,6 +7,7 @@ import { HttpClient } from '@angular/common/http';
 
 export interface ResourceRegistryItem {
   name: string;
+  siteUrl?:string;
   pricing?:any;
   translations?:Record<string,any>;
   enabled?: boolean;
@@ -57,7 +59,7 @@ export class ResourceRegistryService {
       .filter(([, asset]) => asset.assetType === type && this.isPublic(asset))
       .map(([key, asset]) => ({
         resourceId: key.split('/')[1], resourceType: type,
-        name: asset.name || key.split('/')[1], description: asset.description || '',
+        name: asset.name || key.split('/')[1], description: descriptionPlainText(asset.description || ''),
         coverImage: asset.media?.cover || '', enabled: true,locationLabel:[asset.location?.area,asset.location?.city,asset.location?.country].filter(Boolean).join(' · '),
       }));
   }
@@ -65,7 +67,7 @@ export class ResourceRegistryService {
   async search(filters:DiscoveryFilters={}):Promise<Array<ResourceRegistryItem & {resourceId:string;resourceType:string}>>{
     const params:Record<string,string>={};for(const [key,value] of Object.entries(filters))if(value)params[key]=value;
     const rows=await firstValueFrom(this.http.get<any[]>('/api/assets',{params}).pipe(timeout(12000)));
-    return (rows||[]).filter(a=>this.isPublic(a)).map(a=>({resourceId:a.id,resourceType:a.assetType,name:a.name||a.id,description:a.headline||a.description||'',coverImage:a.media?.hero||a.media?.cover||a.media?.gallery?.[0]||'',locationLabel:[a.location?.area,a.location?.city,a.location?.country].filter(Boolean).join(' · '),pricing:a.pricing,translations:a.translations}));
+    return (rows||[]).filter(a=>this.isPublic(a)).map(a=>({siteUrl:a.siteUrl,resourceId:a.id,resourceType:a.assetType,name:a.name||a.id,description:descriptionPlainText(a.headline||a.description||''),coverImage:a.media?.hero||a.media?.cover||a.media?.gallery?.[0]||'',locationLabel:[a.location?.area,a.location?.city,a.location?.country].filter(Boolean).join(' · '),pricing:a.pricing,translations:a.translations}));
   }
   mediaUrl(path?: string): string { return mediaObjectUrl(path || ''); }
 }

@@ -1,5 +1,8 @@
+import {queueNotification,queueBookingChange,emitNotification} from './email-notifications.js';
+import {OwnerCustomersService} from './owner-customers.service.js';
+import {WarrantyChargeService} from './warranty-charges.js';
 import { CancellationService } from './cancellation.service.js';
-import { ownerStripeTestMode } from './owner-stripe-mode.js';
+import { ownerStripeTestMode, stripeTestNamespace } from './owner-stripe-mode.js';
 import { updateExisting } from './existing-transaction.js';
 import { advanceReservation } from './reservation-workflow.js';
 import Stripe from 'stripe';
@@ -8,6 +11,8 @@ import { FirebaseService } from './firebase.service.js';
 
 export class StripeService {
   readonly stripe: Stripe;
+  readonly customers:OwnerCustomersService;
+  readonly warranty:WarrantyChargeService;
   readonly cancellations: CancellationService;
   constructor(private readonly firebase: FirebaseService) {
     ownerStripeTestMode();
@@ -15,6 +20,8 @@ export class StripeService {
     if (!key) console.warn('[Stripe] STRIPE_SECRET_KEY is missing; Stripe routes will fail until configured.');
     this.stripe = new Stripe(key || 'sk_test_missing');
     this.cancellations = new CancellationService(firebase,this.stripe);
+    this.customers=new OwnerCustomersService(firebase);
+    this.warranty=new WarrantyChargeService(firebase,this.stripe);
   }
   webhook = async (req: Request, res: Response) => {
     const sig=req.header('stripe-signature'); const secret=process.env.STRIPE_WEBHOOK_SECRET;
@@ -26,8 +33,24 @@ export class StripeService {
       if(id)await this.cancellations.reconcilePayment(id,event.account);
       return res.json({received:true});
     }
+    if(event.type.startsWith('payment_intent.')&&(event.data.object as any).metadata?.warrantyChargeId){if(!event.account)return res.status(400).json({error:'payment_scope_mismatch'});await this.warranty.applyIntent(event.data.object,event.account,event.id);await this.cancellations.reconcilePayment((event.data.object as any).id,event.account);return res.json({received:true});}
     if(event.type==='account.updated'){
-      if(ownerStripeTestMode()&&event.livemode===false)return res.json({received:true});
+      if(ownerStripeTestMode()){
+        if(event.livemode!==false)return res.json({received:true});
+        const account=event.data.object as Stripe.Account;
+        const ownerId=account.metadata?.goDirectOwnerId;
+        const namespace=stripeTestNamespace();
+        if(ownerId && /^[a-zA-Z0-9_-]+$/.test(ownerId) && account.metadata?.environment==='test' && account.metadata?.goDirectTestNamespace===namespace){
+          const ref=this.firebase.db.ref(`owners/${ownerId}/stripeTest/${namespace}`);
+          await ref.once('value');
+          await ref.transaction((v:any)=>{
+            if(v===null)return null;
+            if(v.ownerId!==ownerId||v.connectedAccountId!==account.id)return;
+            return {...v,chargesEnabled:!!account.charges_enabled,payoutsEnabled:!!account.payouts_enabled,onboardingComplete:!!(account.charges_enabled&&account.payouts_enabled),requirementsCurrentlyDue:account.requirements?.currently_due||[],statusUpdatedAt:new Date().toISOString()};
+          },undefined,false);
+        }
+        return res.json({received:true});
+      }
       const account=event.data.object as Stripe.Account;
       const q=await this.firebase.db.ref('owners').orderByChild('stripe/connectedAccountId').equalTo(account.id).once('value');
       const updates:Record<string,unknown>={};
@@ -69,6 +92,9 @@ export class StripeService {
       }
       const saved=await updateExisting(this.firebase.db.ref(`payments/${intent.id}`),(old:any)=>({...old,status:old.status==='succeeded'?'succeeded':intent.status,webhookEventId:event.id,updatedAt:new Date().toISOString()}));
       if(!saved.committed)return res.status(503).json({error:'payment_record_update_retry'});
+      const b=(await this.firebase.db.ref(record.bookingPath).once('value')).val();
+      if(success){await emitNotification(this.firebase,{key:intent.id,kind:'payment.'+record.kind,type:record.bookingPath.split('/')[1],assetId:record.bookingPath.split('/')[2],ownerId:record.ownerId,bookingId:record.bookingId,...(record.kind==='security_deposit'?{}:{amount:record.amount,currency:record.currency})});if(b?.status==='confirmed')await emitNotification(this.firebase,{key:b.id+'|confirmed',kind:'booking.confirmed',type:b.assetType,assetId:b.assetId,ownerId:b.ownerId,bookingId:b.id});}
+      else if(event.type.endsWith('.payment_failed'))await emitNotification(this.firebase,{key:event.id,kind:'payment.failed',type:record.bookingPath.split('/')[1],assetId:record.bookingPath.split('/')[2],ownerId:record.ownerId,bookingId:record.bookingId});
       await this.cancellations.reconcilePayment(intent.id,accountId);
     }
     return res.json({received:true});

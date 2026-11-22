@@ -30,7 +30,7 @@
     <div class="car-landing__content">
       <p class="eyebrow">{{t('car')}}</p>
       <h1>{{ title }}</h1>
-      <p class="lead" *ngIf="intro">{{ intro }}</p>
+      <app-listing-description class="car-intro" *ngIf="intro && intro!==description" [text]="intro"></app-listing-description>
 
       <div class="car-landing__facts" *ngIf="features.length">
         <span *ngFor="let feature of features">{{ feature }}</span>
@@ -42,7 +42,7 @@
         <span>/ {{t('day')}}</span>
       </div>
 
-      <p class="car-landing__description" *ngIf="description">{{ description }}</p>
+      
 
       <div class="car-landing__actions">
         <a class="btn-primary" [routerLink]="'/reserver' | resourceRoute" queryParamsHandling="preserve">{{t('book')}}</a>
@@ -57,9 +57,9 @@
   </section>
 
   <section class="car-info">
-    <article>
+    <article class="car-info__description">
       <h2>{{ localized.descriptionTitle || t('about') }}</h2>
-      <p>{{ description }}</p>
+      <app-listing-description [text]="description"></app-listing-description>
     </article>
     <article>
       <h2>{{ localized.rentalTitle || t('rental') }}</h2>

@@ -1,3 +1,8 @@
+import {BookingQuestionComponent} from '../messaging/booking-question.component';
+import {MessageLinkComponent} from '../messaging/message-link.component';
+import {CarBookingComponent} from '../assets/car/pages/booking/car-booking.component';
+import {SimpleListingComponent} from '../simple-listing/simple-listing.component';
+import {ProfileRolesComponent} from '../profile-roles/profile-roles.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -97,7 +102,7 @@ import { ResourceRoutePipe } from '../services/resource-route.pipe';
     GenericAssetHomeComponent,
     GenericAssetBookingComponent,
   ],
-  imports: [
+  imports: [BookingQuestionComponent,MessageLinkComponent,CarBookingComponent,SimpleListingComponent,ProfileRolesComponent,
     CommonModule,
     ResourceRoutePipe,
     FormsModule,

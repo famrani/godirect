@@ -2,6 +2,7 @@ import {SiteTextPipe} from '../home/site-text.pipe';
 import {OWNER_OFFER_TEXT} from '../services/owner-offer-text';
 import {Component,EventEmitter,OnDestroy,OnInit,Output} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
 import {firstValueFrom,timeout} from 'rxjs';
@@ -10,10 +11,11 @@ import {LanguageService} from '../services/language.service';
 import {SiteContentService} from '../home/site-content-service/site-content.service';
 import {PlatformLayoutComponent} from '../layout/platform-layout/platform-layout.component';
 import {OWNER_DASHBOARD_TEXT} from './owner-dashboard.text';
-@Component({selector:'app-owner-dashboard',standalone:true,imports:[SiteTextPipe,CommonModule,RouterModule,PlatformLayoutComponent],templateUrl:'./owner-dashboard.component.html',styleUrls:['./owner-dashboard.component.scss']})
+@Component({selector:'app-owner-dashboard',standalone:true,imports:[SiteTextPipe,CommonModule,FormsModule,RouterModule,PlatformLayoutComponent],templateUrl:'./owner-dashboard.component.html',styleUrls:['./owner-dashboard.component.scss']})
 export class OwnerDashboardComponent implements OnInit,OnDestroy {
  @Output() browse=new EventEmitter<void>();
  assets:any[]=[];stripe:any=null;content:any;loading=false;listError=false;stripeError=false;
+ assetTypeFilter='';assetStateFilter='';assetLocationFilter='';
  private request=0;private destroyed=false;
  constructor(private http:HttpClient,private auth:ReservationAuthService,public language:LanguageService,private texts:SiteContentService){}
  o(key:string){const lang=this.language.currentLanguage;return this.texts.tFromContent(this.content,'ui.ownerOffer.'+key,lang,OWNER_OFFER_TEXT[lang]?.[key]||OWNER_OFFER_TEXT.en[key]||key);}
@@ -31,6 +33,8 @@ export class OwnerDashboardComponent implements OnInit,OnDestroy {
   finally{if(!this.destroyed&&request===this.request)this.loading=false;}
  }
  get current(){return this.assets.filter(a=>!a.deletedAt);}
+ get assetTypes(){return [...new Set(this.current.map(a=>String(a.assetType||'')).filter(Boolean))].sort();}
+ get visibleAssets(){const location=this.normalized(this.assetLocationFilter);return this.current.filter(a=>(!this.assetTypeFilter||a.assetType===this.assetTypeFilter)&&(!this.assetStateFilter||(this.assetStateFilter==='online'?a.public===true:a.public!==true))&&(!location||this.normalized([a.location?.city,a.location?.area,a.location?.country].filter(Boolean).join(' ')).includes(location)));}
  get online(){return this.current.filter(a=>a.public===true).length;}
  get pending(){return this.assets.reduce((n,a)=>n+Number(a.reservationSummary?.pending||0),0);}
  get confirmed(){return this.assets.reduce((n,a)=>n+Number(a.reservationSummary?.confirmed||0),0);}
@@ -38,5 +42,6 @@ export class OwnerDashboardComponent implements OnInit,OnDestroy {
  get archivedSubscriptions(){return this.assets.filter(a=>a.deletedAt&&a.billing?.status==='active'&&!a.billing.cancelAtPeriodEnd);}
  get reservationAssets(){return this.assets.filter(a=>a.reservationSummary?.active>0).sort((a,b)=>Number(b.reservationSummary?.pending||0)-Number(a.reservationSummary?.pending||0));}
  get stripeReady(){return this.stripe?.connected===true&&this.stripe?.chargesEnabled===true;}
+ private normalized(value:any){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
  path(a:any,tail:string){return `/${encodeURIComponent(a.assetType)}/${encodeURIComponent(a.id)}/${tail}`;}
 }

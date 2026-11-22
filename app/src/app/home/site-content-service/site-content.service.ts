@@ -1,3 +1,4 @@
+import {portalFor} from '../../services/portal-policy';
 import {PAGE_TRANSLATIONS,LITERAL_KEYS} from '../../services/page-translations';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -76,7 +77,19 @@ export class SiteContentService {
    *
    * The service no longer reads /alegria_v2 for translations.
    */
+  private platformOnly(): boolean {
+    if (typeof window === 'undefined') return false;
+    return portalFor(window.location.hostname) === 'client';
+  }
+  private async sharedContent(refresh: boolean): Promise<any> {
+    if (refresh) this.globalContent=undefined;
+    if (this.globalContent) return this.globalContent;
+    this.globalPromise ||= firstValueFrom(this.http.get<any>('/api/ui-content').pipe(timeout(5000)))
+      .then(content=>this.globalContent=content||{}).catch(()=>({})).finally(()=>this.globalPromise=undefined);
+    return this.globalPromise;
+  }
   getContent(forceRefresh = false): Promise<Record<SiteLanguage, SiteContent>> {
+    if (this.platformOnly()) return this.sharedContent(forceRefresh);
     const scope=this.resourceContext.scopedPath('siteContent');
     const current=this.scopeLoads.get(scope);if(current&&!forceRefresh)return current;
     const task=this.loadContent(forceRefresh);this.scopeLoads.set(scope,task);
@@ -88,14 +101,15 @@ export class SiteContentService {
     this.cacheScope=scope;
     const generation=this.cacheGeneration;
     try{
-      if(forceRefresh)this.globalPromise=undefined;
-      if(!this.globalContent||forceRefresh){try{this.globalPromise ||= firstValueFrom(this.http.get<any>('/api/ui-content').pipe(timeout(5000))).finally(()=>this.globalPromise=undefined);this.globalContent=await this.globalPromise;}catch{}}
+      await this.sharedContent(forceRefresh);
       let scoped:any={};
       try{scoped=await firstValueFrom(this.http.get<any>(`${this.restDatabaseUrls[0]}/${scope}.json`).pipe(timeout(5000)))||{};}catch{}
       const value:any={};
       for(const language of this.languages){
         const fallback=(SITE_CONTENT as any)[language]||(SITE_CONTENT as any).en||{};
         value[language]=this.deepMerge(this.deepMerge(fallback,this.globalContent?.[language]||{}),scoped?.[language]||{});
+        // RTDB drops empty arrays; an explicit photo selection must not revive sample images.
+        if(scoped?.[language]?.boatPhotosConfigured===true){value[language].boatHeroImage=String(scoped[language].boatHeroImage||'');value[language].galleryImages=Array.isArray(scoped[language].galleryImages)?scoped[language].galleryImages:[];}
         // Generic role labels and new shared UI belong to the platform, not boat CMS overrides.
         if(this.globalContent?.[language]?.roles)value[language].roles=this.globalContent[language].roles;
         if(this.globalContent?.[language]?.ui)value[language].ui=this.globalContent[language].ui;
@@ -115,6 +129,7 @@ export class SiteContentService {
   }
 
   async getRawContent(forceRefresh = false): Promise<any> {
+    if(this.platformOnly()) return {};
     const scope=this.resourceContext.scopedPath('siteContent');
     if (!forceRefresh && this.rawSiteContent && this.rawScope===scope) return this.rawSiteContent;
 

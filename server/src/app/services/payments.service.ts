@@ -1,3 +1,4 @@
+import {connectedCustomer} from './connected-customer.js';
 import { randomUUID } from 'node:crypto';
 import { cancellationLocked } from './cancellation.service.js';
 import { ownerStripeTestMode, ownerStripeAccountId, assertOwnerTestAccount } from './owner-stripe-mode.js';
@@ -62,19 +63,45 @@ export class PaymentsService {
     });
     if(locked.missing)return res.status(404).json({error:'booking_not_found'});
     if(!locked.committed)return res.status(409).json({error:'booking_changed_reload_required'});
+    try{
     const metadata={bookingId:String(b.id),bookingPath,kind:p.kind,assetId:String(b.assetId),ownerId:canonicalOwnerId,platform:'godirect'};
-    const warranty=p.kind==='security_deposit';
-    // A warranty registers a card for future off-session charges; it does not charge the security amount.
-    const customer:any=warranty?await this.stripeSvc.stripe.customers.create({email:b.customerEmail,metadata:{bookingId:String(b.id)}},{stripeAccount:accountId,idempotencyKey:`gd25:${idempotencyScope}:customer`}):null;
-    const pi:any=warranty
-      ?await this.stripeSvc.stripe.setupIntents.create({customer:customer.id,usage:'off_session',payment_method_types:['card'],metadata},{stripeAccount:accountId,idempotencyKey:`gd25:${idempotencyScope}:warranty:${attempt}`})
-      :await this.stripeSvc.stripe.paymentIntents.create({amount:Math.round(Number(amount)*100),currency:String(b.currency||'eur').toLowerCase(),automatic_payment_methods:{enabled:true},metadata},{stripeAccount:accountId,idempotencyKey:`gd25:${idempotencyScope}:${p.kind}:${Math.round(Number(amount)*100)}:${attempt}`});
+    const warranty=p.kind==='security_deposit';const options={stripeAccount:accountId};
+    const pending=existing.filter(r=>r.kind===p.kind&&r.status!=='canceled'&&r.status!=='succeeded');
+    if(pending.length>1)return res.status(409).json({error:'multiple_pending_payments_review_required'});
+    let pi:any=null;
+    if(pending.length){
+      const previous=pending[0];const previousId=String(previous.stripePaymentIntentId||previous.id||'');
+      pi=warranty?await this.stripeSvc.stripe.setupIntents.retrieve(previousId,options):await this.stripeSvc.stripe.paymentIntents.retrieve(previousId,options);
+      if(['succeeded','processing','requires_capture'].includes(pi.status))return res.status(409).json({error:'payment_confirmation_pending'});
+      if(pi.status==='canceled')return res.status(409).json({error:'payment_cancellation_pending'});
+      if(Object.entries(metadata).some(([key,value])=>pi.metadata?.[key]!==value)||(!warranty&&(pi.amount!==Math.round(Number(amount)*100)||pi.currency!==String(b.currency||'eur').toLowerCase())))return res.status(409).json({error:'payment_scope_mismatch'});
+    }
+    const linked=pi?.customer?(typeof pi.customer==='string'?pi.customer:pi.customer.id):'';
+    const customer=await connectedCustomer(this.firebase,this.stripeSvc.stripe,{uid,ownerId:canonicalOwnerId,accountId,mode:stripeMode,email:String(b.customerEmail||''),name:b.customerName,bookingId:String(b.id),candidateId:linked});
+    if(linked&&linked!==customer.id)return res.status(409).json({error:'stripe_customer_migration_required'});
+    if(!pi){
+      // Preserve the previous idempotency recipe. Attach the Customer before returning to Elements.
+      pi=warranty
+       ?await this.stripeSvc.stripe.setupIntents.create({customer:customer.id,usage:'off_session',payment_method_types:['card'],metadata},{...options,idempotencyKey:`gd25:${idempotencyScope}:warranty:${attempt}`})
+       :await this.stripeSvc.stripe.paymentIntents.create({amount:Math.round(Number(amount)*100),currency:String(b.currency||'eur').toLowerCase(),automatic_payment_methods:{enabled:true},metadata},{...options,idempotencyKey:`gd25:${idempotencyScope}:${p.kind}:${Math.round(Number(amount)*100)}:${attempt}`});
+    }
+    if(['succeeded','processing','requires_capture'].includes(pi.status))return res.status(409).json({error:'payment_confirmation_pending'});
+    if(pi.status==='canceled')return res.status(409).json({error:'payment_cancellation_pending'});
+    if(!warranty){
+      if(pi.customer&&(typeof pi.customer==='string'?pi.customer:pi.customer.id)!==customer.id)return res.status(409).json({error:'stripe_customer_scope_mismatch'});
+      pi=await this.stripeSvc.stripe.paymentIntents.update(pi.id,{customer:customer.id,receipt_email:customer.email},options);
+    }else if((typeof pi.customer==='string'?pi.customer:pi.customer?.id)!==customer.id)return res.status(409).json({error:'stripe_customer_scope_mismatch'});
     const paymentId=pi.id;
-    const payment={id:paymentId,stripeMode,bookingId:b.id,bookingPath,ownerId:canonicalOwnerId,assetId:b.assetId,kind:p.kind,amount:Number(amount),currency:String(b.currency||'eur').toLowerCase(),stripePaymentIntentId:pi.id,stripeConnectedAccountId:accountId,goDirectCommissionAmount:0,goDirectCommissionPercent:0,status:pi.status,createdAt:new Date().toISOString()};
-    // Deterministic records make repeated checkout requests idempotent.
-    await this.firebase.db.ref(`payments/${paymentId}`).transaction((old:any)=>old||payment,undefined,false);
+    const payment={id:paymentId,stripeMode,bookingId:b.id,bookingPath,ownerId:canonicalOwnerId,assetId:b.assetId,customerUid:uid,stripeCustomerId:customer.id,customerEmail:customer.email,kind:p.kind,amount:Number(amount),currency:String(b.currency||'eur').toLowerCase(),stripePaymentIntentId:pi.id,stripeConnectedAccountId:accountId,goDirectCommissionAmount:0,goDirectCommissionPercent:0,status:pi.status,createdAt:new Date().toISOString()};
+    await this.firebase.db.ref(`payments/${paymentId}`).transaction((old:any)=>{
+      if(!old)return payment;
+      if(old.bookingId!==b.id||old.stripeConnectedAccountId!==accountId||old.kind!==p.kind)throw Object.assign(new Error('payment_scope_mismatch'),{status:409});
+      return {...old,customerUid:uid,stripeCustomerId:customer.id,customerEmail:customer.email};
+    },undefined,false);
     await this.firebase.db.ref(`paymentsByBooking/${b.id}/${paymentId}`).set(true);
-    await updateExisting(this.firebase.db.ref(bookingPath),(current:any)=>{const operations={...(current.checkoutOperations||{})};delete operations[operation];return {...current,checkoutOperations:operations};});
     return res.json({clientSecret:pi.client_secret,connectedAccountId:accountId,paymentId,mode:warranty?'setup':'payment',stripeMode});
+    }finally{
+      await updateExisting(this.firebase.db.ref(bookingPath),(current:any)=>{const operations={...(current.checkoutOperations||{})};delete operations[operation];return {...current,checkoutOperations:operations};});
+    }
   };
 }

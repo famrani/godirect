@@ -1,3 +1,4 @@
+import {EmailNotifications} from '../services/email-notifications.js';
 import {AccountAccessService} from '../services/account-access.service.js';
 import { ListingBillingService } from '../services/listing-billing.service.js';
 import { FirebaseService } from '../services/firebase.service.js';
@@ -20,8 +21,10 @@ export class MainComponent {
     const media=new MediaService(firebase);
     const billing=new ListingBillingService(firebase);
     await billing.init();
-    const web=new WebServerComponent(assets,bookings,owners,payments,reviews,stripe,media,billing,new AccountAccessService(firebase));
+    const notifications=new EmailNotifications(firebase);
+    const web=new WebServerComponent(assets,bookings,owners,payments,reviews,stripe,media,billing,new AccountAccessService(firebase),notifications);
     await web.initWebServer();
+    notifications.start();
     console.log('[GoDirect] ready');
   }
 }

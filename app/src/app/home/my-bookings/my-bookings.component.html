@@ -4,14 +4,14 @@
   <p *ngIf="paymentMessage" class="notice" role="status">{{ paymentMessage | siteText }}</p>
   <details *ngIf="admin" class="booking-card" [open]="createOpen"><summary>{{ "ui.pages.tdb3f8932a7a9" | siteText }}</summary>
     <app-generic-asset-booking *ngIf="ctx.resourceType !== 'car'" [kind]="bookingKind" [admin]="true"></app-generic-asset-booking>
-    <app-car-booking *ngIf="ctx.resourceType === 'car'" [admin]="true"></app-car-booking>
+    <app-car-booking *ngIf="ctx.resourceType === 'car'"></app-car-booking>
   </details>
   <p *ngIf="loading" aria-live="polite">{{ "ui.pages.t8e22b9999d31" | siteText }}</p>
   <h2>{{ "ui.pages.t5ae4e5874c90" | siteText }}</h2><p *ngIf="!loading && !upcoming.length">{{ "ui.pages.tdae685e69915" | siteText }}</p>
   <article *ngFor="let b of upcoming" class="booking-card">
     <div class="card-heading"><h3>{{ b.assetType | siteText }} · {{b.assetId}}</h3><span class="status" [class.confirmed]="b.status==='confirmed'">{{ reservationStatus(b) | siteText }}</span></div>
     <p>{{b.startAt | date:'medium'}} — {{b.endAt | date:'medium'}}</p>
-    <p class="price">{{b.rentalAmount | number:'1.2-2'}} {{b.currency || 'EUR'}}</p>
+    <app-message-link [threadId]="b.messageThreadId||''" [type]="b.assetType" [assetId]="b.assetId" [bookingId]="b.id"></app-message-link><app-message-link *ngIf="admin" audience="management" [type]="b.assetType" [assetId]="b.assetId" [bookingId]="b.id"></app-message-link><p class="price">{{b.rentalAmount | number:'1.2-2'}} {{b.currency || 'EUR'}}</p>
     <div class="reservation-status-steps"><span [class.done]="depositDone(b)">{{ "ui.pages.t79f9f1012a3f" | siteText }} {{depositDone(b)?('ui.pages.t75cc10149318' | siteText):('ui.pages.t3b28057050c4' | siteText)}}</span><span [class.done]="warrantyDone(b)">{{ warrantyLabel(b) | siteText }}</span><span [class.done]="b.workflow?.adminApproved">{{ "ui.pages.td4dbee0f76ac" | siteText }} {{b.workflow?.adminApproved?('ui.messages.te3130f49f2ae' | siteText):('ui.pages.t5fba9c16f0e5' | siteText)}}</span></div>
     <div class="actions"><button type="button" (click)="open(b)" [disabled]="!!busy">{{ "ui.pages.tc6565c1527e9" | siteText }}</button><button type="button" *ngIf="active(b) && !cancellationLocked(b)" (click)="startEdit(b)" [disabled]="!!busy">{{ "ui.pages.t6d2f5f3af29a" | siteText }}</button><button type="button" class="primary" *ngIf="canPay(b,'booking_deposit')" (click)="pay(b,'booking_deposit')" [disabled]="!!busy">{{ "ui.pages.tad999d81c402" | siteText }} {{b.bookingDeposit}} {{b.currency}}</button></div>
     <p *ngIf="b.financialReviewRequired" class="notice">{{ "ui.pages.t35b8f6a61721" | siteText }}</p>
@@ -36,11 +36,13 @@
       <button type="button" class="primary" *ngIf="canPay(selected,'balance')" (click)="pay(selected,'balance')" [disabled]="!!busy">{{offer('payBalance')}}</button>
       <button type="button" *ngIf="canPay(selected,'security_deposit')" (click)="pay(selected,'security_deposit')" [disabled]="!!busy">{{ "ui.pages.tc19651206d81" | siteText }}</button>
       <button type="button" *ngIf="admin && active(selected) && !cancellationLocked(selected) && !selected.workflow?.adminApproved" (click)="approve(selected)" [disabled]="!!busy">{{ "ui.pages.td8f2c32eec62" | siteText }}</button>
-      <button type="button" *ngIf="admin && active(selected)" (click)="cancelAdmin(selected)" [disabled]="!!busy">{{cancellationLocked(selected)?('ui.messages.t452e77e20f3a' | siteText):('ui.pages.td05bbb93c567' | siteText)}}</button>
-      <button type="button" *ngIf="admin && cancellationLocked(selected)" (click)="checkCancellation(selected)" [disabled]="!!busy">{{ "ui.pages.t270064cc4bda" | siteText }}</button>
+      <button type="button" *ngIf="admin && selected.managementPermissions?.financial!==false && active(selected)" (click)="cancelAdmin(selected)" [disabled]="!!busy">{{cancellationLocked(selected)?('ui.messages.t452e77e20f3a' | siteText):('ui.pages.td05bbb93c567' | siteText)}}</button>
+      <button type="button" *ngIf="admin && selected.managementPermissions?.financial!==false && cancellationLocked(selected)" (click)="checkCancellation(selected)" [disabled]="!!busy">{{ "ui.pages.t270064cc4bda" | siteText }}</button>
       <button type="button" *ngIf="!admin && active(selected) && selected.cancellationRequestStatus !== 'pending' && !cancellationLocked(selected)" (click)="requestCancellation(selected)" [disabled]="!!busy">{{ "ui.pages.t1e7e2d808ffa" | siteText }}</button>
     </div>
     <p *ngIf="selected.cancellationRequestStatus==='pending'" class="notice">{{ "ui.pages.t5a8b34eb6452" | siteText }}</p>
+    <section *ngIf="!admin && warrantyDone(selected) && selected.workflow?.warrantyProvidedProof?.kind==='security_deposit' && !warrantyConsentDone(selected)"><label><input type="checkbox" [(ngModel)]="warrantyAccepted"> {{warrantyText('accept')}} {{selected.securityDeposit|number:'1.2-2'}} {{selected.currency}}.</label><p>{{warrantyText('consentHelp')}}</p><button (click)="authorizeWarranty()" [disabled]="!!busy || !warrantyAccepted">{{warrantyText('authorize')}}</button></section>
+    <section *ngIf="warrantyCharges(selected).length"><h3>{{warrantyText('warrantyPayments')}}</h3><article *ngFor="let c of warrantyCharges(selected)"><strong>{{c.amountMinor/100|number:'1.2-2'}} {{selected.currency}} — {{warrantyText('status_'+c.status)}}</strong><p>{{c.reason}}</p><button *ngIf="!admin && (c.status==='requires_action'||c.status==='requires_confirmation')" (click)="validateWarrantyCharge(selected,c)" [disabled]="!!busy">{{warrantyText('validate')}}</button></article></section>
     <p *ngIf="!admin && !warrantyDone(selected) && selected.securityDeposit>0" class="help">{{ "ui.pages.t161364db700d" | siteText }}</p>
     <section *ngIf="selected.cancellation" class="notice" aria-live="polite">
       <strong>{{ reservationStatus(selected) | siteText }}</strong>
@@ -87,9 +89,10 @@
     <span class="eyebrow">{{ "ui.pages.t6d3771de8e3a" | siteText }}</span><h2>{{ paymentTitle(checkout.kind) | siteText }}</h2>
     <p *ngIf="checkout.kind==='security_deposit'">{{ "ui.pages.t1792574188a6" | siteText }} {{checkout.amount}} {{checkout.currency}}{{ "ui.pages.t0e1858a6665b" | siteText }}</p>
     <p *ngIf="checkout.kind!=='security_deposit'">{{ "ui.pages.tbf63ab8774b1" | siteText }} <strong>{{checkout.amount | number:'1.2-2'}} {{checkout.currency}}</strong></p>
+    <label *ngIf="checkout.kind==='security_deposit'"><input type="checkbox" [(ngModel)]="warrantyAccepted"> {{warrantyText('accept')}} {{checkout.amount|number:'1.2-2'}} {{checkout.currency}}. <small>{{warrantyText('consentHelp')}}</small></label>
     <div #paymentHost class="payment-element"></div>
     <p *ngIf="error" class="notice error">{{ error | siteText }}</p>
-    <div class="actions"><button type="button" class="primary" [disabled]="!!busy" (click)="confirmPayment()">{{busy==='payment'?('ui.messages.t22ddf9388cea' | siteText):checkout.kind==='security_deposit'?('ui.messages.t64d17e0f5f47' | siteText):('ui.messages.tabefff5f023b' | siteText)}}</button><button type="button" [disabled]="!!busy" (click)="closePayment()">{{ "ui.pages.tf201a632220e" | siteText }}</button></div>
+    <div class="actions"><button type="button" class="primary" [disabled]="!!busy || (checkout.kind==='security_deposit' && !warrantyAccepted)" (click)="confirmPayment()">{{busy==='payment'?('ui.messages.t22ddf9388cea' | siteText):checkout.kind==='security_deposit'?('ui.messages.t64d17e0f5f47' | siteText):('ui.messages.tabefff5f023b' | siteText)}}</button><button type="button" [disabled]="!!busy" (click)="closePayment()">{{ "ui.pages.tf201a632220e" | siteText }}</button></div>
   </section>
   <h2>{{ "ui.pages.t47d9a55512ce" | siteText }}</h2><p *ngIf="!loading && !past.length">{{ "ui.pages.td6328bc603a4" | siteText }}</p>
   <article *ngFor="let b of past" class="booking-card"><div class="card-heading"><h3>{{ b.assetType | siteText }} · {{b.assetId}}</h3><span class="status">{{ reservationStatus(b) | siteText }}</span></div><p>{{b.startAt | date:'medium'}} — {{b.endAt | date:'medium'}}</p><button type="button" (click)="open(b)">{{ "ui.pages.tc6565c1527e9" | siteText }}</button></article>

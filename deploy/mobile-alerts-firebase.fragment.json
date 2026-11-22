@@ -1,0 +1,6 @@
+{
+  "mobileAlertPreferences": {".read": false, ".write": false},
+  "mobileAlertVerification": {".read": false, ".write": false},
+  "mobileAlertLimits": {".read": false, ".write": false},
+  "mobileAlertQueue": {".read": false, ".write": false, ".indexOn": ["status"]}
+}

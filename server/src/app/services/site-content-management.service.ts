@@ -1,6 +1,9 @@
+import {queueListingUpdate} from './listing-update-notification.js';
+import {queueNotification} from './email-notifications.js';
+import {hasAssetPermission,assetPermission} from './asset-delegation.js';
 import {photoUpdate,persistPhoto} from './persisted-photo.js';
 import {Request,Response} from 'express';
-import {createHash} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
 import {FirebaseService} from './firebase.service.js';
 import {isAssetType} from './asset-paths.service.js';
 import {platformAdministrator} from './account-access.service.js';
@@ -41,17 +44,19 @@ export class SiteContentManagementService {
   const asset=(await this.store.db.ref(`assets/${type}/${id}`).once('value')).val();
   const admin=platformAdministrator(user,profile);
   if(!asset||asset.deletedAt)throw fail(404,'asset_not_found');
-  if(!admin&&asset.ownerId!==user.uid)throw fail(403,'asset_management_required');
+  if(!admin&&!await hasAssetPermission(this.store,user.uid,type,id,'content'))throw fail(403,'asset_management_required');
   return {type,id,user,admin,asset};
  }
  get=async(req:Request,res:Response)=>{
   const {type,id,asset}=await this.access(req);
   const [site,pricing,outings,fleet]=await Promise.all(['siteContent','bnPricingModel','bnOutings','bnFleet'].map(root=>this.store.db.ref(`${root}/${type}/${id}`).once('value')));
-  res.setHeader('Cache-Control','no-store');return res.json({asset,siteContent:site.val()||{},pricing:pricing.val(),outings:outings.val()||{},fleet:fleet.val()});
+  res.setHeader('Cache-Control','no-store');return res.json({asset,revision:listingRevision(asset),siteContent:site.val()||{},pricing:pricing.val(),outings:outings.val()||{},fleet:fleet.val()});
  };
  save=async(req:Request,res:Response)=>{
   const {type,id,user,admin}=await this.access(req),body=req.body;
-  if(!body||!safeTree({...body,asset:null})||JSON.stringify(body).length>1000000||Object.keys(body).some(k=>!['asset','siteContent','pricing','outings','photo'].includes(k)))throw fail(400,'invalid_content');
+  if(!body||!safeTree({...body,asset:null})||JSON.stringify(body).length>1000000||Object.keys(body).some(k=>!['asset','siteContent','pricing','outings','photo','expectedRevision'].includes(k)))throw fail(400,'invalid_content');
+  if(body.expectedRevision!==undefined&&!/^[a-f0-9]{64}$/.test(String(body.expectedRevision)))throw fail(400,'invalid_revision');
+  if(body.outings||Object.values<any>(body.siteContent||{}).some(c=>c&&('outings' in c||'outingsPage' in c)))throw fail(400,'listing_outings_removed');
   const assetUpdates=body.asset?cmsAssetUpdates(body.asset):{};
   const photo=body.photo?photoUpdate(body.photo,type,id):undefined;
   if(type!=='boat'&&(body.siteContent||body.pricing||body.outings))throw fail(400,'invalid_content_scope');
@@ -59,10 +64,13 @@ export class SiteContentManagementService {
   const numericPricing=new Set(['day','halfDay','sunset','evening','skipperPrice','cleaningPrice','nominalGuests','minGuests','maxGuests','extraGuestPrice']);
   if(body.pricing&&(Array.isArray(body.pricing)||typeof body.pricing!=='object'||Object.entries(body.pricing).some(([key,v])=>numericPricing.has(key)&&(typeof v!=='number'||!Number.isFinite(v)||v<0))))throw fail(400,'invalid_price');
   if(body.outings&&Object.keys(body.outings).some(k=>!/^[a-zA-Z0-9_-]{1,80}$/.test(k)))throw fail(400,'invalid_outing');
-  const now=new Date().toISOString();let error='asset_changed_reload_required';
+  const now=new Date().toISOString(),auditId=randomUUID();let error='asset_changed_reload_required';
+  await this.store.db.ref().once('value');
   const result=await this.store.db.ref().transaction((root:any)=>{
    if(root===null)return null;const asset=root.assets?.[type]?.[id];
-   if(!asset||asset.deletedAt||(!admin&&asset.ownerId!==user.uid)){error='asset_management_required';return;}
+   if(!asset||asset.deletedAt||!assetPermission(root,user.uid,type,id,'content',user)){error='asset_management_required';return;}
+   if(body.expectedRevision!==undefined&&listingRevision(asset)!==body.expectedRevision)return;
+   const before=JSON.parse(JSON.stringify(asset));
    for(const [key,v]of Object.entries(assetUpdates))setPath(asset,key,v);
    if(['property','pool','parking'].includes(type)&&(!String(asset.location?.city||'').trim()||!String(asset.location?.country||'').trim())){error='location_required';return;}
    if(body.siteContent){root.siteContent??={};root.siteContent[type]??={};root.siteContent[type][id]??={};for(const [l,c]of Object.entries<any>(body.siteContent))root.siteContent[type][id][l]={...(root.siteContent[type][id][l]||{}),...c};
@@ -76,9 +84,10 @@ export class SiteContentManagementService {
    if(body.pricing){root.bnPricingModel??={};root.bnPricingModel[type]??={};root.bnPricingModel[type][id]={...(root.bnPricingModel[type][id]||{}),...body.pricing};}
    if(body.outings){root.bnOutings??={};root.bnOutings[type]??={};const previous=root.bnOutings[type][id]||{};for(const [slug,o]of Object.entries<any>(body.outings))previous[slug]={...(previous[slug]||{}),...o,ownerId:asset.ownerId,boatId:id};root.bnOutings[type][id]=previous;}
    if(photo){persistPhoto(root,type,id,photo);if(type==='boat')asset.siteContentRevision=createHash('sha256').update(JSON.stringify(root.siteContent?.boat?.[id]||{})).digest('hex');}
-   root.listingModeration??={};root.listingModeration[type]??={};root.listingModeration[type][id]={status:'pending',revision:listingRevision(asset),requestedAt:now,requestedBy:user.uid};asset.updatedAt=now;return root;
+   if(type==='boat'&&(body.siteContent||body.pricing||body.outings||photo))asset.siteContentRevision=createHash('sha256').update(JSON.stringify({site:root.siteContent?.boat?.[id]||{},pricing:root.bnPricingModel?.boat?.[id]||{},outings:root.bnOutings?.boat?.[id]||{}})).digest('hex');
+   root.listingModeration??={};root.listingModeration[type]??={};root.listingModeration[type][id]={status:'pending',revision:listingRevision(asset),requestedAt:now,requestedBy:user.uid};asset.updatedAt=now;root.managementAudit??={};root.managementAudit[auditId]={actorId:user.uid,ownerId:asset.ownerId,assetType:type,assetId:id,action:'content.save',at:now};queueListingUpdate(root,before,asset,type,id,user.uid,auditId);return root;
   },undefined,false);
   if(!result.committed)throw fail(409,error);
-  res.setHeader('Cache-Control','no-store');return res.json({ok:true,moderation:'pending',...(photo?{photo,media:result.snapshot.val()?.assets?.[type]?.[id]?.media}: {})});
+  res.setHeader('Cache-Control','no-store');return res.json({ok:true,revision:listingRevision(result.snapshot.val()?.assets?.[type]?.[id]),moderation:'pending',...(photo?{photo,media:result.snapshot.val()?.assets?.[type]?.[id]?.media}: {})});
  };
 }

@@ -1,3 +1,5 @@
+import {portalFor} from '../../services/portal-policy';
+import {GoogleSessionService} from '../../services/google-session.service';
 import { Component } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -42,7 +44,8 @@ export class LoginComponent {
     private route: ActivatedRoute,
     public utilSvc: UtilsService,
     private storeDb: StoreDbService,
-    private loginSvc: LoginService
+    private loginSvc: LoginService,
+    private googleSession:GoogleSessionService
   ) {
     this.loginForm = this.fb.group({
       email: [localStorage.getItem('rememberEmail') || '', [Validators.required, Validators.email]],
@@ -98,7 +101,10 @@ export class LoginComponent {
   }
 
   private postLoginRedirect() {
-    const target = this.redirectTo && this.redirectTo.startsWith('/') ? this.redirectTo : '/';
+    const portal=portalFor(window.location.hostname);
+    const fallback=portal==='admin'?'/platform/admin':portal==='concierge'?'/concierge':portal==='owner'?'/owner/listings':'/';
+    const requested=this.route.snapshot.queryParamMap.get('returnUrl')||this.redirectTo;
+    const target=requested&&requested.startsWith('/')&&!requested.startsWith('//')?requested:fallback;
     try {
       localStorage.removeItem('redirectAfterLogin');
       sessionStorage.removeItem('redirectAfterLogin');
@@ -175,43 +181,10 @@ export class LoginComponent {
     this.sending = true;
     this.closeError();
     try {
-      const user = await this.users.signInWithGoogleAndLoadProfile();
-
-      // (Optional) ensure we have an RTDB profile doc (in case first-time Google login)
-      // If your UsersService already upserts, you can remove this block:
-      try {
-        const uid = user.userId;
-        if (uid) {
-          const now = Date.now();
-          const patch = {
-            userId: uid,
-            email: user.email || '',
-            displayName: user.displayName || '',
-            photoURL: user.photoURL || '',
-            emailverified: !!user.emailverified,
-            modifiedTS: now,
-          };
-
-          await this.storeDb.partialUpdateObject(
-            this.utilSvc.backendFBstoreId,
-            this.utilSvc.mdb,
-            OBJECTNAME.bnUsers,
-            patch,
-            uid
-          );
-
-          // reload full profile if needed
-          const full = await this.storeDb.getObject(
-            this.utilSvc.backendFBstoreId,
-            this.utilSvc.mdb,
-            OBJECTNAME.bnUsers,
-            uid
-          ) as Users;
-
-          this.loginSvc.wnGuest = full;
-          this.loginSvc.mainSvc.setLoggedUser(full);
-        }
-      } catch { /* best effort upsert */ }
+      const user = await this.googleSession.signIn();
+      this.loginSvc.wnGuest=user;
+      this.loginSvc.mainSvc.setLoggedUser(user);
+      try{sessionStorage.setItem('loggedUser',JSON.stringify(user));if(localStorage.getItem('rememberLogin')==='true')localStorage.setItem('loggedUser',JSON.stringify(user));else localStorage.removeItem('loggedUser');}catch{}
 
       this.postLoginRedirect();
     } catch (e: any) {

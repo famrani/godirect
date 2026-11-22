@@ -1,3 +1,13 @@
+import {PortalHomeComponent} from './portals/portal-home.component';
+import {MessageNotificationsComponent} from './messaging/message-notifications.component';
+import {LegalInterceptor} from './services/legal.interceptor';
+import {OwnerSitePromoComponent} from './owner-site-promo/owner-site-promo.component';
+import {HomeRolesComponent} from './home-roles/home-roles.component';
+import {ConciergeComponent} from './workspace/concierge.component';
+import {ReleaseFooterComponent} from './layout/release-footer/release-footer.component';
+import { UrlSerializer } from '@angular/router';
+import { AssetUrlSerializer } from './services/asset-url-serializer';
+import { ResourceRoutePipe } from './services/resource-route.pipe';
 import {PlatformAdminComponent} from './platform-admin/platform-admin.component';
 import {OwnerDashboardComponent} from './owner-dashboard/owner-dashboard.component';
 import {SiteTextPipe} from './home/site-text.pipe';
@@ -42,10 +52,11 @@ import { ResourceListComponent } from './resource-list/resource-list.component';
 import { OwnerPaymentsComponent } from './owner-payments.component';
 
 @NgModule({
-  declarations: [OwnerListingsComponent, LegacyRouteRedirectComponent, ResourceDashboardComponent, ResourceListComponent, OwnerPaymentsComponent, AppComponent, Page404Component],
-  imports: [
+  declarations: [PortalHomeComponent, LegacyRouteRedirectComponent, ResourceDashboardComponent, ResourceListComponent, OwnerPaymentsComponent, AppComponent, Page404Component],
+  imports: [MessageNotificationsComponent,OwnerListingsComponent,ReleaseFooterComponent,
+    ResourceRoutePipe,
     PlatformAdminComponent,
-    OwnerDashboardComponent,
+    OwnerDashboardComponent,ConciergeComponent,HomeRolesComponent,OwnerSitePromoComponent,
     SiteTextPipe,
     BrowserModule,
     FormsModule,
@@ -68,6 +79,8 @@ import { OwnerPaymentsComponent } from './owner-payments.component';
     }),
   ],
   providers: [
+    {provide:HTTP_INTERCEPTORS,useClass:LegalInterceptor,multi:true},
+    { provide: UrlSerializer, useClass: AssetUrlSerializer },
     {provide:HTTP_INTERCEPTORS,useClass:AssetOwnerReadInterceptor,multi:true},
     StatusBar,
     SplashScreen,

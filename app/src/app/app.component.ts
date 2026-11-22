@@ -1,3 +1,4 @@
+import {LegalService} from './services/legal.service';
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, OnInit, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
@@ -43,6 +44,7 @@ export class AppComponent implements OnInit {
     public fb: FormBuilder,
     private pendingOfferLoginModal: PendingOfferLoginModalService,
     private seo: SeoService,
+    private legal: LegalService,
     @Inject(DOCUMENT) private document: Document,
   ) {
   }
@@ -85,7 +87,10 @@ export class AppComponent implements OnInit {
     const identity = String(user.userId || user.uid || user.id || user.email || '').trim();
     if (!identity || identity === this.lastLoginIdentity) return;
     this.lastLoginIdentity = identity;
-    setTimeout(() => this.pendingOfferLoginModal.checkAfterLogin(user), 250);
+    setTimeout(async () => {
+      if(/^\/owner\/listings\/[^/]+\/[^/]+\/documents(?:[?#]|$)/.test(this.router.url)||this.router.url.startsWith('/platform/admin/documents')||this.router.url.startsWith('/platform/admin/legal')||this.router.url.startsWith('/account/signup')||this.router.url.startsWith('/account/accept-terms'))return;
+      try{const status=await this.legal.ensure();if(identity!==this.lastLoginIdentity)return;if(status&&status.accepting&&!status.accepted){await this.router.navigate(['/account/accept-terms'],{queryParams:{role:status.role,returnUrl:this.router.url}});return;}await this.pendingOfferLoginModal.checkAfterLogin(user);}catch{/* API guard still prevents unaccepted business operations. */}
+    }, 250);
   }
 
   async initializeApp() {

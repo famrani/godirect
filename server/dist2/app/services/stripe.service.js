@@ -1,11 +1,15 @@
+import { OwnerCustomersService } from './owner-customers.service.js';
+import { WarrantyChargeService } from './warranty-charges.js';
 import { CancellationService } from './cancellation.service.js';
-import { ownerStripeTestMode } from './owner-stripe-mode.js';
+import { ownerStripeTestMode, stripeTestNamespace } from './owner-stripe-mode.js';
 import { updateExisting } from './existing-transaction.js';
 import { advanceReservation } from './reservation-workflow.js';
 import Stripe from 'stripe';
 export class StripeService {
     firebase;
     stripe;
+    customers;
+    warranty;
     cancellations;
     constructor(firebase) {
         this.firebase = firebase;
@@ -15,6 +19,8 @@ export class StripeService {
             console.warn('[Stripe] STRIPE_SECRET_KEY is missing; Stripe routes will fail until configured.');
         this.stripe = new Stripe(key || 'sk_test_missing');
         this.cancellations = new CancellationService(firebase, this.stripe);
+        this.customers = new OwnerCustomersService(firebase);
+        this.warranty = new WarrantyChargeService(firebase, this.stripe);
     }
     webhook = async (req, res) => {
         const sig = req.header('stripe-signature');
@@ -35,9 +41,33 @@ export class StripeService {
                 await this.cancellations.reconcilePayment(id, event.account);
             return res.json({ received: true });
         }
+        if (event.type.startsWith('payment_intent.') && event.data.object.metadata?.warrantyChargeId) {
+            if (!event.account)
+                return res.status(400).json({ error: 'payment_scope_mismatch' });
+            await this.warranty.applyIntent(event.data.object, event.account, event.id);
+            await this.cancellations.reconcilePayment(event.data.object.id, event.account);
+            return res.json({ received: true });
+        }
         if (event.type === 'account.updated') {
-            if (ownerStripeTestMode() && event.livemode === false)
+            if (ownerStripeTestMode()) {
+                if (event.livemode !== false)
+                    return res.json({ received: true });
+                const account = event.data.object;
+                const ownerId = account.metadata?.goDirectOwnerId;
+                const namespace = stripeTestNamespace();
+                if (ownerId && /^[a-zA-Z0-9_-]+$/.test(ownerId) && account.metadata?.environment === 'test' && account.metadata?.goDirectTestNamespace === namespace) {
+                    const ref = this.firebase.db.ref(`owners/${ownerId}/stripeTest/${namespace}`);
+                    await ref.once('value');
+                    await ref.transaction((v) => {
+                        if (v === null)
+                            return null;
+                        if (v.ownerId !== ownerId || v.connectedAccountId !== account.id)
+                            return;
+                        return { ...v, chargesEnabled: !!account.charges_enabled, payoutsEnabled: !!account.payouts_enabled, onboardingComplete: !!(account.charges_enabled && account.payouts_enabled), requirementsCurrentlyDue: account.requirements?.currently_due || [], statusUpdatedAt: new Date().toISOString() };
+                    }, undefined, false);
+                }
                 return res.json({ received: true });
+            }
             const account = event.data.object;
             const q = await this.firebase.db.ref('owners').orderByChild('stripe/connectedAccountId').equalTo(account.id).once('value');
             const updates = {};

@@ -89,6 +89,8 @@ export class BookingsComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     await this.assetAccess.refresh();
+    // Delegated managers use the scoped backend component only, never legacy direct Firebase controls.
+    if(!this.assetAccess.ownsCurrentAsset||this.assetAccess.isPlatformAdmin)return;
     // Property and parking management is handled by the owner-authenticated unified component.
     if(this.resourceContext.resourceType!=='boat')return;
     this.languageSub = this.languageService.language$.subscribe((language) => {

@@ -1,3 +1,6 @@
+import {GoogleSessionService} from '../../services/google-session.service';import {ServicesService} from 'godigital-lib';
+import {LanguageService} from '../../services/language.service';
+import {LegalService} from '../../services/legal.service';
 import {RegistrationProfileService} from '../../services/registration-profile.service';
 import { FormControl } from '@angular/forms';
 import { Component } from '@angular/core';
@@ -8,7 +11,7 @@ import { UsersService } from 'godigital-lib';               // adjust path if ne
 import { StoreDbService, OBJECTNAME } from 'godigital-lib'; // adjust path if needed
 import { UtilsService } from 'godigital-lib';
 
-export function registrationRole(value:any):string {return ['assetOwner','boatOwner','owner'].includes(String(value))?'assetOwner':value==='serviceProvider'?'serviceProvider':'customer';}
+export function registrationRole(value:any):string {return ['assetOwner','boatOwner','owner'].includes(String(value))?'assetOwner':value==='concierge'?'concierge':value==='serviceProvider'?'serviceProvider':'customer';}
 
 type SocialLink = { label: string; url: string };
 
@@ -19,10 +22,13 @@ type SocialLink = { label: string; url: string };
   styleUrls: ['./signup.component.css'],
 })
 export class SignupComponent {
+  legalCatalog:any;legalLabels:any={};legalError='';private legalLoad=0;private legalLanguageSub:any;
+  async loadLegal(){const request=++this.legalLoad;this.legalCatalog=null;this.form?.patchValue({acceptTerms:false});try{const catalog=await this.legal.catalog(registrationRole(this.form?.value.role));if(request!==this.legalLoad)return;this.legalCatalog=catalog;this.legalLabels=catalog.labels;this.legalError=this.legalCatalog.accepting?'':this.legalLabels.signupUnavailable;}catch{this.legalError=this.legalLabels.error||'';}}
   publishIntent=false;
   roles:Array<{id:string,labelKey:string}>=[];
-  async ngOnInit():Promise<void>{this.publishIntent=this.route?.snapshot.queryParamMap.get('returnUrl')==='/owner/listings';try{this.roles=await this.registrationProfile.roles();if(this.publishIntent&&this.roles.some(r=>r.id==='assetOwner'))this.form.patchValue({role:'assetOwner'});}catch{this.error='Le catalogue des rôles est indisponible. Réessayez.';}}
+  async ngOnInit():Promise<void>{this.publishIntent=this.route?.snapshot.queryParamMap.get('returnUrl')==='/owner/listings';try{this.roles=await this.registrationProfile.roles();if(this.route.snapshot.queryParamMap.get('returnUrl')==='/concierge'&&this.roles.some(r=>r.id==='concierge'))this.form.patchValue({role:'concierge'});else if(this.publishIntent&&this.roles.some(r=>r.id==='assetOwner'))this.form.patchValue({role:'assetOwner'});}catch{this.error='Le catalogue des rôles est indisponible. Réessayez.';}this.legalLanguageSub=this.legalLanguage.language$.subscribe(()=>{void this.loadLegal();});this.form.get('role')?.valueChanges.subscribe(()=>{void this.loadLegal();});}
 
+  ngOnDestroy(){this.legalLanguageSub?.unsubscribe();this.legalLoad++;}
   socialControl(index: number, key: 'label' | 'url'): FormControl {
     return this.socials.at(index).get(key) as FormControl;
   }
@@ -56,7 +62,10 @@ export class SignupComponent {
     public utilSvc: UtilsService,
     private router: Router,
     private registrationProfile:RegistrationProfileService,
-    private route:ActivatedRoute
+    private legal:LegalService,
+    private legalLanguage:LanguageService,
+    private route:ActivatedRoute,
+    private googleSession:GoogleSessionService,private mainSvc:ServicesService
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -73,6 +82,8 @@ export class SignupComponent {
       socialnetwork: this.fb.array<ReturnType<typeof this.newSocial>>([]),
 
       acceptTerms: [false, Validators.requiredTrue],
+      legalName: ['', [Validators.required,Validators.minLength(2),Validators.maxLength(240)]],
+      adultConfirmed: [false, Validators.requiredTrue],
     });
   }
 
@@ -111,7 +122,7 @@ export class SignupComponent {
 
   closeSuccessModal() {
     this.showSuccessModal = false;
-    this.router.navigate(['/login'], { queryParams: { created: 'true' } });
+    this.router.navigate(['/account/login'], { queryParams: { created: 'true' } });
   }
 
   // ---------- uploads
@@ -137,7 +148,7 @@ export class SignupComponent {
   async signupWithEmail() {
     this.error = undefined;
     this.success = false;
-    if (this.form.invalid) return;
+    if (this.form.invalid||!this.legalCatalog?.accepting) {this.form.markAllAsTouched();return;}
 
     this.sending = true;
     try {
@@ -185,6 +196,8 @@ export class SignupComponent {
         provider: 'firebase',
       };
 
+      await this.legal.accept(this.legalCatalog,v.legalName,v.adultConfirmed);
+
       // 3) save to RTDB
       await this.registrationProfile.save(profile);
 
@@ -202,7 +215,7 @@ export class SignupComponent {
       }
 
       this.success = true;
-      this.form.reset({ role: 'customer', acceptTerms: false });
+      this.form.reset({ role: 'customer', acceptTerms: false,adultConfirmed:false });
       this.photoUrls = [];
       this.openSuccessModal(
         this.emailActionWarning || 'Account created successfully. Please check your inbox and your Junk/Spam folder for the password setup/reset email before signing in.',
@@ -223,11 +236,12 @@ export class SignupComponent {
 
   // ---------- Google signup (IMMEDIATE REDIRECT TO HOME)
   async signupWithGoogle() {
+    if(!this.legalCatalog?.accepting||!this.form.value.acceptTerms||!this.form.value.adultConfirmed||this.form.get('legalName')?.invalid){this.form.markAllAsTouched();return;}
     this.error = undefined;
     this.sending = true;
 
     try {
-      const user = await this.users.signInWithGoogleAndLoadProfile();
+      const user = await this.googleSession.signIn();
       const uid = user.userId;
       const now = Date.now();
 
@@ -235,7 +249,7 @@ export class SignupComponent {
       const displayName = (v.displayName || user.displayName || '').trim();
       const firstname = v.firstname || (displayName.split(' ')[0] || '');
       const lastname = v.lastname || (displayName.split(' ').slice(1).join(' ') || '');
-      const role = user.role || registrationRole(v.role);
+      const role = ['assetOwner','boatOwner','owner','concierge','admin'].includes(String(user.role)) ? user.role : registrationRole(v.role);
 
       const profile = {
         userId: uid,
@@ -261,7 +275,10 @@ export class SignupComponent {
         provider: 'google',
       };
 
-      await this.registrationProfile.save(profile);
+      const catalog=await this.legal.catalog(registrationRole(role));
+      if(catalog.bundleHash!==this.legalCatalog.bundleHash){await this.router.navigate(['/account/accept-terms'],{queryParams:{role:catalog.role,returnUrl:'/account/profile'}});return;}
+      await this.legal.accept(catalog,v.legalName,v.adultConfirmed);
+      const savedProfile=await this.registrationProfile.save(profile);this.mainSvc.setLoggedUser(savedProfile);
 
       // IMMEDIATE redirect to home (no “user created” banner)
       // If you want to auto-open Stripe right after Google for owners/providers, uncomment below:

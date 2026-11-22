@@ -1,3 +1,4 @@
+import {publicWarrantyBooking} from './warranty-charges.js';
 import { updateExisting } from './existing-transaction.js';
 import { FirebaseService } from './firebase.service.js';
 import { initialWorkflow, advanceReservation } from './reservation-workflow.js';
@@ -11,7 +12,7 @@ export async function bookingPayments(firebase:FirebaseService,id:string):Promis
 
 // Legacy status labels are not proof of payment. Only the server's verified ledger is adopted.
 export async function reservationView(firebase:FirebaseService,b:any):Promise<any> {
-  if(b.workflow?.version===25)return advanceReservation(b);
+  if(b.workflow?.version===25)return publicWarrantyBooking(advanceReservation(b));
   const w:any={...initialWorkflow('customer'),legacyLinked:true,adminApproved:b.status==='confirmed'};
   let unresolvedPayment=false;
   const records=await bookingPayments(firebase,String(b.id));
@@ -28,7 +29,7 @@ export async function reservationView(firebase:FirebaseService,b:any):Promise<an
   const legacyWarranty=b.warrantyStatus===true||['paid','provided','card_registered'].includes(String(b.warrantyStatus).toLowerCase());
   const financialReviewRequired=unresolvedPayment||(legacyPaid&&Number(b.bookingDeposit)>0&&!w.depositPaid)||(b.balancePaid===true&&!w.balancePaid)||(legacyWarranty&&!w.warrantyProvided);
   const result=advanceReservation({...b,workflow:w});
-  return {...result,...(b.status==='confirmed'?{status:b.status}:{}),financialReviewRequired,financialChangesLocked:records.length>0||!!b.paymentCheckoutStartedAt};
+  return publicWarrantyBooking({...result,...(b.status==='confirmed'?{status:b.status}:{}),financialReviewRequired,financialChangesLocked:records.length>0||!!b.paymentCheckoutStartedAt});
 }
 
 export async function ensureReservationWorkflow(firebase:FirebaseService,path:string):Promise<any> {

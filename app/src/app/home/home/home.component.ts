@@ -453,7 +453,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   get showAdminHome(): boolean {
-    return this.isAdmin && this.ownerView === 'admin';
+    return !this.assetAccess.isPlatformAdmin && this.isAdmin && this.ownerView === 'admin';
   }
 
 

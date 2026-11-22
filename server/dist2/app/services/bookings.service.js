@@ -1,3 +1,4 @@
+import { hasAssetPermission, assetPermission, conciergeBookingView } from './asset-delegation.js';
 import { listingPublic } from './listing-billing.service.js';
 import { cancellationLocked } from './cancellation.service.js';
 import { updateExisting } from './existing-transaction.js';
@@ -40,7 +41,7 @@ export class BookingsService {
         if (!user)
             return null;
         const admin = String(req.query.admin || '') === '1';
-        if (admin && String(asset.ownerId) !== user.uid) {
+        if (admin && !await hasAssetPermission(this.firebase, user.uid, asset.assetType, asset.id || p.assetId, 'bookings', user)) {
             res.status(403).json({ error: 'owner_required' });
             return null;
         }
@@ -60,7 +61,7 @@ export class BookingsService {
             }
         }
         return { customerId, customerEmail: admin ? p.customerEmail : user.email,
-            workflow: initialWorkflow(admin ? 'admin' : 'customer') };
+            actorUid: admin ? user.uid : null, actorClaims: admin ? { uid: user.uid, admin: user.admin === true } : null, workflow: initialWorkflow(admin ? 'admin' : 'customer') };
     }
     // R17 canonical layout: bookings/{assetType}/{assetId}/{bookingId}.
     bookingPath(type, assetId, id) {
@@ -96,13 +97,26 @@ export class BookingsService {
         const start = new Date(startAt).getTime(), end = new Date(endAt).getTime();
         return existing.some((b) => !['cancelled', 'rejected'].includes(String(b.status || '').toLowerCase()) && new Date(b.startAt).getTime() < end && new Date(b.endAt).getTime() > start);
     }
-    async saveNewBooking(booking) {
+    async saveNewBooking(booking, actorUid, actorClaims) {
         const path = this.bookingPath(booking.assetType, booking.assetId, booking.id);
-        const result = await this.firebase.db.ref(this.bookingPath(booking.assetType, booking.assetId)).transaction((rows) => {
-            rows = rows || {};
+        const result = await this.firebase.db.ref().transaction((root) => {
+            if (root === null)
+                return null;
+            if (root.assets?.[booking.assetType]?.[booking.assetId]?.ownerId !== booking.ownerId || root.assets[booking.assetType][booking.assetId].deletedAt)
+                return;
+            if (actorUid && !assetPermission(root, actorUid, booking.assetType, booking.assetId, 'bookings', actorClaims))
+                return;
+            root.bookings ??= {};
+            root.bookings[booking.assetType] ??= {};
+            const rows = root.bookings[booking.assetType][booking.assetId] || {};
             if (Object.values(rows).some((b) => !['cancelled', 'rejected'].includes(b.status) && Date.parse(b.startAt) < Date.parse(booking.endAt) && Date.parse(b.endAt) > Date.parse(booking.startAt)))
                 return;
-            return { ...rows, [booking.id]: booking };
+            root.bookings[booking.assetType][booking.assetId] = { ...rows, [booking.id]: booking };
+            if (actorUid) {
+                root.managementAudit ??= {};
+                root.managementAudit['create_' + booking.id] = { action: 'booking.create', actorId: actorUid, ownerId: booking.ownerId, assetType: booking.assetType, assetId: booking.assetId, bookingId: booking.id, at: booking.createdAt };
+            }
+            return root;
         }, undefined, false);
         if (!result.committed)
             return false;
@@ -164,8 +178,9 @@ export class BookingsService {
         const pricing = this.validatePrice(this.carPrice(asset, p.startAt, p.endAt, p.additionalDriver, p.childSeat));
         const ref = this.firebase.db.ref(this.bookingPath('car', p.assetId)).push(), id = String(ref.key);
         const booking = { id, assetId: p.assetId, assetType: 'car', ownerId: String(asset.ownerId), customerId, startAt: p.startAt, endAt: p.endAt, customerName: p.customerName, customerEmail, customerPhone: p.customerPhone, rental: { pickupLocation: p.pickupLocation, returnLocation: p.returnLocation, driverAge: p.driverAge, licenseCountry: p.licenseCountry }, extras: { additionalDriver: p.additionalDriver, childSeat: p.childSeat }, comments: p.comments, pricing, rentalAmount: pricing.rentalAmount, bookingDeposit: pricing.bookingDeposit, securityDeposit: pricing.securityDeposit, currency: pricing.currency, balanceAmount: Math.max(0, pricing.rentalAmount - pricing.bookingDeposit), status: 'pending', paymentStatus: 'unpaid', createdAt: this.utils.nowIso() };
-        Object.assign(booking, advanceReservation({ ...booking, ...identity }));
-        if (!await this.saveNewBooking(booking))
+        const { actorUid, actorClaims, ...customerIdentity } = identity;
+        Object.assign(booking, advanceReservation({ ...booking, ...customerIdentity }));
+        if (!await this.saveNewBooking(booking, identity.actorUid, identity.actorClaims))
             return res.status(409).json({ error: 'asset_unavailable' });
         return res.status(201).json(booking);
     };
@@ -221,8 +236,9 @@ export class BookingsService {
             booking.rental = { vehiclePlate: p.vehiclePlate };
         else
             booking.rental = { guests: p.guests };
-        Object.assign(booking, advanceReservation({ ...booking, ...identity }));
-        if (!await this.saveNewBooking(booking))
+        const { actorUid, actorClaims, ...customerIdentity } = identity;
+        Object.assign(booking, advanceReservation({ ...booking, ...customerIdentity }));
+        if (!await this.saveNewBooking(booking, identity.actorUid, identity.actorClaims))
             return res.status(409).json({ error: 'asset_unavailable' });
         return res.status(201).json(booking);
     };
@@ -242,6 +258,7 @@ export class BookingsService {
         return res.status(403).json({ error: 'owner_required' }); return res.json(await Promise.all((await this.bookingsForIndex('bookingsByOwner', id)).filter((b) => b.ownerId === user.uid).map((b) => reservationView(this.firebase, b)))); };
     // R21: Firebase ID token is verified server-side. Never trust an ownerId from the request.
     async ownedBooking(req, res) {
+        res.setHeader('Cache-Control', 'no-store');
         const { type, assetId, bookingId } = req.params;
         if (typeof type !== 'string' || !['boat', 'car', 'parking', 'property', 'pool'].includes(type) ||
             typeof assetId !== 'string' || typeof bookingId !== 'string' ||
@@ -255,29 +272,31 @@ export class BookingsService {
             return null;
         }
         let uid;
+        let actorClaims;
         try {
-            uid = (await this.firebase.auth.verifyIdToken(match[1])).uid;
+            actorClaims = await this.firebase.auth.verifyIdToken(match[1]);
+            uid = actorClaims.uid;
         }
         catch {
             res.status(401).json({ error: 'invalid_authentication' });
             return null;
         }
-        const asset = await findAsset(this.firebase, assetId);
+        const asset = await findAsset(this.firebase, assetId, type);
         if (!asset || String(asset.assetType) !== type) {
             res.status(404).json({ error: 'asset_not_found' });
             return null;
         }
-        if (String(asset.ownerId) !== uid) {
+        if (!await hasAssetPermission(this.firebase, uid, type, assetId, 'bookings', actorClaims)) {
             res.status(403).json({ error: 'not_asset_owner' });
             return null;
         }
         const path = this.bookingPath(type, assetId, bookingId);
         const booking = (await this.firebase.db.ref(path).once('value')).val();
-        if (!booking || String(booking.assetId) !== assetId || String(booking.ownerId) !== uid) {
+        if (!booking || String(booking.assetId) !== assetId || String(booking.ownerId) !== String(asset.ownerId)) {
             res.status(404).json({ error: 'booking_not_found' });
             return null;
         }
-        return { asset, booking, path };
+        return { asset, booking, path, actorId: uid, actorClaims };
     }
     // R22.4: customer operations are bound to the verified Firebase identity.
     async authenticatedCustomer(req, res) {
@@ -288,7 +307,7 @@ export class BookingsService {
         }
         try {
             const claims = await this.firebase.auth.verifyIdToken(match[1]);
-            return { uid: String(claims.uid), email: String(claims.email || '').trim().toLowerCase() };
+            return { uid: String(claims.uid), email: String(claims.email || '').trim().toLowerCase(), admin: claims.admin === true || claims.role === 'admin' };
         }
         catch {
             res.status(401).json({ error: 'invalid_authentication' });
@@ -385,7 +404,7 @@ export class BookingsService {
         const scoped = await this.ownedBooking(req, res);
         if (!scoped)
             return;
-        return res.json(await reservationView(this.firebase, scoped.booking));
+        return res.json(scoped.actorId === scoped.booking.ownerId ? await reservationView(this.firebase, scoped.booking) : conciergeBookingView(await reservationView(this.firebase, scoped.booking)));
     };
     customerBookingPatch = async (req, res) => this.editReservation(req, res, false);
     adminBookingPatch = async (req, res) => this.editReservation(req, res, true);
@@ -396,7 +415,7 @@ export class BookingsService {
             scoped = await this.ownedBooking(req, res);
             if (!scoped)
                 return;
-            uid = String(scoped.booking.ownerId);
+            uid = String(scoped.actorId);
         }
         else {
             const user = await this.authenticatedCustomer(req, res);
@@ -480,14 +499,19 @@ export class BookingsService {
         }
         let failure = 'booking_changed_reload_required';
         const parent = this.bookingPath(type, String(old.assetId));
-        const result = await updateExisting(this.firebase.db.ref(parent), (rows) => {
+        const result = await updateExisting(this.firebase.db.ref(), (root) => {
+            if (admin && (!assetPermission(root, uid, type, String(old.assetId), 'bookings', scoped.actorClaims) || root.assets?.[type]?.[String(old.assetId)]?.ownerId !== old.ownerId)) {
+                failure = 'not_asset_owner';
+                return;
+            }
+            const rows = root?.bookings?.[type]?.[String(old.assetId)];
             failure = 'booking_changed_reload_required';
             const current = rows?.[old.id];
             if (cancellationLocked(current)) {
                 failure = 'cancellation_in_progress';
                 return;
             }
-            if (!current || String(current.updatedAt || current.createdAt || '') !== expected || (admin ? current.ownerId : current.customerId) !== uid)
+            if (!current || String(current.updatedAt || current.createdAt || '') !== expected || (admin ? current.ownerId !== scoped.asset.ownerId : current.customerId !== uid))
                 return;
             if (!admin && ['cancelled', 'rejected', 'completed'].includes(current.status)) {
                 failure = 'booking_closed';
@@ -513,13 +537,17 @@ export class BookingsService {
                     next.workflow = { ...next.workflow, adminApproved: next.workflow.origin === 'admin' };
                 next = advanceReservation(next);
             }
-            return { ...rows, [old.id]: next };
+            root.bookings[type][String(old.assetId)] = { ...rows, [old.id]: next };
+            root.managementAudit ??= {};
+            root.managementAudit['edit_' + old.id + '_' + Date.parse(next.updatedAt)] = { actorId: uid, ownerId: current.ownerId, assetType: type, assetId: old.assetId, bookingId: old.id, action: 'booking.edit', at: next.updatedAt };
+            return root;
         });
         if (result.missing)
             return res.status(404).json({ error: 'booking_not_found' });
         if (!result.committed)
             return res.status(409).json({ error: failure });
-        return res.json(await reservationView(this.firebase, result.snapshot.val()[old.id]));
+        const updated = await reservationView(this.firebase, result.snapshot.val()?.bookings?.[type]?.[String(old.assetId)]?.[old.id]);
+        return res.json(admin && uid !== old.ownerId ? conciergeBookingView(updated) : updated);
     }
     adminBookingDelete = async (req, res) => this.cancelReservation(req, res, true);
     adminCancellationReconcile = async (req, res) => this.cancelReservation(req, res, false);
@@ -527,6 +555,8 @@ export class BookingsService {
         const scoped = await this.ownedBooking(req, res);
         if (!scoped)
             return;
+        if (scoped.actorId !== scoped.booking.ownerId)
+            return res.status(403).json({ error: 'financial_owner_required' });
         if (!this.cancellations)
             return res.status(503).json({ error: 'cancellation_service_unavailable' });
         const booking = await this.cancellations.run(scoped.path, String(scoped.booking.ownerId), initiate);

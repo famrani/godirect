@@ -13,6 +13,8 @@ export class ResourceRoutePipe implements PipeTransform {
     }
     if (/^(?:https?:|mailto:|tel:|javascript:)/i.test(route) || route.startsWith('#')) return route;
     if (/^\/(?:boat|property|parking|car|pool)\/[a-z0-9][a-z0-9_-]*(?:\/|$)/i.test(route)) return route;
+    if(/^\/(account|owner|platform)(?:[/?#]|$)/.test(route))return route;
+    if(typeof window!=='undefined'&&window.location.pathname.startsWith('/account/'))return route==='/home'?'/':`/account${route}`;
     return boatPath(route || '/home');
   }
 }

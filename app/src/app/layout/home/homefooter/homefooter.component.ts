@@ -1,3 +1,4 @@
+import { dedicatedAsset } from '../../../services/asset-domain';
 import {PLATFORM_HOME_TEXT} from '../../../services/platform-home-text';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -16,6 +17,7 @@ import { ResourceRegistryService } from '../../../services/resource-registry.ser
   styleUrls: ['./homefooter.component.scss'],
 })
 export class HomefooterComponent implements OnInit, OnDestroy {
+  readonly isDedicatedAssetSite=!!dedicatedAsset();
   get goDirectHomeLabel():string {return this.siteContentService.tFromContent(this.allSiteContent,'ui.platform.home',this.currentLanguage,PLATFORM_HOME_TEXT[this.currentLanguage]||PLATFORM_HOME_TEXT.en);}
 
   year = new Date().getFullYear();

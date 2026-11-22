@@ -4,7 +4,7 @@
     <div>
       <span class="eyebrow">{{details.eyebrow || ('ui.messages.t10b31fcfff37' | siteText)}}</span>
       <h1>{{details.title || (p.brand + ' ' + p.model)}}</h1>
-      <p class="lead">{{details.intro || asset.description}}</p>
+      <app-listing-description *ngIf="details.intro && details.intro !== (details.description || asset.description)" [text]="details.intro"></app-listing-description>
     </div>
     <div class="price"><small>{{ "ui.pages.tc0fd7660f17d" | siteText }}</small><strong>{{price.basePrice}} {{price.currency}}</strong><small>{{ "ui.pages.t156b9eb38835" | siteText }}</small></div>
   </div>
@@ -23,7 +23,7 @@
   </div>
 
   <div class="content-grid">
-    <article><h2>{{details.descriptionTitle || ('ui.messages.t27e518f76490' | siteText)}}</h2><p>{{details.description || asset.description}}</p></article>
+    <article><h2>{{details.descriptionTitle || ('ui.messages.t27e518f76490' | siteText)}}</h2><app-listing-description [text]="details.description || asset.description"></app-listing-description></article>
     <article><h2>{{details.featuresTitle || ('ui.messages.t6d93dfc44200' | siteText)}}</h2><ul><li *ngFor="let item of details.features || []">{{item}}</li></ul></article>
     <article><h2>{{details.rentalTitle || ('ui.pages.td219c68101f5' | siteText)}}</h2><p>{{details.rentalText || ('ui.messages.t25fba3860c7b' | siteText)}}</p></article>
   </div>

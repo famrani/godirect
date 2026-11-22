@@ -1,0 +1,17 @@
+const types = new Set(['boat', 'car', 'property', 'parking', 'pool']);
+export function feedbackRows(data) { const out = []; for (const [key, value] of Object.entries(data || {})) {
+    if (types.has(key)) {
+        for (const [id, items] of Object.entries(value || {}))
+            for (const [fid, row] of Object.entries(items || {}))
+                if (row && typeof row === 'object')
+                    out.push({ ...row, feedbackId: fid, assetType: key, assetId: id });
+    }
+    else if (value && typeof value === 'object') {
+        const type = value.assetType || value.resourceType || (value.boatId ? 'boat' : null), id = value.assetId || value.resourceId || value.boatId;
+        if (types.has(type) && typeof id === 'string' && /^[a-z0-9][a-z0-9_-]*$/.test(id))
+            out.push({ ...value, feedbackId: key, assetType: type, assetId: id });
+    }
+} return out.filter(r => r.status !== 'deleted'); }
+export function publicFeedback(row) { return { feedbackId: row.feedbackId, assetType: row.assetType, assetId: row.assetId, bookingId: String(row.bookingId || ''), rating: Number(row.rating ?? row.rate) || 0, comments: String(row.comments || row.description || ''), date: String(row.date || '') }; }
+
+//# sourceMappingURL=workspace-feedback.js.map

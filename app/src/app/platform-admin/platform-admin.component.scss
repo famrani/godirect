@@ -19,3 +19,7 @@
   overflow-wrap: anywhere;
   text-underline-offset: 3px;
 }
+
+.filters select{max-width:100%;flex:0 1 420px}.table-scroll td small{font-size:12px}.table-scroll td strong{font-weight:600}@media(max-width:650px){.filters select{flex:initial;width:100%}}
+
+.owner-link{border:0;background:transparent;color:inherit;padding:0;text-align:left;font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}

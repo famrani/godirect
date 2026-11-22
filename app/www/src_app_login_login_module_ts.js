@@ -1087,15 +1087,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   registrationRole: () => (/* binding */ registrationRole)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _signup_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./signup.component.html?ngResource */ 97356);
 /* harmony import */ var _signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./signup.component.css?ngResource */ 41093);
 /* harmony import */ var _signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/registration-profile.service */ 92915);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/language.service */ 48756);
+/* harmony import */ var _services_legal_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/legal.service */ 5847);
+/* harmony import */ var _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../services/registration-profile.service */ 92915);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! godigital-lib */ 22464);
+
+
 
 
 
@@ -1108,7 +1112,7 @@ __webpack_require__.r(__webpack_exports__);
  // adjust path if needed
 
 function registrationRole(value) {
-  return ['assetOwner', 'boatOwner', 'owner'].includes(String(value)) ? 'assetOwner' : value === 'serviceProvider' ? 'serviceProvider' : 'customer';
+  return ['assetOwner', 'boatOwner', 'owner'].includes(String(value)) ? 'assetOwner' : value === 'concierge' ? 'concierge' : value === 'serviceProvider' ? 'serviceProvider' : 'customer';
 }
 let SignupComponent = class SignupComponent {
   fb;
@@ -1117,22 +1121,60 @@ let SignupComponent = class SignupComponent {
   utilSvc;
   router;
   registrationProfile;
+  legal;
+  legalLanguage;
   route;
+  legalCatalog;
+  legalLabels = {};
+  legalError = '';
+  legalLoad = 0;
+  legalLanguageSub;
+  loadLegal() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const request = ++_this.legalLoad;
+      _this.legalCatalog = null;
+      _this.form?.patchValue({
+        acceptTerms: false
+      });
+      try {
+        const catalog = yield _this.legal.catalog(registrationRole(_this.form?.value.role));
+        if (request !== _this.legalLoad) return;
+        _this.legalCatalog = catalog;
+        _this.legalLabels = catalog.labels;
+        _this.legalError = _this.legalCatalog.accepting ? '' : _this.legalLabels.signupUnavailable;
+      } catch {
+        _this.legalError = _this.legalLabels.error || '';
+      }
+    })();
+  }
   publishIntent = false;
   roles = [];
   ngOnInit() {
-    var _this = this;
+    var _this2 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      _this.publishIntent = _this.route?.snapshot.queryParamMap.get('returnUrl') === '/owner/listings';
+      _this2.publishIntent = _this2.route?.snapshot.queryParamMap.get('returnUrl') === '/owner/listings';
       try {
-        _this.roles = yield _this.registrationProfile.roles();
-        if (_this.publishIntent && _this.roles.some(r => r.id === 'assetOwner')) _this.form.patchValue({
+        _this2.roles = yield _this2.registrationProfile.roles();
+        if (_this2.route.snapshot.queryParamMap.get('returnUrl') === '/concierge' && _this2.roles.some(r => r.id === 'concierge')) _this2.form.patchValue({
+          role: 'concierge'
+        });else if (_this2.publishIntent && _this2.roles.some(r => r.id === 'assetOwner')) _this2.form.patchValue({
           role: 'assetOwner'
         });
       } catch {
-        _this.error = 'Le catalogue des rôles est indisponible. Réessayez.';
+        _this2.error = 'Le catalogue des rôles est indisponible. Réessayez.';
       }
+      _this2.legalLanguageSub = _this2.legalLanguage.language$.subscribe(() => {
+        void _this2.loadLegal();
+      });
+      _this2.form.get('role')?.valueChanges.subscribe(() => {
+        void _this2.loadLegal();
+      });
     })();
+  }
+  ngOnDestroy() {
+    this.legalLanguageSub?.unsubscribe();
+    this.legalLoad++;
   }
   socialControl(index, key) {
     return this.socials.at(index).get(key);
@@ -1155,25 +1197,29 @@ let SignupComponent = class SignupComponent {
   photoUrls = [];
   /** If true & role is owner/provider, redirect to Stripe Connect after signup */
   connectStripeNow = false;
-  constructor(fb, users, storeDb, utilSvc, router, registrationProfile, route) {
+  constructor(fb, users, storeDb, utilSvc, router, registrationProfile, legal, legalLanguage, route) {
     this.fb = fb;
     this.users = users;
     this.storeDb = storeDb;
     this.utilSvc = utilSvc;
     this.router = router;
     this.registrationProfile = registrationProfile;
+    this.legal = legal;
+    this.legalLanguage = legalLanguage;
     this.route = route;
     this.form = this.fb.group({
-      email: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.email]],
-      password: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.minLength(6)]],
-      firstname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required]],
-      lastname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required]],
+      email: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.email]],
+      password: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.minLength(6)]],
+      firstname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required]],
+      lastname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required]],
       displayName: [''],
       phone: [''],
       country: [''],
-      role: ['customer', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required]],
+      role: ['customer', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required]],
       socialnetwork: this.fb.array([]),
-      acceptTerms: [false, _angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.requiredTrue]
+      acceptTerms: [false, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.requiredTrue],
+      legalName: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.minLength(2), _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.maxLength(240)]],
+      adultConfirmed: [false, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.requiredTrue]
     });
   }
   // ---------- helpers
@@ -1221,7 +1267,7 @@ let SignupComponent = class SignupComponent {
   }
   closeSuccessModal() {
     this.showSuccessModal = false;
-    this.router.navigate(['/login'], {
+    this.router.navigate(['/account/login'], {
       queryParams: {
         created: 'true'
       }
@@ -1229,46 +1275,49 @@ let SignupComponent = class SignupComponent {
   }
   // ---------- uploads
   onPhotosSelected(files) {
-    var _this2 = this;
+    var _this3 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!files?.length) return;
-      const storeId = _this2.utilSvc.backendFBstoreId;
+      const storeId = _this3.utilSvc.backendFBstoreId;
       const dir = `users/${Date.now()}`;
-      _this2.sending = true;
+      _this3.sending = true;
       try {
         for (const file of Array.from(files)) {
-          const url = yield _this2.storeDb.uploadObjects1(storeId, file, dir);
-          _this2.photoUrls.push(url);
+          const url = yield _this3.storeDb.uploadObjects1(storeId, file, dir);
+          _this3.photoUrls.push(url);
         }
       } catch (e) {
-        _this2.openErrorModal(e?.message || 'Photo upload failed', 'Upload failed');
+        _this3.openErrorModal(e?.message || 'Photo upload failed', 'Upload failed');
       } finally {
-        _this2.sending = false;
+        _this3.sending = false;
       }
     })();
   }
   // ---------- email/password signup
   signupWithEmail() {
-    var _this3 = this;
+    var _this4 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      _this3.error = undefined;
-      _this3.success = false;
-      if (_this3.form.invalid) return;
-      _this3.sending = true;
+      _this4.error = undefined;
+      _this4.success = false;
+      if (_this4.form.invalid || !_this4.legalCatalog?.accepting) {
+        _this4.form.markAllAsTouched();
+        return;
+      }
+      _this4.sending = true;
       try {
-        const v = _this3.form.value;
+        const v = _this4.form.value;
         const displayName = (v.displayName || '').trim() || `${(v.firstname || '').toString().trim()} ${(v.lastname || '').toString().trim()}`.trim();
         // 1) create auth user
-        _this3.emailActionWarning = '';
-        const previousUid = _this3.firebaseUser()?.uid;
+        _this4.emailActionWarning = '';
+        const previousUid = _this4.firebaseUser()?.uid;
         let uid;
         try {
-          uid = (yield _this3.users.registerWithEmail(v.email, v.password, displayName)).uid;
+          uid = (yield _this4.users.registerWithEmail(v.email, v.password, displayName)).uid;
         } catch (e) {
-          const current = _this3.firebaseUser();
+          const current = _this4.firebaseUser();
           if (e?.code === 'auth/unauthorized-continue-uri' && current?.uid && current.uid !== previousUid && String(current.email || '').toLowerCase() === String(v.email).trim().toLowerCase()) {
             uid = current.uid;
-            _this3.emailActionWarning = 'Le compte a été créé, mais Firebase a refusé l’envoi du courriel de validation. Ajoutez le domaine de l’URL de retour dans Authentication > Settings > Authorized domains, puis renvoyez le courriel. Le compte n’est pas marqué comme vérifié.';
+            _this4.emailActionWarning = 'Le compte a été créé, mais Firebase a refusé l’envoi du courriel de validation. Ajoutez le domaine de l’URL de retour dans Authentication > Settings > Authorized domains, puis renvoyez le courriel. Le compte n’est pas marqué comme vérifié.';
           } else throw e;
         }
         // 2) profile
@@ -1283,7 +1332,7 @@ let SignupComponent = class SignupComponent {
           email: v.email,
           phone: v.phone || '',
           role: registrationRole(v.role),
-          photos: _this3.photoUrls,
+          photos: _this4.photoUrls,
           socialnetwork: (v.socialnetwork || []).map(s => ({
             label: s.label || '',
             url: s.url || ''
@@ -1293,56 +1342,62 @@ let SignupComponent = class SignupComponent {
           displayName: displayName,
           createdTS: now,
           modifiedTS: now,
-          photoURL: _this3.photoUrls[0] || '',
+          photoURL: _this4.photoUrls[0] || '',
           provider: 'firebase'
         };
+        yield _this4.legal.accept(_this4.legalCatalog, v.legalName, v.adultConfirmed);
         // 3) save to RTDB
-        yield _this3.registrationProfile.save(profile);
+        yield _this4.registrationProfile.save(profile);
         // 4) Either redirect to Stripe immediately, or show the success banner (as before)
-        if (_this3.connectStripeNow && _this3.isOwnerOrProvider(profile.role) && !_this3.emailActionWarning) {
-          window.location.href = _this3.buildStripeAuthorizeUrl(uid, profile.role);
+        if (_this4.connectStripeNow && _this4.isOwnerOrProvider(profile.role) && !_this4.emailActionWarning) {
+          window.location.href = _this4.buildStripeAuthorizeUrl(uid, profile.role);
           return;
         }
         // Send a password setup/reset email when available so the user can validate or reset access cleanly.
         try {
-          yield _this3.users.resetPwdUser(v.email);
+          yield _this4.users.resetPwdUser(v.email);
         } catch {
           // Best effort only: some Firebase configurations may not allow reset immediately after creation.
         }
-        _this3.success = true;
-        _this3.form.reset({
+        _this4.success = true;
+        _this4.form.reset({
           role: 'customer',
-          acceptTerms: false
+          acceptTerms: false,
+          adultConfirmed: false
         });
-        _this3.photoUrls = [];
-        _this3.openSuccessModal(_this3.emailActionWarning || 'Account created successfully. Please check your inbox and your Junk/Spam folder for the password setup/reset email before signing in.', 'Account created successfully');
+        _this4.photoUrls = [];
+        _this4.openSuccessModal(_this4.emailActionWarning || 'Account created successfully. Please check your inbox and your Junk/Spam folder for the password setup/reset email before signing in.', 'Account created successfully');
         setTimeout(() => {
-          if (_this3.showSuccessModal && !_this3.emailActionWarning) {
-            _this3.closeSuccessModal();
+          if (_this4.showSuccessModal && !_this4.emailActionWarning) {
+            _this4.closeSuccessModal();
           }
         }, 2500);
       } catch (e) {
-        _this3.openErrorModal(e?.code === 'auth/unauthorized-continue-uri' ? 'Firebase refuse le domaine de l’URL de retour. Dans Firebase Console > Authentication > Settings > Authorized domains, ajoutez le domaine utilisé (par exemple localhost pour vos tests). Le compte peut déjà avoir été créé : essayez de vous connecter avant de recommencer.' : e?.code === 'auth/email-already-in-use' ? 'Cette adresse possède déjà un compte. Connectez-vous ou utilisez Mot de passe oublié.' : e?.message || 'Sign-up failed.');
+        _this4.openErrorModal(e?.code === 'auth/unauthorized-continue-uri' ? 'Firebase refuse le domaine de l’URL de retour. Dans Firebase Console > Authentication > Settings > Authorized domains, ajoutez le domaine utilisé (par exemple localhost pour vos tests). Le compte peut déjà avoir été créé : essayez de vous connecter avant de recommencer.' : e?.code === 'auth/email-already-in-use' ? 'Cette adresse possède déjà un compte. Connectez-vous ou utilisez Mot de passe oublié.' : e?.message || 'Sign-up failed.');
       } finally {
-        _this3.sending = false;
+        _this4.sending = false;
       }
     })();
   }
   // ---------- Google signup (IMMEDIATE REDIRECT TO HOME)
   signupWithGoogle() {
-    var _this4 = this;
+    var _this5 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      _this4.error = undefined;
-      _this4.sending = true;
+      if (!_this5.legalCatalog?.accepting || !_this5.form.value.acceptTerms || !_this5.form.value.adultConfirmed || _this5.form.get('legalName')?.invalid) {
+        _this5.form.markAllAsTouched();
+        return;
+      }
+      _this5.error = undefined;
+      _this5.sending = true;
       try {
-        const user = yield _this4.users.signInWithGoogleAndLoadProfile();
+        const user = yield _this5.users.signInWithGoogleAndLoadProfile();
         const uid = user.userId;
         const now = Date.now();
-        const v = _this4.form.value;
+        const v = _this5.form.value;
         const displayName = (v.displayName || user.displayName || '').trim();
         const firstname = v.firstname || displayName.split(' ')[0] || '';
         const lastname = v.lastname || displayName.split(' ').slice(1).join(' ') || '';
-        const role = user.role || registrationRole(v.role);
+        const role = ['assetOwner', 'boatOwner', 'owner', 'concierge', 'admin'].includes(String(user.role)) ? user.role : registrationRole(v.role);
         const profile = {
           userId: uid,
           firstname,
@@ -1353,7 +1408,7 @@ let SignupComponent = class SignupComponent {
           email: user.email || v.email || '',
           phone: v.phone || user.phone || '',
           role,
-          photos: _this4.photoUrls.length ? _this4.photoUrls : user.photoURL ? [user.photoURL] : [],
+          photos: _this5.photoUrls.length ? _this5.photoUrls : user.photoURL ? [user.photoURL] : [],
           socialnetwork: (v.socialnetwork || []).map(s => ({
             label: s.label || '',
             url: s.url || ''
@@ -1363,44 +1418,59 @@ let SignupComponent = class SignupComponent {
           displayName,
           createdTS: now,
           modifiedTS: now,
-          photoURL: _this4.photoUrls[0] || user.photoURL || '',
+          photoURL: _this5.photoUrls[0] || user.photoURL || '',
           provider: 'google'
         };
-        yield _this4.registrationProfile.save(profile);
+        const catalog = yield _this5.legal.catalog(registrationRole(role));
+        if (catalog.bundleHash !== _this5.legalCatalog.bundleHash) {
+          yield _this5.router.navigate(['/account/accept-terms'], {
+            queryParams: {
+              role: catalog.role,
+              returnUrl: '/account/profile'
+            }
+          });
+          return;
+        }
+        yield _this5.legal.accept(catalog, v.legalName, v.adultConfirmed);
+        yield _this5.registrationProfile.save(profile);
         // IMMEDIATE redirect to home (no “user created” banner)
         // If you want to auto-open Stripe right after Google for owners/providers, uncomment below:
         // if (this.isOwnerOrProvider(role) && this.connectStripeNow) {
         //   window.location.href = this.buildStripeAuthorizeUrl(uid, role);
         //   return;
         // }
-        if (_this4.publishIntent) try {
+        if (_this5.publishIntent) try {
           sessionStorage.removeItem('redirectAfterLogin');
         } catch {}
-        _this4.router.navigateByUrl(_this4.publishIntent ? '/owner/listings' : '/');
+        _this5.router.navigateByUrl(_this5.publishIntent ? '/owner/listings' : '/');
       } catch (e) {
-        _this4.openErrorModal(e?.message || 'Google sign-in failed.');
+        _this5.openErrorModal(e?.message || 'Google sign-in failed.');
       } finally {
-        _this4.sending = false;
+        _this5.sending = false;
       }
     })();
   }
   static ctorParameters = () => [{
-    type: _angular_forms__WEBPACK_IMPORTED_MODULE_4__.FormBuilder
+    type: _angular_forms__WEBPACK_IMPORTED_MODULE_6__.FormBuilder
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.UsersService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_7__.UsersService
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.StoreDbService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_7__.StoreDbService
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.UtilsService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_7__.UtilsService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_6__.Router
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_8__.Router
   }, {
-    type: _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_3__.RegistrationProfileService
+    type: _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_5__.RegistrationProfileService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_6__.ActivatedRoute
+    type: _services_legal_service__WEBPACK_IMPORTED_MODULE_4__.LegalService
+  }, {
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_3__.LanguageService
+  }, {
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_8__.ActivatedRoute
   }];
 };
-SignupComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_7__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Component)({
+SignupComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_9__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_10__.Component)({
   standalone: false,
   selector: 'app-signup',
   template: _signup_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
@@ -1654,7 +1724,7 @@ RegistrationProfileService = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<div class=\"container py-5 auth-shell\">\n  <div class=\"auth-brand\">\n    <span class=\"auth-eyebrow\">{{ 'ui.signup.brand' | siteText:'GoDirect' }}</span>\n    <div class=\"auth-mark\">G</div>\n    <h1 class=\"h4 mb-1\">{{ 'auto.login.signup.signup.component.create_your_account' | siteText }}</h1>\n    <p class=\"text-muted small mb-4\">{{ 'auto.login.signup.signup.component.prepare_your_charter_manage_your_details_and_confi' | siteText }}</p>\n  </div>\n\n  <div *ngIf=\"success\" class=\"alert alert-success py-2\">{{ 'auto.login.signup.signup.component.account_created_successfully_please_check_your_inb' | siteText }}</div>\n\n  <form [formGroup]=\"form\" (ngSubmit)=\"signupWithEmail()\" novalidate>\n    <div class=\"row g-3\">\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.first_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"firstname\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.last_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"lastname\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.display_name_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"displayName\" [placeholder]=\"'auto.login.signup.signup.component.public_name' | siteText\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.country' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"country\" [placeholder]=\"'auto.login.signup.signup.component.fr' | siteText\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.email' | siteText }}</label>\n        <input type=\"email\" class=\"form-control form-control-sm\" formControlName=\"email\"\n          [class.is-invalid]=\"f.email.touched && f.email.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('required')\">{{ 'auto.login.signup.signup.component.email_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('email')\">{{ 'auto.login.signup.signup.component.enter_a_valid_email' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.phone_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"phone\" placeholder=\"+33 6 ...\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.password' | siteText }}</label>\n        <input type=\"password\" class=\"form-control form-control-sm\" formControlName=\"password\"\n          [class.is-invalid]=\"f.password.touched && f.password.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('required')\">{{ 'auto.login.signup.signup.component.password_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('minlength')\">{{ 'auto.login.signup.signup.component.minimum_6_characters' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.account_type' | siteText }}</label>\n        <select class=\"form-select form-select-sm\" formControlName=\"role\">\n          <option *ngFor=\"let r of roles\" [value]=\"r.id\">{{r.labelKey | siteText}}</option>\n        </select>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.admin_role_must_be_granted_by_the_platform' | siteText }}</div>\n      </div>\n\n      <!-- Stripe Connect opt-in (only shows for owner/provider) -->\n      <div class=\"col-12\" *ngIf=\"form.value.role === 'assetOwner' || form.value.role === 'serviceProvider'\">\n        <div class=\"form-check\">\n          <input class=\"form-check-input\" type=\"checkbox\" id=\"connectStripe\" [(ngModel)]=\"connectStripeNow\"\n            [ngModelOptions]=\"{standalone: true}\">\n          <label class=\"form-check-label small\" for=\"connectStripe\">{{ 'auto.login.signup.signup.component.connect_my_stripe_account_right_after_signup' | siteText }}</label>\n        </div>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.you_can_also_do_this_later_from_your_dashboard' | siteText }}</div>\n      </div>\n\n      <!-- Social links -->\n      <div class=\"col-12\">\n        <label class=\"form-label d-flex justify-content-between align-items-center small\">{{ 'auto.login.signup.signup.component.social_links' | siteText }}<button type=\"button\" class=\"btn btn-sm btn-outline-secondary rounded-pill\" (click)=\"addSocial()\">{{ 'auto.login.signup.signup.component.add_link' | siteText }}</button>\n        </label>\n\n        <div *ngFor=\"let s of socials.controls; let i = index\" class=\"row g-2 align-items-center mb-2\">\n          <div class=\"col-md-3\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'label')\" [placeholder]=\"'auto.login.signup.signup.component.instagram' | siteText\" />\n          </div>\n          <div class=\"col-md-8\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'url')\"\n              [placeholder]=\"'auto.login.signup.signup.component.https_instagram_com_yourname' | siteText\" />\n          </div>\n          <div class=\"col-md-1 text-end\">\n            <button type=\"button\" class=\"btn btn-link text-danger p-0\" (click)=\"removeSocial(i)\" [title]=\"'auto.login.signup.signup.component.remove' | siteText\">\n              <i class=\"bi bi-x-lg\"></i>\n            </button>\n          </div>\n        </div>\n      </div>\n\n      <!-- Photos upload -->\n      <div class=\"col-12\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.photos_optional' | siteText }}</label>\n        <input type=\"file\" class=\"form-control form-control-sm\" (change)=\"onPhotosInput($event)\"\n          multiple />\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.jpg_png_you_can_add_more_later' | siteText }}</div>\n\n        <div class=\"d-flex flex-wrap gap-2 mt-2\" *ngIf=\"photoUrls.length\">\n          <img *ngFor=\"let url of photoUrls\" [src]=\"url\" class=\"rounded border\"\n            style=\"width:108px;height:80px;object-fit:cover;\">\n        </div>\n      </div>\n\n      <!-- Terms -->\n      <div class=\"col-12\">\n        <div class=\"form-check\">\n          <input class=\"form-check-input\" type=\"checkbox\" id=\"acceptTerms\" formControlName=\"acceptTerms\" />\n          <label class=\"form-check-label small\" for=\"acceptTerms\">{{ 'auto.login.signup.signup.component.i_agree_to_the' | siteText }}<a [routerLink]=\"'/terms' | resourceRoute\">{{ 'auto.login.signup.signup.component.terms' | siteText }}</a>{{ 'auto.login.signup.signup.component.amp' | siteText }}<a [routerLink]=\"'/privacy' | resourceRoute\">{{ 'auto.login.signup.signup.component.privacy' | siteText }}</a>.\n          </label>\n        </div>\n        <div class=\"text-danger small mt-1\" *ngIf=\"f.acceptTerms.touched && f.acceptTerms.invalid\">{{ 'auto.login.signup.signup.component.you_must_accept_the_terms_to_create_an_account' | siteText }}</div>\n      </div>\n    </div>\n\n    <div class=\"d-flex justify-content-end gap-2 mt-4\">\n      <button class=\"btn btn-dark btn-sm rounded-pill px-3\" [disabled]=\"form.invalid || sending\">\n        {{ sending ? ('ui.messages.t94d7d8ee473f' | siteText) : ('ui.messages.taaf374479756' | siteText) }}\n      </button>\n    </div>\n  </form>\n\n  <div class=\"text-center text-muted my-3 small\">{{ 'auto.login.signup.signup.component.or' | siteText }}</div>\n\n  <div class=\"d-grid\">\n    <button class=\"btn btn-outline-dark btn-sm rounded-pill\" (click)=\"signupWithGoogle()\" [disabled]=\"sending\">\n      <span class=\"d-inline-flex align-items-center gap-2\">\n        <img src=\"https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg\" width=\"16\" height=\"16\" alt=\"\">{{ 'auto.login.signup.signup.component.continue_with_google' | siteText }}</span>\n    </button>\n  </div>\n\n  <hr class=\"my-4\">\n\n  <div class=\"text-center\">\n    <span class=\"text-muted me-1 small\">{{ 'auto.login.signup.signup.component.already_have_an_account' | siteText }}</span>\n    <a [routerLink]=\"'/login' | resourceRoute\" queryParamsHandling=\"preserve\" class=\"text-decoration-none small\">{{ 'auto.login.signup.signup.component.sign_in' | siteText }}</a>\n  </div>\n</div>\n\n<div *ngIf=\"success && publishIntent\" class=\"text-center my-3\"><a class=\"btn btn-dark\" routerLink=\"/owner/listings\">{{ 'ui.discovery.manage' | siteText:'Mes annonces' }}</a></div>\n<!-- Error Modal (pure Angular + Bootstrap styles) -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showErrorModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showErrorModal\" (click)=\"closeErrorModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ errorModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeErrorModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ errorModalMessage }}</p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-secondary\" (click)=\"closeErrorModal()\">{{ 'auto.login.signup.signup.component.close' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n<!-- Success Modal -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showSuccessModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showSuccessModal\" (click)=\"closeSuccessModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ successModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeSuccessModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ successModalMessage }}<br><br><strong>{{ 'auto.login.signup.signup.component.please_also_check_your_junk_spam_folder' | siteText }}</strong></p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-dark\" (click)=\"closeSuccessModal()\">{{ 'auto.login.signup.signup.component.go_to_login' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n";
+module.exports = "<div class=\"container py-5 auth-shell\">\n  <div class=\"auth-brand\">\n    <span class=\"auth-eyebrow\">{{ 'ui.signup.brand' | siteText:'GoDirect' }}</span>\n    <div class=\"auth-mark\">G</div>\n    <h1 class=\"h4 mb-1\">{{ 'auto.login.signup.signup.component.create_your_account' | siteText }}</h1>\n    <p class=\"text-muted small mb-4\">{{ 'auto.login.signup.signup.component.prepare_your_charter_manage_your_details_and_confi' | siteText }}</p>\n  </div>\n\n  <div *ngIf=\"success\" class=\"alert alert-success py-2\">{{ 'auto.login.signup.signup.component.account_created_successfully_please_check_your_inb' | siteText }}</div>\n\n  <form [formGroup]=\"form\" (ngSubmit)=\"signupWithEmail()\" novalidate>\n    <div class=\"row g-3\">\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.first_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"firstname\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.last_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"lastname\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.display_name_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"displayName\" [placeholder]=\"'auto.login.signup.signup.component.public_name' | siteText\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.country' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"country\" [placeholder]=\"'auto.login.signup.signup.component.fr' | siteText\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.email' | siteText }}</label>\n        <input type=\"email\" class=\"form-control form-control-sm\" formControlName=\"email\"\n          [class.is-invalid]=\"f.email.touched && f.email.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('required')\">{{ 'auto.login.signup.signup.component.email_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('email')\">{{ 'auto.login.signup.signup.component.enter_a_valid_email' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.phone_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"phone\" placeholder=\"+33 6 ...\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.password' | siteText }}</label>\n        <input type=\"password\" class=\"form-control form-control-sm\" formControlName=\"password\"\n          [class.is-invalid]=\"f.password.touched && f.password.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('required')\">{{ 'auto.login.signup.signup.component.password_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('minlength')\">{{ 'auto.login.signup.signup.component.minimum_6_characters' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.account_type' | siteText }}</label>\n        <select class=\"form-select form-select-sm\" formControlName=\"role\">\n          <option *ngFor=\"let r of roles\" [value]=\"r.id\">{{r.labelKey | siteText}}</option>\n        </select>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.admin_role_must_be_granted_by_the_platform' | siteText }}</div>\n      </div>\n\n      <!-- Stripe Connect opt-in (only shows for owner/provider) -->\n      <div class=\"col-12\" *ngIf=\"form.value.role === 'assetOwner' || form.value.role === 'serviceProvider'\">\n        <div class=\"form-check\">\n          <input class=\"form-check-input\" type=\"checkbox\" id=\"connectStripe\" [(ngModel)]=\"connectStripeNow\"\n            [ngModelOptions]=\"{standalone: true}\">\n          <label class=\"form-check-label small\" for=\"connectStripe\">{{ 'auto.login.signup.signup.component.connect_my_stripe_account_right_after_signup' | siteText }}</label>\n        </div>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.you_can_also_do_this_later_from_your_dashboard' | siteText }}</div>\n      </div>\n\n      <!-- Social links -->\n      <div class=\"col-12\">\n        <label class=\"form-label d-flex justify-content-between align-items-center small\">{{ 'auto.login.signup.signup.component.social_links' | siteText }}<button type=\"button\" class=\"btn btn-sm btn-outline-secondary rounded-pill\" (click)=\"addSocial()\">{{ 'auto.login.signup.signup.component.add_link' | siteText }}</button>\n        </label>\n\n        <div *ngFor=\"let s of socials.controls; let i = index\" class=\"row g-2 align-items-center mb-2\">\n          <div class=\"col-md-3\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'label')\" [placeholder]=\"'auto.login.signup.signup.component.instagram' | siteText\" />\n          </div>\n          <div class=\"col-md-8\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'url')\"\n              [placeholder]=\"'auto.login.signup.signup.component.https_instagram_com_yourname' | siteText\" />\n          </div>\n          <div class=\"col-md-1 text-end\">\n            <button type=\"button\" class=\"btn btn-link text-danger p-0\" (click)=\"removeSocial(i)\" [title]=\"'auto.login.signup.signup.component.remove' | siteText\">\n              <i class=\"bi bi-x-lg\"></i>\n            </button>\n          </div>\n        </div>\n      </div>\n\n      <!-- Photos upload -->\n      <div class=\"col-12\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.photos_optional' | siteText }}</label>\n        <input type=\"file\" class=\"form-control form-control-sm\" (change)=\"onPhotosInput($event)\"\n          multiple />\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.jpg_png_you_can_add_more_later' | siteText }}</div>\n\n        <div class=\"d-flex flex-wrap gap-2 mt-2\" *ngIf=\"photoUrls.length\">\n          <img *ngFor=\"let url of photoUrls\" [src]=\"url\" class=\"rounded border\"\n            style=\"width:108px;height:80px;object-fit:cover;\">\n        </div>\n      </div>\n\n      <!-- Firebase-sourced localized versioned acceptance -->\n      <div class=\"col-12\"><h2 class=\"h5\">{{legalLabels.conditions}}</h2><p *ngIf=\"legalError\" role=\"alert\">{{legalError}}</p><p>{{legalLabels.signupIntro}} {{legalCatalog?.language}}</p><ul><li *ngFor=\"let d of legalCatalog?.documents\"><a routerLink=\"/legal\" [queryParams]=\"{role:legalCatalog.role}\" target=\"_blank\" rel=\"noopener\">{{d.title}} — {{d.version}}</a></li></ul><label class=\"form-label\" for=\"legalName\">{{legalLabels.name}}</label><input id=\"legalName\" class=\"form-control\" formControlName=\"legalName\" autocomplete=\"name\" maxlength=\"240\"><label class=\"d-flex gap-2 mt-3\"><input type=\"checkbox\" formControlName=\"adultConfirmed\">{{legalLabels.adult}}</label><label class=\"d-flex gap-2 mt-3\"><input type=\"checkbox\" id=\"acceptTerms\" formControlName=\"acceptTerms\">{{legalLabels.agree}}</label><p class=\"small\">{{legalLabels.signIntro}} {{legalLabels.noMarketing}}</p><p class=\"text-danger\" *ngIf=\"f.acceptTerms.touched && f.acceptTerms.invalid\">{{legalLabels.required}}</p></div>\n    </div>\n\n    <div class=\"d-flex justify-content-end gap-2 mt-4\">\n      <button class=\"btn btn-dark btn-sm rounded-pill px-3\" [disabled]=\"form.invalid || sending || !legalCatalog?.accepting\">\n        {{ sending ? ('ui.messages.t94d7d8ee473f' | siteText) : ('ui.messages.taaf374479756' | siteText) }}\n      </button>\n    </div>\n  </form>\n\n  <div class=\"text-center text-muted my-3 small\">{{ 'auto.login.signup.signup.component.or' | siteText }}</div>\n\n  <div class=\"d-grid\">\n    <button class=\"btn btn-outline-dark btn-sm rounded-pill\" (click)=\"signupWithGoogle()\" [disabled]=\"sending || !legalCatalog?.accepting || !form.value.acceptTerms || !form.value.adultConfirmed || f.legalName.invalid\">\n      <span class=\"d-inline-flex align-items-center gap-2\">\n        <img src=\"https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg\" width=\"16\" height=\"16\" alt=\"\">{{ 'auto.login.signup.signup.component.continue_with_google' | siteText }}</span>\n    </button>\n  </div>\n\n  <hr class=\"my-4\">\n\n  <div class=\"text-center\">\n    <span class=\"text-muted me-1 small\">{{ 'auto.login.signup.signup.component.already_have_an_account' | siteText }}</span>\n    <a [routerLink]=\"'/login' | resourceRoute\" queryParamsHandling=\"preserve\" class=\"text-decoration-none small\">{{ 'auto.login.signup.signup.component.sign_in' | siteText }}</a>\n  </div>\n</div>\n\n<div *ngIf=\"success && publishIntent\" class=\"text-center my-3\"><a class=\"btn btn-dark\" routerLink=\"/owner/listings\">{{ 'ui.discovery.manage' | siteText:'Mes annonces' }}</a></div>\n<!-- Error Modal (pure Angular + Bootstrap styles) -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showErrorModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showErrorModal\" (click)=\"closeErrorModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ errorModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeErrorModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ errorModalMessage }}</p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-secondary\" (click)=\"closeErrorModal()\">{{ 'auto.login.signup.signup.component.close' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n<!-- Success Modal -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showSuccessModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showSuccessModal\" (click)=\"closeSuccessModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ successModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeSuccessModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ successModalMessage }}<br><br><strong>{{ 'auto.login.signup.signup.component.please_also_check_your_junk_spam_folder' | siteText }}</strong></p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-dark\" (click)=\"closeSuccessModal()\">{{ 'auto.login.signup.signup.component.go_to_login' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n";
 
 /***/ }),
 

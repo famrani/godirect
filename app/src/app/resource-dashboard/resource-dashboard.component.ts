@@ -1,3 +1,5 @@
+import {homeRolesCopy} from '../home-roles/home-roles.text';
+import {accountHeaderText} from '../services/account-header';
 import {OWNER_OFFER_TEXT} from '../services/owner-offer-text';
 import {SiteContentService} from '../home/site-content-service/site-content.service';
 import {AssetAccessService} from '../services/asset-access.service';
@@ -14,11 +16,33 @@ import { boatPath } from '../services/boat-routing';
 
 @Component({ standalone:false, selector: 'app-resource-dashboard', templateUrl: './resource-dashboard.component.html', styleUrls: ['./resource-dashboard.component.scss'] })
 export class ResourceDashboardComponent implements OnInit, OnDestroy {
+  readonly heroSlides = [
+    {type:'boat', image:'/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-2.jpg'},
+    {type:'car', image:'assets/img/car/riviera-ev/tesla-model-3-1.jpg'},
+    {type:'parking', image:'assets/img/parking/port-antibes-parking/parking-1.jpg'},
+    {type:'property', image:'assets/img/property/villa-azur/villa-5.jpg'},
+    {type:'pool', image:'assets/img/pool/azure-pool/pool-1.jpg'}
+  ];
+  heroIndex=0; heroPlaying=false; heroHovered=false;
+  private heroTimer?:ReturnType<typeof setInterval>;
+  get heroSlide(){return this.heroSlides[this.heroIndex];}
+  selectHero(index:number){this.heroIndex=(index+this.heroSlides.length)%this.heroSlides.length;}
+  pauseHero(){this.heroPlaying=false;}
+  toggleHero(){this.heroPlaying=!this.heroPlaying;}
+  private startHero(){
+    if(typeof window==='undefined')return;
+    this.heroPlaying=!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.heroTimer=setInterval(()=>{
+      if(this.heroPlaying&&!this.heroHovered&&!document.hidden&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)this.selectHero(this.heroIndex+1);
+    },6000);
+  }
   get listingOffline():boolean{return typeof window!=='undefined'&&new URLSearchParams(window.location.search).has('listing');}
   get isPlatformAdmin(){return this.assetAccess.isPlatformAdmin;}
-  browseAsCustomer=false;
+  private requestedClientView=false;
+  get browseAsCustomer(){return (typeof window!=='undefined'&&window.location.hostname==='client.godirect.fr')||this.requestedClientView||(this.assetAccess.isManager&&this.assetAccess.viewMode==='client');}
+  set browseAsCustomer(value:boolean){this.requestedClientView=value;}
   browseRentals(){void this.router.navigate(['/'],{queryParams:{view:'rentals'},fragment:'rentals'});}
-  showOwnerDashboard(){void this.router.navigate(['/']);}
+  showOwnerDashboard(){void this.assetAccess.switchView();}
   types: ResourceTypeSummary[] = [];
   loading = true;
   results:Array<ResourceRegistryItem & {resourceId:string;resourceType:string}>=[];
@@ -50,6 +74,8 @@ export class ResourceDashboardComponent implements OnInit, OnDestroy {
 ) {}
 
   async ngOnInit() {
+    if(typeof document!=='undefined')document.title='GoDirect | Trouver une location';
+
     if(typeof document!=='undefined'&&!document.getElementById('godirect-discovery-style')){const link=document.createElement('link');link.id='godirect-discovery-style';link.rel='stylesheet';link.href=new URL('assets/styles/godirect-discovery.css',document.baseURI).toString();document.head.appendChild(link);}
     void this.siteContent.getContent().then(c=>this.uiContent=c);void this.assetAccess.refresh();
     this.querySub=this.route.queryParamMap.subscribe(params=>{
@@ -74,17 +100,18 @@ export class ResourceDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {this.closePublicationChoice();this.accountSub?.unsubscribe();this.querySub?.unsubscribe();this.searchRequest++;}
+  ngOnDestroy(): void {if(this.heroTimer)clearInterval(this.heroTimer);this.closePublicationChoice();this.accountSub?.unsubscribe();this.querySub?.unsubscribe();this.searchRequest++;}
 
+  homeRoleCopy(){return homeRolesCopy(this.lang);}
   o(key:string):string{const lang=this.lang;return this.siteContent.tFromContent(this.uiContent,'ui.ownerOffer.'+key,lang,OWNER_OFFER_TEXT[lang]?.[key]||OWNER_OFFER_TEXT.en[key]||key);}
   d(key:string):string {const live=this.uiContent?.[this.lang]?.ui?.discovery?.[key];return typeof live==='string'?live:DISCOVERY_TEXT[this.lang]?.[key]||DISCOVERY_TEXT.en[key]||key;}
   open(type:string){this.selectedType=type;void this.search();}
-  async search(){this.searchError='';let filters:DiscoveryFilters;try{filters=discoveryFilters(this.selectedType,this.location,this.startDate,this.endDate);}catch(e:any){this.searchError=e.message;return;}void this.runSearch(filters);await this.router.navigate(['/'],{queryParams:{...filters,...(this.isOwner&&this.browseAsCustomer?{view:'rentals'}:{})}});}
+  async search(){this.searchError='';let filters:DiscoveryFilters;try{filters=discoveryFilters(this.selectedType,this.location,this.startDate,this.endDate);}catch(e:any){this.searchError=e.message;return;}void this.runSearch(filters);await this.router.navigate(['/'],{queryParams:{...filters,...(this.isOwner&&this.browseAsCustomer?{view:'rentals'}:{})},fragment:'results'});}
   async runSearch(filters:DiscoveryFilters){const request=++this.searchRequest;this.lastSearch=JSON.stringify(filters);this.appliedFilters={...filters};this.searching=true;this.searchError='';this.searched=Object.values(filters).some(Boolean);try{const rows=await this.registry.search(filters);if(request===this.searchRequest)this.results=rows;}catch{if(request===this.searchRequest){this.results=[];this.searchError='searchFailed';}}finally{if(request===this.searchRequest)this.searching=false;}}
   clearSearch(){this.selectedType='';this.location='';this.startDate='';this.endDate='';void this.search();}
   get appliedPeriod(){return this.appliedFilters;}
   get hasDates(){return !!this.appliedFilters.startAt&&!!this.appliedFilters.endAt;}
-  openResult(item:ResourceRegistryItem){void this.router.navigate(['/',item.resourceType,item.resourceId,'home'],{queryParams:this.appliedFilters});}
+  openResult(item:ResourceRegistryItem){if(item.siteUrl){const u=new URL(item.siteUrl);if(u.protocol==='https:'&&u.hostname.endsWith('.godirect.fr')){Object.entries(this.appliedFilters).forEach(([k,v])=>{if(v)u.searchParams.set(k,String(v));});window.location.assign(u.href);return;}}void this.router.navigate(['/',item.resourceType,item.resourceId,'home'],{queryParams:this.appliedFilters});}
   title(item:ResourceRegistryItem){return item.translations?.[this.lang]?.name||item.name;}
   description(item:ResourceRegistryItem){return item.translations?.[this.lang]?.headline||item.translations?.[this.lang]?.description||item.description;}
   priceUnit(unit:string){return this.d(unit==='night'?'night':unit==='hour'?'hour':'day');}
@@ -104,7 +131,7 @@ export class ResourceDashboardComponent implements OnInit, OnDestroy {
     this.closePublicationChoice();
     if(this.isLoggedIn){void this.router.navigateByUrl('/owner/listings');return;}
     try{sessionStorage.setItem('redirectAfterLogin','/owner/listings');}catch{}
-    void this.router.navigate([boatPath('/'+mode)],{queryParams:{role:'assetOwner',returnUrl:'/owner/listings'}});
+    void this.router.navigate(['/account/'+mode],{queryParams:{role:'assetOwner',returnUrl:'/owner/listings'}});
   }
 
   icon(type: string) { return ({parking:'🅿️', car:'🚗', boat:'⛵', property:'🏠', pool:'🏊'} as any)[type] || '📦'; }
@@ -115,12 +142,13 @@ export class ResourceDashboardComponent implements OnInit, OnDestroy {
     const value = user.firstname || user.firstName || user.displayName || user.email || '';
     return String(value).split(' ')[0] || this.t('account');
   }
+  accountText(key:string){return accountHeaderText(this.lang,key);}
   get accountLabel(): string { return this.isLoggedIn ? `${this.firstName}` : this.t('account'); }
 
-  login(): void { this.router.navigateByUrl(boatPath('/login')); }
-  signup(): void { this.router.navigateByUrl(boatPath('/signup')); }
-  profile(): void { this.router.navigateByUrl(boatPath('/my-profile')); }
-  bookings(): void { this.router.navigateByUrl(boatPath('/my-bookings')); }
+  login(): void { this.router.navigateByUrl('/account/login'); }
+  signup(): void { this.router.navigateByUrl('/account/signup'); }
+  profile(): void { this.router.navigateByUrl('/account/profile'); }
+  bookings(): void { this.router.navigateByUrl(this.isOwner?'/owner/activity/reservations':'/account/bookings'); }
   ownerPayments(): void { this.router.navigateByUrl('/owner/payments'); }
   get isOwner(): boolean { return this.assetAccess.isOwner; }
 

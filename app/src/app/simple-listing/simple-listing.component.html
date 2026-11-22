@@ -1,0 +1,9 @@
+<main class="listing" *ngIf="asset; else status">
+ <header class="listing-heading"><h1>{{title}}</h1><p class="headline" *ngIf="localized.headline||asset.headline">{{localized.headline||asset.headline}}</p><p class="location" *ngIf="asset.location?.city">{{asset.location.area?asset.location.area+' · ':''}}{{asset.location.city}}{{asset.location.country?' · '+asset.location.country:''}}</p></header>
+ <section id="listing-photos" class="photos" *ngIf="photos.length"><img *ngFor="let photo of visiblePhotos;let i=index" [src]="photo" [alt]="title+' — '+(i+1)" [attr.loading]="i===0?'eager':'lazy'"></section>
+ <button class="gallery-toggle" type="button" *ngIf="photos.length>5" (click)="showAllPhotos=!showAllPhotos" [attr.aria-expanded]="showAllPhotos" aria-controls="listing-photos">{{photoToggleText()}} ({{photos.length}})</button>
+ <p class="empty-photo" *ngIf="!photos.length">{{t('photo')}}</p>
+ <div class="listing-body"><article class="description-panel"><app-listing-description [text]="description"></app-listing-description></article>
+ <aside class="price"><app-asset-calendar-link [type]="assetType" [assetId]="assetId"></app-asset-calendar-link><p><strong>{{asset.pricing?.basePrice|number:'1.2-2'}} {{asset.pricing?.currency||'EUR'}}</strong><span> / {{t(asset.pricing?.pricingUnit||'day')}}</span></p><a [routerLink]="bookingLink">{{t('book')}}</a></aside></div>
+</main>
+<ng-template #status><p class="listing" role="status">{{t(error?'notFound':'loading')}}</p></ng-template>

@@ -1,3 +1,4 @@
+import {ListingDescriptionComponent} from '../../shared/listing-description.component';
 import {SiteTextPipe} from '../../home/site-text.pipe';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -10,6 +11,6 @@ import { PoolDetailsComponent } from './pages/details/pool-details.component';
 
 @NgModule({
  declarations:[PoolHomeComponent,PoolDetailsComponent],
- imports: [SiteTextPipe,CommonModule,LayoutModule,SharedModule,ResourceRoutePipe,PoolRoutingModule]
+ imports: [ListingDescriptionComponent,SiteTextPipe,CommonModule,LayoutModule,SharedModule,ResourceRoutePipe,PoolRoutingModule]
 })
 export class PoolModule {}

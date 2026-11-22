@@ -136,7 +136,7 @@ const routes = [{
     component: _pages_details_property_details_component__WEBPACK_IMPORTED_MODULE_4__.PropertyDetailsComponent
   }, {
     path: '',
-    loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_home_home_module_ts"), __webpack_require__.e("common")]).then(__webpack_require__.bind(__webpack_require__, /*! ../../home/home.module */ 45055)).then(m => m.HomeModule)
+    loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_services_owner-customers-text_ts"), __webpack_require__.e("default-src_app_home_home_module_ts"), __webpack_require__.e("common")]).then(__webpack_require__.bind(__webpack_require__, /*! ../../home/home.module */ 45055)).then(m => m.HomeModule)
   }, {
     path: '',
     loadChildren: () => __webpack_require__.e(/*! import() */ "src_app_login_login_module_ts").then(__webpack_require__.bind(__webpack_require__, /*! ../../login/login.module */ 91307)).then(m => m.LoginModule)

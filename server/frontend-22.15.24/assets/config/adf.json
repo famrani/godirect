@@ -1,0 +1,82 @@
+{
+  "application": {
+    "name": "godirect front-end",
+    "platform": "test",
+    "release": "1.01"
+  },
+  "dev": {
+    "firebaseMasterConfig": {
+      "apiKey": "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      "authDomain": "ailla-poc.firebaseapp.com",
+      "databaseURL": "https://ailla-poc-default-rtdb.firebaseio.com",
+      "projectId": "ailla-poc",
+      "storageBucket": "ailla-poc.appspot.com",
+      "messagingSenderId": "483464582410",
+      "appId": "1:483464582410:web:010d025e452b5a9b4b16f3",
+      "measurementId": "G-BVM7KGJTRY"
+    },
+    "firebaseStorageConfig": {
+      "apiKey": "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      "authDomain": "ailla-poc.firebaseapp.com",
+      "databaseURL": "https://ailla-poc-default-rtdb.firebaseio.com",
+      "projectId": "ailla-poc",
+      "storageBucket": "ailla-poc.appspot.com",
+      "messagingSenderId": "483464582410",
+      "appId": "1:483464582410:web:010d025e452b5a9b4b16f3",
+      "measurementId": "G-BVM7KGJTRY"
+    },
+    "backendURL": "https://alegriaboat.eu",
+    "refreshUrl": "/stripe-account-failed",
+    "returnUrl": "/stripe-account-confirm"
+  },
+  "test": {
+    "firebaseMasterConfig": {
+      "apiKey": "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      "authDomain": "ailla-poc.firebaseapp.com",
+      "databaseURL": "https://ailla-poc-default-rtdb.firebaseio.com",
+      "projectId": "ailla-poc",
+      "storageBucket": "ailla-poc.appspot.com",
+      "messagingSenderId": "483464582410",
+      "appId": "1:483464582410:web:010d025e452b5a9b4b16f3",
+      "measurementId": "G-BVM7KGJTRY"
+    },
+    "firebaseStorageConfig": {
+      "apiKey": "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      "authDomain": "ailla-poc.firebaseapp.com",
+      "databaseURL": "https://ailla-poc-default-rtdb.firebaseio.com",
+      "projectId": "ailla-poc",
+      "storageBucket": "ailla-poc.appspot.com",
+      "messagingSenderId": "483464582410",
+      "appId": "1:483464582410:web:010d025e452b5a9b4b16f3",
+      "measurementId": "G-BVM7KGJTRY"
+    },
+    "backendURL": "https://alegriaboat.eu",
+    "refreshUrl": "/stripe-account-failed",
+    "returnUrl": "/stripe-account-confirm"
+  },
+  "prod": {
+    "firebaseMasterConfig": {
+      "apiKey": "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      "authDomain": "ailla-poc.firebaseapp.com",
+      "databaseURL": "https://ailla-poc-default-rtdb.firebaseio.com",
+      "projectId": "ailla-poc",
+      "storageBucket": "ailla-poc.appspot.com",
+      "messagingSenderId": "483464582410",
+      "appId": "1:483464582410:web:010d025e452b5a9b4b16f3",
+      "measurementId": "G-BVM7KGJTRY"
+    },
+    "firebaseStorageConfig": {
+      "apiKey": "AIzaSyA6T1dBtPac0sZrCugK4Gl0gDZkW0BK5No",
+      "authDomain": "ailla-poc.firebaseapp.com",
+      "databaseURL": "https://ailla-poc-default-rtdb.firebaseio.com",
+      "projectId": "ailla-poc",
+      "storageBucket": "ailla-poc.appspot.com",
+      "messagingSenderId": "483464582410",
+      "appId": "1:483464582410:web:010d025e452b5a9b4b16f3",
+      "measurementId": "G-BVM7KGJTRY"
+    },
+    "backendURL": "https://alegriaboat.eu",
+    "refreshUrl": "/stripe-account-failed",
+    "returnUrl": "/stripe-account-confirm"
+  }
+}

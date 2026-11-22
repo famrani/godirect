@@ -1,3 +1,5 @@
+import { hasAssetPermission } from './asset-delegation.js';
+import { domainAssetId } from './asset-domain.js';
 import { platformAdministrator } from './account-access.service.js';
 import { parseAssetSearch, locationMatches, overlapsSearch, legacySearchInterval } from './asset-search.service.js';
 import { listingPublic } from './listing-billing.service.js';
@@ -10,17 +12,24 @@ export class AssetsService {
         this.firebase = firebase;
     }
     async accessible(req, a, id) {
-        if (!a || a.deletedAt)
+        if (!a)
             return false;
-        if (await listingPublic(this.firebase, a?.assetType || a?.type, id, a))
+        if (!a.deletedAt && await listingPublic(this.firebase, a?.assetType || a?.type, id, a))
             return true;
         const token = /^Bearer\s+(.+)$/i.exec(String(req.headers.authorization || ''))?.[1];
         if (!token)
             return false;
         try {
             const u = await this.firebase.auth.verifyIdToken(token);
+            if (a.deletedAt) {
+                const p = (await this.firebase.db.ref(`backendusers/${u.uid}`).once('value')).val() || {};
+                return platformAdministrator(u, p);
+            }
             if (u.uid === a.ownerId)
                 return true;
+            for (const permission of ['content', 'bookings', 'customers', 'payments'])
+                if (await hasAssetPermission(this.firebase, u.uid, String(a.assetType || a.type), id, permission))
+                    return true;
             const p = (await this.firebase.db.ref(`backendusers/${u.uid}`).once('value')).val() || {};
             return platformAdministrator(u, p);
         }
@@ -28,6 +37,27 @@ export class AssetsService {
             return false;
         }
     }
+    resolveDomain = async (req, res) => {
+        res.setHeader('Cache-Control', 'no-store');
+        const id = domainAssetId(String(req.headers.host || ''));
+        if (!id)
+            return res.status(404).json({ error: 'asset_domain_not_found' });
+        const alias = (await this.firebase.db.ref(`assetPrefixes/${id}`).once('value')).val();
+        if (alias && isAssetType(alias.assetType) && typeof alias.assetId === 'string') {
+            const asset = await findAsset(this.firebase, alias.assetId, alias.assetType);
+            if (!asset || asset.deletedAt)
+                return res.status(404).json({ error: 'asset_domain_not_found' });
+            return res.json({ assetType: alias.assetType, assetId: alias.assetId });
+        }
+        // IDs must be unique across asset types to be usable as a subdomain.
+        const types = ['boat', 'car', 'property', 'parking', 'pool'];
+        const all = (await this.firebase.db.ref('assets').once('value')).val() || {};
+        const matches = types.flatMap(type => Object.entries(all[type] || {}).filter(([assetId, a]) => a && !a.deletedAt && (assetId === id || String(a.prefix || '').toLowerCase() === id)).map(([assetId]) => ({ assetType: type, assetId })));
+        if (matches.length !== 1)
+            return res.status(matches.length ? 409 : 404).json({ error: matches.length ? 'ambiguous_asset_domain' : 'asset_domain_not_found' });
+        // Only routing identifiers are returned; content/publication guards still apply.
+        return res.json(matches[0]);
+    };
     list = async (req, res) => {
         const snap = await this.firebase.db.ref('assets').once('value');
         let rows = Object.entries(snap.val() || {}).filter(([t]) => isAssetType(t)).flatMap(([t, group]) => Object.entries(group || {}).map(([id, value]) => ({ ...value, id, assetType: t })));

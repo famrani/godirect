@@ -1,3 +1,7 @@
+import { LegalAdminService } from '../services/legal-admin.service.js';
+import { AssetDocumentsService } from '../services/asset-documents.service.js';
+import { LegalAcceptanceService } from '../services/legal-acceptance.service.js';
+import { ConciergeService } from '../services/concierge.service.js';
 import { SiteContentManagementService } from '../services/site-content-management.service.js';
 import fs from 'fs';
 import path from 'path';
@@ -58,18 +62,52 @@ export class WebServerComponent {
             .map((x) => x.trim())
             .filter(Boolean);
         this.app.use(cors({ origin: origins.length ? origins : true, credentials: true }));
+        this.app.get('/api/asset-domain', this.asyncRoute(this.assets.resolveDomain));
         // Stripe requires the unparsed request body. Keep this BEFORE express.json().
         this.app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), this.asyncRoute(this.stripe.webhook));
         this.app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), this.asyncRoute(this.billing.webhook));
         this.app.use(express.json({ limit: '2mb' }));
         this.app.use(express.urlencoded({ extended: true }));
+        const legal = new LegalAcceptanceService(this.accounts.store);
+        const legalAdmin = new LegalAdminService(this.accounts.store);
+        await legalAdmin.init();
+        legalAdmin.setRoutes(this.app);
+        this.app.get('/api/public-content', this.asyncRoute(legal.content));
+        this.app.get('/api/legal/catalog', this.asyncRoute(legal.catalog));
+        this.app.get('/api/me/legal', this.asyncRoute(legal.status));
+        this.app.post('/api/me/legal/accept', this.asyncRoute(legal.accept));
+        this.app.get('/api/me/legal/receipts/:hash', this.asyncRoute(legal.receipt));
+        const assetDocuments = new AssetDocumentsService(this.accounts.store);
+        await assetDocuments.init();
+        assetDocuments.setRoutes(this.app);
+        this.app.use('/api', legal.guard);
         // Backward-compatible private GCS media routes used by the existing Angular frontend/CMS.
         this.media.setRoutes(this.app);
         // Subscription billing runs on the GoDirect platform, separate from Connect rentals.
         this.app.get('/api/listing-plans', this.asyncRoute(this.billing.plans));
+        const concierge = new ConciergeService(this.accounts.store);
+        this.app.get('/api/owner/delegations', this.asyncRoute(concierge.options));
+        this.app.put('/api/owner/delegations/:type/:id', this.asyncRoute(concierge.grant));
+        this.app.delete('/api/owner/delegations/:type/:id/:conciergeId', this.asyncRoute(concierge.revoke));
+        this.app.get('/api/concierge/assets', this.asyncRoute(concierge.assets));
+        this.app.get('/api/manage/bookings', this.asyncRoute(concierge.bookings));
+        this.app.get('/api/concierge/payments', this.asyncRoute(concierge.payments));
+        this.app.get('/api/concierge/customers', this.asyncRoute(concierge.customers));
+        this.app.get('/api/owner/customers', this.asyncRoute(this.stripe.customers.list));
+        this.app.get('/api/owner/customers/:customerKey', this.asyncRoute(this.stripe.customers.detail));
+        this.app.post('/api/owner/bookings/:type/:id/:bookingId/warranty-charges', this.asyncRoute(this.stripe.warranty.charge));
+        this.app.post('/api/owner/bookings/:type/:id/:bookingId/warranty-charges/:requestId/reconcile', this.asyncRoute(this.stripe.warranty.reconcile));
+        this.app.post('/api/me/bookings/:type/:id/:bookingId/warranty-consent', this.asyncRoute(this.stripe.warranty.consent));
+        this.app.get('/api/me/bookings/:type/:id/:bookingId/warranty-charges/:requestId/payment', this.asyncRoute(this.stripe.warranty.authenticate));
         this.app.get('/api/owner/listings', this.asyncRoute(this.billing.list));
+        this.app.get('/api/owner/prefixes', this.asyncRoute(this.billing.prefixes));
         this.app.post('/api/owner/listings', this.asyncRoute(this.billing.create));
+        this.app.get('/api/owner/listings/:type/:id/subscription', this.asyncRoute(this.billing.subscription));
+        this.app.get('/api/platform/admin/listings/:type/:id/impact', this.asyncRoute(this.billing.adminImpact));
+        this.app.get('/api/platform/admin/listings/:type/:id/prefixes', this.asyncRoute(this.billing.adminPrefixes));
+        this.app.patch('/api/platform/admin/listings/:type/:id', this.asyncRoute(this.billing.adminEdit));
         this.app.get('/api/owner/listings/:type/:id/impact', this.asyncRoute(this.billing.impact));
+        this.app.patch('/api/owner/listings/:type/:id/prefix', this.asyncRoute(this.billing.assignPrefix));
         this.app.patch('/api/owner/listings/:type/:id', this.asyncRoute(this.billing.edit));
         this.app.delete('/api/owner/listings/:type/:id', this.asyncRoute(this.billing.remove));
         this.app.patch('/api/owner/listings/:type/:id/publication', this.asyncRoute(this.billing.publication));
@@ -79,8 +117,13 @@ export class WebServerComponent {
         this.app.post('/api/owner/listings/:type/:id/portal', this.asyncRoute(this.billing.portal));
         this.app.get('/api/listings/:type/:id/visibility', this.asyncRoute(this.billing.visibility));
         this.app.post('/api/platform/admin/listings/:type/:id/moderation', this.asyncRoute(this.accounts.moderateListing));
+        this.app.get('/api/platform/admin/assets/:type/:id', this.asyncRoute(this.accounts.platformAsset));
         this.app.get('/api/platform/admin/overview', this.asyncRoute(this.accounts.platformOverview));
         this.app.get('/api/me/context', this.asyncRoute(this.accounts.context));
+        this.app.get('/api/me/roles', this.asyncRoute(this.accounts.accountRoles));
+        this.app.get('/api/me/profile', this.asyncRoute(this.accounts.getProfile));
+        this.app.get('/api/me/feedbacks', this.asyncRoute(this.accounts.myFeedbacks));
+        this.app.get('/api/manage/assets/:type/:id/feedbacks', this.asyncRoute(this.accounts.assetFeedbacks));
         this.app.put('/api/me/profile', this.asyncRoute(this.accounts.saveProfile));
         this.app.get('/api/account-roles', this.asyncRoute(this.accounts.registrationRoles));
         const cms = new SiteContentManagementService(this.accounts.store);
@@ -90,7 +133,7 @@ export class WebServerComponent {
         // API routes.
         this.app.get('/api/health', (_req, res) => res.json({
             name: 'GoDirect API',
-            version: '22.15.0',
+            version: '22.15.46',
             ok: true,
             timestamp: new Date().toISOString(),
         }));
@@ -98,7 +141,7 @@ export class WebServerComponent {
         this.app.get('/api/assets', this.asyncRoute(this.assets.list));
         this.app.get('/api/resources/:type', this.asyncRoute(this.assets.listByType));
         this.app.get('/api/resources/:type/:id', this.asyncRoute(this.assets.getByScope));
-        this.app.get('/api/resources/:type/:id/outings', this.asyncRoute(this.assets.outingsByScope));
+        this.app.get('/api/resources/:type/:id/outings', (_req, res) => res.status(410).json({ error: 'listing_outings_removed' }));
         this.app.get('/api/assets/:id', this.asyncRoute(this.assets.get));
         this.app.get('/api/assets/:assetId/faqs', this.asyncRoute(this.assets.faqs));
         this.app.post('/api/bookings', this.asyncRoute(this.bookings.create));
@@ -124,6 +167,7 @@ export class WebServerComponent {
         this.app.get('/api/owners/:ownerId/bookings', this.asyncRoute(this.bookings.ownerBookings));
         this.app.get('/api/stripe/connect/test/callback', this.asyncRoute(this.owners.oauthCallback));
         this.app.post('/api/owners/:ownerId/stripe/connect', this.asyncRoute(this.owners.connect));
+        this.app.post('/api/owners/:ownerId/stripe/test/provision', this.asyncRoute(this.owners.provisionTest));
         this.app.get('/api/owners/:ownerId/stripe/status', this.asyncRoute(this.owners.status));
         this.app.get('/api/payments/config', this.asyncRoute(this.payments.config));
         this.app.post('/api/payments/checkout', this.asyncRoute(this.payments.checkout));
@@ -177,6 +221,7 @@ export class WebServerComponent {
             }
             return res.status(Number(err?.status) || 500).json({
                 error: err instanceof Error ? err.message : 'server_error',
+                ...(err?.status === 428 ? { requiredRole: err?.requiredRole } : {}),
             });
         });
         await this.listen();

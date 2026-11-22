@@ -1,3 +1,5 @@
+import { hasAssetPermission } from './asset-delegation.js';
+import { hostnameMatches } from './asset-domain.js';
 import { outingMediaFolder } from './outing-media-folder.js';
 import { MEDIA_ROUTES, mediaObjectUrl } from './media-routes.js';
 import { gcsPhotoPath } from './gcs-photo-path.js';
@@ -170,7 +172,7 @@ export class MediaService {
         const id = String(req.body?.resourceId || req.body?.assetId || req.body?.boatId || '');
         if (['boat', 'car', 'property', 'parking', 'pool'].includes(type) && /^[a-zA-Z0-9_-]{1,80}$/.test(id)) {
             const asset = (await this.store.db.ref(`assets/${type}/${id}`).once('value')).val();
-            if (asset && !asset.deletedAt && asset.ownerId === decoded.uid)
+            if (asset && !asset.deletedAt && await hasAssetPermission(this.store, decoded.uid, type, id, 'content'))
                 return { uid: decoded.uid, email: String(decoded.email || '') };
         }
         const snapshot = await this.store.db.ref(`/backendusers/${decoded.uid}`).once('value');
@@ -353,7 +355,7 @@ export class MediaService {
                 return false;
             return this.asStringArray(config?.hostnames)
                 .map((value) => this.normalizeHostname(value))
-                .includes(hostname);
+                .some(pattern => hostnameMatches(pattern, hostname));
         });
         // Local development and single-tenant reverse proxies can explicitly use
         // GCS_MEDIA_DEFAULT_TENANT. The physical root is still never accepted from

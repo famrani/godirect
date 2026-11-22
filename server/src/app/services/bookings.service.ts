@@ -1,4 +1,10 @@
-import {listingPublic} from './listing-billing.service.js';
+import {queueMobileAlert} from './mobile-alerts.js';
+import {domainScope,matchesSite,siteOrigin} from './portal-sites.js';
+import {portalFor} from './portal-policy.js';
+import {linkPrebooking} from './message-prebooking.js';
+import {queueNotification,queueBookingChange,emitNotification} from './email-notifications.js';
+import {hasAssetPermission,assetPermission,conciergeBookingView} from './asset-delegation.js';
+import {listingPublicationIssue} from './listing-billing.service.js';
 import { CancellationService, cancellationLocked } from './cancellation.service.js';
 import { updateExisting } from './existing-transaction.js';
 import { reservationView, bookingPayments } from './reservation-compatibility.js';
@@ -11,6 +17,7 @@ import { UtilsService } from './utils.service.js';
 
 const genericSchema = z.object({ assetId:z.string().min(1), customerId:z.string().min(1), startAt:z.string().min(1), endAt:z.string().min(1), rentalAmount:z.number().nonnegative(), bookingDeposit:z.number().nonnegative().default(0), securityDeposit:z.number().nonnegative().default(0), currency:z.string().default('eur') });
 const carSchema = z.object({
+ prebookingThreadId:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   assetId: z.string().min(1), customerId: z.string().min(1), startAt: z.string().min(1), endAt: z.string().min(1),
   customerName: z.string().min(1), customerEmail: z.string().email(), customerPhone: z.string().optional().default(''),
   pickupLocation: z.string().min(1), returnLocation: z.string().min(1), driverAge: z.number().int().min(18).max(100),
@@ -19,6 +26,7 @@ const carSchema = z.object({
 
 
 const resourceSchema = z.object({
+ prebookingThreadId:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   assetId:z.string().min(1), customerId:z.string().min(1), startAt:z.string().min(1), endAt:z.string().min(1),
   customerName:z.string().min(1), customerEmail:z.string().email(), customerPhone:z.string().optional().default(''),
   guests:z.number().int().min(1).optional().default(1), vehiclePlate:z.string().optional().default(''), comments:z.string().optional().default('')
@@ -38,12 +46,22 @@ export class BookingsService {
   private async creationIdentity(req:Request,res:Response,asset:any,p:any):Promise<any> {
     const user=await this.authenticatedCustomer(req,res);if(!user)return null;
     const admin=String(req.query.admin||'')==='1';
-    if(admin&&String(asset.ownerId)!==user.uid){res.status(403).json({error:'owner_required'});return null;}
+    if(admin&&!await hasAssetPermission(this.firebase,user.uid,asset.assetType,asset.id||p.assetId,'bookings',user)){res.status(403).json({error:'owner_required'});return null;}
     if(!admin&&!user.email){res.status(403).json({error:'email_required'});return null;}
     let customerId=user.uid;
     if(admin){try{customerId=(await this.firebase.auth.getUserByEmail(p.customerEmail)).uid;}catch(e:any){if(e.code!=='auth/user-not-found')throw e;customerId='guest';}}
     return {customerId,customerEmail:admin?p.customerEmail:user.email,
-      workflow:initialWorkflow(admin?'admin':'customer')};
+      actorUid:admin?user.uid:null,actorClaims:admin?{uid:user.uid,admin:user.admin===true}:null,workflow:initialWorkflow(admin?'admin':'customer')};
+  }
+  private async bookingSite(req:Request,res:Response,asset:any,id:string):Promise<boolean>{
+    const host=String(req.headers.host||''),portal=portalFor(host),type=String(asset.assetType);
+    if(portal==='local'&&['localhost','127.0.0.1','alegriaboat.eu','www.alegriaboat.eu'].includes(host.toLowerCase().replace(/:\d+$/,'')))return true;
+    if(portal==='asset'&&await matchesSite(this.firebase,host,type,id))return true;
+    if(portal!=='asset'&&String(req.query.admin||'')==='1'){
+      const token=/^Bearer\s+(.+)$/i.exec(String(req.headers.authorization||''))?.[1];
+      if(token){try{const u=await this.firebase.auth.verifyIdToken(token);if(await hasAssetPermission(this.firebase,u.uid,type,id,'bookings',u))return true;}catch{}}
+    }
+    res.status(409).json({error:'booking_site_required',siteUrl:siteOrigin(asset,id)});return false;
   }
   // R17 canonical layout: bookings/{assetType}/{assetId}/{bookingId}.
   private bookingPath(type:string, assetId:string, id?:string):string {
@@ -72,12 +90,12 @@ export class BookingsService {
     return existing.some((b:any) => !['cancelled','rejected'].includes(String(b.status||'').toLowerCase()) && new Date(b.startAt).getTime() < end && new Date(b.endAt).getTime() > start);
   }
 
-  private async saveNewBooking(booking:any):Promise<boolean>{
+  private async saveNewBooking(booking:any,actorUid?:string,actorClaims?:any,prebookingThreadId?:string):Promise<boolean>{
     const path=this.bookingPath(booking.assetType,booking.assetId,booking.id);
-    const result=await this.firebase.db.ref(this.bookingPath(booking.assetType,booking.assetId)).transaction((rows:any)=>{
-      rows=rows||{};
+    const result=await this.firebase.db.ref().transaction((root:any)=>{
+      if(root===null)return null;if(root.assets?.[booking.assetType]?.[booking.assetId]?.ownerId!==booking.ownerId||root.assets[booking.assetType][booking.assetId].deletedAt)return;if(actorUid&&!assetPermission(root,actorUid,booking.assetType,booking.assetId,'bookings',actorClaims))return;root.bookings??={};root.bookings[booking.assetType]??={};const rows=root.bookings[booking.assetType][booking.assetId]||{};
       if(Object.values(rows).some((b:any)=>!['cancelled','rejected'].includes(b.status)&&Date.parse(b.startAt)<Date.parse(booking.endAt)&&Date.parse(b.endAt)>Date.parse(booking.startAt)))return;
-      return {...rows,[booking.id]:booking};
+      linkPrebooking(root,booking,prebookingThreadId);root.bookings[booking.assetType][booking.assetId]={...rows,[booking.id]:booking};if(actorUid){root.managementAudit??={};root.managementAudit['create_'+booking.id]={action:'booking.create',actorId:actorUid,ownerId:booking.ownerId,assetType:booking.assetType,assetId:booking.assetId,bookingId:booking.id,at:booking.createdAt};}if(!actorUid)queueMobileAlert(root,{kind:'booking',type:booking.assetType,assetId:booking.assetId,ownerId:booking.ownerId,reference:booking.id});queueNotification(root,{key:booking.id,kind:'booking.created',type:booking.assetType,assetId:booking.assetId,ownerId:booking.ownerId,bookingId:booking.id,customerId:booking.customerId});return root;
     },undefined,false);
     if(!result.committed)return false;
     await this.firebase.db.ref().update(bookingIndexPaths(booking,path));
@@ -107,8 +125,9 @@ export class BookingsService {
   carQuote = async (req:Request,res:Response) => {
     const p = carSchema.omit({customerId:true,customerName:true,customerEmail:true,customerPhone:true,comments:true}).parse(req.body);
     if(!validBookingDates(p.startAt,p.endAt))return res.status(400).json({error:'invalid_booking_dates'});
-    const asset=await findAsset(this.firebase,p.assetId); if(!asset) return res.status(404).json({error:'asset_not_found'}); if(String(asset.assetType)!=='car') return res.status(400).json({error:'asset_is_not_car'});
-    if(!await listingPublic(this.firebase,String(asset.assetType),String(p.assetId),asset))return res.status(402).json({error:'listing_subscription_required'});
+    const asset=await findAsset(this.firebase,p.assetId,'car'); if(!asset) return res.status(404).json({error:'asset_not_found'}); if(String(asset.assetType)!=='car') return res.status(400).json({error:'asset_is_not_car'});
+    if(!await this.bookingSite(req,res,asset,p.assetId))return;
+    const publicationIssue=await listingPublicationIssue(this.firebase,String(asset.assetType),String(p.assetId),asset);if(publicationIssue)return res.status(publicationIssue==='listing_subscription_required'?402:409).json({error:publicationIssue});
     if(await this.overlaps(p.assetId,p.startAt,p.endAt)) return res.status(409).json({error:'asset_unavailable'});
     return res.json(this.carPrice(asset,p.startAt,p.endAt,p.additionalDriver,p.childSeat));
   };
@@ -116,7 +135,8 @@ export class BookingsService {
   createCar = async (req:Request,res:Response) => {
     const p=carSchema.parse(req.body); const asset=await findAsset(this.firebase,p.assetId,'car');
     if(!asset||asset.assetType!=='car')return res.status(404).json({error:'asset_not_found'});
-    if(!await listingPublic(this.firebase,String(asset.assetType),String(p.assetId),asset))return res.status(402).json({error:'listing_subscription_required'});
+    if(!await this.bookingSite(req,res,asset,p.assetId))return;
+    const publicationIssue=await listingPublicationIssue(this.firebase,String(asset.assetType),String(p.assetId),asset);if(publicationIssue)return res.status(publicationIssue==='listing_subscription_required'?402:409).json({error:publicationIssue});
     const identity=await this.creationIdentity(req,res,asset,p);if(!identity)return;
     const {customerId,customerEmail}=identity;
     if(!validBookingDates(p.startAt,p.endAt))return res.status(400).json({error:'invalid_booking_dates'});
@@ -124,8 +144,8 @@ export class BookingsService {
     const pricing=this.validatePrice(this.carPrice(asset,p.startAt,p.endAt,p.additionalDriver,p.childSeat));
     const ref=this.firebase.db.ref(this.bookingPath('car',p.assetId)).push(), id=String(ref.key);
     const booking:any={id,assetId:p.assetId,assetType:'car',ownerId:String(asset.ownerId),customerId,startAt:p.startAt,endAt:p.endAt,customerName:p.customerName,customerEmail,customerPhone:p.customerPhone,rental:{pickupLocation:p.pickupLocation,returnLocation:p.returnLocation,driverAge:p.driverAge,licenseCountry:p.licenseCountry},extras:{additionalDriver:p.additionalDriver,childSeat:p.childSeat},comments:p.comments,pricing,rentalAmount:pricing.rentalAmount,bookingDeposit:pricing.bookingDeposit,securityDeposit:pricing.securityDeposit,currency:pricing.currency,balanceAmount:Math.max(0,pricing.rentalAmount-pricing.bookingDeposit),status:'pending',paymentStatus:'unpaid',createdAt:this.utils.nowIso()};
-    Object.assign(booking,advanceReservation({...booking,...identity}));
-    if(!await this.saveNewBooking(booking))return res.status(409).json({error:'asset_unavailable'});
+    const {actorUid,actorClaims,...customerIdentity}=identity;Object.assign(booking,advanceReservation({...booking,...customerIdentity}));
+    if(!await this.saveNewBooking(booking,identity.actorUid,identity.actorClaims,p.prebookingThreadId))return res.status(409).json({error:'asset_unavailable'});
     return res.status(201).json(booking);
   };
 
@@ -146,7 +166,8 @@ export class BookingsService {
     if(!validBookingDates(p.startAt,p.endAt)) return res.status(400).json({error:'invalid_booking_dates'});
     const asset=await findAsset(this.firebase,p.assetId,type);
     if(!asset) return res.status(404).json({error:'asset_not_found'});
-    if(!await listingPublic(this.firebase,String(asset.assetType),String(p.assetId),asset))return res.status(402).json({error:'listing_subscription_required'});
+    if(!await this.bookingSite(req,res,asset,p.assetId))return;
+    const publicationIssue=await listingPublicationIssue(this.firebase,String(asset.assetType),String(p.assetId),asset);if(publicationIssue)return res.status(publicationIssue==='listing_subscription_required'?402:409).json({error:publicationIssue});
     if(String(asset.assetType)!==type) return res.status(400).json({error:`asset_is_not_${type}`});
     if(type==='property' && Number(p.guests)>Number(asset?.properties?.guests||999)) return res.status(400).json({error:'too_many_guests'});
     if(await this.overlaps(p.assetId,p.startAt,p.endAt)) return res.status(409).json({error:'asset_unavailable'});
@@ -158,7 +179,8 @@ export class BookingsService {
     if(!validBookingDates(p.startAt,p.endAt)) return res.status(400).json({error:'invalid_booking_dates'});
     const asset=await findAsset(this.firebase,p.assetId,type);
     if(!asset) return res.status(404).json({error:'asset_not_found'});
-    if(!await listingPublic(this.firebase,String(asset.assetType),String(p.assetId),asset))return res.status(402).json({error:'listing_subscription_required'});
+    if(!await this.bookingSite(req,res,asset,p.assetId))return;
+    const publicationIssue=await listingPublicationIssue(this.firebase,String(asset.assetType),String(p.assetId),asset);if(publicationIssue)return res.status(publicationIssue==='listing_subscription_required'?402:409).json({error:publicationIssue});
     if(String(asset.assetType)!==type) return res.status(400).json({error:`asset_is_not_${type}`});
     if(type==='property' && Number(p.guests)>Number(asset?.properties?.guests||999)) return res.status(400).json({error:'too_many_guests'});
     if(await this.overlaps(p.assetId,p.startAt,p.endAt)) return res.status(409).json({error:'asset_unavailable'});
@@ -166,15 +188,16 @@ export class BookingsService {
     const pricing=this.validatePrice(this.resourcePrice(asset,p.startAt,p.endAt,type)), ref=this.firebase.db.ref(this.bookingPath(type,p.assetId)).push(), id=String(ref.key);
     const booking:any={id,assetId:p.assetId,assetType:type,ownerId:String(asset.ownerId),customerId:identity.customerId,startAt:p.startAt,endAt:p.endAt,customerName:p.customerName,customerEmail:identity.customerEmail,customerPhone:p.customerPhone,comments:p.comments,pricing,rentalAmount:pricing.rentalAmount,bookingDeposit:pricing.bookingDeposit,securityDeposit:pricing.securityDeposit,currency:pricing.currency,balanceAmount:Math.max(0,pricing.rentalAmount-pricing.bookingDeposit),status:'pending',paymentStatus:'unpaid',createdAt:this.utils.nowIso()};
     if(type==='parking') booking.rental={vehiclePlate:p.vehiclePlate}; else booking.rental={guests:p.guests};
-    Object.assign(booking,advanceReservation({...booking,...identity}));
-    if(!await this.saveNewBooking(booking))return res.status(409).json({error:'asset_unavailable'});
+    const {actorUid,actorClaims,...customerIdentity}=identity;Object.assign(booking,advanceReservation({...booking,...customerIdentity}));
+    if(!await this.saveNewBooking(booking,identity.actorUid,identity.actorClaims,p.prebookingThreadId))return res.status(409).json({error:'asset_unavailable'});
     return res.status(201).json(booking);
   };
 
   create = async(req:Request,res:Response)=>{
     const asset=await findAsset(this.firebase,String(req.body.assetId||''));
     if(!asset)return res.status(404).json({error:'asset_not_found'});
-    if(!await listingPublic(this.firebase,String(asset.assetType),String(req.body.assetId),asset))return res.status(402).json({error:'listing_subscription_required'});
+    if(!await this.bookingSite(req,res,asset,String(req.body.assetId)))return;
+    const publicationIssue=await listingPublicationIssue(this.firebase,String(asset.assetType),String(req.body.assetId),asset);if(publicationIssue)return res.status(publicationIssue==='listing_subscription_required'?402:409).json({error:publicationIssue});
     if(asset.assetType==='car')return this.createCar(req,res);
     return this.createResource(asset.assetType)(req,res);
   };
@@ -182,6 +205,7 @@ export class BookingsService {
   ownerBookings=async(req:Request,res:Response)=>{const user=await this.authenticatedCustomer(req,res);if(!user)return;const id=String(req.params.ownerId);if(id!==user.uid)return res.status(403).json({error:'owner_required'});return res.json(await Promise.all((await this.bookingsForIndex('bookingsByOwner',id)).filter((b:any)=>b.ownerId===user.uid).map((b:any)=>reservationView(this.firebase,b))));};
   // R21: Firebase ID token is verified server-side. Never trust an ownerId from the request.
   private async ownedBooking(req:Request,res:Response):Promise<{asset:any;booking:any;path:string}|null> {
+    res.setHeader('Cache-Control','no-store');
     const {type,assetId,bookingId}=req.params;
     if(typeof type!=='string'||!['boat','car','parking','property','pool'].includes(type)||
        typeof assetId!=='string'||typeof bookingId!=='string'||
@@ -190,24 +214,24 @@ export class BookingsService {
     }
     const match=/^Bearer (.+)$/i.exec(String(req.headers.authorization||''));
     if(!match){res.status(401).json({error:'authentication_required'});return null;}
-    let uid:string;
-    try{uid=(await this.firebase.auth.verifyIdToken(match[1])).uid;}
+    let uid:string;let actorClaims:any;
+    try{actorClaims=await this.firebase.auth.verifyIdToken(match[1]);uid=actorClaims.uid;}
     catch{res.status(401).json({error:'invalid_authentication'});return null;}
-    const asset=await findAsset(this.firebase,assetId);
+    const asset=await findAsset(this.firebase,assetId,type);
     if(!asset||String(asset.assetType)!==type){res.status(404).json({error:'asset_not_found'});return null;}
-    if(String(asset.ownerId)!==uid){res.status(403).json({error:'not_asset_owner'});return null;}
+    if(!await hasAssetPermission(this.firebase,uid,type,assetId,'bookings',actorClaims)){res.status(403).json({error:'not_asset_owner'});return null;}
     const path=this.bookingPath(type,assetId,bookingId);
     const booking=(await this.firebase.db.ref(path).once('value')).val();
-    if(!booking||String(booking.assetId)!==assetId||String(booking.ownerId)!==uid){res.status(404).json({error:'booking_not_found'});return null;}
-    return {asset,booking,path};
+    if(!booking||String(booking.assetId)!==assetId||String(booking.ownerId)!==String(asset.ownerId)){res.status(404).json({error:'booking_not_found'});return null;}
+    return {asset,booking,path,actorId:uid,actorClaims} as any;
   }
   // R22.4: customer operations are bound to the verified Firebase identity.
-  private async authenticatedCustomer(req:Request,res:Response):Promise<{uid:string;email:string}|null> {
+  private async authenticatedCustomer(req:Request,res:Response):Promise<{uid:string;email:string;admin:boolean}|null> {
     const match=/^Bearer (.+)$/i.exec(String(req.headers.authorization||''));
     if(!match){res.status(401).json({error:'authentication_required'});return null;}
     try{
       const claims:any=await this.firebase.auth.verifyIdToken(match[1]);
-      return {uid:String(claims.uid),email:String(claims.email||'').trim().toLowerCase()};
+      return {uid:String(claims.uid),email:String(claims.email||'').trim().toLowerCase(),admin:claims.admin===true||claims.role==='admin'};
     } catch { res.status(401).json({error:'invalid_authentication'});return null; }
   }
 
@@ -236,7 +260,8 @@ export class BookingsService {
   customerMyBookings=async(req:Request,res:Response)=>{
     const customer=await this.authenticatedCustomer(req,res);if(!customer)return;
     await this.claimLegacyGuestBookings(customer.uid,customer.email);
-    const bookings=await this.bookingsForIndex('bookingsByCustomer',customer.uid);
+    let bookings=await this.bookingsForIndex('bookingsByCustomer',customer.uid);
+    if(portalFor(String(req.headers.host||''))==='asset'){const scope=await domainScope(this.firebase,String(req.headers.host||''));bookings=bookings.filter((b:any)=>b.assetType===scope?.assetType&&b.assetId===scope?.assetId);}
     // Never trust the index alone: stale or forged pointers must not expose other customers.
     return res.json(await Promise.all(bookings.filter((b:any)=>String(b.customerId)===customer.uid).map((b:any)=>reservationView(this.firebase,b))));
   };
@@ -246,6 +271,7 @@ export class BookingsService {
     if(typeof type!=='string'||!['boat','car','parking','property','pool'].includes(type)||
        typeof assetId!=='string'||typeof bookingId!=='string'||
        !/^[a-zA-Z0-9_-]+$/.test(assetId)||!/^[a-zA-Z0-9_-]+$/.test(bookingId))return res.status(400).json({error:'invalid_booking_scope'});
+    if(!await matchesSite(this.firebase,String(req.headers.host||''),type,assetId))return res.status(404).json({error:'booking_not_found'});
     const booking=(await this.firebase.db.ref(this.bookingPath(type,assetId,bookingId)).once('value')).val();
     if(!booking||String(booking.customerId)!==uid)return res.status(404).json({error:'booking_not_found'});
     return res.json(await reservationView(this.firebase,booking));
@@ -268,18 +294,18 @@ export class BookingsService {
     if(forbidden)return res.status(404).json({error:'booking_not_found'});
     if(invalid)return res.status(409).json({error:'booking_not_cancellable'});
     if(!result.committed)return res.status(409).json({error:'booking_changed_retry'});
-    return res.json({ok:true,status:'cancellation_requested'});
+    const b=result.snapshot.val();await emitNotification(this.firebase,{key:b.id+'|cancellation_requested',kind:'booking.cancellation_requested',type,assetId,ownerId:b.ownerId,bookingId:b.id,customerId:b.customerId});return res.json({ok:true,status:'cancellation_requested'});
   };
   adminBookingGet=async(req:Request,res:Response)=>{
     const scoped=await this.ownedBooking(req,res);if(!scoped)return;
-    return res.json(await reservationView(this.firebase,scoped.booking));
+    return res.json((scoped as any).actorId===scoped.booking.ownerId?await reservationView(this.firebase,scoped.booking):conciergeBookingView(await reservationView(this.firebase,scoped.booking)));
   };
   customerBookingPatch=async(req:Request,res:Response)=>this.editReservation(req,res,false);
   adminBookingPatch=async(req:Request,res:Response)=>this.editReservation(req,res,true);
 
   private async editReservation(req:Request,res:Response,admin:boolean){
     let scoped:any;let uid='';
-    if(admin){scoped=await this.ownedBooking(req,res);if(!scoped)return;uid=String(scoped.booking.ownerId);}
+    if(admin){scoped=await this.ownedBooking(req,res);if(!scoped)return;uid=String(scoped.actorId);}
     else{
       const user=await this.authenticatedCustomer(req,res);if(!user)return;uid=user.uid;
       const {type,assetId,bookingId}=req.params;
@@ -334,11 +360,12 @@ export class BookingsService {
     }
     let failure='booking_changed_reload_required';
     const parent=this.bookingPath(type,String(old.assetId));
-    const result=await updateExisting(this.firebase.db.ref(parent),(rows:any)=>{
+    const result=await updateExisting(this.firebase.db.ref(),(root:any)=>{
+      if(admin&&(!assetPermission(root,uid,type,String(old.assetId),'bookings',scoped.actorClaims)||root.assets?.[type]?.[String(old.assetId)]?.ownerId!==old.ownerId)){failure='not_asset_owner';return;}const rows=root?.bookings?.[type]?.[String(old.assetId)];
       failure='booking_changed_reload_required';
       const current=rows?.[old.id];
       if(cancellationLocked(current)){failure='cancellation_in_progress';return;}
-      if(!current||String(current.updatedAt||current.createdAt||'')!==expected||(admin?current.ownerId:current.customerId)!==uid)return;
+      if(!current||String(current.updatedAt||current.createdAt||'')!==expected||(admin?current.ownerId!==scoped.asset.ownerId:current.customerId!==uid))return;
       if(!admin&&['cancelled','rejected','completed'].includes(current.status)){failure='booking_closed';return;}
       if(priceChanged&&current.paymentCheckoutStartedAt){failure='financial_changes_locked';return;}
       if(datesChanged&&Object.values(rows).some((b:any)=>b.id!==old.id&&!['cancelled','rejected'].includes(b.status)&&Date.parse(b.startAt)<Date.parse(endAt)&&Date.parse(b.endAt)>Date.parse(startAt))){failure='asset_unavailable';return;}
@@ -350,16 +377,17 @@ export class BookingsService {
         if(admin&&p.status==='pending')next.workflow={...next.workflow,adminApproved:next.workflow.origin==='admin'};
         next=advanceReservation(next);
       }
-      return {...rows,[old.id]:next};
+      queueBookingChange(root,current,next);root.bookings[type][String(old.assetId)]={...rows,[old.id]:next};root.managementAudit??={};root.managementAudit['edit_'+old.id+'_'+Date.parse(next.updatedAt)]={actorId:uid,ownerId:current.ownerId,assetType:type,assetId:old.assetId,bookingId:old.id,action:'booking.edit',at:next.updatedAt};return root;
     });
     if(result.missing)return res.status(404).json({error:'booking_not_found'});
     if(!result.committed)return res.status(409).json({error:failure});
-    return res.json(await reservationView(this.firebase,result.snapshot.val()[old.id]));
+    const updated=await reservationView(this.firebase,result.snapshot.val()?.bookings?.[type]?.[String(old.assetId)]?.[old.id]);return res.json(admin&&uid!==old.ownerId?conciergeBookingView(updated):updated);
   }
   adminBookingDelete=async(req:Request,res:Response)=>this.cancelReservation(req,res,true);
   adminCancellationReconcile=async(req:Request,res:Response)=>this.cancelReservation(req,res,false);
   private async cancelReservation(req:Request,res:Response,initiate:boolean){
     const scoped=await this.ownedBooking(req,res);if(!scoped)return;
+    if((scoped as any).actorId!==scoped.booking.ownerId)return res.status(403).json({error:'financial_owner_required'});
     if(!this.cancellations)return res.status(503).json({error:'cancellation_service_unavailable'});
     const booking=await this.cancellations.run(scoped.path,String(scoped.booking.ownerId),initiate);
     return res.status(booking.status==='cancelled'?200:202).json(await reservationView(this.firebase,booking));

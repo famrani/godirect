@@ -385,3 +385,11 @@ export const PLATFORM_ADMIN_TEXT:Record<string,Record<string,string>>={
     "open": "Открыть объявление"
   }
 };
+
+for(const[lang,labels]of Object.entries({fr:['Gérer le bien','Réservations'],en:['Manage asset','Bookings'],es:['Gestionar bien','Reservas'],it:['Gestisci bene','Prenotazioni'],de:['Objekt verwalten','Buchungen'],nl:['Object beheren','Boekingen'],ru:['Управление объектом','Бронирования']})){PLATFORM_ADMIN_TEXT[lang].manageAsset=labels[0];PLATFORM_ADMIN_TEXT[lang].assetReservations=labels[1];}
+
+for(const [lang,label] of Object.entries({fr:'Modérer l’annonce',en:'Moderate listing',es:'Moderar anuncio',it:'Modera annuncio',de:'Inserat prüfen',nl:'Advertentie beoordelen',ru:'Модерация объявления'}))PLATFORM_ADMIN_TEXT[lang].moderateAsset=label;
+
+for(const[lang,label]of Object.entries({fr:'Modifier l’annonce',en:'Edit listing',es:'Editar anuncio',it:'Modifica annuncio',de:'Inserat bearbeiten',nl:'Advertentie bewerken',ru:'Редактировать объявление'}))PLATFORM_ADMIN_TEXT[lang].editAsset=label;
+
+for(const[lang,label]of Object.entries({fr:'Valider l’annonce',en:'Review listing',es:'Validar anuncio',it:'Valida annuncio',de:'Inserat prüfen',nl:'Advertentie beoordelen',ru:'Проверить объявление'}))PLATFORM_ADMIN_TEXT[lang].reviewAsset=label;

@@ -1,0 +1,25 @@
+services:
+  godirect:
+    image: ${GODIRECT_IMAGE:-godirect:local}
+    env_file:
+      - ./server/.env
+    environment:
+      NODE_ENV: production
+      PORT: "2000"
+      HTTPS_ENABLED: "false"
+      FRONTEND_URL: ${GODIRECT_PUBLIC_URL:-http://localhost:2000}
+      BILLING_RETURN_URL: ${GODIRECT_PUBLIC_URL:-http://localhost:2000}
+      CORS_ORIGINS: ${GODIRECT_PUBLIC_URL:-http://localhost:2000}
+      FRONTEND_DIST: /opt/godirect/server/www
+      FIREBASE_SERVICE_ACCOUNT: /run/secrets/firebase-service-account.json
+      GCS_SERVICE_ACCOUNT: /run/secrets/firebase-service-account.json
+    ports:
+      - "127.0.0.1:2000:2000"
+    secrets:
+      - source: firebase_service_account
+        target: firebase-service-account.json
+    init: true
+    restart: unless-stopped
+secrets:
+  firebase_service_account:
+    file: ${FIREBASE_SERVICE_ACCOUNT_FILE:?Set FIREBASE_SERVICE_ACCOUNT_FILE to your local Firebase JSON key}

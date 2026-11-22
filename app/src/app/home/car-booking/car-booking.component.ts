@@ -33,12 +33,13 @@ export class CarBookingComponent implements OnInit {
     const a=new Date(`${start}T${timeStart}:00`),b=new Date(`${end}T${timeEnd}:00`);
     return Number.isFinite(a.getTime())&&Number.isFinite(b.getTime())&&b.getTime()>a.getTime();
   }
-  calculate(){
+  async calculate(){
     this.error='';this.quote=null;this.quotedPayload='';
     if(!this.datesValid()){this.calculating=false;this.error='Sélectionnez des dates et heures valides : la restitution doit être après la prise en charge.';return;}
     const p=this.payload(); const signature=this.pricingSignature(); const requestId=++this.quoteRequestId;
     this.calculating=true;
-    this.http.post<any>('/api/car-bookings/quote',p).subscribe({
+    let headers;try{if(this.admin)headers=await this.auth.headers();}catch(e:any){this.calculating=false;this.error=e.message;return;}
+    this.http.post<any>('/api/car-bookings/quote'+(this.admin?'?admin=1':''),p,{headers}).subscribe({
       next:q=>{if(requestId!==this.quoteRequestId||signature!==this.pricingSignature())return;this.quote=q;this.quotedPayload=signature;this.calculating=false;this.hasCalculated=true;},
       error:e=>{if(requestId!==this.quoteRequestId)return;this.calculating=false;this.error=e?.error?.error==='asset_unavailable'?this.uiText.text('Indisponible pour cette période.'):this.uiText.text('Impossible de calculer le prix')+(e?.error?.error?' : '+this.uiText.text(e.error.error):'');}
     });

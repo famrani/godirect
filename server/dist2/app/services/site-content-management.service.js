@@ -1,5 +1,6 @@
+import { hasAssetPermission, assetPermission } from './asset-delegation.js';
 import { photoUpdate, persistPhoto } from './persisted-photo.js';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { isAssetType } from './asset-paths.service.js';
 import { platformAdministrator } from './account-access.service.js';
 import { listingRevision } from './listing-moderation.js';
@@ -64,7 +65,7 @@ export class SiteContentManagementService {
         const admin = platformAdministrator(user, profile);
         if (!asset || asset.deletedAt)
             throw fail(404, 'asset_not_found');
-        if (!admin && asset.ownerId !== user.uid)
+        if (!admin && !await hasAssetPermission(this.store, user.uid, type, id, 'content'))
             throw fail(403, 'asset_management_required');
         return { type, id, user, admin, asset };
     }
@@ -72,12 +73,16 @@ export class SiteContentManagementService {
         const { type, id, asset } = await this.access(req);
         const [site, pricing, outings, fleet] = await Promise.all(['siteContent', 'bnPricingModel', 'bnOutings', 'bnFleet'].map(root => this.store.db.ref(`${root}/${type}/${id}`).once('value')));
         res.setHeader('Cache-Control', 'no-store');
-        return res.json({ asset, siteContent: site.val() || {}, pricing: pricing.val(), outings: outings.val() || {}, fleet: fleet.val() });
+        return res.json({ asset, revision: listingRevision(asset), siteContent: site.val() || {}, pricing: pricing.val(), outings: outings.val() || {}, fleet: fleet.val() });
     };
     save = async (req, res) => {
         const { type, id, user, admin } = await this.access(req), body = req.body;
-        if (!body || !safeTree({ ...body, asset: null }) || JSON.stringify(body).length > 1000000 || Object.keys(body).some(k => !['asset', 'siteContent', 'pricing', 'outings', 'photo'].includes(k)))
+        if (!body || !safeTree({ ...body, asset: null }) || JSON.stringify(body).length > 1000000 || Object.keys(body).some(k => !['asset', 'siteContent', 'pricing', 'outings', 'photo', 'expectedRevision'].includes(k)))
             throw fail(400, 'invalid_content');
+        if (body.expectedRevision !== undefined && !/^[a-f0-9]{64}$/.test(String(body.expectedRevision)))
+            throw fail(400, 'invalid_revision');
+        if (body.outings || Object.values(body.siteContent || {}).some(c => c && ('outings' in c || 'outingsPage' in c)))
+            throw fail(400, 'listing_outings_removed');
         const assetUpdates = body.asset ? cmsAssetUpdates(body.asset) : {};
         const photo = body.photo ? photoUpdate(body.photo, type, id) : undefined;
         if (type !== 'boat' && (body.siteContent || body.pricing || body.outings))
@@ -91,16 +96,19 @@ export class SiteContentManagementService {
             throw fail(400, 'invalid_price');
         if (body.outings && Object.keys(body.outings).some(k => !/^[a-zA-Z0-9_-]{1,80}$/.test(k)))
             throw fail(400, 'invalid_outing');
-        const now = new Date().toISOString();
+        const now = new Date().toISOString(), auditId = randomUUID();
         let error = 'asset_changed_reload_required';
+        await this.store.db.ref().once('value');
         const result = await this.store.db.ref().transaction((root) => {
             if (root === null)
                 return null;
             const asset = root.assets?.[type]?.[id];
-            if (!asset || asset.deletedAt || (!admin && asset.ownerId !== user.uid)) {
+            if (!asset || asset.deletedAt || !assetPermission(root, user.uid, type, id, 'content', user)) {
                 error = 'asset_management_required';
                 return;
             }
+            if (body.expectedRevision !== undefined && listingRevision(asset) !== body.expectedRevision)
+                return;
             for (const [key, v] of Object.entries(assetUpdates))
                 setPath(asset, key, v);
             if (['property', 'pool', 'parking'].includes(type) && (!String(asset.location?.city || '').trim() || !String(asset.location?.country || '').trim())) {
@@ -151,16 +159,20 @@ export class SiteContentManagementService {
                 if (type === 'boat')
                     asset.siteContentRevision = createHash('sha256').update(JSON.stringify(root.siteContent?.boat?.[id] || {})).digest('hex');
             }
+            if (type === 'boat' && (body.siteContent || body.pricing || body.outings || photo))
+                asset.siteContentRevision = createHash('sha256').update(JSON.stringify({ site: root.siteContent?.boat?.[id] || {}, pricing: root.bnPricingModel?.boat?.[id] || {}, outings: root.bnOutings?.boat?.[id] || {} })).digest('hex');
             root.listingModeration ??= {};
             root.listingModeration[type] ??= {};
             root.listingModeration[type][id] = { status: 'pending', revision: listingRevision(asset), requestedAt: now, requestedBy: user.uid };
             asset.updatedAt = now;
+            root.managementAudit ??= {};
+            root.managementAudit[auditId] = { actorId: user.uid, ownerId: asset.ownerId, assetType: type, assetId: id, action: 'content.save', at: now };
             return root;
         }, undefined, false);
         if (!result.committed)
             throw fail(409, error);
         res.setHeader('Cache-Control', 'no-store');
-        return res.json({ ok: true, moderation: 'pending', ...(photo ? { photo, media: result.snapshot.val()?.assets?.[type]?.[id]?.media } : {}) });
+        return res.json({ ok: true, revision: listingRevision(result.snapshot.val()?.assets?.[type]?.[id]), moderation: 'pending', ...(photo ? { photo, media: result.snapshot.val()?.assets?.[type]?.[id]?.media } : {}) });
     };
 }
 

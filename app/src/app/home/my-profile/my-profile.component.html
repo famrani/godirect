@@ -4,6 +4,7 @@
     <h1>{{ t('title') }}</h1>
     <p class="intro">{{ t('intro') }}</p>
 
+    <app-profile-roles [refreshKey]="loggedUser?.uid||loggedUser?.userId||loggedUser?.id||''"></app-profile-roles>
     <form class="profile-form" (ngSubmit)="saveProfile()">
       <label>
         <span>{{ t('firstname') }}</span>
