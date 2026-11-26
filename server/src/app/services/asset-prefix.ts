@@ -17,15 +17,25 @@ export function prefixSuggestions(root:any,query:string,scope?:PrefixScope):stri
 }
 export function applyPrefixChange(root:any,prefix:string,assetType:string,assetId:string,ownerId:string):boolean{
  const asset=root?.assets?.[assetType]?.[assetId],scope={assetType,assetId};
+ if(asset?.prefix&&prefix!==asset.prefix)return false;
  if(!asset||asset.ownerId!==ownerId||asset.deletedAt||!validPrefix(prefix)||prefixTaken(root,prefix,scope))return false;
  root.assetPrefixes??={};const old=asset.prefix;
  // Preserve previous addresses; never hand a former URL to another owner's listing.
  if(old&&old!==prefix&&!prefixTaken(root,old,scope))root.assetPrefixes[old]={assetType,assetId,ownerId};
  asset.prefix=prefix;root.assetPrefixes[prefix]={assetType,assetId,ownerId};return true;
 }
+export function ownerSitePrefix(root:any,uid:string):string {
+ const rows=ASSET_TYPES.flatMap(t=>Object.entries<any>(root?.assets?.[t]||{}).map(([id,a])=>({...a,id,t}))).filter(a=>a.ownerId===uid&&validPrefix(a.prefix||'')).sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||''))||a.id.localeCompare(b.id));
+ const saved=root?.owners?.[uid]?.sitePrefix;
+ return (validPrefix(saved||'')&&root?.assetPrefixes?.[saved]?.ownerId===uid?saved:rows.find(a=>!prefixTaken(root,a.prefix,{assetType:a.t,assetId:a.id})||root?.assetPrefixes?.[a.prefix]?.ownerId===uid)?.prefix)||'';
+}
 export function applyCreation(root:any,updates:Record<string,any>,prefix:string,assetType:string,assetId:string,ownerId:string):any{
- if(!root||prefixTaken(root,prefix))return;
+ if(!root)return;
+ const existing=ownerSitePrefix(root,ownerId);
+ if(existing)prefix=existing;else if(prefixTaken(root,prefix))return;
  if(!validPrefix(prefix))return;
  for(const [path,value] of Object.entries(updates)){const parts=path.split('/');let node=root;for(const part of parts.slice(0,-1))node=node[part]??={};node[parts[parts.length-1]]=value;}
- root.assetPrefixes??={};root.assetPrefixes[prefix]={assetType,assetId,ownerId};return root;
+ root.assets[assetType][assetId].prefix=prefix;
+ root.owners??={};root.owners[ownerId]??={};root.owners[ownerId].sitePrefix=prefix;
+ root.assetPrefixes??={};root.assetPrefixes[prefix]??={assetType,assetId,ownerId};return root;
 }

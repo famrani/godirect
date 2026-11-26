@@ -13,7 +13,7 @@
     <p>{{b.startAt | date:'medium'}} — {{b.endAt | date:'medium'}}</p>
     <app-message-link [threadId]="b.messageThreadId||''" [type]="b.assetType" [assetId]="b.assetId" [bookingId]="b.id"></app-message-link><app-message-link *ngIf="admin" audience="management" [type]="b.assetType" [assetId]="b.assetId" [bookingId]="b.id"></app-message-link><p class="price">{{b.rentalAmount | number:'1.2-2'}} {{b.currency || 'EUR'}}</p>
     <div class="reservation-status-steps"><span [class.done]="depositDone(b)">{{ "ui.pages.t79f9f1012a3f" | siteText }} {{depositDone(b)?('ui.pages.t75cc10149318' | siteText):('ui.pages.t3b28057050c4' | siteText)}}</span><span [class.done]="warrantyDone(b)">{{ warrantyLabel(b) | siteText }}</span><span [class.done]="b.workflow?.adminApproved">{{ "ui.pages.td4dbee0f76ac" | siteText }} {{b.workflow?.adminApproved?('ui.messages.te3130f49f2ae' | siteText):('ui.pages.t5fba9c16f0e5' | siteText)}}</span></div>
-    <div class="actions"><button type="button" (click)="open(b)" [disabled]="!!busy">{{ "ui.pages.tc6565c1527e9" | siteText }}</button><button type="button" *ngIf="active(b) && !cancellationLocked(b)" (click)="startEdit(b)" [disabled]="!!busy">{{ "ui.pages.t6d2f5f3af29a" | siteText }}</button><button type="button" class="primary" *ngIf="canPay(b,'booking_deposit')" (click)="pay(b,'booking_deposit')" [disabled]="!!busy">{{ "ui.pages.tad999d81c402" | siteText }} {{b.bookingDeposit}} {{b.currency}}</button></div>
+    <div class="actions"><button type="button" (click)="open(b)" [disabled]="!!busy">{{ "ui.pages.tc6565c1527e9" | siteText }}</button><button type="button" *ngIf="active(b) && !cancellationLocked(b)" (click)="startEdit(b)" [disabled]="!!busy"><span class="gd-full">{{ "ui.pages.t6d2f5f3af29a" | siteText }}</span><span class="gd-short">{{compactLabel('Modifier','Edit',('ui.pages.t6d2f5f3af29a' | siteText))}}</span></button><button type="button" class="primary" *ngIf="canPay(b,'booking_deposit')" (click)="pay(b,'booking_deposit')" [disabled]="!!busy">{{ "ui.pages.tad999d81c402" | siteText }} {{b.bookingDeposit}} {{b.currency}}</button></div>
     <p *ngIf="b.financialReviewRequired" class="notice">{{ "ui.pages.t35b8f6a61721" | siteText }}</p>
   </article>
 
@@ -24,19 +24,19 @@
     <p>{{selected.startAt | date:'medium'}} — {{selected.endAt | date:'medium'}}</p>
     <p><span class="status" [class.confirmed]="selected.status==='confirmed'">{{ reservationStatus(selected) | siteText }}</span></p>
     <div class="amounts">
-      <div><span>{{ "ui.pages.taf42c6b10bf9" | siteText }}</span><strong>{{selected.rentalAmount | number:'1.2-2'}} {{selected.currency}}</strong></div>
+      <div><span><span class="gd-full">{{ "ui.pages.taf42c6b10bf9" | siteText }}</span><span class="gd-short">{{compactLabel('Location','Rental',('ui.pages.taf42c6b10bf9' | siteText))}}</span></span><strong>{{selected.rentalAmount | number:'1.2-2'}} {{selected.currency}}</strong></div>
       <div><span>{{ "ui.pages.t79f9f1012a3f" | siteText }}</span><strong>{{selected.bookingDeposit | number:'1.2-2'}} {{selected.currency}}</strong><small>{{depositDone(selected)?('ui.messages.t3893f70d45c4' | siteText):('ui.messages.t4999346b25bc' | siteText)}}</small></div>
-      <div><span>{{ "ui.pages.t0b5c7c5e47a7" | siteText }}</span><strong>{{selected.balanceAmount | number:'1.2-2'}} {{selected.currency}}</strong><small>{{balanceDone(selected)?('ui.messages.t3893f70d45c4' | siteText):('ui.messages.t4999346b25bc' | siteText)}}</small></div>
-      <div><span>{{ "ui.pages.td3e7b46b738f" | siteText }}</span><strong>{{selected.securityDeposit | number:'1.2-2'}} {{selected.currency}}</strong><small>{{ warrantyLabel(selected) | siteText }}</small></div>
+      <div><span><span class="gd-full">{{ "ui.pages.t0b5c7c5e47a7" | siteText }}</span><span class="gd-short">{{compactLabel('Solde','Balance',('ui.pages.t0b5c7c5e47a7' | siteText))}}</span></span><strong>{{selected.balanceAmount | number:'1.2-2'}} {{selected.currency}}</strong><small>{{balanceDone(selected)?('ui.messages.t3893f70d45c4' | siteText):('ui.messages.t4999346b25bc' | siteText)}}</small></div>
+      <div><span><span class="gd-full">{{ "ui.pages.td3e7b46b738f" | siteText }}</span><span class="gd-short">{{compactLabel('Caution max.','Max. deposit',('ui.pages.td3e7b46b738f' | siteText))}}</span></span><strong>{{selected.securityDeposit | number:'1.2-2'}} {{selected.currency}}</strong><small>{{ warrantyLabel(selected) | siteText }}</small></div>
     </div>
     <p *ngIf="selected.financialReviewRequired" class="notice">{{ "ui.pages.t44300432be8e" | siteText }}</p>
     <div *ngIf="!editing" class="actions">
-      <button type="button" *ngIf="active(selected) && !cancellationLocked(selected)" (click)="startEdit(selected)" [disabled]="!!busy">{{ "ui.pages.t6d2f5f3af29a" | siteText }}</button>
+      <button type="button" *ngIf="active(selected) && !cancellationLocked(selected)" (click)="startEdit(selected)" [disabled]="!!busy"><span class="gd-full">{{ "ui.pages.t6d2f5f3af29a" | siteText }}</span><span class="gd-short">{{compactLabel('Modifier','Edit',('ui.pages.t6d2f5f3af29a' | siteText))}}</span></button>
       <button type="button" class="primary" *ngIf="canPay(selected,'booking_deposit')" (click)="pay(selected,'booking_deposit')" [disabled]="!!busy">{{ "ui.pages.t4d66607dac3a" | siteText }}</button>
       <button type="button" class="primary" *ngIf="canPay(selected,'balance')" (click)="pay(selected,'balance')" [disabled]="!!busy">{{offer('payBalance')}}</button>
       <button type="button" *ngIf="canPay(selected,'security_deposit')" (click)="pay(selected,'security_deposit')" [disabled]="!!busy">{{ "ui.pages.tc19651206d81" | siteText }}</button>
-      <button type="button" *ngIf="admin && active(selected) && !cancellationLocked(selected) && !selected.workflow?.adminApproved" (click)="approve(selected)" [disabled]="!!busy">{{ "ui.pages.td8f2c32eec62" | siteText }}</button>
-      <button type="button" *ngIf="admin && selected.managementPermissions?.financial!==false && active(selected)" (click)="cancelAdmin(selected)" [disabled]="!!busy">{{cancellationLocked(selected)?('ui.messages.t452e77e20f3a' | siteText):('ui.pages.td05bbb93c567' | siteText)}}</button>
+      <button type="button" *ngIf="admin && active(selected) && !cancellationLocked(selected) && !selected.workflow?.adminApproved" (click)="approve(selected)" [disabled]="!!busy"><span class="gd-full">{{ "ui.pages.td8f2c32eec62" | siteText }}</span><span class="gd-short">{{compactLabel('Approuver','Approve',('ui.pages.td8f2c32eec62' | siteText))}}</span></button>
+      <button type="button" *ngIf="admin && selected.managementPermissions?.financial!==false && active(selected)" (click)="cancelAdmin(selected)" [disabled]="!!busy"><span class="gd-full">{{cancellationLocked(selected)?('ui.messages.t452e77e20f3a' | siteText):('ui.pages.td05bbb93c567' | siteText)}}</span><span class="gd-short">{{cancellationLocked(selected)?('ui.messages.t452e77e20f3a' | siteText):compactLabel('Annuler et tout rembourser','Cancel and fully refund',('ui.pages.td05bbb93c567' | siteText))}}</span></button>
       <button type="button" *ngIf="admin && selected.managementPermissions?.financial!==false && cancellationLocked(selected)" (click)="checkCancellation(selected)" [disabled]="!!busy">{{ "ui.pages.t270064cc4bda" | siteText }}</button>
       <button type="button" *ngIf="!admin && active(selected) && selected.cancellationRequestStatus !== 'pending' && !cancellationLocked(selected)" (click)="requestCancellation(selected)" [disabled]="!!busy">{{ "ui.pages.t1e7e2d808ffa" | siteText }}</button>
     </div>
@@ -53,7 +53,7 @@
     </section>
     <p *ngIf="selected.comments && !editing">{{selected.comments}}</p>
     <form *ngIf="editing" (ngSubmit)="saveEdit()" class="edit-form">
-      <h3>{{ "ui.pages.t6d2f5f3af29a" | siteText }}</h3>
+      <h3><span class="gd-full">{{ "ui.pages.t6d2f5f3af29a" | siteText }}</span><span class="gd-short">{{compactLabel('Modifier','Edit',('ui.pages.t6d2f5f3af29a' | siteText))}}</span></h3>
       <p *ngIf="financialLocked(selected)" class="notice">{{ "ui.pages.t61e1d39559d8" | siteText }}</p>
       <p *ngIf="!financialLocked(selected)" class="help">{{ "ui.pages.t7b4dee957e6b" | siteText }}</p>
       <div class="form-grid">
@@ -73,7 +73,7 @@
         <label *ngIf="selected.assetType==='parking'">{{ "ui.pages.t678a4af267da" | siteText }}<input name="vehiclePlate" [(ngModel)]="editForm.vehiclePlate" maxlength="80"></label>
         <label *ngIf="selected.assetType!=='car' && selected.assetType!=='parking'">{{ "ui.pages.t93a4bcbadea4" | siteText }}<input name="guests" type="number" min="1" [(ngModel)]="editForm.guests" required></label>
         <ng-container *ngIf="admin">
-          <label>{{ "ui.pages.taf42c6b10bf9" | siteText }}<input name="rentalAmount" type="number" min="0.01" step="0.01" [(ngModel)]="editForm.rentalAmount" [disabled]="financialLocked(selected)" required></label>
+          <label><span class="gd-full">{{ "ui.pages.taf42c6b10bf9" | siteText }}</span><span class="gd-short">{{compactLabel('Location','Rental',('ui.pages.taf42c6b10bf9' | siteText))}}</span><input name="rentalAmount" type="number" min="0.01" step="0.01" [(ngModel)]="editForm.rentalAmount" [disabled]="financialLocked(selected)" required></label>
           <label>{{ "ui.pages.t79f9f1012a3f" | siteText }}<input name="bookingDeposit" type="number" min="0" step="0.01" [(ngModel)]="editForm.bookingDeposit" [disabled]="financialLocked(selected)" required></label>
           <label>{{ "ui.pages.t55a89527100d" | siteText }}<input name="securityDeposit" type="number" min="0" step="0.01" [(ngModel)]="editForm.securityDeposit" [disabled]="financialLocked(selected)" required></label>
         </ng-container>

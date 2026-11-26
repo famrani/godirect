@@ -42,9 +42,7 @@ export interface AlegriaV2ContentRoot {
 
 @Injectable({ providedIn: 'root' })
 export class SiteContentService {
-  private readonly restDatabaseUrls = [
-    'https://ailla-poc-default-rtdb.firebaseio.com',
-  ];
+  private contentUrl(scope:string):string { return "/api/listing-content/"+scope.split("/").filter(Boolean).slice(-2).map(encodeURIComponent).join("/"); }
 
   private readonly languages: SiteLanguage[] = ['fr', 'en', 'es', 'it', 'de', 'nl', 'ru'];
   private readonly defaultTenantId = 'alegria';
@@ -79,7 +77,7 @@ export class SiteContentService {
    */
   private platformOnly(): boolean {
     if (typeof window === 'undefined') return false;
-    return portalFor(window.location.hostname) === 'client';
+    return ['owner','client','concierge','admin'].includes(portalFor(window.location.hostname)) && !/^\/(boat|car|property|pool|parking)\//.test(window.location.pathname);
   }
   private async sharedContent(refresh: boolean): Promise<any> {
     if (refresh) this.globalContent=undefined;
@@ -103,7 +101,7 @@ export class SiteContentService {
     try{
       await this.sharedContent(forceRefresh);
       let scoped:any={};
-      try{scoped=await firstValueFrom(this.http.get<any>(`${this.restDatabaseUrls[0]}/${scope}.json`).pipe(timeout(5000)))||{};}catch{}
+      try{scoped=await firstValueFrom(this.http.get<any>(this.contentUrl(scope)).pipe(timeout(5000)))||{};}catch{}
       const value:any={};
       for(const language of this.languages){
         const fallback=(SITE_CONTENT as any)[language]||(SITE_CONTENT as any).en||{};
@@ -133,10 +131,10 @@ export class SiteContentService {
     const scope=this.resourceContext.scopedPath('siteContent');
     if (!forceRefresh && this.rawSiteContent && this.rawScope===scope) return this.rawSiteContent;
 
-    for (const baseUrl of this.restDatabaseUrls) {
+    {
       try {
         this.rawSiteContent = await firstValueFrom(this.http.get<any>(
-          `${baseUrl}/${this.resourceContext.scopedPath('siteContent')}.json`
+          this.contentUrl(scope)
         ).pipe(timeout(5000)));
         if (!this.rawSiteContent) {
           this.rawSiteContent = {};

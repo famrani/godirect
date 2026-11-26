@@ -39,7 +39,7 @@ export class ResourceDashboardComponent implements OnInit, OnDestroy {
   get listingOffline():boolean{return typeof window!=='undefined'&&new URLSearchParams(window.location.search).has('listing');}
   get isPlatformAdmin(){return this.assetAccess.isPlatformAdmin;}
   private requestedClientView=false;
-  get browseAsCustomer(){return (typeof window!=='undefined'&&window.location.hostname==='client.godirect.fr')||this.requestedClientView||(this.assetAccess.isManager&&this.assetAccess.viewMode==='client');}
+  get browseAsCustomer(){return (typeof window!=='undefined'&&window.location.pathname==='/locations')||this.requestedClientView||(this.assetAccess.isManager&&this.assetAccess.viewMode==='client');}
   set browseAsCustomer(value:boolean){this.requestedClientView=value;}
   browseRentals(){void this.router.navigate(['/'],{queryParams:{view:'rentals'},fragment:'rentals'});}
   showOwnerDashboard(){void this.assetAccess.switchView();}
@@ -111,7 +111,7 @@ export class ResourceDashboardComponent implements OnInit, OnDestroy {
   clearSearch(){this.selectedType='';this.location='';this.startDate='';this.endDate='';void this.search();}
   get appliedPeriod(){return this.appliedFilters;}
   get hasDates(){return !!this.appliedFilters.startAt&&!!this.appliedFilters.endAt;}
-  openResult(item:ResourceRegistryItem){if(item.siteUrl){const u=new URL(item.siteUrl);if(u.protocol==='https:'&&u.hostname.endsWith('.godirect.fr')){Object.entries(this.appliedFilters).forEach(([k,v])=>{if(v)u.searchParams.set(k,String(v));});window.location.assign(u.href);return;}}void this.router.navigate(['/',item.resourceType,item.resourceId,'home'],{queryParams:this.appliedFilters});}
+  openResult(item:ResourceRegistryItem){if(item.siteUrl){const u=new URL(item.siteUrl);if(u.protocol==='https:'&&u.hostname==='godirect.fr'){Object.entries(this.appliedFilters).forEach(([k,v])=>{if(v)u.searchParams.set(k,String(v));});window.location.assign(u.href);return;}}void this.router.navigate(['/',item.resourceType,item.resourceId,'home'],{queryParams:this.appliedFilters});}
   title(item:ResourceRegistryItem){return item.translations?.[this.lang]?.name||item.name;}
   description(item:ResourceRegistryItem){return item.translations?.[this.lang]?.headline||item.translations?.[this.lang]?.description||item.description;}
   priceUnit(unit:string){return this.d(unit==='night'?'night':unit==='hour'?'hour':'day');}

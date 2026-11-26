@@ -12,26 +12,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PlatformAssetComponent: () => (/* binding */ PlatformAssetComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _platform_asset_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./platform-asset.component.html?ngResource */ 84205);
 /* harmony import */ var _platform_asset_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./platform-asset.component.scss?ngResource */ 81251);
 /* harmony import */ var _platform_asset_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_platform_asset_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _owner_listings_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../owner-listings.component */ 22314);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _services_media_routes__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/media-routes */ 79906);
-/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/common/http */ 93262);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! rxjs */ 56196);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! rxjs */ 72354);
-/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
-/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
-/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../services/language.service */ 48756);
-/* harmony import */ var _platform_asset_text__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./platform-asset.text */ 82957);
+/* harmony import */ var _shared_admin_success_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../shared/admin-success.component */ 62834);
+/* harmony import */ var _calendar_asset_calendar_link_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../calendar/asset-calendar-link.component */ 84168);
+/* harmony import */ var _shared_listing_description_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../shared/listing-description.component */ 41644);
+/* harmony import */ var _owner_listings_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../owner-listings.component */ 22314);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _services_media_routes__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../services/media-routes */ 79906);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! rxjs */ 72354);
+/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../services/language.service */ 48756);
+/* harmony import */ var _platform_asset_text__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./platform-asset.text */ 82957);
+
+
+
 
 
 
@@ -56,6 +62,7 @@ let PlatformAssetComponent = class PlatformAssetComponent {
   access;
   language;
   route;
+  success = '';
   panel = 'summary';
   imageErrors = new Set();
   priceUnitKey() {
@@ -119,7 +126,7 @@ let PlatformAssetComponent = class PlatformAssetComponent {
     this.route = route;
   }
   t(key) {
-    return _platform_asset_text__WEBPACK_IMPORTED_MODULE_10__.PLATFORM_ASSET_TEXT[this.language.currentLanguage]?.[key] || _platform_asset_text__WEBPACK_IMPORTED_MODULE_10__.PLATFORM_ASSET_TEXT.en[key] || key;
+    return _platform_asset_text__WEBPACK_IMPORTED_MODULE_13__.PLATFORM_ASSET_TEXT[this.language.currentLanguage]?.[key] || _platform_asset_text__WEBPACK_IMPORTED_MODULE_13__.PLATFORM_ASSET_TEXT.en[key] || key;
   }
   ngOnInit() {
     this.subscription = this.route.paramMap.subscribe(() => {
@@ -142,7 +149,7 @@ let PlatformAssetComponent = class PlatformAssetComponent {
     return typeof value === 'number' ? 'number' : typeof value === 'boolean' ? 'checkbox' : 'text';
   }
   image(path) {
-    return (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_4__.mediaObjectUrl)(path);
+    return (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_7__.mediaObjectUrl)(path);
   }
   open(panel) {
     if (this.working) return;
@@ -186,7 +193,7 @@ let PlatformAssetComponent = class PlatformAssetComponent {
           form.append('subject', a.id);
           form.append('resourceType', a.assetType);
           form.append('resourceId', a.id);
-          const uploaded = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this2.http.post(_services_media_routes__WEBPACK_IMPORTED_MODULE_4__.MEDIA_ROUTES.upload, form, {
+          const uploaded = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_14__.firstValueFrom)(_this2.http.post(_services_media_routes__WEBPACK_IMPORTED_MODULE_7__.MEDIA_ROUTES.upload, form, {
             headers
           }));
           if (!uploaded?.path) throw Error('upload_failed');
@@ -209,7 +216,7 @@ let PlatformAssetComponent = class PlatformAssetComponent {
           'media/configured': true
         };
         for (const [key, value] of Object.entries(_this2.form.properties || {})) asset['properties/' + key] = value;
-        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this2.http.patch(endpoint, {
+        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_14__.firstValueFrom)(_this2.http.patch(endpoint, {
           asset,
           expectedRevision: revision
         }, {
@@ -235,7 +242,7 @@ let PlatformAssetComponent = class PlatformAssetComponent {
       const a = _this3.data.asset,
         seq = _this3.sequence;
       try {
-        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this3.http.post('/api/platform/admin/listings/' + [a.assetType, a.id].map(encodeURIComponent).join('/') + '/moderation', {
+        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_14__.firstValueFrom)(_this3.http.post('/api/platform/admin/listings/' + [a.assetType, a.id].map(encodeURIComponent).join('/') + '/moderation', {
           decision,
           revision: _this3.data.moderation.revision,
           reason: _this3.reason,
@@ -245,6 +252,10 @@ let PlatformAssetComponent = class PlatformAssetComponent {
           headers: yield _this3.auth.headers()
         }));
         if (seq !== _this3.sequence) return;
+        if (decision === 'approved') {
+          _this3.success = 'Annonce validée.';
+          return;
+        }
         yield _this3.refresh();
         _this3.message = _this3.x('Décision enregistrée.', 'Decision saved.');
       } catch (e) {
@@ -267,9 +278,9 @@ let PlatformAssetComponent = class PlatformAssetComponent {
         if (!['boat', 'car', 'property', 'parking', 'pool'].includes(type) || !/^[a-zA-Z0-9_-]+$/.test(id)) throw Error('invalid_scope');
         const uid = (yield _this4.auth.user()).uid;
         _this4.uid = uid;
-        const data = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this4.http.get('/api/platform/admin/assets/' + [type, id].map(encodeURIComponent).join('/'), {
+        const data = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_14__.firstValueFrom)(_this4.http.get('/api/platform/admin/assets/' + [type, id].map(encodeURIComponent).join('/'), {
           headers: yield _this4.auth.headers()
-        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_12__.timeout)(20000)));
+        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_15__.timeout)(20000)));
         if (sequence !== _this4.sequence || (yield _this4.auth.user()).uid !== uid) return;
         _this4.data = data;
         _this4.imageErrors.clear();
@@ -285,21 +296,21 @@ let PlatformAssetComponent = class PlatformAssetComponent {
     })();
   }
   static ctorParameters = () => [{
-    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_13__.HttpClient
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_16__.HttpClient
   }, {
-    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_7__.ReservationAuthService
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_10__.ReservationAuthService
   }, {
-    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_8__.AssetAccessService
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_11__.AssetAccessService
   }, {
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_9__.LanguageService
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_12__.LanguageService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_14__.ActivatedRoute
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_17__.ActivatedRoute
   }];
 };
-PlatformAssetComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_15__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_16__.Component)({
+PlatformAssetComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_18__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_19__.Component)({
   selector: 'app-platform-asset',
   standalone: true,
-  imports: [_owner_listings_component__WEBPACK_IMPORTED_MODULE_3__.OwnerListingsComponent, _angular_common__WEBPACK_IMPORTED_MODULE_17__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_18__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_19__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_6__.PlatformLayoutComponent, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_5__.SiteTextPipe],
+  imports: [_shared_admin_success_component__WEBPACK_IMPORTED_MODULE_3__.AdminSuccessComponent, _calendar_asset_calendar_link_component__WEBPACK_IMPORTED_MODULE_4__.AssetCalendarLinkComponent, _shared_listing_description_component__WEBPACK_IMPORTED_MODULE_5__.ListingDescriptionComponent, _owner_listings_component__WEBPACK_IMPORTED_MODULE_6__.OwnerListingsComponent, _angular_common__WEBPACK_IMPORTED_MODULE_20__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_21__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_22__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_9__.PlatformLayoutComponent, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_8__.SiteTextPipe],
   template: _platform_asset_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_platform_asset_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], PlatformAssetComponent);
@@ -411,6 +422,26 @@ nav {
     padding: 1rem;
   }
 }
+.asset-admin-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0;
+}
+
+.asset-admin-nav > a, .asset-admin-nav app-asset-calendar-link {
+  margin: 0;
+}
+
+.asset-admin-nav > a {
+  background: transparent;
+  color: #12566a;
+  padding: 0.5rem 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 label {
   display: block;
   margin: 1rem 0;
@@ -514,7 +545,7 @@ fieldset {
   .review-photos img {
     height: 240px;
   }
-}`, "",{"version":3,"sources":["webpack://./src/app/platform-admin/platform-asset.component.scss"],"names":[],"mappings":"AAAA;EAAmB,iBAAA;EAAiB,YAAA;EAAY,kBAAA;EAAkB,cAAA;AAKlE;;AALgF;EAAO,aAAA;EAAa,8BAAA;EAA8B,SAAA;AAWlI;;AAX2I;EAAO,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;EAAmB,eAAA;EAAe,cAAA;AAmB9N;;AAnB4O;EAAQ,aAAA;EAAa,mBAAA;EAAmB,kBAAA;AAyBpR;;AAzBsS;EAAO,cAAA;AA6B7S;;AA7B2T;EAAG,aAAA;EAAa,gCAAA;EAAgC,WAAA;AAmC3W;;AAnCqX;EAAG,SAAA;EAAS,uBAAA;AAwCjY;;AAxCwZ;EAAM,cAAA;EAAc,cAAA;AA6C5a;;AA7C0b;EAAS,aAAA;EAAa,SAAA;EAAS,eAAA;AAmDzd;;AAnDwe;EAAgB,cAAA;EAAc,iBAAA;AAwDtgB;;AAxDuhB;EAAa,qBAAA;EAAqB,mBAAA;EAAmB,WAAA;EAAW,SAAA;EAAS,kBAAA;EAAkB,oBAAA;EAAmB,8BAAA;EAA2B,qBAAA;EAAqB,eAAA;AAoErrB;;AApEosB;EAAgB,YAAA;AAwEptB;;AAxE+tB;EAAI,gBAAA;AA4EnuB;;AA5EmvB;EAAwB;IAAO,sBAAA;EAiFhxB;EAjFsyB;IAAG,0BAAA;IAA0B,WAAA;EAqFn0B;EArF60B;IAAG,qBAAA;EAwFh1B;EAxFo2B;IAAO,aAAA;EA2F32B;AACF;AA1FA;EAAM,cAAA;EAAc,cAAA;AA8FpB;;AA9FkC;EAAoC,cAAA;EAAc,WAAA;EAAW,sBAAA;EAAsB,eAAA;EAAc,yBAAA;EAAyB,kBAAA;EAAkB,aAAA;AAwG9K;;AAxG2L;EAAS,SAAA;EAAS,UAAA;EAAU,YAAA;AA8GvN;;AA9GmO;EAAQ,aAAA;EAAa,2DAAA;EAAyD,SAAA;AAoHjT;;AApH0T;EAAQ,aAAA;EAAa,eAAA;EAAe,SAAA;AA0H9V;;AA1HuW;EAAY,cAAA;EAAc,YAAA;EAAY,eAAA;EAAe,aAAA;EAAa,iBAAA;EAAiB,mBAAA;AAmI1b;;AAnI6c;EAAa,qBAAA;AAuI1d;;AArIA;EAAmB,kBAAA;AAyInB;;AAzIqC;EAA6B,gBAAA;EAAgB,uBAAA;AA8IlF;;AA9IyG;EAAc,aAAA;EAAa,mBAAA;EAAmB,mBAAA;EAAmB,gBAAA;AAqJ1K;;AArJ0L;EAAgB,iBAAA;EAAiB,kBAAA;AA0J3N;;AA1J4O;EAAe,aAAA;EAAa,gDAAA;EAA8C,SAAA;AAgKtT;;AAhK+T;EAAsB,SAAA;EAAS,yBAAA;EAAyB,eAAA;EAAc,mBAAA;AAuKrY;;AAvKwZ;EAAmB,cAAA;EAAc,WAAA;EAAW,aAAA;EAAa,mBAAA;EAAmB,mBAAA;AA+Kpe;;AA/Kuf;EAA0B,iBAAA;AAmLjhB;;AAnLiiB;EAAiB,cAAA;AAuLljB;;AAvLgkB;EAAwB;IAAe,0BAAA;EA4LrmB;EA5L+nB;IAAmB,aAAA;EA+LlpB;AACF","sourcesContent":[".asset-admin-shell{max-width:1100px;margin:auto;padding:2rem 1rem;color:#153b46}header{display:flex;justify-content:space-between;gap:1rem}.panel{background:white;border:1px solid #cbdde1;border-radius:16px;padding:1.5rem;margin:1rem 0}.notice{padding:1rem;background:#edf5f6;border-radius:8px}.error{color:#b42318}dl{display:grid;grid-template-columns:10rem 1fr;gap:.7rem}dd{margin:0;overflow-wrap:anywhere}small{display:block;color:#567078}.metrics{display:flex;gap:2rem;flex-wrap:wrap}.metrics strong{display:block;font-size:1.8rem}button,nav a{display:inline-block;background:#12566a;color:#fff;border:0;border-radius:8px;padding:.7rem 1rem;margin:.4rem .5rem .4rem 0;text-decoration:none;cursor:pointer}button:disabled{opacity:.5}nav{margin-top:1rem}@media(max-width:650px){header{flex-direction:column}dl{grid-template-columns:1fr;gap:.3rem}dd{margin-bottom:.8rem}.panel{padding:1rem}}\n\nlabel{display:block;margin:1rem 0}input:not([type=checkbox]),textarea{display:block;width:100%;box-sizing:border-box;padding:.7rem;border:1px solid #aac3cd;border-radius:6px;font:inherit}fieldset{border:0;padding:0;min-width:0}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}.photos{display:flex;flex-wrap:wrap;gap:1rem}.photos img{display:block;width:220px;max-width:100%;height:160px;object-fit:cover;border-radius:10px}.description{white-space:pre-wrap}\n\n.listing-review h3{font-size:1.35rem}.listing-review .description{line-height:1.7;overflow-wrap:anywhere}.review-price{padding:1rem;background:#edf5f6;border-radius:10px;margin:1.5rem 0}.review-price p{font-size:1.5rem;margin:.5rem 0 0}.review-photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.review-photos figure{margin:0;border:1px solid #d2e0e4;padding:.6rem;border-radius:10px}.review-photos img{display:block;width:100%;height:300px;object-fit:contain;background:#f5f7f8}.review-photos figcaption{padding:.5rem 0}.review-photos a{color:inherit}@media(max-width:650px){.review-photos{grid-template-columns:1fr}.review-photos img{height:240px}}\n"],"sourceRoot":""}]);
+}`, "",{"version":3,"sources":["webpack://./src/app/platform-admin/platform-asset.component.scss"],"names":[],"mappings":"AAAA;EAAmB,iBAAA;EAAiB,YAAA;EAAY,kBAAA;EAAkB,cAAA;AAKlE;;AALgF;EAAO,aAAA;EAAa,8BAAA;EAA8B,SAAA;AAWlI;;AAX2I;EAAO,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;EAAmB,eAAA;EAAe,cAAA;AAmB9N;;AAnB4O;EAAQ,aAAA;EAAa,mBAAA;EAAmB,kBAAA;AAyBpR;;AAzBsS;EAAO,cAAA;AA6B7S;;AA7B2T;EAAG,aAAA;EAAa,gCAAA;EAAgC,WAAA;AAmC3W;;AAnCqX;EAAG,SAAA;EAAS,uBAAA;AAwCjY;;AAxCwZ;EAAM,cAAA;EAAc,cAAA;AA6C5a;;AA7C0b;EAAS,aAAA;EAAa,SAAA;EAAS,eAAA;AAmDzd;;AAnDwe;EAAgB,cAAA;EAAc,iBAAA;AAwDtgB;;AAxDuhB;EAAa,qBAAA;EAAqB,mBAAA;EAAmB,WAAA;EAAW,SAAA;EAAS,kBAAA;EAAkB,oBAAA;EAAmB,8BAAA;EAA2B,qBAAA;EAAqB,eAAA;AAoErrB;;AApEosB;EAAgB,YAAA;AAwEptB;;AAxE+tB;EAAI,gBAAA;AA4EnuB;;AA5EmvB;EAAwB;IAAO,sBAAA;EAiFhxB;EAjFsyB;IAAG,0BAAA;IAA0B,WAAA;EAqFn0B;EArF60B;IAAG,qBAAA;EAwFh1B;EAxFo2B;IAAO,aAAA;EA2F32B;AACF;AA3FA;EAAiB,aAAA;EAAa,mBAAA;EAAmB,SAAA;EAAS,eAAA;EAAe,aAAA;AAkGzE;;AAlGsF;EAA4D,SAAA;AAsGlJ;;AAtG2J;EAAmB,uBAAA;EAAuB,cAAA;EAAc,iBAAA;EAAgB,0BAAA;EAA0B,0BAAA;AA8G7P;;AA5GA;EAAM,cAAA;EAAc,cAAA;AAiHpB;;AAjHkC;EAAoC,cAAA;EAAc,WAAA;EAAW,sBAAA;EAAsB,eAAA;EAAc,yBAAA;EAAyB,kBAAA;EAAkB,aAAA;AA2H9K;;AA3H2L;EAAS,SAAA;EAAS,UAAA;EAAU,YAAA;AAiIvN;;AAjImO;EAAQ,aAAA;EAAa,2DAAA;EAAyD,SAAA;AAuIjT;;AAvI0T;EAAQ,aAAA;EAAa,eAAA;EAAe,SAAA;AA6I9V;;AA7IuW;EAAY,cAAA;EAAc,YAAA;EAAY,eAAA;EAAe,aAAA;EAAa,iBAAA;EAAiB,mBAAA;AAsJ1b;;AAtJ6c;EAAa,qBAAA;AA0J1d;;AAxJA;EAAmB,kBAAA;AA4JnB;;AA5JqC;EAA6B,gBAAA;EAAgB,uBAAA;AAiKlF;;AAjKyG;EAAc,aAAA;EAAa,mBAAA;EAAmB,mBAAA;EAAmB,gBAAA;AAwK1K;;AAxK0L;EAAgB,iBAAA;EAAiB,kBAAA;AA6K3N;;AA7K4O;EAAe,aAAA;EAAa,gDAAA;EAA8C,SAAA;AAmLtT;;AAnL+T;EAAsB,SAAA;EAAS,yBAAA;EAAyB,eAAA;EAAc,mBAAA;AA0LrY;;AA1LwZ;EAAmB,cAAA;EAAc,WAAA;EAAW,aAAA;EAAa,mBAAA;EAAmB,mBAAA;AAkMpe;;AAlMuf;EAA0B,iBAAA;AAsMjhB;;AAtMiiB;EAAiB,cAAA;AA0MljB;;AA1MgkB;EAAwB;IAAe,0BAAA;EA+MrmB;EA/M+nB;IAAmB,aAAA;EAkNlpB;AACF","sourcesContent":[".asset-admin-shell{max-width:1100px;margin:auto;padding:2rem 1rem;color:#153b46}header{display:flex;justify-content:space-between;gap:1rem}.panel{background:white;border:1px solid #cbdde1;border-radius:16px;padding:1.5rem;margin:1rem 0}.notice{padding:1rem;background:#edf5f6;border-radius:8px}.error{color:#b42318}dl{display:grid;grid-template-columns:10rem 1fr;gap:.7rem}dd{margin:0;overflow-wrap:anywhere}small{display:block;color:#567078}.metrics{display:flex;gap:2rem;flex-wrap:wrap}.metrics strong{display:block;font-size:1.8rem}button,nav a{display:inline-block;background:#12566a;color:#fff;border:0;border-radius:8px;padding:.7rem 1rem;margin:.4rem .5rem .4rem 0;text-decoration:none;cursor:pointer}button:disabled{opacity:.5}nav{margin-top:1rem}@media(max-width:650px){header{flex-direction:column}dl{grid-template-columns:1fr;gap:.3rem}dd{margin-bottom:.8rem}.panel{padding:1rem}}\n.asset-admin-nav{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:0}.asset-admin-nav>a,.asset-admin-nav app-asset-calendar-link{margin:0}.asset-admin-nav>a{background:transparent;color:#12566a;padding:.5rem 0;text-decoration:underline;text-underline-offset:3px}\n\nlabel{display:block;margin:1rem 0}input:not([type=checkbox]),textarea{display:block;width:100%;box-sizing:border-box;padding:.7rem;border:1px solid #aac3cd;border-radius:6px;font:inherit}fieldset{border:0;padding:0;min-width:0}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}.photos{display:flex;flex-wrap:wrap;gap:1rem}.photos img{display:block;width:220px;max-width:100%;height:160px;object-fit:cover;border-radius:10px}.description{white-space:pre-wrap}\n\n.listing-review h3{font-size:1.35rem}.listing-review .description{line-height:1.7;overflow-wrap:anywhere}.review-price{padding:1rem;background:#edf5f6;border-radius:10px;margin:1.5rem 0}.review-price p{font-size:1.5rem;margin:.5rem 0 0}.review-photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.review-photos figure{margin:0;border:1px solid #d2e0e4;padding:.6rem;border-radius:10px}.review-photos img{display:block;width:100%;height:300px;object-fit:contain;background:#f5f7f8}.review-photos figcaption{padding:.5rem 0}.review-photos a{color:inherit}@media(max-width:650px){.review-photos{grid-template-columns:1fr}.review-photos img{height:240px}}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -596,7 +627,7 @@ const PLATFORM_ASSET_TEXT = {
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<app-platform-layout><main class=\"asset-admin-shell\"><header><div><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'assets'}\">← {{t('back')}}</a><h1>{{x('Modérer l’annonce','Moderate listing')}}</h1></div><button (click)=\"refresh()\" [disabled]=\"loading||working\">{{t('refresh')}}</button></header><p *ngIf=\"error\" role=\"alert\" class=\"error\">{{error}}</p>\n<p *ngIf=\"message\" role=\"status\">{{message}}</p><section *ngIf=\"data && access.authenticatedUid===uid && access.isPlatformAdmin\" class=\"panel\"><h2>{{data.asset.name}}</h2><p class=\"notice\">{{t('notice')}}</p><p *ngIf=\"data.asset.archived\" class=\"notice\">{{t('archived')}}</p><dl><dt>{{t('owner')}}</dt><dd><strong>{{data.owner.name}}</strong><small>{{data.owner.email}}</small></dd><dt>{{t('type')}}</dt><dd>{{data.asset.assetType}}</dd><dt>{{t('prefix')}}</dt><dd>{{data.asset.prefix}}.godirect.fr</dd><dt>{{t('location')}}</dt><dd>{{data.asset.location?.city}} {{data.asset.location?.country}}</dd><dt>{{t('price')}}</dt><dd>{{data.asset.pricing?.basePrice|number:'1.2-2'}} {{data.asset.pricing?.currency}} / {{data.asset.pricing?.pricingUnit}}</dd><dt>{{t('moderation')}}</dt><dd>{{data.moderation.status}}</dd><dt>{{t('subscription')}}</dt><dd>{{data.subscription.status}}<small>{{t('expiry')}} : {{data.subscription.paidUntil?(data.subscription.paidUntil*1000|date:'dd/MM/yyyy'):'—'}}</small></dd></dl>\n\n<p *ngIf=\"data.documents\">{{ 'ui.documents.title' | siteText }} : {{ ('ui.documents.status_'+data.documents.status) | siteText }} · {{data.documents.validated}} / {{data.documents.total}}</p><nav><a [routerLink]=\"['/platform/admin/documents',data.asset.assetType,data.asset.id]\">{{x('Valider les documents','Review documents')}}</a><button (click)=\"review()\">{{x('Valider l’annonce','Review listing')}}</button><button *ngIf=\"data.permissions.content\" (click)=\"open('edit')\">{{x('Modifier l’annonce','Edit listing')}}</button><a *ngIf=\"!data.asset.archived\" [routerLink]=\"link()\">{{x('Voir le site client','View customer site')}}</a></nav><p>{{x('Administration : justificatifs, annonce et publication. La gestion des réservations reste au propriétaire ou à son concierge habilité.','Administration: documents, listing and publication. Booking management remains with the owner or their authorized concierge.')}}</p></section>\n<ng-container *ngIf=\"data && access.authenticatedUid===uid && access.isPlatformAdmin && !data.asset.archived\">\n<section *ngIf=\"panel!=='edit'\" class=\"panel listing-review\" id=\"listing-review\" aria-labelledby=\"review-title\"><h2 id=\"review-title\">{{x('Annonce à vérifier','Listing to review')}}</h2><h3>{{data.asset.name}}</h3><p class=\"description\">{{data.asset.description||x('Aucune description renseignée.','No description provided.')}}</p><div class=\"review-price\"><strong>{{t('price')}}</strong><p>{{data.asset.pricing?.basePrice|number:'1.2-2'}} {{data.asset.pricing?.currency||'EUR'}} / {{priceUnitKey()|siteText:priceUnitFallback()}}</p></div><h3>{{x('Photos','Photos')}} ({{assetPhotos().length}})</h3><p *ngIf=\"!assetPhotos().length\">{{x('Aucune photo ajoutée à cette annonce.','No photos have been added to this listing.')}}</p><p *ngIf=\"assetPhotos().length\">{{x('Cliquez sur une photo pour l’ouvrir en grand.','Click a photo to open it at full size.')}}</p><div class=\"review-photos\"><figure *ngFor=\"let photo of assetPhotos();let i=index\"><a [href]=\"image(photo)\" target=\"_blank\" rel=\"noopener\"><img [src]=\"image(photo)\" [alt]=\"data.asset.name+' — '+(i+1)\" loading=\"lazy\" (error)=\"imageErrors.add(photo)\"><figcaption>{{x('Photo','Photo')}} {{i+1}}</figcaption></a><p class=\"error\" *ngIf=\"imageErrors.has(photo)\">{{x('Impossible de charger cette photo.','Could not load this photo.')}}</p></figure></div></section>\n<app-owner-listings *ngIf=\"panel==='edit'\" [adminScope]=\"editScope\" (editorClosed)=\"open('summary')\" (listingSaved)=\"onListingSaved()\"></app-owner-listings>\n<section class=\"panel\" *ngIf=\"panel==='summary'\"><h2>{{x('Modérer les textes et les images','Review text and images')}}</h2><p>{{x('Examinez le titre, la description, les photos et le prix affichés ci-dessus avant de prendre votre décision.','Review the title, description, photos and price above before making your decision.')}}</p><label>{{x('Observations (obligatoires pour refuser)','Comments (required for rejection)')}}<textarea [(ngModel)]=\"reason\" maxlength=\"2000\" [disabled]=\"working\"></textarea></label><label><input type=\"checkbox\" [(ngModel)]=\"publish\" [disabled]=\"working||!data.documents?.approved||!data.subscription.entitled\">{{x('Publier aussi l’annonce après validation','Also publish the listing after approval')}}</label><p *ngIf=\"!data.documents?.approved||!data.subscription.entitled\">{{x('Publication : justificatifs validés ou dispensés et abonnement actif requis. La validation seule ne publie pas un bien hors ligne.','Publication requires approved or exempted documents and an active subscription. Approval alone does not publish an offline asset.')}}</p><button (click)=\"decide('approved')\" [disabled]=\"working\">{{x('Valider l’annonce','Approve listing')}}</button><button (click)=\"decide('rejected')\" [disabled]=\"working||!reason.trim()\">{{x('Refuser l’annonce','Reject listing')}}</button></section></ng-container></main></app-platform-layout>\n";
+module.exports = "<app-platform-layout><main class=\"asset-admin-shell\"><header><div><nav class=\"asset-admin-nav\" [attr.aria-label]=\"x('Navigation du bien','Asset navigation')\"><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'assets'}\">← {{t('back')}}</a><app-asset-calendar-link *ngIf=\"data?.asset\" [type]=\"data.asset.assetType\" [assetId]=\"data.asset.id\"></app-asset-calendar-link></nav><h1>{{x('Modérer l’annonce','Moderate listing')}}</h1></div><button (click)=\"refresh()\" [disabled]=\"loading||working\">{{t('refresh')}}</button></header><p *ngIf=\"error\" role=\"alert\" class=\"error\">{{error}}</p>\n<p *ngIf=\"message\" role=\"status\">{{message}}</p><section *ngIf=\"data && access.authenticatedUid===uid && access.isPlatformAdmin\" class=\"panel\"><h2>{{data.asset.name}}</h2><p class=\"notice\">{{t('notice')}}</p><p *ngIf=\"data.asset.archived\" class=\"notice\">{{t('archived')}}</p><dl><dt>{{t('owner')}}</dt><dd><strong>{{data.owner.name}}</strong><small>{{data.owner.email}}</small></dd><dt>{{t('type')}}</dt><dd>{{data.asset.assetType}}</dd><dt>{{t('prefix')}}</dt><dd>godirect.fr/b/{{data.asset.prefix}}</dd><dt>{{t('location')}}</dt><dd>{{data.asset.location?.city}} {{data.asset.location?.country}}</dd><dt>{{t('price')}}</dt><dd>{{data.asset.pricing?.basePrice|number:'1.2-2'}} {{data.asset.pricing?.currency}} / {{data.asset.pricing?.pricingUnit}}</dd><dt>{{t('moderation')}}</dt><dd>{{data.moderation.status}}</dd><dt>{{t('subscription')}}</dt><dd>{{data.subscription.status}}<small>{{t('expiry')}} : {{data.subscription.paidUntil?(data.subscription.paidUntil*1000|date:'dd/MM/yyyy'):'—'}}</small></dd></dl>\n\n<p *ngIf=\"data.documents\">{{ 'ui.documents.title' | siteText }} : {{ ('ui.documents.status_'+data.documents.status) | siteText }} · {{data.documents.validated}} / {{data.documents.total}}</p><nav><a [routerLink]=\"['/platform/admin/documents',data.asset.assetType,data.asset.id]\">{{x('Valider les documents','Review documents')}}</a><button (click)=\"review()\">{{x('Valider l’annonce','Review listing')}}</button><button *ngIf=\"data.permissions.content\" (click)=\"open('edit')\">{{x('Modifier l’annonce','Edit listing')}}</button><a *ngIf=\"!data.asset.archived\" [routerLink]=\"link()\">{{x('Voir le site client','View customer site')}}</a></nav><p>{{x('Administration : justificatifs, annonce et publication. La gestion des réservations reste au propriétaire ou à son concierge habilité.','Administration: documents, listing and publication. Booking management remains with the owner or their authorized concierge.')}}</p></section>\n<ng-container *ngIf=\"data && access.authenticatedUid===uid && access.isPlatformAdmin && !data.asset.archived\">\n<section *ngIf=\"panel!=='edit'\" class=\"panel listing-review\" id=\"listing-review\" aria-labelledby=\"review-title\"><h2 id=\"review-title\">{{x('Annonce à vérifier','Listing to review')}}</h2><h3>{{data.asset.name}}</h3><app-listing-description [text]=\"data.asset.description||x('Aucune description renseignée.','No description provided.')\"></app-listing-description><div class=\"review-price\"><strong>{{t('price')}}</strong><p>{{data.asset.pricing?.basePrice|number:'1.2-2'}} {{data.asset.pricing?.currency||'EUR'}} / {{priceUnitKey()|siteText:priceUnitFallback()}}</p></div><h3>{{x('Photos','Photos')}} ({{assetPhotos().length}})</h3><p *ngIf=\"!assetPhotos().length\">{{x('Aucune photo ajoutée à cette annonce.','No photos have been added to this listing.')}}</p><p *ngIf=\"assetPhotos().length\">{{x('Cliquez sur une photo pour l’ouvrir en grand.','Click a photo to open it at full size.')}}</p><div class=\"review-photos\"><figure *ngFor=\"let photo of assetPhotos();let i=index\"><a [href]=\"image(photo)\" target=\"_blank\" rel=\"noopener\"><img [src]=\"image(photo)\" [alt]=\"data.asset.name+' — '+(i+1)\" loading=\"lazy\" (error)=\"imageErrors.add(photo)\"><figcaption>{{x('Photo','Photo')}} {{i+1}}</figcaption></a><p class=\"error\" *ngIf=\"imageErrors.has(photo)\">{{x('Impossible de charger cette photo.','Could not load this photo.')}}</p></figure></div></section>\n<app-owner-listings *ngIf=\"panel==='edit'\" [adminScope]=\"editScope\" (editorClosed)=\"open('summary')\" (listingSaved)=\"onListingSaved()\"></app-owner-listings>\n<section class=\"panel\" *ngIf=\"panel==='summary'\"><h2>{{x('Modérer les textes et les images','Review text and images')}}</h2><p>{{x('Examinez le titre, la description, les photos et le prix affichés ci-dessus avant de prendre votre décision.','Review the title, description, photos and price above before making your decision.')}}</p><label>{{x('Observations (obligatoires pour refuser)','Comments (required for rejection)')}}<textarea [(ngModel)]=\"reason\" maxlength=\"2000\" [disabled]=\"working\"></textarea></label><label><input type=\"checkbox\" [(ngModel)]=\"publish\" [disabled]=\"working||!data.documents?.approved||!data.subscription.entitled\">{{x('Publier aussi l’annonce après validation','Also publish the listing after approval')}}</label><p *ngIf=\"!data.documents?.approved||!data.subscription.entitled\">{{x('Publication : justificatifs validés ou dispensés et abonnement actif requis. La validation seule ne publie pas un bien hors ligne.','Publication requires approved or exempted documents and an active subscription. Approval alone does not publish an offline asset.')}}</p><button (click)=\"decide('approved')\" [disabled]=\"working\">{{x('Valider l’annonce','Approve listing')}}</button><button (click)=\"decide('rejected')\" [disabled]=\"working||!reason.trim()\">{{x('Refuser l’annonce','Reject listing')}}</button></section></ng-container></main></app-platform-layout>\n\n<app-admin-success (dismissed)=\"success=''\" *ngIf=\"success\" [message]=\"success\"></app-admin-success>\n";
 
 /***/ })
 

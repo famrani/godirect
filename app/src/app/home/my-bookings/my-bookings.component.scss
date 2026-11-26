@@ -2,3 +2,17 @@
 
 /* Keep status badges independent of framework progress-bar styles. */
 .reservation-status-steps{height:auto;min-height:0;overflow:visible;background:transparent;line-height:1.5;align-items:flex-start}.reservation-status-steps>span{display:inline-block;max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;line-height:1.5;flex:0 1 auto}
+
+.gd-short{display:none!important}
+@media(max-width:600px){
+ .customer-bookings{margin:12px auto;padding:10px 12px;font-size:14px}
+ h1{font-size:23px}h2{font-size:18px}h3{font-size:16px}
+ .amounts{gap:7px}
+ .amounts>div{min-width:0;padding:8px}
+ .amounts span,.amounts small{font-size:12px;line-height:1.3}
+ .amounts strong{font-size:16px;line-height:1.25}
+ .actions{gap:6px}
+ .actions button{font-size:13px;line-height:1.25;padding:6px 9px;min-height:44px}
+ .gd-full{display:none!important}
+ .gd-short{display:inline!important}
+}

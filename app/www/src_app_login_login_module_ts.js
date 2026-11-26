@@ -12,15 +12,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   LoginComponent: () => (/* binding */ LoginComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _login_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./login.component.html?ngResource */ 32582);
 /* harmony import */ var _login_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./login.component.css?ngResource */ 26603);
 /* harmony import */ var _login_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_login_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! godigital-lib */ 22464);
-/* harmony import */ var _login_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../login.service */ 89652);
+/* harmony import */ var _services_site_return__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/site-return */ 50831);
+/* harmony import */ var _services_management_entry_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/management-entry.service */ 32356);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../services/reservation-auth.service */ 46709);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var _services_portal_policy__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../services/portal-policy */ 6636);
+/* harmony import */ var _services_google_session_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../services/google-session.service */ 98716);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var _login_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../login.service */ 89652);
+
+
+
+
+
+
 
 
 
@@ -40,6 +52,10 @@ let LoginComponent = class LoginComponent {
   utilSvc;
   storeDb;
   loginSvc;
+  entry;
+  session;
+  http;
+  googleSession;
   loginForm;
   sending = false;
   showPassword = false;
@@ -55,7 +71,7 @@ let LoginComponent = class LoginComponent {
   accountCreatedMessage = '';
   // redirection
   redirectTo = null;
-  constructor(fb, users, router, route, utilSvc, storeDb, loginSvc) {
+  constructor(fb, users, router, route, utilSvc, storeDb, loginSvc, entry, session, http, googleSession) {
     this.fb = fb;
     this.users = users;
     this.router = router;
@@ -63,15 +79,37 @@ let LoginComponent = class LoginComponent {
     this.utilSvc = utilSvc;
     this.storeDb = storeDb;
     this.loginSvc = loginSvc;
+    this.entry = entry;
+    this.session = session;
+    this.http = http;
+    this.googleSession = googleSession;
     this.loginForm = this.fb.group({
-      email: [localStorage.getItem('rememberEmail') || '', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.email]],
-      password: [localStorage.getItem('rememberPassword') || '', [_angular_forms__WEBPACK_IMPORTED_MODULE_4__.Validators.required]],
+      email: [localStorage.getItem('rememberEmail') || '', [_angular_forms__WEBPACK_IMPORTED_MODULE_9__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_9__.Validators.email]],
+      password: [localStorage.getItem('rememberPassword') || '', [_angular_forms__WEBPACK_IMPORTED_MODULE_9__.Validators.required]],
       rememberme: [localStorage.getItem('rememberLogin') === 'true' || !!localStorage.getItem('rememberEmail')]
     });
     this.redirectTo = this.route.snapshot.queryParamMap.get('returnUrl') || this.route.snapshot.queryParamMap.get('redirect') || localStorage.getItem('redirectAfterLogin') || sessionStorage.getItem('redirectAfterLogin');
     if (this.route.snapshot.queryParamMap.get('created') === 'true') {
       this.accountCreatedMessage = 'Account created successfully. Please check your inbox and your Junk/Spam folder for the password setup/reset email before signing in.';
     }
+  }
+  ngOnInit() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const returnUrl = _this.route.snapshot.queryParamMap.get('returnUrl');
+      if (!returnUrl && _this.route.snapshot.queryParamMap.has('created')) return;
+      try {
+        yield _this.session.user();
+      } catch {
+        return;
+      }
+      if (_this.sending || !location.pathname.replace(/\/$/, '').endsWith('/account/login')) return;
+      try {
+        yield _this.postLoginRedirect();
+      } catch (e) {
+        _this.openError(_this.normalizeAuthError(e));
+      }
+    })();
   }
   get f() {
     return this.loginForm.controls;
@@ -109,21 +147,31 @@ let LoginComponent = class LoginComponent {
     return rawMessage || 'Authentication failed. Please try again.';
   }
   postLoginRedirect() {
-    const target = this.redirectTo && this.redirectTo.startsWith('/') ? this.redirectTo : '/';
-    try {
-      localStorage.removeItem('redirectAfterLogin');
-      sessionStorage.removeItem('redirectAfterLogin');
-    } catch {}
-    this.router.navigateByUrl(target);
+    var _this2 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const portal = (0,_services_portal_policy__WEBPACK_IMPORTED_MODULE_6__.portalFor)(window.location.hostname);
+      const fallback = (0,_services_portal_policy__WEBPACK_IMPORTED_MODULE_6__.dedicatedPortalHome)(window.location.hostname) ?? (portal === 'owner' ? '/espaces' : '/');
+      const requested = _this2.route.snapshot.queryParamMap.get('returnUrl') || (portal === 'asset' ? _this2.route.snapshot.queryParamMap.get('redirect') || '' : _this2.redirectTo);
+      const target = portal === 'admin' && !/^\/(?:platform\/admin(?:[/?#]|$)|admin-access(?:[/?#]|$))/.test(requested || '') ? fallback : (0,_services_site_return__WEBPACK_IMPORTED_MODULE_3__.siteReturn)(requested, window.location.hostname, fallback);
+      try {
+        localStorage.removeItem('redirectAfterLogin');
+        sessionStorage.removeItem('redirectAfterLogin');
+      } catch {}
+      yield _this2.session.user();
+      const navigated = yield _this2.router.navigateByUrl(target, {
+        replaceUrl: true
+      });
+      if (!navigated && location.pathname === '/account/login') throw new Error('Connexion réussie, mais impossible d’ouvrir votre espace. Réessayez.');
+    })();
   }
   loginWithEmail() {
-    var _this = this;
+    var _this3 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       let status, user;
-      if (_this.loginForm.invalid) return;
-      _this.sending = true;
+      if (_this3.loginForm.invalid) return;
+      _this3.sending = true;
       try {
-        const v = _this.loginForm.value;
+        const v = _this3.loginForm.value;
         const rememberMe = !!v.rememberme;
         // Remember me: keep credentials available for the next visit when selected.
         // This is intentionally explicit because the user wants the password restored too.
@@ -137,12 +185,12 @@ let LoginComponent = class LoginComponent {
           localStorage.removeItem('rememberPassword');
           localStorage.removeItem('loggedUser');
         }
-        [status, user] = yield _this.withTimeout(_this.loginSvc.localUtilsSvc.processLogin(v.email, v.password, undefined), 20000, 'Login is taking too long. Please check your connection and try again.');
+        [status, user] = yield _this3.withTimeout(_this3.loginSvc.localUtilsSvc.processLogin(v.email, v.password, undefined), 20000, 'Login is taking too long. Please check your connection and try again.');
         if (!user) {
           throw new Error('Authentication failed. Please try again.');
         }
-        _this.loginSvc.wnGuest = user;
-        _this.loginSvc.mainSvc.setLoggedUser(user);
+        _this3.loginSvc.wnGuest = user;
+        _this3.loginSvc.mainSvc.setLoggedUser(user);
         try {
           sessionStorage.setItem('loggedUser', JSON.stringify(user));
           if (rememberMe) {
@@ -153,53 +201,38 @@ let LoginComponent = class LoginComponent {
         } catch {}
         // OPTION: you can fetch the user profile here if you need local state
         // const profile = await this.users.loadProfile(); // depends on your lib
-        _this.postLoginRedirect();
+        yield _this3.postLoginRedirect();
       } catch (e) {
-        const message = _this.normalizeAuthError(e);
+        const message = _this3.normalizeAuthError(e);
         if (message === 'EMAIL_NOT_VERIFIED') {
           $('#emailNotVerifiedModal').modal('show');
         } else {
-          _this.openError(message, 'Connexion impossible');
+          _this3.openError(message, 'Connexion impossible');
         }
       } finally {
-        _this.sending = false;
+        _this3.sending = false;
       }
     })();
   }
   loginWithGoogle() {
-    var _this2 = this;
+    var _this4 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       // Keep the Firebase popup promise directly attached to the user's click.
       // Do NOT wrap popup authentication in an application timeout: choosing a
       // Google account can legitimately take more than 20 seconds and racing the
       // popup promise can leave Firebase's popup lifecycle in an inconsistent state.
-      if (_this2.sending) return;
-      _this2.sending = true;
-      _this2.closeError();
+      if (_this4.sending) return;
+      _this4.sending = true;
+      _this4.closeError();
       try {
-        const user = yield _this2.users.signInWithGoogleAndLoadProfile();
-        // (Optional) ensure we have an RTDB profile doc (in case first-time Google login)
-        // If your UsersService already upserts, you can remove this block:
+        const user = yield _this4.googleSession.signIn();
+        _this4.loginSvc.wnGuest = user;
+        _this4.loginSvc.mainSvc.setLoggedUser(user);
         try {
-          const uid = user.userId;
-          if (uid) {
-            const now = Date.now();
-            const patch = {
-              userId: uid,
-              email: user.email || '',
-              displayName: user.displayName || '',
-              photoURL: user.photoURL || '',
-              emailverified: !!user.emailverified,
-              modifiedTS: now
-            };
-            yield _this2.storeDb.partialUpdateObject(_this2.utilSvc.backendFBstoreId, _this2.utilSvc.mdb, godigital_lib__WEBPACK_IMPORTED_MODULE_5__.OBJECTNAME.bnUsers, patch, uid);
-            // reload full profile if needed
-            const full = yield _this2.storeDb.getObject(_this2.utilSvc.backendFBstoreId, _this2.utilSvc.mdb, godigital_lib__WEBPACK_IMPORTED_MODULE_5__.OBJECTNAME.bnUsers, uid);
-            _this2.loginSvc.wnGuest = full;
-            _this2.loginSvc.mainSvc.setLoggedUser(full);
-          }
-        } catch {/* best effort upsert */}
-        _this2.postLoginRedirect();
+          sessionStorage.setItem('loggedUser', JSON.stringify(user));
+          if (localStorage.getItem('rememberLogin') === 'true') localStorage.setItem('loggedUser', JSON.stringify(user));else localStorage.removeItem('loggedUser');
+        } catch {}
+        yield _this4.postLoginRedirect();
       } catch (e) {
         const code = String(e?.code || '');
         console.error('[Google Auth]', {
@@ -208,20 +241,20 @@ let LoginComponent = class LoginComponent {
           error: e
         });
         if (code.includes('auth/popup-closed-by-user')) {
-          _this2.openError('The Google sign-in window closed before Firebase received the result. Please try again and keep the Google window open until it returns to GoDirect. If it closes immediately, verify that this site domain is listed in Firebase Authentication > Settings > Authorized domains.', 'Google sign-in interrupted');
+          _this4.openError('The Google sign-in window closed before Firebase received the result. Please try again and keep the Google window open until it returns to GoDirect. If it closes immediately, verify that this site domain is listed in Firebase Authentication > Settings > Authorized domains.', 'Google sign-in interrupted');
         } else if (code.includes('auth/popup-blocked')) {
-          _this2.openError('Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.', 'Google pop-up blocked');
+          _this4.openError('Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.', 'Google pop-up blocked');
         } else if (code.includes('auth/unauthorized-domain')) {
-          _this2.openError(`This domain (${window.location.hostname}) is not authorized for Firebase Authentication. Add it in Firebase Authentication > Settings > Authorized domains.`, 'Unauthorized domain');
+          _this4.openError(`This domain (${window.location.hostname}) is not authorized for Firebase Authentication. Add it in Firebase Authentication > Settings > Authorized domains.`, 'Unauthorized domain');
         } else if (code.includes('auth/operation-not-allowed')) {
-          _this2.openError('Google authentication is not enabled for this Firebase project. Enable Google in Firebase Authentication > Sign-in method.', 'Google authentication disabled');
+          _this4.openError('Google authentication is not enabled for this Firebase project. Enable Google in Firebase Authentication > Sign-in method.', 'Google authentication disabled');
         } else if (code.includes('auth/cancelled-popup-request')) {
-          _this2.openError('Another Google sign-in request was already in progress. Please try once more.', 'Google sign-in interrupted');
+          _this4.openError('Another Google sign-in request was already in progress. Please try once more.', 'Google sign-in interrupted');
         } else {
-          _this2.openError(`${e?.message || 'Google sign-in failed.'}${code ? ` (${code})` : ''}`);
+          _this4.openError(`${e?.message || 'Google sign-in failed.'}${code ? ` (${code})` : ''}`);
         }
       } finally {
-        _this2.sending = false;
+        _this4.sending = false;
       }
     })();
   }
@@ -231,40 +264,48 @@ let LoginComponent = class LoginComponent {
     if (!this.resetEmail) this.resetEmail = this.f.email.value || '';
   }
   sendReset() {
-    var _this3 = this;
+    var _this5 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (!_this3.resetEmail || !/.+@.+\..+/.test(_this3.resetEmail)) {
-        _this3.openError('Enter a valid email to receive a reset link.', 'Password reset');
+      if (!_this5.resetEmail || !/.+@.+\..+/.test(_this5.resetEmail)) {
+        _this5.openError('Enter a valid email to receive a reset link.', 'Password reset');
         return;
       }
-      _this3.resetSending = true;
+      _this5.resetSending = true;
       try {
-        yield _this3.users.resetPwdUser(_this3.resetEmail);
-        _this3.resetSent = true;
+        yield _this5.users.resetPwdUser(_this5.resetEmail);
+        _this5.resetSent = true;
       } catch (e) {
-        _this3.openError(e?.message || 'Failed to send reset email.', 'Password reset');
+        _this5.openError(e?.message || 'Failed to send reset email.', 'Password reset');
       } finally {
-        _this3.resetSending = false;
+        _this5.resetSending = false;
       }
     })();
   }
   static ctorParameters = () => [{
-    type: _angular_forms__WEBPACK_IMPORTED_MODULE_4__.FormBuilder
+    type: _angular_forms__WEBPACK_IMPORTED_MODULE_9__.FormBuilder
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.UsersService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_10__.UsersService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_6__.Router
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_11__.Router
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_6__.ActivatedRoute
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_11__.ActivatedRoute
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.UtilsService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_10__.UtilsService
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.StoreDbService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_10__.StoreDbService
   }, {
-    type: _login_service__WEBPACK_IMPORTED_MODULE_3__.LoginService
+    type: _login_service__WEBPACK_IMPORTED_MODULE_8__.LoginService
+  }, {
+    type: _services_management_entry_service__WEBPACK_IMPORTED_MODULE_4__.ManagementEntryService
+  }, {
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_5__.ReservationAuthService
+  }, {
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_12__.HttpClient
+  }, {
+    type: _services_google_session_service__WEBPACK_IMPORTED_MODULE_7__.GoogleSessionService
   }];
 };
-LoginComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_7__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Component)({
+LoginComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_13__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_14__.Component)({
   standalone: false,
   selector: 'app-login',
   template: _login_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
@@ -1087,17 +1128,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   registrationRole: () => (/* binding */ registrationRole)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _signup_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./signup.component.html?ngResource */ 97356);
 /* harmony import */ var _signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./signup.component.css?ngResource */ 41093);
 /* harmony import */ var _signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_signup_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/language.service */ 48756);
-/* harmony import */ var _services_legal_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/legal.service */ 5847);
-/* harmony import */ var _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../services/registration-profile.service */ 92915);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var _services_google_session_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/google-session.service */ 98716);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/language.service */ 48756);
+/* harmony import */ var _services_legal_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../services/legal.service */ 5847);
+/* harmony import */ var _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../services/registration-profile.service */ 92915);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/router */ 50085);
+
+
 
 
 
@@ -1124,16 +1168,33 @@ let SignupComponent = class SignupComponent {
   legal;
   legalLanguage;
   route;
+  googleSession;
+  mainSvc;
   legalCatalog;
   legalLabels = {};
   legalError = '';
   legalLoad = 0;
   legalLanguageSub;
+  get customerRegistration() {
+    return registrationRole(this.form?.value.role) === 'customer';
+  }
   loadLegal() {
     var _this = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const request = ++_this.legalLoad;
       _this.legalCatalog = null;
+      for (const key of ['legalName', 'adultConfirmed', 'acceptTerms']) {
+        const c = _this.form?.get(key);
+        if (_this.customerRegistration) c?.disable({
+          emitEvent: false
+        });else c?.enable({
+          emitEvent: false
+        });
+      }
+      if (_this.customerRegistration) {
+        _this.legalError = '';
+        return;
+      }
       _this.form?.patchValue({
         acceptTerms: false
       });
@@ -1197,7 +1258,7 @@ let SignupComponent = class SignupComponent {
   photoUrls = [];
   /** If true & role is owner/provider, redirect to Stripe Connect after signup */
   connectStripeNow = false;
-  constructor(fb, users, storeDb, utilSvc, router, registrationProfile, legal, legalLanguage, route) {
+  constructor(fb, users, storeDb, utilSvc, router, registrationProfile, legal, legalLanguage, route, googleSession, mainSvc) {
     this.fb = fb;
     this.users = users;
     this.storeDb = storeDb;
@@ -1207,19 +1268,21 @@ let SignupComponent = class SignupComponent {
     this.legal = legal;
     this.legalLanguage = legalLanguage;
     this.route = route;
+    this.googleSession = googleSession;
+    this.mainSvc = mainSvc;
     this.form = this.fb.group({
-      email: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.email]],
-      password: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.minLength(6)]],
-      firstname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required]],
-      lastname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required]],
+      email: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.email]],
+      password: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.minLength(6)]],
+      firstname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.required]],
+      lastname: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.required]],
       displayName: [''],
       phone: [''],
       country: [''],
-      role: ['customer', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required]],
+      role: ['customer', [_angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.required]],
       socialnetwork: this.fb.array([]),
-      acceptTerms: [false, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.requiredTrue],
-      legalName: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.minLength(2), _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.maxLength(240)]],
-      adultConfirmed: [false, _angular_forms__WEBPACK_IMPORTED_MODULE_6__.Validators.requiredTrue]
+      acceptTerms: [false, _angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.requiredTrue],
+      legalName: ['', [_angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.required, _angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.minLength(2), _angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.maxLength(240)]],
+      adultConfirmed: [false, _angular_forms__WEBPACK_IMPORTED_MODULE_7__.Validators.requiredTrue]
     });
   }
   // ---------- helpers
@@ -1299,7 +1362,7 @@ let SignupComponent = class SignupComponent {
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       _this4.error = undefined;
       _this4.success = false;
-      if (_this4.form.invalid || !_this4.legalCatalog?.accepting) {
+      if (_this4.form.invalid || !_this4.customerRegistration && !_this4.legalCatalog?.accepting) {
         _this4.form.markAllAsTouched();
         return;
       }
@@ -1345,7 +1408,7 @@ let SignupComponent = class SignupComponent {
           photoURL: _this4.photoUrls[0] || '',
           provider: 'firebase'
         };
-        yield _this4.legal.accept(_this4.legalCatalog, v.legalName, v.adultConfirmed);
+        if (!_this4.customerRegistration) yield _this4.legal.accept(_this4.legalCatalog, v.legalName, v.adultConfirmed);
         // 3) save to RTDB
         yield _this4.registrationProfile.save(profile);
         // 4) Either redirect to Stripe immediately, or show the success banner (as before)
@@ -1383,14 +1446,14 @@ let SignupComponent = class SignupComponent {
   signupWithGoogle() {
     var _this5 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (!_this5.legalCatalog?.accepting || !_this5.form.value.acceptTerms || !_this5.form.value.adultConfirmed || _this5.form.get('legalName')?.invalid) {
+      if (!_this5.customerRegistration && (!_this5.legalCatalog?.accepting || !_this5.form.value.acceptTerms || !_this5.form.value.adultConfirmed || _this5.form.get('legalName')?.invalid)) {
         _this5.form.markAllAsTouched();
         return;
       }
       _this5.error = undefined;
       _this5.sending = true;
       try {
-        const user = yield _this5.users.signInWithGoogleAndLoadProfile();
+        const user = yield _this5.googleSession.signIn();
         const uid = user.userId;
         const now = Date.now();
         const v = _this5.form.value;
@@ -1421,18 +1484,21 @@ let SignupComponent = class SignupComponent {
           photoURL: _this5.photoUrls[0] || user.photoURL || '',
           provider: 'google'
         };
-        const catalog = yield _this5.legal.catalog(registrationRole(role));
-        if (catalog.bundleHash !== _this5.legalCatalog.bundleHash) {
-          yield _this5.router.navigate(['/account/accept-terms'], {
-            queryParams: {
-              role: catalog.role,
-              returnUrl: '/account/profile'
-            }
-          });
-          return;
+        if (registrationRole(role) !== 'customer') {
+          const catalog = yield _this5.legal.catalog(registrationRole(role));
+          if (catalog.bundleHash !== _this5.legalCatalog?.bundleHash) {
+            yield _this5.router.navigate(['/account/accept-terms'], {
+              queryParams: {
+                role: catalog.role,
+                returnUrl: '/account/profile'
+              }
+            });
+            return;
+          }
+          yield _this5.legal.accept(catalog, v.legalName, v.adultConfirmed);
         }
-        yield _this5.legal.accept(catalog, v.legalName, v.adultConfirmed);
-        yield _this5.registrationProfile.save(profile);
+        const savedProfile = yield _this5.registrationProfile.save(profile);
+        _this5.mainSvc.setLoggedUser(savedProfile);
         // IMMEDIATE redirect to home (no “user created” banner)
         // If you want to auto-open Stripe right after Google for owners/providers, uncomment below:
         // if (this.isOwnerOrProvider(role) && this.connectStripeNow) {
@@ -1451,26 +1517,30 @@ let SignupComponent = class SignupComponent {
     })();
   }
   static ctorParameters = () => [{
-    type: _angular_forms__WEBPACK_IMPORTED_MODULE_6__.FormBuilder
+    type: _angular_forms__WEBPACK_IMPORTED_MODULE_7__.FormBuilder
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_7__.UsersService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_8__.UsersService
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_7__.StoreDbService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_8__.StoreDbService
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_7__.UtilsService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_8__.UtilsService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_8__.Router
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_9__.Router
   }, {
-    type: _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_5__.RegistrationProfileService
+    type: _services_registration_profile_service__WEBPACK_IMPORTED_MODULE_6__.RegistrationProfileService
   }, {
-    type: _services_legal_service__WEBPACK_IMPORTED_MODULE_4__.LegalService
+    type: _services_legal_service__WEBPACK_IMPORTED_MODULE_5__.LegalService
   }, {
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_3__.LanguageService
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_4__.LanguageService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_8__.ActivatedRoute
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_9__.ActivatedRoute
+  }, {
+    type: _services_google_session_service__WEBPACK_IMPORTED_MODULE_3__.GoogleSessionService
+  }, {
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_8__.ServicesService
   }];
 };
-SignupComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_9__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_10__.Component)({
+SignupComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_11__.Component)({
   standalone: false,
   selector: 'app-signup',
   template: _signup_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
@@ -1724,7 +1794,86 @@ RegistrationProfileService = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<div class=\"container py-5 auth-shell\">\n  <div class=\"auth-brand\">\n    <span class=\"auth-eyebrow\">{{ 'ui.signup.brand' | siteText:'GoDirect' }}</span>\n    <div class=\"auth-mark\">G</div>\n    <h1 class=\"h4 mb-1\">{{ 'auto.login.signup.signup.component.create_your_account' | siteText }}</h1>\n    <p class=\"text-muted small mb-4\">{{ 'auto.login.signup.signup.component.prepare_your_charter_manage_your_details_and_confi' | siteText }}</p>\n  </div>\n\n  <div *ngIf=\"success\" class=\"alert alert-success py-2\">{{ 'auto.login.signup.signup.component.account_created_successfully_please_check_your_inb' | siteText }}</div>\n\n  <form [formGroup]=\"form\" (ngSubmit)=\"signupWithEmail()\" novalidate>\n    <div class=\"row g-3\">\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.first_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"firstname\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.last_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"lastname\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.display_name_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"displayName\" [placeholder]=\"'auto.login.signup.signup.component.public_name' | siteText\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.country' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"country\" [placeholder]=\"'auto.login.signup.signup.component.fr' | siteText\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.email' | siteText }}</label>\n        <input type=\"email\" class=\"form-control form-control-sm\" formControlName=\"email\"\n          [class.is-invalid]=\"f.email.touched && f.email.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('required')\">{{ 'auto.login.signup.signup.component.email_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('email')\">{{ 'auto.login.signup.signup.component.enter_a_valid_email' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.phone_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"phone\" placeholder=\"+33 6 ...\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.password' | siteText }}</label>\n        <input type=\"password\" class=\"form-control form-control-sm\" formControlName=\"password\"\n          [class.is-invalid]=\"f.password.touched && f.password.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('required')\">{{ 'auto.login.signup.signup.component.password_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('minlength')\">{{ 'auto.login.signup.signup.component.minimum_6_characters' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.account_type' | siteText }}</label>\n        <select class=\"form-select form-select-sm\" formControlName=\"role\">\n          <option *ngFor=\"let r of roles\" [value]=\"r.id\">{{r.labelKey | siteText}}</option>\n        </select>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.admin_role_must_be_granted_by_the_platform' | siteText }}</div>\n      </div>\n\n      <!-- Stripe Connect opt-in (only shows for owner/provider) -->\n      <div class=\"col-12\" *ngIf=\"form.value.role === 'assetOwner' || form.value.role === 'serviceProvider'\">\n        <div class=\"form-check\">\n          <input class=\"form-check-input\" type=\"checkbox\" id=\"connectStripe\" [(ngModel)]=\"connectStripeNow\"\n            [ngModelOptions]=\"{standalone: true}\">\n          <label class=\"form-check-label small\" for=\"connectStripe\">{{ 'auto.login.signup.signup.component.connect_my_stripe_account_right_after_signup' | siteText }}</label>\n        </div>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.you_can_also_do_this_later_from_your_dashboard' | siteText }}</div>\n      </div>\n\n      <!-- Social links -->\n      <div class=\"col-12\">\n        <label class=\"form-label d-flex justify-content-between align-items-center small\">{{ 'auto.login.signup.signup.component.social_links' | siteText }}<button type=\"button\" class=\"btn btn-sm btn-outline-secondary rounded-pill\" (click)=\"addSocial()\">{{ 'auto.login.signup.signup.component.add_link' | siteText }}</button>\n        </label>\n\n        <div *ngFor=\"let s of socials.controls; let i = index\" class=\"row g-2 align-items-center mb-2\">\n          <div class=\"col-md-3\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'label')\" [placeholder]=\"'auto.login.signup.signup.component.instagram' | siteText\" />\n          </div>\n          <div class=\"col-md-8\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'url')\"\n              [placeholder]=\"'auto.login.signup.signup.component.https_instagram_com_yourname' | siteText\" />\n          </div>\n          <div class=\"col-md-1 text-end\">\n            <button type=\"button\" class=\"btn btn-link text-danger p-0\" (click)=\"removeSocial(i)\" [title]=\"'auto.login.signup.signup.component.remove' | siteText\">\n              <i class=\"bi bi-x-lg\"></i>\n            </button>\n          </div>\n        </div>\n      </div>\n\n      <!-- Photos upload -->\n      <div class=\"col-12\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.photos_optional' | siteText }}</label>\n        <input type=\"file\" class=\"form-control form-control-sm\" (change)=\"onPhotosInput($event)\"\n          multiple />\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.jpg_png_you_can_add_more_later' | siteText }}</div>\n\n        <div class=\"d-flex flex-wrap gap-2 mt-2\" *ngIf=\"photoUrls.length\">\n          <img *ngFor=\"let url of photoUrls\" [src]=\"url\" class=\"rounded border\"\n            style=\"width:108px;height:80px;object-fit:cover;\">\n        </div>\n      </div>\n\n      <!-- Firebase-sourced localized versioned acceptance -->\n      <div class=\"col-12\"><h2 class=\"h5\">{{legalLabels.conditions}}</h2><p *ngIf=\"legalError\" role=\"alert\">{{legalError}}</p><p>{{legalLabels.signupIntro}} {{legalCatalog?.language}}</p><ul><li *ngFor=\"let d of legalCatalog?.documents\"><a routerLink=\"/legal\" [queryParams]=\"{role:legalCatalog.role}\" target=\"_blank\" rel=\"noopener\">{{d.title}} — {{d.version}}</a></li></ul><label class=\"form-label\" for=\"legalName\">{{legalLabels.name}}</label><input id=\"legalName\" class=\"form-control\" formControlName=\"legalName\" autocomplete=\"name\" maxlength=\"240\"><label class=\"d-flex gap-2 mt-3\"><input type=\"checkbox\" formControlName=\"adultConfirmed\">{{legalLabels.adult}}</label><label class=\"d-flex gap-2 mt-3\"><input type=\"checkbox\" id=\"acceptTerms\" formControlName=\"acceptTerms\">{{legalLabels.agree}}</label><p class=\"small\">{{legalLabels.signIntro}} {{legalLabels.noMarketing}}</p><p class=\"text-danger\" *ngIf=\"f.acceptTerms.touched && f.acceptTerms.invalid\">{{legalLabels.required}}</p></div>\n    </div>\n\n    <div class=\"d-flex justify-content-end gap-2 mt-4\">\n      <button class=\"btn btn-dark btn-sm rounded-pill px-3\" [disabled]=\"form.invalid || sending || !legalCatalog?.accepting\">\n        {{ sending ? ('ui.messages.t94d7d8ee473f' | siteText) : ('ui.messages.taaf374479756' | siteText) }}\n      </button>\n    </div>\n  </form>\n\n  <div class=\"text-center text-muted my-3 small\">{{ 'auto.login.signup.signup.component.or' | siteText }}</div>\n\n  <div class=\"d-grid\">\n    <button class=\"btn btn-outline-dark btn-sm rounded-pill\" (click)=\"signupWithGoogle()\" [disabled]=\"sending || !legalCatalog?.accepting || !form.value.acceptTerms || !form.value.adultConfirmed || f.legalName.invalid\">\n      <span class=\"d-inline-flex align-items-center gap-2\">\n        <img src=\"https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg\" width=\"16\" height=\"16\" alt=\"\">{{ 'auto.login.signup.signup.component.continue_with_google' | siteText }}</span>\n    </button>\n  </div>\n\n  <hr class=\"my-4\">\n\n  <div class=\"text-center\">\n    <span class=\"text-muted me-1 small\">{{ 'auto.login.signup.signup.component.already_have_an_account' | siteText }}</span>\n    <a [routerLink]=\"'/login' | resourceRoute\" queryParamsHandling=\"preserve\" class=\"text-decoration-none small\">{{ 'auto.login.signup.signup.component.sign_in' | siteText }}</a>\n  </div>\n</div>\n\n<div *ngIf=\"success && publishIntent\" class=\"text-center my-3\"><a class=\"btn btn-dark\" routerLink=\"/owner/listings\">{{ 'ui.discovery.manage' | siteText:'Mes annonces' }}</a></div>\n<!-- Error Modal (pure Angular + Bootstrap styles) -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showErrorModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showErrorModal\" (click)=\"closeErrorModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ errorModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeErrorModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ errorModalMessage }}</p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-secondary\" (click)=\"closeErrorModal()\">{{ 'auto.login.signup.signup.component.close' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n<!-- Success Modal -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showSuccessModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showSuccessModal\" (click)=\"closeSuccessModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ successModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeSuccessModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ successModalMessage }}<br><br><strong>{{ 'auto.login.signup.signup.component.please_also_check_your_junk_spam_folder' | siteText }}</strong></p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-dark\" (click)=\"closeSuccessModal()\">{{ 'auto.login.signup.signup.component.go_to_login' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n";
+module.exports = "<div class=\"container py-5 auth-shell\">\n  <div class=\"auth-brand\">\n    <span class=\"auth-eyebrow\">{{ 'ui.signup.brand' | siteText:'GoDirect' }}</span>\n    <div class=\"auth-mark\">G</div>\n    <h1 class=\"h4 mb-1\">{{ 'auto.login.signup.signup.component.create_your_account' | siteText }}</h1>\n    <p class=\"text-muted small mb-4\">{{ 'auto.login.signup.signup.component.prepare_your_charter_manage_your_details_and_confi' | siteText }}</p>\n  </div>\n\n  <div *ngIf=\"success\" class=\"alert alert-success py-2\">{{ 'auto.login.signup.signup.component.account_created_successfully_please_check_your_inb' | siteText }}</div>\n\n  <form [formGroup]=\"form\" (ngSubmit)=\"signupWithEmail()\" novalidate>\n    <div class=\"row g-3\">\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.first_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"firstname\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.last_name' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"lastname\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.display_name_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"displayName\" [placeholder]=\"'auto.login.signup.signup.component.public_name' | siteText\" />\n      </div>\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.country' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"country\" [placeholder]=\"'auto.login.signup.signup.component.fr' | siteText\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.email' | siteText }}</label>\n        <input type=\"email\" class=\"form-control form-control-sm\" formControlName=\"email\"\n          [class.is-invalid]=\"f.email.touched && f.email.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('required')\">{{ 'auto.login.signup.signup.component.email_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.email.touched && f.email.hasError('email')\">{{ 'auto.login.signup.signup.component.enter_a_valid_email' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.phone_optional' | siteText }}</label>\n        <input class=\"form-control form-control-sm\" formControlName=\"phone\" placeholder=\"+33 6 ...\" />\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.password' | siteText }}</label>\n        <input type=\"password\" class=\"form-control form-control-sm\" formControlName=\"password\"\n          [class.is-invalid]=\"f.password.touched && f.password.invalid\" />\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('required')\">{{ 'auto.login.signup.signup.component.password_is_required' | siteText }}</div>\n        <div class=\"invalid-feedback\" *ngIf=\"f.password.touched && f.password.hasError('minlength')\">{{ 'auto.login.signup.signup.component.minimum_6_characters' | siteText }}</div>\n      </div>\n\n      <div class=\"col-md-6\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.account_type' | siteText }}</label>\n        <select class=\"form-select form-select-sm\" formControlName=\"role\">\n          <option *ngFor=\"let r of roles\" [value]=\"r.id\">{{r.labelKey | siteText}}</option>\n        </select>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.admin_role_must_be_granted_by_the_platform' | siteText }}</div>\n      </div>\n\n      <!-- Stripe Connect opt-in (only shows for owner/provider) -->\n      <div class=\"col-12\" *ngIf=\"form.value.role === 'assetOwner' || form.value.role === 'serviceProvider'\">\n        <div class=\"form-check\">\n          <input class=\"form-check-input\" type=\"checkbox\" id=\"connectStripe\" [(ngModel)]=\"connectStripeNow\"\n            [ngModelOptions]=\"{standalone: true}\">\n          <label class=\"form-check-label small\" for=\"connectStripe\">{{ 'auto.login.signup.signup.component.connect_my_stripe_account_right_after_signup' | siteText }}</label>\n        </div>\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.you_can_also_do_this_later_from_your_dashboard' | siteText }}</div>\n      </div>\n\n      <!-- Social links -->\n      <div class=\"col-12\">\n        <label class=\"form-label d-flex justify-content-between align-items-center small\">{{ 'auto.login.signup.signup.component.social_links' | siteText }}<button type=\"button\" class=\"btn btn-sm btn-outline-secondary rounded-pill\" (click)=\"addSocial()\">{{ 'auto.login.signup.signup.component.add_link' | siteText }}</button>\n        </label>\n\n        <div *ngFor=\"let s of socials.controls; let i = index\" class=\"row g-2 align-items-center mb-2\">\n          <div class=\"col-md-3\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'label')\" [placeholder]=\"'auto.login.signup.signup.component.instagram' | siteText\" />\n          </div>\n          <div class=\"col-md-8\">\n            <input class=\"form-control form-control-sm\" [formControl]=\"socialControl(i, 'url')\"\n              [placeholder]=\"'auto.login.signup.signup.component.https_instagram_com_yourname' | siteText\" />\n          </div>\n          <div class=\"col-md-1 text-end\">\n            <button type=\"button\" class=\"btn btn-link text-danger p-0\" (click)=\"removeSocial(i)\" [title]=\"'auto.login.signup.signup.component.remove' | siteText\">\n              <i class=\"bi bi-x-lg\"></i>\n            </button>\n          </div>\n        </div>\n      </div>\n\n      <!-- Photos upload -->\n      <div class=\"col-12\">\n        <label class=\"form-label small mb-1\">{{ 'auto.login.signup.signup.component.photos_optional' | siteText }}</label>\n        <input type=\"file\" class=\"form-control form-control-sm\" (change)=\"onPhotosInput($event)\"\n          multiple />\n        <div class=\"form-text small\">{{ 'auto.login.signup.signup.component.jpg_png_you_can_add_more_later' | siteText }}</div>\n\n        <div class=\"d-flex flex-wrap gap-2 mt-2\" *ngIf=\"photoUrls.length\">\n          <img *ngFor=\"let url of photoUrls\" [src]=\"url\" class=\"rounded border\"\n            style=\"width:108px;height:80px;object-fit:cover;\">\n        </div>\n      </div>\n\n      <!-- Firebase-sourced localized versioned acceptance -->\n      <div *ngIf=\"!customerRegistration\" class=\"col-12\"><h2 class=\"h5\">{{legalLabels.conditions}}</h2><p *ngIf=\"legalError\" role=\"alert\">{{legalError}}</p><p>{{legalLabels.signupIntro}} {{legalCatalog?.language}}</p><ul><li *ngFor=\"let d of legalCatalog?.documents\"><a routerLink=\"/legal\" [queryParams]=\"{role:legalCatalog.role}\" target=\"_blank\" rel=\"noopener\">{{d.title}} — {{d.version}}</a></li></ul><label class=\"form-label\" for=\"legalName\">{{legalLabels.name}}</label><input id=\"legalName\" class=\"form-control\" formControlName=\"legalName\" autocomplete=\"name\" maxlength=\"240\"><label class=\"d-flex gap-2 mt-3\"><input type=\"checkbox\" formControlName=\"adultConfirmed\">{{legalLabels.adult}}</label><label class=\"d-flex gap-2 mt-3\"><input type=\"checkbox\" id=\"acceptTerms\" formControlName=\"acceptTerms\">{{legalLabels.agree}}</label><p class=\"small\">{{legalLabels.signIntro}} {{legalLabels.noMarketing}}</p><p class=\"text-danger\" *ngIf=\"f.acceptTerms.touched && f.acceptTerms.invalid\">{{legalLabels.required}}</p></div>\n    </div>\n\n    <div class=\"d-flex justify-content-end gap-2 mt-4\">\n      <button class=\"btn btn-dark btn-sm rounded-pill px-3\" [disabled]=\"form.invalid || sending || (!customerRegistration && !legalCatalog?.accepting)\">\n        {{ sending ? ('ui.messages.t94d7d8ee473f' | siteText) : ('ui.messages.taaf374479756' | siteText) }}\n      </button>\n    </div>\n  </form>\n\n  <div class=\"text-center text-muted my-3 small\">{{ 'auto.login.signup.signup.component.or' | siteText }}</div>\n\n  <div class=\"d-grid\">\n    <button class=\"btn btn-outline-dark btn-sm rounded-pill\" (click)=\"signupWithGoogle()\" [disabled]=\"sending || (!customerRegistration && (!legalCatalog?.accepting || !form.value.acceptTerms || !form.value.adultConfirmed || f.legalName.invalid))\">\n      <span class=\"d-inline-flex align-items-center gap-2\">\n        <img src=\"https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg\" width=\"16\" height=\"16\" alt=\"\">{{ 'auto.login.signup.signup.component.continue_with_google' | siteText }}</span>\n    </button>\n  </div>\n\n  <hr class=\"my-4\">\n\n  <div class=\"text-center\">\n    <span class=\"text-muted me-1 small\">{{ 'auto.login.signup.signup.component.already_have_an_account' | siteText }}</span>\n    <a [routerLink]=\"'/login' | resourceRoute\" queryParamsHandling=\"preserve\" class=\"text-decoration-none small\">{{ 'auto.login.signup.signup.component.sign_in' | siteText }}</a>\n  </div>\n</div>\n\n<div *ngIf=\"success && publishIntent\" class=\"text-center my-3\"><a class=\"btn btn-dark\" routerLink=\"/owner/listings\">{{ 'ui.discovery.manage' | siteText:'Mes annonces' }}</a></div>\n<!-- Error Modal (pure Angular + Bootstrap styles) -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showErrorModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showErrorModal\" (click)=\"closeErrorModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ errorModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeErrorModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ errorModalMessage }}</p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-secondary\" (click)=\"closeErrorModal()\">{{ 'auto.login.signup.signup.component.close' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n<!-- Success Modal -->\n<div class=\"modal-backdrop fade show\" *ngIf=\"showSuccessModal\"></div>\n<div class=\"modal d-block\" tabindex=\"-1\" role=\"dialog\" *ngIf=\"showSuccessModal\" (click)=\"closeSuccessModal()\">\n  <div class=\"modal-dialog modal-dialog-centered\" role=\"document\" (click)=\"$event.stopPropagation()\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header py-2\">\n        <h5 class=\"modal-title\">{{ successModalTitle }}</h5>\n        <button type=\"button\" class=\"btn-close\" [attr.aria-label]=\"'auto.login.signup.signup.component.close' | siteText\" (click)=\"closeSuccessModal()\"></button>\n      </div>\n      <div class=\"modal-body\">\n        <p class=\"mb-0\">{{ successModalMessage }}<br><br><strong>{{ 'auto.login.signup.signup.component.please_also_check_your_junk_spam_folder' | siteText }}</strong></p>\n      </div>\n      <div class=\"modal-footer py-2\">\n        <button type=\"button\" class=\"btn btn-sm btn-dark\" (click)=\"closeSuccessModal()\">{{ 'auto.login.signup.signup.component.go_to_login' | siteText }}</button>\n      </div>\n    </div>\n  </div>\n</div>\n";
+
+/***/ }),
+
+/***/ 98716:
+/*!****************************************************!*\
+  !*** ./src/app/services/google-session.service.ts ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   GoogleSessionService: () => (/* binding */ GoogleSessionService)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var firebase_auth__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! firebase/auth */ 92630);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs */ 72354);
+
+
+
+
+
+
+
+let GoogleSessionService = class GoogleSessionService {
+  store;
+  http;
+  constructor(store, http) {
+    this.store = store;
+    this.http = http;
+  }
+  auth() {
+    const s = this.store;
+    return s.firebaseauth || s.firebaseAuth || s.auth;
+  }
+  /** Call directly from the click: no awaited bootstrap or dynamic import before the popup. */
+  signIn() {
+    var _this = this;
+    const auth = this.auth();
+    if (!auth) return Promise.reject(Error('Authentication is still initializing. Reload the page and try again.'));
+    const provider = new firebase_auth__WEBPACK_IMPORTED_MODULE_1__.GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+    const result = typeof auth.signInWithPopup === 'function' ? auth.signInWithPopup(provider) : (0,firebase_auth__WEBPACK_IMPORTED_MODULE_1__.signInWithPopup)(auth, provider);
+    return Promise.resolve(result).then(/*#__PURE__*/function () {
+      var _ref = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* (credential) {
+        const user = credential.user;
+        if (!user?.uid || typeof user.getIdToken !== 'function') throw Error('invalid_authentication');
+        const token = yield user.getIdToken();
+        if (_this.auth()?.currentUser?.uid !== user.uid) throw Error('session_changed');
+        const profile = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_2__.firstValueFrom)(_this.http.post('/api/me/session', {}, {
+          headers: {
+            Authorization: 'Bearer ' + token
+          }
+        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_3__.timeout)(20000)));
+        if (_this.auth()?.currentUser?.uid !== user.uid || profile?.userId !== user.uid) throw Error('session_changed');
+        return profile;
+      });
+      return function (_x) {
+        return _ref.apply(this, arguments);
+      };
+    }());
+  }
+  static ctorParameters = () => [{
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_4__.StoreDbService
+  }, {
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_5__.HttpClient
+  }];
+};
+GoogleSessionService = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.Injectable)({
+  providedIn: 'root'
+})], GoogleSessionService);
+
 
 /***/ }),
 

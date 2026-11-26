@@ -9,7 +9,11 @@ export function assetDomainSlug(hostname:string):string|null {
 }
 export function internalAssetUrl(url:string):string {
  const a=domainAsset;if(!a)return url;
- if(/^\/(?:__asset_unavailable|messages|asset-calendar|admin-access|account|owner|platform|concierge-role|concierge|legal|faq|contact)(?:[/?#]|$)/.test(url))return url;
+ // Angular Location normalizes the initial '/' to an empty string.
+ if(/^\/(?:espaces|(?:boat|car|property|parking|pool)\/[^/]+\/espaces)\/?(?:[?#].*)?$/.test(url))return '/';
+ if(!url||url.startsWith('?')||url.startsWith('#'))return '/'+(url||'');
+ if(/^\/(?:[?#]|$)/.test(url))return url;
+ if(/^\/(?:__asset_unavailable|site-management|site-client|messages|asset-calendar|admin-access|account|owner|platform|concierge-role|concierge|legal|faq|contact)(?:[/?#]|$)/.test(url))return url;
  const base=`/${a.assetType}/${a.assetId}`;
  if(url===base||url.startsWith(base+'/')||url.startsWith(base+'?')||url.startsWith(base+'#'))return url;
  if(/^\/(boat|car|property|parking|pool)\//.test(url))return url;
@@ -19,7 +23,8 @@ export function internalAssetUrl(url:string):string {
 export function externalAssetUrl(url:string):string {
  const a=domainAsset;if(!a)return url;
  const base=`/${a.assetType}/${a.assetId}`;
- if(url===base||url===base+'/home')return '/';
+ if(typeof location!=='undefined'&&location.pathname.startsWith(base+'/'))return url;
+ if(url===base||url.startsWith(base+'/'))return url;
  if(url.startsWith(base+'/home?')||url.startsWith(base+'/home#'))return '/'+url.slice((base+'/home').length);
  if(url.startsWith(base+'/'))return url.slice(base.length);
  return url;

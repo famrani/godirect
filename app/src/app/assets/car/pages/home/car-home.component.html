@@ -32,7 +32,8 @@
       <h1>{{ title }}</h1>
       <app-listing-description class="car-intro" *ngIf="intro && intro!==description" [text]="intro"></app-listing-description>
 
-      <div class="car-landing__facts" *ngIf="features.length">
+      <div class="car-landing__facts" *ngIf="carOffer.length || features.length">
+        <span *ngFor="let label of carOffer">{{ label }}</span>
         <span *ngFor="let feature of features">{{ feature }}</span>
       </div>
 

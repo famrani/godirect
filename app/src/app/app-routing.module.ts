@@ -18,6 +18,12 @@ import { OwnerPaymentsComponent } from './owner-payments.component';
 const legacy = ['home','sorties','bateau','galerie','reserver','book-online','contact','crew','terms','safety','deposit','booking-process','sea-toys','faq','how-it-works','my-bookings','calendar','my-offers','my-proposals','my-payments','my-profile','my-feedbacks','leave-feedback','my-external-bookings','signup','login','forgotpwd'];
 
 const routes: Routes = [
+ {path:'espaces',loadComponent:()=>import('./workspace/spaces.component').then(m=>m.SpacesComponent),canActivate:[ManagementWorkspaceGuard]},
+ {path:'managed-portfolio',loadComponent:()=>import('./workspace/concierge.component').then(m=>m.ConciergeComponent),canActivate:[ManagementWorkspaceGuard]},
+ {path:'site-management',loadComponent:()=>import('./workspace/site-management.component').then(m=>m.SiteManagementComponent)},
+  {path:'owner/client-view',loadComponent:()=>import('./workspace/client-space.component').then(m=>m.ClientSpaceComponent),canActivate:[OwnerWorkspaceGuard]},
+  {path:'site-client',loadComponent:()=>import('./workspace/client-space.component').then(m=>m.ClientSpaceComponent)},
+
   {path:'owner/alerts',loadComponent:()=>import('./workspace/mobile-alerts.component').then(m=>m.MobileAlertsComponent),canActivate:[ManagementWorkspaceGuard]},
   {path:'concierge/alerts',loadComponent:()=>import('./workspace/mobile-alerts.component').then(m=>m.MobileAlertsComponent),canActivate:[ManagementWorkspaceGuard]},
  {path:'concierge-role',loadComponent:()=>import('./portals/concierge-role.component').then(m=>m.ConciergeRoleComponent)},
@@ -28,6 +34,7 @@ const routes: Routes = [
   {path:'legal',pathMatch:'full',loadComponent:()=>import('./legal/legal-page.component').then(m=>m.LegalPageComponent)},
   {path:'faq',pathMatch:'full',loadComponent:()=>import('./legal/faq.component').then(m=>m.FaqComponent)},
   {path:'account/accept-terms',pathMatch:'full',loadComponent:()=>import('./legal/legal-page.component').then(m=>m.LegalPageComponent),data:{accept:true}},
+  {path:'account/rental-history',component:PlatformLayoutComponent,canActivate:[ManagementWorkspaceGuard],children:[{path:'',loadComponent:()=>import('./workspace/rental-history.component').then(m=>m.RentalHistoryComponent)}]},
   {path:'account',children:[
     {path:'profile',loadComponent:()=>import('./workspace/workspace.component').then(m=>m.WorkspaceComponent),data:{kind:'profile'}},
     {path:'bookings',loadComponent:()=>import('./workspace/workspace.component').then(m=>m.WorkspaceComponent),data:{kind:'bookings'}},
@@ -40,6 +47,7 @@ const routes: Routes = [
   {path:'concierge',pathMatch:'full',loadComponent:()=>import('./workspace/concierge.component').then(m=>m.ConciergeComponent),canActivate:[ManagementWorkspaceGuard]},
   {path:'concierge/customers',loadComponent:()=>import('./workspace/owner-customers.component').then(m=>m.OwnerCustomersComponent),data:{concierge:true},canActivate:[ManagementWorkspaceGuard]},
   {path:'concierge/activity/:section',loadComponent:()=>import('./workspace/workspace.component').then(m=>m.WorkspaceComponent),data:{owner:true,concierge:true},canActivate:[ManagementWorkspaceGuard]},
+  {path:'owner/site-settings',loadComponent:()=>import('./workspace/owner-site-settings.component').then(m=>m.OwnerSiteSettingsComponent),canActivate:[OwnerWorkspaceGuard]},
   {path:'owner/customers',loadComponent:()=>import('./workspace/owner-customers.component').then(m=>m.OwnerCustomersComponent),canActivate:[OwnerWorkspaceGuard]},
   {path:'owner/activity/:section',loadComponent:()=>import('./workspace/workspace.component').then(m=>m.WorkspaceComponent),data:{owner:true}},
   {path:'__asset_unavailable',loadComponent:()=>import('./workspace/asset-unavailable.component').then(m=>m.AssetUnavailableComponent)},
@@ -52,10 +60,11 @@ const routes: Routes = [
   {path:'platform/admin',component:PlatformAdminComponent,canActivate:[PlatformAdminGuard]},
   {path:'owner',component:PlatformLayoutComponent,children:[
     {path:'',redirectTo:'listings',pathMatch:'full'},
+    {path:'start',component:OwnerListingsComponent,data:{firstListing:true},canActivate:[ManagementWorkspaceGuard]},
     {path:'listings',component:OwnerListingsComponent,canActivate:[OwnerWorkspaceGuard]},
     {path:'payments',component:OwnerPaymentsComponent,canActivate:[OwnerWorkspaceGuard]}
   ]},
-  { path: '', component: ResourceDashboardComponent, pathMatch: 'full', canMatch: [() => typeof window !== 'undefined' && window.location.hostname === 'client.godirect.fr'] },
+  {path:'locations',component:ResourceDashboardComponent},
   { path: '', component: PortalHomeComponent, pathMatch: 'full' },
 
   ...['login','signup','forgotpwd'].map(path=>({path,redirectTo:'account/'+path,pathMatch:'full' as const})),

@@ -1,3 +1,4 @@
+import {AdminSuccessComponent} from '../shared/admin-success.component';
 import {MessageLinkComponent} from '../messaging/message-link.component';
 import {AssetListFiltersComponent} from '../shared/asset-list-filters.component';
 import {emptyAssetFilters,matchesAssetFilters,sortAssetRows} from '../shared/asset-list-filters';
@@ -6,8 +7,9 @@ import {ListingDescriptionComponent} from '../shared/listing-description.compone
 import {SiteTextPipe} from '../home/site-text.pipe';
 import {ActivatedRoute} from '@angular/router';import {Subscription} from 'rxjs';import {PrivateMediaService} from '../services/private-media.service';
 import {Component,OnInit,OnDestroy} from '@angular/core';import {CommonModule} from '@angular/common';import {FormsModule} from '@angular/forms';import {RouterModule} from '@angular/router';import {HttpClient} from '@angular/common/http';import {firstValueFrom,timeout} from 'rxjs';import {ReservationAuthService} from '../services/reservation-auth.service';import {SiteContentService} from '../home/site-content-service/site-content.service';import {LanguageService} from '../services/language.service';import {PlatformLayoutComponent} from '../layout/platform-layout/platform-layout.component';import {PLATFORM_ADMIN_TEXT} from './platform-admin.text';
-@Component({selector:'app-platform-admin',standalone:true,imports:[MessageLinkComponent,AssetListFiltersComponent,AssetCalendarLinkComponent,ListingDescriptionComponent,SiteTextPipe,CommonModule,FormsModule,RouterModule,PlatformLayoutComponent],templateUrl:'./platform-admin.component.html',styleUrls:['./platform-admin.component.scss']})
+@Component({selector:'app-platform-admin',standalone:true,imports:[AdminSuccessComponent,MessageLinkComponent,AssetListFiltersComponent,AssetCalendarLinkComponent,ListingDescriptionComponent,SiteTextPipe,CommonModule,FormsModule,RouterModule,PlatformLayoutComponent],templateUrl:'./platform-admin.component.html',styleUrls:['./platform-admin.component.scss']})
 export class PlatformAdminComponent implements OnInit,OnDestroy{
+ success='';
  filters=emptyAssetFilters();
  showArchived=false;data:any=null;loading=false;error='';query='';ownerId='';tab='requests';page=0;readonly pageSize=20;content:any;selected:any=null;reason='';working=false;private querySub?:Subscription;private destroyed=false;private request=0;
  constructor(private http:HttpClient,private auth:ReservationAuthService,public language:LanguageService,private texts:SiteContentService,private route:ActivatedRoute,private media:PrivateMediaService){}
@@ -26,7 +28,7 @@ export class PlatformAdminComponent implements OnInit,OnDestroy{
  get photos():string[]{const m=this.selected?.media||{};return [...new Set<string>([m.hero,m.cover,...(Array.isArray(m.gallery)?m.gallery:[])].filter(v=>typeof v==='string'&&!!v))];}
  async decide(decision:'approved'|'rejected'){
   if(this.working||!this.selected||(decision==='rejected'&&!this.reason.trim()))return;this.working=true;this.error='';
-  const a=this.selected;try{await firstValueFrom(this.http.post(`/api/platform/admin/listings/${encodeURIComponent(a.assetType)}/${encodeURIComponent(a.id)}/moderation`,{decision,revision:a.moderation.revision,reason:this.reason.trim()},{headers:await this.auth.headers()}).pipe(timeout(20000)));if(!this.destroyed){this.selected=null;await this.refresh();}}catch(e:any){if(!this.destroyed){this.error=this.t(e.status===409?'changed':e.status===403?'forbidden':'error');if(e.status===409)this.selected=null;}}finally{if(!this.destroyed)this.working=false;}
+  const a=this.selected;try{await firstValueFrom(this.http.post(`/api/platform/admin/listings/${encodeURIComponent(a.assetType)}/${encodeURIComponent(a.id)}/moderation`,{decision,revision:a.moderation.revision,reason:this.reason.trim()},{headers:await this.auth.headers()}).pipe(timeout(20000)));if(!this.destroyed){this.selected=null;if(decision==='approved'){this.select('assets');this.success='Annonce validée.';}await this.refresh();}}catch(e:any){if(!this.destroyed){this.error=this.t(e.status===409?'changed':e.status===403?'forbidden':'error');if(e.status===409)this.selected=null;}}finally{if(!this.destroyed)this.working=false;}
  }
  get requestCount(){return (this.data?.assets||[]).filter((a:any)=>!a.archived&&a.moderation?.status==='pending').length;}
  get visible(){return this.rows.slice(this.page*this.pageSize,(this.page+1)*this.pageSize);}

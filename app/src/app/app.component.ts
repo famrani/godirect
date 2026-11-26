@@ -89,7 +89,7 @@ export class AppComponent implements OnInit {
     this.lastLoginIdentity = identity;
     setTimeout(async () => {
       if(/^\/owner\/listings\/[^/]+\/[^/]+\/documents(?:[?#]|$)/.test(this.router.url)||this.router.url.startsWith('/platform/admin/documents')||this.router.url.startsWith('/platform/admin/legal')||this.router.url.startsWith('/account/signup')||this.router.url.startsWith('/account/accept-terms'))return;
-      try{const status=await this.legal.ensure();if(identity!==this.lastLoginIdentity)return;if(status&&status.accepting&&!status.accepted){await this.router.navigate(['/account/accept-terms'],{queryParams:{role:status.role,returnUrl:this.router.url}});return;}await this.pendingOfferLoginModal.checkAfterLogin(user);}catch{/* API guard still prevents unaccepted business operations. */}
+      try{const status=await this.legal.ensure();if(identity!==this.lastLoginIdentity)return;if(status&&status.role!=='customer'&&status.accepting&&!status.accepted){await this.router.navigate(['/account/accept-terms'],{queryParams:{role:status.role,returnUrl:this.router.url}});return;}await this.pendingOfferLoginModal.checkAfterLogin(user);}catch{/* API guard still prevents unaccepted business operations. */}
     }, 250);
   }
 

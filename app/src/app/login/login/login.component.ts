@@ -1,4 +1,8 @@
-import {portalFor} from '../../services/portal-policy';
+import {siteReturn} from '../../services/site-return';
+import {ManagementEntryService} from '../../services/management-entry.service';
+import {ReservationAuthService} from '../../services/reservation-auth.service';
+import {HttpClient} from '@angular/common/http';import {firstValueFrom} from 'rxjs';
+import {portalFor,dedicatedPortalHome} from '../../services/portal-policy';
 import {GoogleSessionService} from '../../services/google-session.service';
 import { Component } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
@@ -45,7 +49,7 @@ export class LoginComponent {
     public utilSvc: UtilsService,
     private storeDb: StoreDbService,
     private loginSvc: LoginService,
-    private googleSession:GoogleSessionService
+    private entry:ManagementEntryService,private session:ReservationAuthService,private http:HttpClient,private googleSession:GoogleSessionService
   ) {
     this.loginForm = this.fb.group({
       email: [localStorage.getItem('rememberEmail') || '', [Validators.required, Validators.email]],
@@ -60,6 +64,14 @@ export class LoginComponent {
     if (this.route.snapshot.queryParamMap.get('created') === 'true') {
       this.accountCreatedMessage = 'Account created successfully. Please check your inbox and your Junk/Spam folder for the password setup/reset email before signing in.';
     }
+  }
+
+  async ngOnInit(){
+    const returnUrl=this.route.snapshot.queryParamMap.get('returnUrl');
+    if(!returnUrl&&this.route.snapshot.queryParamMap.has('created'))return;
+    try{await this.session.user();}catch{return;}
+    if(this.sending||!location.pathname.replace(/\/$/,'').endsWith('/account/login'))return;
+    try{await this.postLoginRedirect();}catch(e:any){this.openError(this.normalizeAuthError(e));}
   }
 
   get f() { return this.loginForm.controls; }
@@ -100,16 +112,19 @@ export class LoginComponent {
     return rawMessage || 'Authentication failed. Please try again.';
   }
 
-  private postLoginRedirect() {
+  private async postLoginRedirect() {
     const portal=portalFor(window.location.hostname);
-    const fallback=portal==='admin'?'/platform/admin':portal==='concierge'?'/concierge':portal==='owner'?'/owner/listings':'/';
-    const requested=this.route.snapshot.queryParamMap.get('returnUrl')||this.redirectTo;
-    const target=requested&&requested.startsWith('/')&&!requested.startsWith('//')?requested:fallback;
+    const fallback=dedicatedPortalHome(window.location.hostname)??(portal==='owner'?'/espaces':'/');
+    const requested=this.route.snapshot.queryParamMap.get('returnUrl')||(portal==='asset'?(this.route.snapshot.queryParamMap.get('redirect')||''):this.redirectTo);
+    const target=portal==='admin'&&!/^\/(?:platform\/admin(?:[/?#]|$)|admin-access(?:[/?#]|$))/.test(requested||'')?fallback:siteReturn(requested,window.location.hostname,fallback);
     try {
       localStorage.removeItem('redirectAfterLogin');
       sessionStorage.removeItem('redirectAfterLogin');
     } catch {}
-    this.router.navigateByUrl(target);
+    await this.session.user();
+    const navigated=await this.router.navigateByUrl(target,{replaceUrl:true});
+    if(!navigated&&location.pathname==='/account/login')throw new Error('Connexion réussie, mais impossible d’ouvrir votre espace. Réessayez.');
+
   }
 
   async loginWithEmail() {
@@ -159,7 +174,7 @@ export class LoginComponent {
       // OPTION: you can fetch the user profile here if you need local state
       // const profile = await this.users.loadProfile(); // depends on your lib
 
-      this.postLoginRedirect();
+      await this.postLoginRedirect();
     } catch (e: any) {
       const message = this.normalizeAuthError(e);
       if (message === 'EMAIL_NOT_VERIFIED') {
@@ -186,7 +201,7 @@ export class LoginComponent {
       this.loginSvc.mainSvc.setLoggedUser(user);
       try{sessionStorage.setItem('loggedUser',JSON.stringify(user));if(localStorage.getItem('rememberLogin')==='true')localStorage.setItem('loggedUser',JSON.stringify(user));else localStorage.removeItem('loggedUser');}catch{}
 
-      this.postLoginRedirect();
+      await this.postLoginRedirect();
     } catch (e: any) {
       const code = String(e?.code || '');
       console.error('[Google Auth]', { code, message: e?.message, error: e });

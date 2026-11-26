@@ -23,3 +23,22 @@
 .filters select{max-width:100%;flex:0 1 420px}.table-scroll td small{font-size:12px}.table-scroll td strong{font-weight:600}@media(max-width:650px){.filters select{flex:initial;width:100%}}
 
 .owner-link{border:0;background:transparent;color:inherit;padding:0;text-align:left;font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+.mobile-actions{display:none}
+@media(max-width:760px){
+ .admin-shell{padding-inline:16px;padding-bottom:88px}
+ .admin-shell .table-scroll{overflow:visible;border:0;padding:0;background:transparent}
+ .admin-shell table,.admin-shell tbody{display:block;width:100%;min-width:0}
+ .admin-shell thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .admin-shell tr{display:grid;gap:0;border:1px solid #dbe5ed;background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:12px}
+ .admin-shell td{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 12px;padding:8px 0;overflow-wrap:anywhere}
+ .admin-shell td:not(:first-child)[data-label]::before{content:attr(data-label);grid-column:1;grid-row:1 / span 3;font-weight:600;color:#526b80}
+ .admin-shell td:not(:first-child)[data-label]>small{grid-column:2}
+ .admin-shell td:first-child,.admin-shell td.row-action{display:block}
+ .admin-shell td:first-child>a,.admin-shell td:first-child>strong{font-size:1rem;font-weight:700}
+ .admin-shell td:last-child{border-bottom:0}
+ .admin-shell .desktop-actions{display:none}
+ .admin-shell .mobile-actions{display:block;margin-top:8px}
+ .admin-shell .mobile-actions summary{padding:10px 0;font-weight:600;cursor:pointer}
+ .admin-shell .asset-links>a{padding-block:8px}
+}

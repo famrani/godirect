@@ -1,5 +1,5 @@
 export const ACCOUNT_HEADER_TEXT:Record<string,Record<string,string>>={
-fr:{account:'Compte',client:'Client',owner:'Propriétaire',admin:'Administrateur',guest:'Invité',loading:'Vérification du mode…'},
+fr:{account:'Compte',client:'Locataire',owner:'Propriétaire',admin:'Administrateur',guest:'Invité',loading:'Vérification du mode…'},
 en:{account:'Account',client:'Customer',owner:'Owner',admin:'Administrator',guest:'Guest',loading:'Checking access…'},
 es:{account:'Cuenta',client:'Cliente',owner:'Propietario',admin:'Administrador',guest:'Invitado',loading:'Verificando acceso…'},
 it:{account:'Account',client:'Cliente',owner:'Proprietario',admin:'Amministratore',guest:'Ospite',loading:'Verifica accesso…'},
@@ -11,7 +11,7 @@ const WORKSPACE_TEXT:Record<string,Record<string,string>>={"fr": {"assets": "Mes
 for(const lang of Object.keys(WORKSPACE_TEXT))Object.assign(ACCOUNT_HEADER_TEXT[lang],WORKSPACE_TEXT[lang]);
 const PROFILE_FIELDS:Record<string,string[]>={"fr": ["Prénom", "Nom", "Email", "Téléphone", "Adresse"], "en": ["First name", "Last name", "Email", "Phone", "Address"], "es": ["Nombre", "Apellidos", "Email", "Teléfono", "Dirección"], "it": ["Nome", "Cognome", "Email", "Telefono", "Indirizzo"], "de": ["Vorname", "Nachname", "E-Mail", "Telefon", "Adresse"], "nl": ["Voornaam", "Achternaam", "E-mail", "Telefoon", "Adres"], "ru": ["Имя", "Фамилия", "Email", "Телефон", "Адрес"]};
 for(const lang of Object.keys(PROFILE_FIELDS))PROFILE_FIELDS[lang].forEach((label,i)=>ACCOUNT_HEADER_TEXT[lang][['firstname','lastname','email','phone','address'][i]]=label);
-const VIEW_LABELS:Record<string,string[]>={"fr": ["Vue client", "Vue propriétaire"], "en": ["Client view", "Owner view"], "es": ["Vista cliente", "Vista propietario"], "it": ["Vista cliente", "Vista proprietario"], "de": ["Kundenansicht", "Eigentümeransicht"], "nl": ["Klantweergave", "Eigenaarweergave"], "ru": ["Режим клиента", "Режим владельца"]};
+const VIEW_LABELS:Record<string,string[]>={"fr": ["Vue locataire", "Vue propriétaire"], "en": ["Renter view", "Owner view"], "es": ["Vista cliente", "Vista propietario"], "it": ["Vista cliente", "Vista proprietario"], "de": ["Kundenansicht", "Eigentümeransicht"], "nl": ["Klantweergave", "Eigenaarweergave"], "ru": ["Режим клиента", "Режим владельца"]};
 for(const lang of Object.keys(VIEW_LABELS)){ACCOUNT_HEADER_TEXT[lang].clientViewMode=VIEW_LABELS[lang][0];ACCOUNT_HEADER_TEXT[lang].ownerViewMode=VIEW_LABELS[lang][1];}
 export function accountHeaderText(language:string,key:string):string{return ACCOUNT_HEADER_TEXT[language]?.[key]||ACCOUNT_HEADER_TEXT.en[key]||key;}
 
@@ -23,3 +23,5 @@ const PROFILE_ROLE_TEXT:Record<string,string[]>={fr:['Rôles du compte','Rôle p
 for(const[lang,labels]of Object.entries(PROFILE_ROLE_TEXT)){ACCOUNT_HEADER_TEXT[lang].profileRoles=labels[0];ACCOUNT_HEADER_TEXT[lang].primaryRole=labels[1];ACCOUNT_HEADER_TEXT[lang].roleHelp=labels[2];}
 
 for(const[lang,label]of Object.entries({fr:'Propriétaire de bien',en:'Asset owner',es:'Propietario de un bien',it:'Proprietario di un bene',de:'Objekteigentümer',nl:'Objecteigenaar',ru:'Владелец объекта'}))ACCOUNT_HEADER_TEXT[lang].assetOwnerRole=label;
+
+ACCOUNT_HEADER_TEXT.fr.concierge='Propriétaire par délégation';

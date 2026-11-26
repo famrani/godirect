@@ -1,3 +1,4 @@
+"use strict";
 (self["webpackChunkapp"] = self["webpackChunkapp"] || []).push([["common"],{
 
 /***/ 6485:
@@ -6,7 +7,6 @@
   \******************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   createSwipeBackGesture: () => (/* binding */ createSwipeBackGesture)
@@ -105,7 +105,6 @@ const createSwipeBackGesture = (el, canStartHandler, onStartHandler, onMoveHandl
   \****************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   K: () => (/* binding */ Keyboard),
@@ -197,7 +196,6 @@ const Keyboard = {
   \***********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   c: () => (/* binding */ createLockController)
@@ -255,7 +253,6 @@ const createLockController = () => {
   \*********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   startFocusVisible: () => (/* binding */ startFocusVisible)
@@ -326,57 +323,12 @@ const startFocusVisible = rootEl => {
 
 /***/ }),
 
-/***/ 16272:
-/*!*********************************************!*\
-  !*** ./src/app/services/ui-text.service.ts ***!
-  \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   UiTextService: () => (/* binding */ UiTextService)
-/* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _language_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./language.service */ 48756);
-/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../home/site-content-service/site-content.service */ 73196);
-
-
-
-
-let UiTextService = class UiTextService {
-  language;
-  source;
-  content;
-  constructor(language, source) {
-    this.language = language;
-    this.source = source;
-    void source.getContent().then(value => this.content = value).catch(() => {});
-  }
-  text(value) {
-    return this.source.tFromContent(this.content, value, this.language.currentLanguage, value);
-  }
-  static ctorParameters = () => [{
-    type: _language_service__WEBPACK_IMPORTED_MODULE_0__.LanguageService
-  }, {
-    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_1__.SiteContentService
-  }];
-};
-UiTextService = (0,tslib__WEBPACK_IMPORTED_MODULE_2__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Injectable)({
-  providedIn: 'root'
-})], UiTextService);
-
-
-/***/ }),
-
 /***/ 17280:
 /*!***********************************************************!*\
   !*** ./node_modules/@ionic/core/dist/esm/dir-babeabeb.js ***!
   \***********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   i: () => (/* binding */ isRTL)
@@ -407,7 +359,6 @@ const isRTL = hostEl => {
   \***********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   S: () => (/* binding */ SPINNERS)
@@ -565,7 +516,6 @@ const SPINNERS = spinners;
   \*************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   I: () => (/* binding */ ION_CONTENT_CLASS_SELECTOR),
@@ -722,7 +672,6 @@ const resetContentScrollY = (contentEl, initialScrollY) => {
   \*********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   c: () => (/* binding */ createButtonActiveGesture)
@@ -798,13 +747,35 @@ const createButtonActiveGesture = (el, isButton) => {
 
 /***/ }),
 
+/***/ 50831:
+/*!*****************************************!*\
+  !*** ./src/app/services/site-return.ts ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   siteReturn: () => (/* binding */ siteReturn)
+/* harmony export */ });
+/* harmony import */ var _asset_domain__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./asset-domain */ 94984);
+
+function siteReturn(value, host, fallback) {
+  const site = !!(0,_asset_domain__WEBPACK_IMPORTED_MODULE_0__.assetDomainSlug)(host),
+    dest = value || fallback;
+  if (!dest.startsWith('/') || dest.startsWith('//') || /[\\\x00-\x1f]/.test(dest) || dest.startsWith('/account/accept-terms')) return site ? '/' : fallback;
+  const path = dest.split(/[?#]/)[0];
+  if (site && /^\/(?:espaces|(?:boat|car|pool|parking|property)\/[^/]+\/espaces)\/?$/.test(path)) return '/';
+  return dest;
+}
+
+/***/ }),
+
 /***/ 61341:
 /*!*****************************************************************!*\
   !*** ./node_modules/@ionic/core/dist/esm/capacitor-59395cbd.js ***!
   \*****************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   g: () => (/* binding */ getCapacitor)
@@ -830,7 +801,6 @@ const getCapacitor = () => {
   \***************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   c: () => (/* binding */ createKeyboardController)
@@ -1026,7 +996,6 @@ const createKeyboardController = /*#__PURE__*/function () {
   \**************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   I: () => (/* binding */ ImpactStyle),
@@ -1208,7 +1177,6 @@ const hapticImpact = options => {
   \**************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   c: () => (/* binding */ compareOptions),
@@ -1260,7 +1228,6 @@ const isOptionSelected = (currentValue, compareValue, compareWith) => {
   \****************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   KEYBOARD_DID_CLOSE: () => (/* binding */ KEYBOARD_DID_CLOSE),
@@ -1429,7 +1396,6 @@ const copyVisualViewport = visualViewport => {
   \*********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   w: () => (/* binding */ watchForOptions)
@@ -1483,124 +1449,12 @@ const findCheckedOption = (node, tagName) => {
 
 /***/ }),
 
-/***/ 88052:
-/*!*********************************************************************!*\
-  !*** ./src/app/workspace/asset-documents.component.scss?ngResource ***!
-  \*********************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-// Imports
-var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
-var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
-var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
-// Module
-___CSS_LOADER_EXPORT___.push([module.id, `.document-shell {
-  max-width: 980px;
-  margin: 2rem auto;
-  padding: 1rem;
-  color: #173642;
-}
-
-section {
-  border: 1px solid #d3dfe4;
-  border-radius: 18px;
-  background: white;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-}
-
-h1 {
-  font-size: 1.8rem;
-}
-
-h2 {
-  font-size: 1.25rem;
-}
-
-article {
-  padding: 1rem;
-  background: #f3f6f6;
-  border-radius: 12px;
-  margin: 1rem 0;
-  overflow-wrap: anywhere;
-}
-
-.notice {
-  padding: 1rem;
-  background: #e8f1ef;
-  border-radius: 10px;
-}
-
-.actions {
-  display: flex;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-  margin: 0.8rem 0;
-}
-
-label {
-  display: block;
-  margin: 0.7rem 0;
-}
-
-input, textarea {
-  display: block;
-  max-width: 100%;
-  padding: 0.6rem;
-  margin-top: 0.3rem;
-}
-
-textarea {
-  width: 100%;
-  min-height: 5rem;
-}
-
-button {
-  padding: 0.7rem 1rem;
-  border: 0;
-  border-radius: 8px;
-  background: #15546a;
-  color: white;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-fieldset {
-  border: 1px solid #d3dfe4;
-  border-radius: 10px;
-  padding: 1rem;
-}
-
-summary {
-  cursor: pointer;
-  margin-top: 1rem;
-}
-
-[role=alert] {
-  color: #992d25;
-}
-
-.waiver-reason {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}`, "",{"version":3,"sources":["webpack://./src/app/workspace/asset-documents.component.scss"],"names":[],"mappings":"AAAA;EAAgB,gBAAA;EAAgB,iBAAA;EAAiB,aAAA;EAAa,cAAA;AAK9D;;AAL4E;EAAQ,yBAAA;EAAyB,mBAAA;EAAmB,iBAAA;EAAiB,eAAA;EAAe,gBAAA;AAahK;;AAbgL;EAAG,iBAAA;AAiBnL;;AAjBoM;EAAG,kBAAA;AAqBvM;;AArByN;EAAQ,aAAA;EAAa,mBAAA;EAAmB,mBAAA;EAAmB,cAAA;EAAc,uBAAA;AA6BlS;;AA7ByT;EAAQ,aAAA;EAAa,mBAAA;EAAmB,mBAAA;AAmCjW;;AAnCoX;EAAS,aAAA;EAAa,WAAA;EAAU,eAAA;EAAe,gBAAA;AA0Cna;;AA1Ckb;EAAM,cAAA;EAAc,gBAAA;AA+Ctc;;AA/Cqd;EAAe,cAAA;EAAc,eAAA;EAAe,eAAA;EAAc,kBAAA;AAsD/gB;;AAtDgiB;EAAS,WAAA;EAAW,gBAAA;AA2DpjB;;AA3DokB;EAAO,oBAAA;EAAmB,SAAA;EAAS,kBAAA;EAAkB,mBAAA;EAAmB,YAAA;EAAY,eAAA;AAoExpB;;AApEuqB;EAAgB,YAAA;EAAW,eAAA;AAyElsB;;AAzEitB;EAAS,yBAAA;EAAyB,mBAAA;EAAmB,aAAA;AA+EtwB;;AA/EmxB;EAAQ,eAAA;EAAe,gBAAA;AAoF1yB;;AApF0zB;EAAa,cAAA;AAwFv0B;;AAtFA;EAAe,qBAAA;EAAqB,uBAAA;AA2FpC","sourcesContent":[".document-shell{max-width:980px;margin:2rem auto;padding:1rem;color:#173642}section{border:1px solid #d3dfe4;border-radius:18px;background:white;padding:1.5rem;margin:1.5rem 0}h1{font-size:1.8rem}h2{font-size:1.25rem}article{padding:1rem;background:#f3f6f6;border-radius:12px;margin:1rem 0;overflow-wrap:anywhere}.notice{padding:1rem;background:#e8f1ef;border-radius:10px}.actions{display:flex;gap:.7rem;flex-wrap:wrap;margin:.8rem 0}label{display:block;margin:.7rem 0}input,textarea{display:block;max-width:100%;padding:.6rem;margin-top:.3rem}textarea{width:100%;min-height:5rem}button{padding:.7rem 1rem;border:0;border-radius:8px;background:#15546a;color:white;cursor:pointer}button:disabled{opacity:.5;cursor:default}fieldset{border:1px solid #d3dfe4;border-radius:10px;padding:1rem}summary{cursor:pointer;margin-top:1rem}[role=alert]{color:#992d25}\n\n.waiver-reason{white-space:pre-wrap;overflow-wrap:anywhere}\n"],"sourceRoot":""}]);
-// Exports
-module.exports = ___CSS_LOADER_EXPORT___.toString();
-
-
-/***/ }),
-
 /***/ 93871:
 /*!*************************************************************!*\
   !*** ./node_modules/@ionic/core/dist/esm/index-e2cf2ceb.js ***!
   \*************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   a: () => (/* binding */ arrowBackSharp),

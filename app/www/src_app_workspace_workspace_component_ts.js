@@ -12,25 +12,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   WorkspaceComponent: () => (/* binding */ WorkspaceComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _workspace_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./workspace.component.html?ngResource */ 78632);
 /* harmony import */ var _workspace_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./workspace.component.scss?ngResource */ 30366);
 /* harmony import */ var _workspace_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_workspace_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _profile_roles_profile_roles_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../profile-roles/profile-roles.component */ 62632);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/common/http */ 93262);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! rxjs */ 19999);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! rxjs */ 56196);
-/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
-/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
-/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../services/language.service */ 48756);
-/* harmony import */ var _services_account_header__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../services/account-header */ 1768);
-/* harmony import */ var _services_workspace_navigation__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../services/workspace-navigation */ 91613);
+/* harmony import */ var _services_asset_domain__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/asset-domain */ 94984);
+/* harmony import */ var _messaging_message_link_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../messaging/message-link.component */ 870);
+/* harmony import */ var _profile_roles_profile_roles_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../profile-roles/profile-roles.component */ 62632);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! rxjs */ 19999);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../services/language.service */ 48756);
+/* harmony import */ var _services_account_header__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../services/account-header */ 1768);
+/* harmony import */ var _services_workspace_navigation__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../services/workspace-navigation */ 91613);
+
+
 
 
 
@@ -54,6 +58,12 @@ let WorkspaceComponent = class WorkspaceComponent {
   access;
   language;
   route;
+  storefront = typeof location === 'undefined' ? null : (0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_3__.assetDomainSlug)(location.hostname);
+  get bookingScopeLabel() {
+    const fr = this.language.currentLanguage === 'fr';
+    return this.storefront ? (fr ? 'Vos réservations auprès de ' : 'Your bookings with ') + this.storefront : fr ? 'Vos réservations auprès de tous les propriétaires GoDirect.' : 'Your bookings with all GoDirect owners.';
+  }
+  needsLogin = false;
   owner = false;
   kind = 'reservations';
   assets = [];
@@ -74,10 +84,10 @@ let WorkspaceComponent = class WorkspaceComponent {
     this.route = route;
   }
   t(key) {
-    return (0,_services_account_header__WEBPACK_IMPORTED_MODULE_8__.accountHeaderText)(this.language.currentLanguage, key);
+    return (0,_services_account_header__WEBPACK_IMPORTED_MODULE_10__.accountHeaderText)(this.language.currentLanguage, key);
   }
   ngOnInit() {
-    this.sub = (0,rxjs__WEBPACK_IMPORTED_MODULE_10__.combineLatest)([this.route.paramMap, this.route.queryParamMap]).subscribe(() => {
+    this.sub = (0,rxjs__WEBPACK_IMPORTED_MODULE_12__.combineLatest)([this.route.paramMap, this.route.queryParamMap]).subscribe(() => {
       this.owner = this.route.snapshot.data['owner'] === true;
       this.kind = this.route.snapshot.data['kind'] || this.route.snapshot.paramMap.get('section') || 'reservations';
       if (!['profile', 'reservations', 'bookings', 'payments', 'ratings'].includes(this.kind)) this.kind = 'reservations';
@@ -93,22 +103,25 @@ let WorkspaceComponent = class WorkspaceComponent {
     this.assets = [];
   }
   path(a, tail = 'home') {
-    return (0,_services_workspace_navigation__WEBPACK_IMPORTED_MODULE_9__.assetLink)(a, tail);
+    return (0,_services_workspace_navigation__WEBPACK_IMPORTED_MODULE_11__.assetLink)(a, tail);
   }
   get concierge() {
     return this.route?.snapshot?.data?.['concierge'] === true;
   }
   get visible() {
-    return this.rows.filter(b => !this.selected || `${b.assetType}/${b.assetId}` === this.selected);
+    const q = this.route.snapshot.queryParamMap,
+      id = q.get('bookingId');
+    return this.rows.filter(b => (!this.selected || `${b.assetType}/${b.assetId}` === this.selected) && (!this.owner || this.kind !== 'reservations' || !id || (b.bookingId || b.id) === id && b.assetType === q.get('assetType') && b.assetId === q.get('assetId')));
   }
   detail(b) {
-    return (0,_services_workspace_navigation__WEBPACK_IMPORTED_MODULE_9__.assetLink)(b, this.owner ? 'admin/reservations' : 'my-bookings');
+    return (0,_services_workspace_navigation__WEBPACK_IMPORTED_MODULE_11__.assetLink)(b, this.owner ? 'admin/reservations' : 'my-bookings');
   }
   refresh() {
     var _this = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const request = ++_this.request;
       _this.loading = true;
+      _this.needsLogin = false;
       _this.error = '';
       _this.rows = [];
       try {
@@ -117,35 +130,35 @@ let WorkspaceComponent = class WorkspaceComponent {
           headers = yield _this.auth.headers();
         _this.uid = uid;
         if (_this.kind === 'profile') {
-          const p = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this.http.get('/api/me/profile', {
+          const p = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this.http.get('/api/me/profile', {
             headers
           }));
           if (request !== _this.request || (yield _this.auth.user()).uid !== uid) return;
           _this.profile = p;
         } else if (_this.owner) {
-          const list = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this.http.get(_this.concierge ? '/api/concierge/assets' : '/api/owner/listings', {
+          const list = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this.http.get(_this.concierge ? '/api/concierge/assets' : '/api/owner/listings', {
             headers
           }));
           if (request !== _this.request || (yield _this.auth.user()).uid !== uid) return;
-          _this.assets = _this.concierge ? list.filter(a => a.permissions?.bookings) : (0,_services_workspace_navigation__WEBPACK_IMPORTED_MODULE_9__.ownedAssets)(list, uid);
+          _this.assets = _this.concierge ? list.filter(a => a.permissions?.bookings) : (0,_services_workspace_navigation__WEBPACK_IMPORTED_MODULE_11__.ownedAssets)(list, uid);
           if (_this.selected && !_this.assets.some(a => `${a.assetType}/${a.id}` === _this.selected)) throw new Error('owner_required');
           if (_this.kind === 'ratings') {
             if (!_this.selected && _this.assets.length === 1) _this.selected = `${_this.assets[0].assetType}/${_this.assets[0].id}`;
             if (_this.selected) {
               const [type, id] = _this.selected.split('/');
-              const ratings = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this.http.get(`/api/manage/assets/${type}/${id}/feedbacks`, {
+              const ratings = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this.http.get(`/api/manage/assets/${type}/${id}/feedbacks`, {
                 headers
               }));
               if (request === _this.request && (yield _this.auth.user()).uid === uid) _this.rows = ratings;
             }
           } else {
-            const rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this.http.get(_this.concierge ? '/api/manage/bookings' : `/api/owners/${encodeURIComponent(uid)}/bookings`, {
+            const rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this.http.get(_this.concierge ? '/api/manage/bookings' : `/api/owners/${encodeURIComponent(uid)}/bookings`, {
               headers
             }));
             if (request === _this.request && (yield _this.auth.user()).uid === uid) _this.rows = rows.filter(b => (_this.concierge || b.ownerId === uid) && _this.assets.some(a => a.assetType === b.assetType && a.id === b.assetId));
           }
         } else {
-          const rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this.http.get(_this.kind === 'ratings' ? '/api/me/feedbacks' : '/api/me/bookings', {
+          const rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this.http.get(_this.kind === 'ratings' ? '/api/me/feedbacks' : '/api/me/bookings', {
             headers
           }));
           if (request === _this.request && (yield _this.auth.user()).uid === uid) _this.rows = rows;
@@ -154,57 +167,88 @@ let WorkspaceComponent = class WorkspaceComponent {
         if (request === _this.request) {
           _this.rows = [];
           _this.assets = [];
-          _this.error = _this.t('error');
+          _this.needsLogin = _this.kind === 'bookings' && !_this.access.authenticatedUid;
+          _this.error = _this.needsLogin ? '' : _this.t('error');
         }
       } finally {
         if (request === _this.request) _this.loading = false;
       }
     })();
   }
-  save() {
+  reviewRow;
+  stars = 5;
+  comment = '';
+  reviewBusy = false;
+  reviewNotice = '';
+  canReview(b) {
+    return ['bookings', 'reservations'].includes(this.kind) && ['confirmed', 'completed'].includes(b.status) && Date.parse(b.endAt) <= Date.now();
+  }
+  submitReview(b) {
     var _this2 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this2.loading) return;
-      _this2.loading = true;
-      _this2.error = '';
-      _this2.saved = false;
+      _this2.reviewBusy = true;
       try {
-        if ((yield _this2.auth.user()).uid !== _this2.uid) throw new Error('authentication_changed');
-        const p = _this2.profile;
-        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_11__.firstValueFrom)(_this2.http.put('/api/me/profile', {
+        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this2.http.put('/api/stay-reviews/' + [b.assetType, b.assetId, b.id || b.bookingId].map(encodeURIComponent).join('/'), {
+          role: _this2.owner ? 'owner' : 'client',
+          rating: Number(_this2.stars),
+          comments: _this2.comment
+        }, {
+          headers: yield _this2.auth.headers()
+        }));
+        _this2.reviewRow = null;
+        _this2.reviewNotice = 'Avis enregistré.';
+      } catch {
+        _this2.reviewNotice = 'Impossible d’enregistrer cet avis.';
+      } finally {
+        _this2.reviewBusy = false;
+      }
+    })();
+  }
+  save() {
+    var _this3 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this3.loading) return;
+      _this3.loading = true;
+      _this3.needsLogin = false;
+      _this3.error = '';
+      _this3.saved = false;
+      try {
+        if ((yield _this3.auth.user()).uid !== _this3.uid) throw new Error('authentication_changed');
+        const p = _this3.profile;
+        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this3.http.put('/api/me/profile', {
           firstname: p.firstname || '',
           lastname: p.lastname || '',
           phone: p.phone || '',
           address: p.address || '',
           displayName: [p.firstname, p.lastname].filter(Boolean).join(' ')
         }, {
-          headers: yield _this2.auth.headers()
+          headers: yield _this3.auth.headers()
         }));
-        yield _this2.access.refresh();
-        _this2.saved = true;
+        yield _this3.access.refresh();
+        _this3.saved = true;
       } catch {
-        _this2.error = _this2.t('error');
+        _this3.error = _this3.t('error');
       } finally {
-        _this2.loading = false;
+        _this3.loading = false;
       }
     })();
   }
   static ctorParameters = () => [{
-    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_12__.HttpClient
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_14__.HttpClient
   }, {
-    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_5__.ReservationAuthService
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_7__.ReservationAuthService
   }, {
-    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_6__.AssetAccessService
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_8__.AssetAccessService
   }, {
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_7__.LanguageService
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_9__.LanguageService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_13__.ActivatedRoute
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_15__.ActivatedRoute
   }];
 };
-WorkspaceComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_14__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_15__.Component)({
+WorkspaceComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_16__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_17__.Component)({
   selector: 'app-workspace',
   standalone: true,
-  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_16__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_17__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_18__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_4__.PlatformLayoutComponent, _profile_roles_profile_roles_component__WEBPACK_IMPORTED_MODULE_3__.ProfileRolesComponent],
+  imports: [_messaging_message_link_component__WEBPACK_IMPORTED_MODULE_4__.MessageLinkComponent, _angular_common__WEBPACK_IMPORTED_MODULE_18__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_19__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_20__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_6__.PlatformLayoutComponent, _profile_roles_profile_roles_component__WEBPACK_IMPORTED_MODULE_5__.ProfileRolesComponent],
   template: _workspace_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_workspace_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], WorkspaceComponent);
@@ -298,7 +342,31 @@ form {
 
 [role=alert] {
   color: #9b302b;
-}`, "",{"version":3,"sources":["webpack://./src/app/workspace/workspace.component.scss"],"names":[],"mappings":"AAAA;EAAM,cAAA;AAEN;;AAFoB;EAAW,iBAAA;EAAiB,kBAAA;EAAkB,YAAA;AAQlE;;AAR8E;EAAkB,aAAA;EAAa,8BAAA;EAA8B,mBAAA;EAAmB,SAAA;AAe9J;;AAfuK;EAAc,eAAA;AAmBrL;;AAnBoM;EAAiB,aAAA;EAAa,QAAA;EAAQ,cAAA;AAyB1O;;AAzBwP;EAAuD,aAAA;EAAa,yBAAA;EAAyB,kBAAA;EAAkB,aAAA;AAgCvW;;AAhCoX;EAA+B,kBAAA;EAAkB,kBAAA;EAAkB,cAAA;AAsCvb;;AAtCqc;EAAkB,eAAA;EAAe,yBAAA;EAAyB,iBAAA;AA4C/f;;AA5CghB;EAAQ,aAAA;EAAa,2DAAA;EAAyD,SAAA;AAkD9lB;;AAlDumB;EAAwB,aAAA;EAAa,yBAAA;EAAyB,mBAAA;EAAmB,iBAAA;EAAiB,cAAA;AA0DzsB;;AA1DutB;EAA6C,cAAA;EAAc,mBAAA;AA+DlxB;;AA/DqyB;EAAW,eAAA;AAmEhzB;;AAnE+zB;EAAK,gBAAA;AAuEp0B;;AAvEo1B;EAAa,cAAA;AA2Ej2B","sourcesContent":[":host{display:block}.workspace{max-width:1120px;padding:32px 20px;margin:auto}.workspace header{display:flex;justify-content:space-between;align-items:center;gap:20px}.workspace h1{font-size:28px}.workspace label{display:grid;gap:8px;margin:16px 0}.workspace input,.workspace select,.workspace textarea{padding:12px;border:1px solid #bccfc9;border-radius:8px;font:inherit}.workspace button,.workspace a{padding:10px 14px;border-radius:8px;color:#173b36}.workspace button{cursor:pointer;border:1px solid #bccfc9;background:white}.assets{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.assets article,.record{padding:20px;border:1px solid #dce5df;border-radius:12px;background:white;margin:16px 0}.assets article strong,.assets article small{display:block;margin-bottom:12px}.record h2{font-size:20px}form{max-width:650px}[role=alert]{color:#9b302b}"],"sourceRoot":""}]);
+}
+
+.workspace {
+  max-width: 1480px;
+  padding-inline: clamp(12px, 3vw, 48px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .workspace {
+    padding-block: 14px;
+  }
+  .workspace article, .workspace section {
+    padding: 14px;
+    margin-block: 10px;
+  }
+  .workspace header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .workspace input, .workspace select {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/workspace/workspace.component.scss"],"names":[],"mappings":"AAAA;EAAM,cAAA;AAEN;;AAFoB;EAAW,iBAAA;EAAiB,kBAAA;EAAkB,YAAA;AAQlE;;AAR8E;EAAkB,aAAA;EAAa,8BAAA;EAA8B,mBAAA;EAAmB,SAAA;AAe9J;;AAfuK;EAAc,eAAA;AAmBrL;;AAnBoM;EAAiB,aAAA;EAAa,QAAA;EAAQ,cAAA;AAyB1O;;AAzBwP;EAAuD,aAAA;EAAa,yBAAA;EAAyB,kBAAA;EAAkB,aAAA;AAgCvW;;AAhCoX;EAA+B,kBAAA;EAAkB,kBAAA;EAAkB,cAAA;AAsCvb;;AAtCqc;EAAkB,eAAA;EAAe,yBAAA;EAAyB,iBAAA;AA4C/f;;AA5CghB;EAAQ,aAAA;EAAa,2DAAA;EAAyD,SAAA;AAkD9lB;;AAlDumB;EAAwB,aAAA;EAAa,yBAAA;EAAyB,mBAAA;EAAmB,iBAAA;EAAiB,cAAA;AA0DzsB;;AA1DutB;EAA6C,cAAA;EAAc,mBAAA;AA+DlxB;;AA/DqyB;EAAW,eAAA;AAmEhzB;;AAnE+zB;EAAK,gBAAA;AAuEp0B;;AAvEo1B;EAAa,cAAA;AA2Ej2B;;AA1EA;EAAW,iBAAA;EAAiB,sCAAA;EAAoC,sBAAA;AAgFhE;;AAhFsF;EAAwB;IAAW,mBAAA;EAqFvH;EArF0I;IAAsC,aAAA;IAAa,kBAAA;EAyF7L;EAzF+M;IAAkB,eAAA;IAAe,QAAA;EA6FhP;EA7FwP;IAAmC,eAAA;IAAe,sBAAA;EAiG1S;AACF","sourcesContent":[":host{display:block}.workspace{max-width:1120px;padding:32px 20px;margin:auto}.workspace header{display:flex;justify-content:space-between;align-items:center;gap:20px}.workspace h1{font-size:28px}.workspace label{display:grid;gap:8px;margin:16px 0}.workspace input,.workspace select,.workspace textarea{padding:12px;border:1px solid #bccfc9;border-radius:8px;font:inherit}.workspace button,.workspace a{padding:10px 14px;border-radius:8px;color:#173b36}.workspace button{cursor:pointer;border:1px solid #bccfc9;background:white}.assets{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.assets article,.record{padding:20px;border:1px solid #dce5df;border-radius:12px;background:white;margin:16px 0}.assets article strong,.assets article small{display:block;margin-bottom:12px}.record h2{font-size:20px}form{max-width:650px}[role=alert]{color:#9b302b}\n.workspace{max-width:1480px;padding-inline:clamp(12px,3vw,48px);box-sizing:border-box}@media(max-width:600px){.workspace{padding-block:14px}.workspace article,.workspace section{padding:14px;margin-block:10px}.workspace header{flex-wrap:wrap;gap:8px}.workspace input,.workspace select{max-width:100%;box-sizing:border-box}}"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -537,7 +605,7 @@ module.exports = ___CSS_LOADER_EXPORT___.toString();
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<app-platform-layout><main class=\"workspace\"><header><div><p>{{t(owner?'bookingManagement':'account')}}</p><h1>{{t(kind==='bookings'?'customerBookings':kind)}}</h1></div><button type=\"button\" (click)=\"refresh()\" [disabled]=\"loading\">{{t('refresh')}}</button></header>\n<p *ngIf=\"error\" role=\"alert\">{{error}}</p><p *ngIf=\"loading\" role=\"status\">…</p>\n<ng-container *ngIf=\"access.authenticatedUid===uid\"><form *ngIf=\"kind==='profile'&&!loading\" (ngSubmit)=\"save()\"><app-profile-roles [refreshKey]=\"uid\"></app-profile-roles><label>{{t('firstname')}}<input name=\"firstname\" [(ngModel)]=\"profile.firstname\" maxlength=\"120\"></label><label>{{t('lastname')}}<input name=\"lastname\" [(ngModel)]=\"profile.lastname\" maxlength=\"120\"></label><label>Email<input [value]=\"profile.email||''\" readonly></label><label>{{t('phone')}}<input name=\"phone\" [(ngModel)]=\"profile.phone\" maxlength=\"80\"></label><label>{{t('address')}}<textarea name=\"address\" [(ngModel)]=\"profile.address\" maxlength=\"1000\"></textarea></label><button [disabled]=\"loading\">{{t('save')}}</button><p *ngIf=\"saved\" role=\"status\">{{t('saved')}}</p></form>\n<ng-container *ngIf=\"kind!=='profile'\"><label *ngIf=\"owner\">{{t('chooseAsset')}}<select [(ngModel)]=\"selected\" (ngModelChange)=\"kind==='ratings'?refresh():null\"><option value=\"\">{{t(kind==='ratings'?'chooseAsset':'allAssets')}}</option><option *ngFor=\"let a of assets\" [value]=\"a.assetType+'/'+a.id\">{{a.name}} · {{a.assetType}}</option></select></label>\n<div class=\"assets\" *ngIf=\"owner\"><article *ngFor=\"let a of assets\" [hidden]=\"selected&&selected!==a.assetType+'/'+a.id\"><strong>{{a.name}}</strong><small>{{a.assetType}} / {{a.id}}</small><a [routerLink]=\"path(a,'admin/reservations')\">{{t('reservations')}}</a><a [routerLink]=\"path(a,'admin/calendar')\">{{t('calendar')}}</a></article></div>\n<p *ngIf=\"!loading&&!error&&!visible.length\">{{t('empty')}}</p><article class=\"record\" *ngFor=\"let b of visible\"><h2>{{b.assetName||b.assetId}}</h2><small>{{b.assetType}} / {{b.assetId}}</small><ng-container *ngIf=\"kind!=='ratings'\"><p>{{b.startAt||b.outingDate}} → {{b.endAt}}</p><p>{{b.status}}</p><p *ngIf=\"kind==='payments'\">{{b.totalAmount||b.rentalAmount||0}} {{b.currency||'EUR'}} · {{b.paymentStatus||b.status}}</p><a [routerLink]=\"detail(b)\" [queryParams]=\"{bookingId:b.id||b.bookingId}\">{{t('open')}}</a></ng-container><ng-container *ngIf=\"kind==='ratings'\"><p>{{b.rating}} / 5</p><p>{{b.comments}}</p></ng-container></article></ng-container>\n</ng-container></main></app-platform-layout>";
+module.exports = "<app-platform-layout><main class=\"workspace\"><header><div><p>{{t(owner?'bookingManagement':'account')}}</p><h1>{{t(kind==='bookings'?'customerBookings':kind)}}</h1></div><button type=\"button\" (click)=\"refresh()\" [disabled]=\"loading\">{{t('refresh')}}</button></header>\n<ng-container *ngIf=\"!owner && kind==='bookings'\"><p>{{bookingScopeLabel}}</p><a *ngIf=\"needsLogin\" routerLink=\"/account/login\" [queryParams]=\"{returnUrl:'/account/bookings',role:'customer'}\">{{language.currentLanguage==='fr'?'Se connecter pour voir mes réservations':'Sign in to view my bookings'}}</a></ng-container>\n<p *ngIf=\"error\" role=\"alert\">{{error}}</p><p *ngIf=\"loading\" role=\"status\">…</p>\n<ng-container *ngIf=\"access.authenticatedUid===uid\"><form *ngIf=\"kind==='profile'&&!loading\" (ngSubmit)=\"save()\"><app-profile-roles [refreshKey]=\"uid\"></app-profile-roles><label>{{t('firstname')}}<input name=\"firstname\" [(ngModel)]=\"profile.firstname\" maxlength=\"120\"></label><label>{{t('lastname')}}<input name=\"lastname\" [(ngModel)]=\"profile.lastname\" maxlength=\"120\"></label><label>Email<input [value]=\"profile.email||''\" readonly></label><label>{{t('phone')}}<input name=\"phone\" [(ngModel)]=\"profile.phone\" maxlength=\"80\"></label><label>{{t('address')}}<textarea name=\"address\" [(ngModel)]=\"profile.address\" maxlength=\"1000\"></textarea></label><button [disabled]=\"loading\">{{t('save')}}</button><p *ngIf=\"saved\" role=\"status\">{{t('saved')}}</p></form>\n<ng-container *ngIf=\"kind!=='profile'\"><label *ngIf=\"owner\">{{t('chooseAsset')}}<select [(ngModel)]=\"selected\" (ngModelChange)=\"kind==='ratings'?refresh():null\"><option value=\"\">{{t(kind==='ratings'?'chooseAsset':'allAssets')}}</option><option *ngFor=\"let a of assets\" [value]=\"a.assetType+'/'+a.id\">{{a.name}} · {{a.assetType}}</option></select></label>\n<div class=\"assets\" *ngIf=\"owner\"><article *ngFor=\"let a of assets\" [hidden]=\"selected&&selected!==a.assetType+'/'+a.id\"><strong>{{a.name}}</strong><small>{{a.assetType}} / {{a.id}}</small><a [routerLink]=\"path(a,'admin/reservations')\">{{t('reservations')}}</a><a [routerLink]=\"path(a,'admin/calendar')\">{{t('calendar')}}</a></article></div>\n<p *ngIf=\"!loading&&!error&&!needsLogin&&!visible.length\">{{t('empty')}}</p><p role=\"status\">{{reviewNotice}}</p><article class=\"record\" *ngFor=\"let b of visible\"><h2>{{b.assetName||b.assetId}}</h2><small>{{b.assetType}} / {{b.assetId}}</small><ng-container *ngIf=\"kind!=='ratings'\"><p>{{b.startAt||b.outingDate}} → {{b.endAt}}</p><p>{{b.status}}</p><button *ngIf=\"canReview(b)\" (click)=\"reviewRow=b;comment='';stars=5;reviewNotice=''\">Laisser un avis</button><div *ngIf=\"reviewRow===b\"><label>Note sur 5<input type=\"number\" min=\"1\" max=\"5\" [(ngModel)]=\"stars\"></label><label>Commentaire<textarea maxlength=\"2000\" [(ngModel)]=\"comment\"></textarea></label><button [disabled]=\"reviewBusy\" (click)=\"submitReview(b)\">Enregistrer mon avis</button></div><p *ngIf=\"kind==='payments'\">{{b.totalAmount||b.rentalAmount||0}} {{b.currency||'EUR'}} · {{b.paymentStatus||b.status}}</p><app-message-link [threadId]=\"b.messageThreadId||''\" [type]=\"b.assetType\" [assetId]=\"b.assetId\" [bookingId]=\"b.id||b.bookingId\"></app-message-link><app-message-link *ngIf=\"owner\" audience=\"management\" [type]=\"b.assetType\" [assetId]=\"b.assetId\" [bookingId]=\"b.id||b.bookingId\"></app-message-link><a *ngIf=\"storefront\" [href]=\"detail(b)+'?bookingId='+(b.id||b.bookingId)\">{{t('open')}}</a><a *ngIf=\"!storefront\" [routerLink]=\"detail(b)\" [queryParams]=\"{bookingId:b.id||b.bookingId}\">{{t('open')}}</a></ng-container><ng-container *ngIf=\"kind==='ratings'\"><p>{{b.rating}} / 5</p><p>{{b.comments}}</p></ng-container></article></ng-container>\n</ng-container></main></app-platform-layout>";
 
 /***/ })
 

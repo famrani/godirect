@@ -23,7 +23,8 @@ type SocialLink = { label: string; url: string };
 })
 export class SignupComponent {
   legalCatalog:any;legalLabels:any={};legalError='';private legalLoad=0;private legalLanguageSub:any;
-  async loadLegal(){const request=++this.legalLoad;this.legalCatalog=null;this.form?.patchValue({acceptTerms:false});try{const catalog=await this.legal.catalog(registrationRole(this.form?.value.role));if(request!==this.legalLoad)return;this.legalCatalog=catalog;this.legalLabels=catalog.labels;this.legalError=this.legalCatalog.accepting?'':this.legalLabels.signupUnavailable;}catch{this.legalError=this.legalLabels.error||'';}}
+  get customerRegistration(){return registrationRole(this.form?.value.role)==='customer';}
+  async loadLegal(){const request=++this.legalLoad;this.legalCatalog=null;for(const key of ['legalName','adultConfirmed','acceptTerms']){const c=this.form?.get(key);if(this.customerRegistration)c?.disable({emitEvent:false});else c?.enable({emitEvent:false});}if(this.customerRegistration){this.legalError='';return;}this.form?.patchValue({acceptTerms:false});try{const catalog=await this.legal.catalog(registrationRole(this.form?.value.role));if(request!==this.legalLoad)return;this.legalCatalog=catalog;this.legalLabels=catalog.labels;this.legalError=this.legalCatalog.accepting?'':this.legalLabels.signupUnavailable;}catch{this.legalError=this.legalLabels.error||'';}}
   publishIntent=false;
   roles:Array<{id:string,labelKey:string}>=[];
   async ngOnInit():Promise<void>{this.publishIntent=this.route?.snapshot.queryParamMap.get('returnUrl')==='/owner/listings';try{this.roles=await this.registrationProfile.roles();if(this.route.snapshot.queryParamMap.get('returnUrl')==='/concierge'&&this.roles.some(r=>r.id==='concierge'))this.form.patchValue({role:'concierge'});else if(this.publishIntent&&this.roles.some(r=>r.id==='assetOwner'))this.form.patchValue({role:'assetOwner'});}catch{this.error='Le catalogue des rôles est indisponible. Réessayez.';}this.legalLanguageSub=this.legalLanguage.language$.subscribe(()=>{void this.loadLegal();});this.form.get('role')?.valueChanges.subscribe(()=>{void this.loadLegal();});}
@@ -148,7 +149,7 @@ export class SignupComponent {
   async signupWithEmail() {
     this.error = undefined;
     this.success = false;
-    if (this.form.invalid||!this.legalCatalog?.accepting) {this.form.markAllAsTouched();return;}
+    if (this.form.invalid||(!this.customerRegistration&&!this.legalCatalog?.accepting)) {this.form.markAllAsTouched();return;}
 
     this.sending = true;
     try {
@@ -196,7 +197,7 @@ export class SignupComponent {
         provider: 'firebase',
       };
 
-      await this.legal.accept(this.legalCatalog,v.legalName,v.adultConfirmed);
+      if(!this.customerRegistration)await this.legal.accept(this.legalCatalog,v.legalName,v.adultConfirmed);
 
       // 3) save to RTDB
       await this.registrationProfile.save(profile);
@@ -236,7 +237,7 @@ export class SignupComponent {
 
   // ---------- Google signup (IMMEDIATE REDIRECT TO HOME)
   async signupWithGoogle() {
-    if(!this.legalCatalog?.accepting||!this.form.value.acceptTerms||!this.form.value.adultConfirmed||this.form.get('legalName')?.invalid){this.form.markAllAsTouched();return;}
+    if(!this.customerRegistration&&(!this.legalCatalog?.accepting||!this.form.value.acceptTerms||!this.form.value.adultConfirmed||this.form.get('legalName')?.invalid)){this.form.markAllAsTouched();return;}
     this.error = undefined;
     this.sending = true;
 
@@ -275,9 +276,9 @@ export class SignupComponent {
         provider: 'google',
       };
 
-      const catalog=await this.legal.catalog(registrationRole(role));
-      if(catalog.bundleHash!==this.legalCatalog.bundleHash){await this.router.navigate(['/account/accept-terms'],{queryParams:{role:catalog.role,returnUrl:'/account/profile'}});return;}
-      await this.legal.accept(catalog,v.legalName,v.adultConfirmed);
+      if(registrationRole(role)!=='customer'){const catalog=await this.legal.catalog(registrationRole(role));
+      if(catalog.bundleHash!==this.legalCatalog?.bundleHash){await this.router.navigate(['/account/accept-terms'],{queryParams:{role:catalog.role,returnUrl:'/account/profile'}});return;}
+      await this.legal.accept(catalog,v.legalName,v.adultConfirmed);}
       const savedProfile=await this.registrationProfile.save(profile);this.mainSvc.setLoggedUser(savedProfile);
 
       // IMMEDIATE redirect to home (no “user created” banner)

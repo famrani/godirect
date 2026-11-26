@@ -1,3 +1,5 @@
+import {domainAssetId} from './asset-domain.js';
+import {matchesSite,customerScopeFilter} from './portal-sites.js';
 import {queueNotification,queueBookingChange,emitNotification} from './email-notifications.js';
 import {documentSummary,assetDocumentStatus} from './asset-documents.js';
 import {LegalAcceptanceService} from './legal-acceptance.service.js';
@@ -49,7 +51,16 @@ export class AccountAccessService {
       ownsAsset=asset?.ownerId===user.uid;
     }
     const assets=(await this.store.db.ref('assets').once('value')).val()||{},grants=(await this.store.db.ref('assetDelegations').once('value')).val()||{};const delegated=delegatedAssets({assets,assetDelegations:grants},user.uid);const grant=activeDelegation({assets,assetDelegations:grants},user.uid,type,id);const managementPermissions=Object.fromEntries(['content','bookings','customers','payments'].map(p=>[p,(platformAdmin&&p==='content')||ownsAsset||grant?.permissions?.[p]===true]));
-    res.setHeader('Cache-Control','no-store');return res.json({conciergePermissions:Object.fromEntries(['content','bookings','customers','payments'].map(p=>[p,delegated.some(a=>a.permissions?.[p]===true)])),isConcierge:delegated.length>0,delegatedAssetCount:delegated.length,managementPermissions,uid:user.uid,displayName:String(profile.displayName||[profile.firstname||profile.firstName,profile.lastname||profile.lastName].filter(Boolean).join(' ')||profile.name||profile.username||user.name||user.email||''),role,platformAdmin,ownsAsset,isAssetOwner:role==='assetOwner'||profile.roles?.assetOwner===true||ownsAsset||ASSET_TYPES.some(t=>Object.values<any>(assets[t]||{}).some(a=>a?.ownerId===user.uid)),scope:type&&id?`${type}/${id}`:''});
+    const slug=domainAssetId(String(req.headers.host||''));
+    let ownsSite=false;
+    if(slug){
+      const alias=(await this.store.db.ref('assetPrefixes/'+slug).once('value')).val();
+      const anchor=assets[alias?.assetType]?.[alias?.assetId];
+      const owners=new Set(ASSET_TYPES.flatMap(t=>Object.entries<any>(assets[t]||{}).filter(([key,a])=>key===slug||a?.prefix===slug).map(([,a])=>a?.ownerId).filter(Boolean)));
+      const siteOwner=alias?(alias.ownerId&&(!anchor||anchor.ownerId===alias.ownerId)?alias.ownerId:null):owners.size===1?[...owners][0]:null;
+      ownsSite=siteOwner===user.uid;
+    }
+    res.setHeader('Cache-Control','no-store');return res.json({ownsSite,conciergePermissions:Object.fromEntries(['content','bookings','customers','payments'].map(p=>[p,delegated.some(a=>a.permissions?.[p]===true)])),isConcierge:delegated.length>0,delegatedAssetCount:delegated.length,managementPermissions,uid:user.uid,displayName:String(profile.displayName||[profile.firstname||profile.firstName,profile.lastname||profile.lastName].filter(Boolean).join(' ')||profile.name||profile.username||user.name||user.email||''),role,platformAdmin,ownsAsset,isAssetOwner:role==='assetOwner'||profile.roles?.assetOwner===true||ownsAsset||ASSET_TYPES.some(t=>Object.values<any>(assets[t]||{}).some(a=>a?.ownerId===user.uid)),scope:type&&id?`${type}/${id}`:''});
   };
   platformOverview=async(req:Request,res:Response)=>{
     const user=await this.identity(req);const profile=(await this.store.db.ref(`backendusers/${user.uid}`).once('value')).val()||{};
@@ -106,9 +117,46 @@ export class AccountAccessService {
     res.setHeader('Cache-Control','no-store');return res.json({uid:user.uid,primaryRole:roles[0],roles,delegatedAssetCount:delegated.length});
   };
   getProfile=async(req:Request,res:Response)=>{const u=await this.identity(req),p=(await this.store.db.ref(`backendusers/${u.uid}`).once('value')).val()||{};return res.json({firstname:String(p.firstname||p.firstName||''),lastname:String(p.lastname||p.lastName||''),phone:String(p.phone||''),address:String(p.address||''),email:String(u.email||p.email||'')});};
+  getAvatar=async(req:Request,res:Response)=>{
+    const u=await this.identity(req);
+    const [saved,account]=await Promise.all([
+      this.store.db.ref('profileAvatars/'+u.uid).once('value'),
+      this.store.auth.getUser(u.uid)
+    ]);
+    const google=account.providerData.find(p=>p.providerId==='google.com')?.photoURL||'';
+    const googlePhoto=/^https:\/\/lh[0-9]+\.googleusercontent\.com\/[^\s]+$/.test(google)?google:'';
+    const avatar=saved.val();
+    return res.set('Cache-Control','no-store').json({photo:avatar?.source==='google'?googlePhoto:avatar?.source==='upload'?avatar.photo:'',googleAvailable:!!googlePhoto});
+  };
+  saveAvatar=async(req:Request,res:Response)=>{
+    const u=await this.identity(req),{source,photo}=req.body||{};
+    const ref=this.store.db.ref('profileAvatars/'+u.uid);
+    if(source==='none') await ref.remove();
+    else if(source==='google'){
+      const account=await this.store.auth.getUser(u.uid);
+      if(!account.providerData.some(p=>p.providerId==='google.com'&&/^https:\/\/lh[0-9]+\.googleusercontent\.com\/[^\s]+$/.test(p.photoURL||'')))throw fail(400,'google_photo_unavailable');
+      await ref.set({source});
+    }else if(source==='upload'){
+      if(typeof photo!=='string'||photo.length>95000||!/^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(photo))throw fail(400,'invalid_avatar');
+      await ref.set({source,photo});
+    }else throw fail(400,'invalid_avatar');
+    return res.set('Cache-Control','no-store').json({ok:true});
+  };
   private async feedbackData(){return feedbackRows((await this.store.db.ref('backendfeedbacks').once('value')).val());}
-  myFeedbacks=async(req:Request,res:Response)=>{const u=await this.identity(req);return res.json((await this.feedbackData()).filter(r=>[r.userId,r.guestId,r.customerId].some(id=>id===u.uid)).map(publicFeedback));};
-  assetFeedbacks=async(req:Request,res:Response)=>{const u=await this.identity(req),type=String(req.params.type||''),id=String(req.params.id||'');if(!isAssetType(type)||!/^[a-z0-9][a-z0-9_-]*$/.test(id))throw fail(400,'invalid_asset_scope');const a=(await this.store.db.ref(assetPath(type,id)).once('value')).val();const p=(await this.store.db.ref(`backendusers/${u.uid}`).once('value')).val()||{};if(!a||(a.ownerId!==u.uid&&!await hasAssetPermission(this.store,u.uid,type,id,'bookings')))throw fail(403,'owner_required');return res.json((await this.feedbackData()).filter(r=>r.assetType===type&&r.assetId===id).map(publicFeedback));};
+  writeStayReview=async(req:Request,res:Response)=>{
+ const u=await this.identity(req),type=String(req.params.type),id=String(req.params.id),bookingId=String(req.params.bookingId),body=req.body||{};
+ if(!isAssetType(type)||![id,bookingId].every(v=>/^[-a-zA-Z0-9_]{1,128}$/.test(v))||!Number.isInteger(body.rating)||body.rating<1||body.rating>5||typeof body.comments!=='string'||body.comments.length>2000)throw fail(400,'invalid_review');
+ if(!await matchesSite(this.store,String(req.headers.host||''),type,id))throw fail(404,'asset_not_found');
+ const read=async(path:string)=>(await this.store.db.ref(path).once('value')).val();
+ const [a,b]=await Promise.all([read('assets/'+type+'/'+id),read('bookings/'+type+'/'+id+'/'+bookingId)]);
+ const role=body.role;if(!b||!a||b.ownerId===b.customerId||!(role==='owner'&&a.ownerId===u.uid&&b.ownerId===u.uid||role==='client'&&b.customerId===u.uid))throw fail(403,'booking_access_required');
+ if(!['confirmed','completed'].includes(b.status)||!(Date.parse(b.endAt)<=Date.now()))throw fail(409,'stay_not_finished');
+ const row={bookingId,userId:u.uid,ownerId:b.ownerId,customerId:b.customerId,customerName:String(b.customerName||'').slice(0,150),rating:body.rating,comments:body.comments.trim(),date:new Date().toISOString(),authorRole:role};
+ const result=await this.store.db.ref('backendfeedbacks/'+type+'/'+id+'/'+bookingId+'_'+role).transaction(old=>old===null?row:undefined,undefined,false);
+ if(!result.committed)throw fail(409,'review_already_exists');
+ return res.json({ok:true});};
+  myFeedbacks=async(req:Request,res:Response)=>{const u=await this.identity(req);const within=await customerScopeFilter(this.store,String(req.headers.host||''),u.uid,req.query.preview==='owner');return res.json((await this.feedbackData()).filter(within).filter(r=>r.authorRole==='owner'?r.customerId===u.uid:[r.userId,r.guestId,r.customerId].some(id=>id===u.uid)).map(publicFeedback));};
+  assetFeedbacks=async(req:Request,res:Response)=>{const u=await this.identity(req),type=String(req.params.type||''),id=String(req.params.id||'');if(!isAssetType(type)||!/^[a-z0-9][a-z0-9_-]*$/.test(id))throw fail(400,'invalid_asset_scope');const a=(await this.store.db.ref(assetPath(type,id)).once('value')).val();const p=(await this.store.db.ref(`backendusers/${u.uid}`).once('value')).val()||{};if(!a||(a.ownerId!==u.uid&&!await hasAssetPermission(this.store,u.uid,type,id,'bookings')))throw fail(403,'owner_required');return res.json((await this.feedbackData()).filter(r=>r.assetType===type&&r.assetId===id&&(r.authorRole!=='owner'||r.userId===u.uid)).map(r=>({...publicFeedback(r),customerName:r.authorRole==='owner'?String(r.customerName||''):''})));};
   saveProfile=async(req:Request,res:Response)=>{
     const user=await this.identity(req),input=profileSchema.parse(req.body);
     const ref=this.store.db.ref(`backendusers/${user.uid}`);

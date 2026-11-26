@@ -17,7 +17,7 @@ export interface MarketplaceAsset extends AlegriaBoatResource {
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceService {
-  private readonly firebaseUrl = 'https://ailla-poc-default-rtdb.firebaseio.com';
+
 
   constructor(private fleet: FleetService, private http: HttpClient) {}
 
@@ -79,7 +79,7 @@ export class MarketplaceService {
   private async withCmsHeroImage(asset: MarketplaceAsset): Promise<MarketplaceAsset> {
     try {
       const content = await this.http.get<any>(
-        `${this.firebaseUrl}/siteContent/${encodeURIComponent(asset.assetType)}/${encodeURIComponent(asset.assetId)}.json`,
+        `/api/listing-content/${encodeURIComponent(asset.assetType)}/${encodeURIComponent(asset.assetId)}`,
       ).toPromise();
 
       // siteContent is language-scoped (fr/en/es/de/...). Prefer French, then English,

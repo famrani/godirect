@@ -1,3 +1,7 @@
+import {SharedHeaderComponent} from './layout/platform-layout/shared-header.component';
+import {PlatformLayoutComponent} from './layout/platform-layout/platform-layout.component';
+import {RentalHistoryComponent} from './workspace/rental-history.component';
+import {SiteManagementComponent} from './workspace/site-management.component';
 import {PortalHomeComponent} from './portals/portal-home.component';
 import {MessageNotificationsComponent} from './messaging/message-notifications.component';
 import {LegalInterceptor} from './services/legal.interceptor';
@@ -53,7 +57,7 @@ import { OwnerPaymentsComponent } from './owner-payments.component';
 
 @NgModule({
   declarations: [PortalHomeComponent, LegacyRouteRedirectComponent, ResourceDashboardComponent, ResourceListComponent, OwnerPaymentsComponent, AppComponent, Page404Component],
-  imports: [MessageNotificationsComponent,OwnerListingsComponent,ReleaseFooterComponent,
+  imports: [SiteManagementComponent,SharedHeaderComponent,PlatformLayoutComponent,RentalHistoryComponent,MessageNotificationsComponent,OwnerListingsComponent,ReleaseFooterComponent,
     ResourceRoutePipe,
     PlatformAdminComponent,
     OwnerDashboardComponent,ConciergeComponent,HomeRolesComponent,OwnerSitePromoComponent,

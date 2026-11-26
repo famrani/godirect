@@ -32,8 +32,9 @@ export class MyBookingsComponent implements OnInit,OnDestroy {
   }
   constructor(private http:HttpClient,private auth:ReservationAuthService,private stripePayments:StripeConnectPaymentService,public ctx:ResourceContextService,private route:ActivatedRoute,private language:LanguageService,private texts:SiteContentService){}
   offerCopy:any;
+  compactLabel(fr:string,en:string,full:string){const lang=this.language.currentLanguage;return lang==='fr'?fr:lang==='en'?en:full;}
   offer(key:string){const lang=this.language?.currentLanguage||'fr';return this.texts?.tFromContent(this.offerCopy,'ui.ownerOffer.'+key,lang,OWNER_OFFER_TEXT[lang]?.[key]||OWNER_OFFER_TEXT.en[key])||OWNER_OFFER_TEXT[lang]?.[key]||OWNER_OFFER_TEXT.en[key];}
-  async ngOnInit(){void this.texts?.getContent().then(c=>this.offerCopy=c).catch(()=>{});this.createOpen=this.admin&&this.route.snapshot.queryParamMap.get('create')==='1';await this.refresh();const id=this.route.snapshot.queryParamMap.get('bookingId');const booking=this.bookings.find(b=>b.id===id);if(booking)await this.open(booking);}
+  async ngOnInit(){void this.texts?.getContent().then(c=>this.offerCopy=c).catch(()=>{});this.route.queryParamMap.subscribe(params=>{this.createOpen=this.admin&&params.get('create')==='1';});await this.refresh();const id=this.route.snapshot.queryParamMap.get('bookingId');const booking=this.bookings.find(b=>b.id===id);if(booking)await this.open(booking);}
   async refresh(){
     this.loading=true;
     try{

@@ -1,3 +1,4 @@
+import {blocked} from './calendar-rates.js';
 import {domainScope,matchesSite,siteOrigin} from './portal-sites.js';
 import {AssetCalendarService} from './asset-calendar.js';
 import {hasAssetPermission} from './asset-delegation.js';
@@ -20,6 +21,20 @@ export class AssetsService {
     const token=/^Bearer\s+(.+)$/i.exec(String(req.headers.authorization||''))?.[1];if(!token)return false;
     try{const u=await this.firebase.auth.verifyIdToken(token);if(a.deletedAt){const p=(await this.firebase.db.ref(`backendusers/${u.uid}`).once('value')).val()||{};return platformAdministrator(u,p);}if(u.uid===a.ownerId)return true;for(const permission of ['content','bookings','customers','payments'] as const)if(await hasAssetPermission(this.firebase,u.uid,String(a.assetType||a.type),id,permission))return true;const p=(await this.firebase.db.ref(`backendusers/${u.uid}`).once('value')).val()||{};return platformAdministrator(u,p);}catch{return false;}
   }
+  listingContent = async (req:Request,res:Response) => {
+    const type=String(req.params.type), id=String(req.params.id);
+    res.setHeader('Cache-Control','no-store');
+    if(!isAssetType(type)||!/^[a-zA-Z0-9_-]{1,80}$/.test(id))return res.status(404).json({error:'asset_not_found'});
+    const asset=(await this.firebase.db.ref(`assets/${type}/${id}`).once('value')).val();
+    if(!asset||asset.deletedAt||!await matchesSite(this.firebase,String(req.headers.host||''),type,id)||!await listingPublic(this.firebase,type,id,asset))return res.status(404).json({error:'asset_not_found'});
+    const cms=(await this.firebase.db.ref(`siteContent/${type}/${id}`).once('value')).val()||{};
+    const result:Record<string,any>={};
+    for(const lang of ['fr','en','es','it','de','nl','ru']){
+      if(!cms[lang])continue;
+      result[lang]=Object.fromEntries(['homePage','outingsPage','outings','brand','brandTagline','boatPage','boatHighlights','boatHeroImage','boatPhotosConfigured','galleryImages','contactPage','contactInfo','phoneDisplay','phoneRaw'].filter(key=>Object.prototype.hasOwnProperty.call(cms[lang],key)).map(key=>[key,cms[lang][key]]));
+    }
+    return res.json(result);
+  };
   resolveDomain = async (req:Request,res:Response) => {
     res.setHeader('Cache-Control','no-store');
     const scope=await domainScope(this.firebase,String(req.headers.host||''));
@@ -30,6 +45,13 @@ export class AssetsService {
     let rows = Object.entries(snap.val() || {}).filter(([t])=>isAssetType(t)).flatMap(([t,group]:any) => Object.entries(group || {}).map(([id, value]) => ({ ...(value as object), id, assetType:t }))) as Asset[];
     const scope=domainAssetId(String(req.headers.host||''))?await domainScope(this.firebase,String(req.headers.host||'')):null;
     if(domainAssetId(String(req.headers.host||'')))rows=rows.filter(a=>scope?.assetType===a.assetType&&scope?.assetId===a.id);
+    if(req.query.preview==='owner'){
+      const token=/^Bearer\s+(.+)$/i.exec(String(req.headers.authorization||''))?.[1];
+      if(!token)return res.status(401).json({error:'authentication_required'});
+      let uid:string;try{uid=(await this.firebase.auth.verifyIdToken(token)).uid;}catch{return res.status(401).json({error:'authentication_required'});}
+      rows=rows.filter((a:any)=>a.ownerId===uid);
+      res.setHeader('Cache-Control','private, no-store');
+    }
     const filter=parseAssetSearch(req.query);
     if(filter.type)rows=rows.filter(a=>a.assetType===filter.type);
     rows=rows.filter(a=>locationMatches(a,filter.location));
@@ -39,7 +61,7 @@ export class AssetsService {
       rows=(await Promise.all(rows.map(async a=>{
         const bookings=(await this.firebase.db.ref(`bookings/${a.assetType}/${a.id}`).once('value')).val()||{};
         const old=a.assetType==='boat'?Object.values(legacy).filter((b:any)=>!!b&&String(b.assetId||b.boatId||'alegria')===String(a.id)&&(!b.assetType||b.assetType==='boat')).map(legacySearchInterval):[];
-        return [...Object.values(bookings),...old].some(b=>overlapsSearch(b,filter.startAt,filter.endAt))?null:a;
+        return blocked(a,filter.startAt!,filter.endAt!)||[...Object.values(bookings),...old].some(b=>overlapsSearch(b,filter.startAt,filter.endAt))?null:a;
       }))).filter(Boolean) as Asset[];
     }
     return res.json(rows.map(publicAsset));

@@ -34,7 +34,7 @@ export class ParkingHomeComponent implements OnInit, OnDestroy {
   const db:any=this.store;const firebaseAuth=db.firebaseauth||db.firebaseAuth||db.auth;
   if(typeof firebaseAuth?.onAuthStateChanged==='function')this.stopAuth=firebaseAuth.onAuthStateChanged(()=>{void this.refreshDashboard();});
   this.http.get<any>(`/api/assets/${encodeURIComponent(this.ctx.resourceId)}`).subscribe({next:async a=>{
-    try{const resolved=await this.media.resolveFirebaseTree(a);if(this.destroyed)return;this.asset=resolved;this.images=this.assetImages(this.asset);await this.refreshDashboard();}
+    try{const resolved=await this.media.resolveFirebaseTree(a);if(this.destroyed)return;this.asset=resolved;this.images=this.assetImages(a);await this.refreshDashboard();}
     catch{if(!this.destroyed)this.error='Ressource introuvable.';}
   },error:()=>this.error='Ressource introuvable.'});
  }
@@ -76,7 +76,7 @@ export class ParkingHomeComponent implements OnInit, OnDestroy {
   return this.contentService?.tFromContent(this.uiContent,'ui.management.parking.'+key,lang,fallback)||fallback;
  }
  get p(){return this.asset?.properties||{};} get price(){return this.asset?.pricing||{};}
- private assetImages(a:any):string[]{return assetPhotoPaths(a,this.ctx.resourceType,this.ctx.resourceId).map(path=>this.media.objectUrl(path));}
+ private assetImages(a:any):string[]{return assetPhotoPaths(a,this.ctx.resourceType,this.ctx.resourceId).map(path=>this.media.objectUrl(path)||(/^https:\/\//i.test(path)?path:'')).filter(Boolean);}
  get facts():string[]{ return [this.p.secured?this.t('secured'):this.t('standard'),this.p.cctv?this.t('cctv'):this.t('noCctv'),this.p.evCharging?this.t('charging'):this.t('noCharging'),`${this.p.widthM||'-'} × ${this.p.lengthM||'-'} m`,`${this.p.heightLimitM||'-'} m max`];
  }
 }

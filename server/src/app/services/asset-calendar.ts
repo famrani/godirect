@@ -15,19 +15,38 @@ export function calendarRows(rows:any[],start:number,end:number,details:boolean)
  // Public payload has no booking IDs, customer data, statuses or booking links.
  return merged.map(p=>({startAt:new Date(p.a).toISOString(),endAt:new Date(p.z).toISOString()}));
 }
+import {days,dayKey} from './calendar-rates.js';
+import {updateExisting} from './existing-transaction.js';
+import {matchesSite} from './portal-sites.js';
 export class AssetCalendarService {
  constructor(private store:FirebaseService){}
+ edit=async(req:Request,res:Response)=>{
+  const type=String(req.params.type),id=String(req.params.id);
+  if(!isAssetType(type)||!/^[-\w]{1,128}$/.test(id)||!await matchesSite(this.store,req.hostname,type,id))return res.sendStatus(404);
+  const token=/^Bearer (.+)$/.exec(req.headers.authorization||'')?.[1];let uid:string;
+  try{if(!token)throw Error();uid=(await this.store.auth.verifyIdToken(token,true)).uid;}catch{return res.sendStatus(401);}
+  const {start,end,action,rate}=req.body||{},keys=action==='baseRate'?[]:days(start,end);
+  if((action!=='baseRate'&&!keys.length)||!['block','personal','open','rate','reset','baseRate'].includes(action)||(['rate','baseRate'].includes(action)&&(!Number.isFinite(rate)||rate<=0||rate>1000000||Math.abs(Math.round(rate*100)-rate*100)>0.000001)))return res.sendStatus(400);
+  const ref=this.store.db.ref();let failure=403;
+  const tx=await updateExisting(ref,(root:any)=>{const a=root.assets?.[type]?.[id];if(!a||a.deletedAt||a.ownerId!==uid)return;
+   if(action==='baseRate'){a.pricing??={};a.pricing.basePrice=rate;return root;}
+   if(action==='block'||action==='personal'){const legacy=type==='boat'?Object.values<any>(root.bnBookings||{}).filter(b=>String(b.assetId||b.boatId||'alegria')===id).map(legacySearchInterval):[];
+   if([...Object.values<any>(root.bookings?.[type]?.[id]||{}),...legacy].some(b=>!['cancelled','canceled','rejected','refused'].includes(b.status)&&Number.isFinite(Date.parse(b.startAt))&&Number.isFinite(Date.parse(b.endAt))&&dayKey(Date.parse(b.startAt))<=end&&dayKey(Date.parse(b.endAt)-1)>=start)){failure=409;return;}}
+   a.calendarDays??={};for(const k of keys){const v=a.calendarDays[k]??={};if(action==='rate')v.rate=rate;else if(action==='reset')delete v.rate;else if(action==='open')delete v.blocked;else v.blocked=true;if(!Object.keys(v).length)delete a.calendarDays[k];}return root;});
+  return tx.committed?res.json({ok:true}):res.status(failure).json({error:failure===409?'booking_conflict':'owner_required'});
+ };
  get=async(req:Request,res:Response)=>{
   res.setHeader('Cache-Control','private, no-store');
   const type=String(req.params.type),id=String(req.params.id);
   if(!isAssetType(type)||!/^[a-zA-Z0-9_-]{1,180}$/.test(id))return res.status(400).json({error:'invalid_asset_scope'});
+  if(!await matchesSite(this.store,req.hostname,type,id))return res.status(404).json({error:'asset_not_found'});
   const start=Date.parse(String(req.query.start||'')),end=Date.parse(String(req.query.end||''));
   if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start||end-start>66*86400000)return res.status(400).json({error:'invalid_calendar_period'});
   const asset=await findAsset(this.store,id,type);if(!asset||asset.deletedAt)return res.status(404).json({error:'asset_not_found'});
-  let details=false,canManageBookings=false;const token=/^Bearer (.+)$/.exec(req.headers.authorization||'')?.[1];
+  let isOwner=false;let details=false,canManageBookings=false;const token=/^Bearer (.+)$/.exec(req.headers.authorization||'')?.[1];
   if(token){let user:any;try{user=await this.store.auth.verifyIdToken(token,true);}catch{return res.status(401).json({error:'authentication_required'});}
    const profile=(await this.store.db.ref(`backendusers/${user.uid}`).once('value')).val()||{};
-   canManageBookings=user.uid===asset.ownerId||await hasAssetPermission(this.store,user.uid,type,id,'bookings',user);
+   isOwner=user.uid===asset.ownerId;canManageBookings=user.uid===asset.ownerId||await hasAssetPermission(this.store,user.uid,type,id,'bookings',user);
    details=canManageBookings||platformAdministrator(user,profile);
   }
   if(!details&&!await listingPublic(this.store,type,id,asset))return res.status(404).json({error:'asset_not_found'});
@@ -37,6 +56,6 @@ export class AssetCalendarService {
    const legacy=(await this.store.db.ref('bnBookings').once('value')).val()||{};
    for(const [key,b]of Object.entries<any>(legacy))if(b&&String(b.assetId||b.boatId||'alegria')===id&&(!b.assetType||b.assetType==='boat')&&(!b.ownerId||b.ownerId===asset.ownerId)&&!rows.some(row=>row.id===key||row.legacyBookingId===key))rows.push({...legacySearchInterval(b),id:key,calendarSource:'legacy'});
   }
-  return res.json({assetName:asset.name,assetType:type,assetId:id,timeZone:'Europe/Paris',canViewDetails:details,canManageBookings,events:calendarRows(rows,start,end,details)});
+  return res.json({assetName:asset.name,assetType:type,assetId:id,timeZone:'Europe/Paris',isOwner,currency:asset.pricing?.currency||'EUR',unit:asset.pricing?.pricingUnit||'day',basePrice:asset.pricing?.basePrice,days:Object.fromEntries(Object.entries<any>(asset.calendarDays||{}).filter(([k])=>k>=dayKey(start)&&k<=dayKey(end))),canViewDetails:details,canManageBookings,events:calendarRows(rows,start,end,details)});
  };
 }

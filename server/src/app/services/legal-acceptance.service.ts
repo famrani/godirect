@@ -52,9 +52,11 @@ export class LegalAcceptanceService{
   // Account listing access remains available to upload compliance documents.
   if(req.method==='GET'&&p==='/owner/listings'){next();return;}
   const u=await this.identity(req),profile=(await this.store.db.ref(`backendusers/${u.uid}`).once('value')).val()||{};
+  const booking=req.method==='POST'&&/^\/(?:bookings|(?:boat|car|parking|pool|property)-bookings)\/?$/.test(p);
+  if(booking&&String(req.query.admin||'')!=='1'){await this.require(u.uid,'customer');next();return;}
   if(platformManagement({backendusers:{[u.uid]:profile}},u.uid,u)){next();return;}
   let role=legalRole(profile.role);if(/^\/(owner|owners)(\/|$)/.test(p))role='assetOwner';if(/^\/concierge(\/|$)/.test(p))role='concierge';
   if(/^\/(manage|admin\/bookings)(\/|$)/.test(p)){const grants=(await this.store.db.ref('assetDelegations').once('value')).val()||{};if(Object.values<any>(grants).some(t=>Object.values<any>(t||{}).some(a=>a?.[u.uid]?.active===true&&a[u.uid].conciergeId===u.uid)))await this.require(u.uid,'concierge');}
-  await this.require(u.uid,role);next();
+  if(role!=='customer'||booking)await this.require(u.uid,role);next();
  }catch(e:any){if(e.status===503&&e.message==='legal_documents_not_published'){res.setHeader('Cache-Control','no-store');res.status(503).json({error:'legal_documents_not_published',messageKey:'ui.ownerStripeStatus.legalUnavailable',stripeStatusKnown:false,retryable:true});return;}if(e.status===428){res.status(428).json({error:e.message,requiredRole:e.requiredRole});return;}next(e);}};
 }

@@ -1,5 +1,6 @@
+const parisFormatter=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'});
 export function parisDay(value:number|string):string{
- const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(value));
+ const parts=parisFormatter.formatToParts(new Date(value));
  const get=(key:string)=>parts.find(p=>p.type===key)?.value||'';return `${get('year')}-${get('month')}-${get('day')}`;
 }
 export function calendarEventOnDay(event:any,key:string):boolean{

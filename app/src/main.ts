@@ -13,12 +13,15 @@ if (environment.production) {
 }
 
 async function start():Promise<void>{
- if(assetDomainSlug(window.location.hostname)){
+ if(assetDomainSlug(window.location.hostname)&&!/^\/account\/(bookings|login|signup|forgotpwd|accept-terms)\/?$/.test(window.location.pathname)){
+  const q=new URLSearchParams(location.search),parts=location.pathname.split('/');
+  const type=location.pathname==='/site-management'?q.get('type'):parts[1],id=location.pathname==='/site-management'?q.get('id'):parts[2];
+  if(type&&id&&['boat','car','property','pool','parking'].includes(type)&&/^[a-z0-9][a-z0-9_-]*$/.test(id)){setDomainAsset({assetType:type,assetId:id});}else{
   const response=await fetch('/api/asset-domain',{credentials:'same-origin'});
   if(!response.ok)throw new Error('asset_domain_lookup_failed:'+response.status);
   const asset=await response.json();
   if(!['boat','car','property','parking','pool'].includes(asset.assetType)||!/^[a-z0-9][a-z0-9_-]*$/.test(asset.assetId))throw new Error('Invalid asset domain');
-  setDomainAsset(asset);
+  setDomainAsset(asset); }
  }
  initializeBoatRouting();
  await platformBrowserDynamic().bootstrapModule(AppModule);

@@ -1,5 +1,6 @@
+<app-shared-header></app-shared-header>
 <router-outlet></router-outlet>
 
 <app-release-footer></app-release-footer>
 
-<app-message-notifications></app-message-notifications>
+<app-message-notifications *ngIf="!router.url.startsWith('/owner/client-view')"></app-message-notifications>

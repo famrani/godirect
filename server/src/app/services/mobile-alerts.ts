@@ -92,7 +92,7 @@ export class MobileAlerts {
    if((e.channel!=='sms'&&e.channel!=='whatsapp')||!channels()[e.channel as 'sms'|'whatsapp'])return;
    const q=new URLSearchParams({bookingId:e.reference,assetType:e.type,assetId:e.assetId});
    const path=e.kind==='inquiry'?'/messages?threadId='+e.reference:(e.uid===e.ownerId?'/owner/activity/reservations':'/concierge/activity/reservations')+'?'+q;
-   const origin=e.uid===e.ownerId?'https://owner.godirect.fr':'https://concierge.godirect.fr';
+   const origin='https://godirect.fr';
    const link=origin+'/account/login?returnUrl='+encodeURIComponent(path);
    const kind=e.kind==='inquiry'?'demande de renseignement':'demande de réservation';
    const name=String(asset.name||'votre bien').replace(/\s+/g,' ').slice(0,70);

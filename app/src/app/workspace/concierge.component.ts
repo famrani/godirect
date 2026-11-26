@@ -1,3 +1,4 @@
+import {ManagementEntryService,portfolioCover} from '../services/management-entry.service';
 import {MessageLinkComponent} from '../messaging/message-link.component';
 import {AssetListFiltersComponent} from '../shared/asset-list-filters.component';
 import {emptyAssetFilters,matchesAssetFilters,sortAssetRows,searchText} from '../shared/asset-list-filters';
@@ -6,9 +7,11 @@ import {Component,OnInit,OnDestroy} from '@angular/core';import {CommonModule} f
 import {PlatformLayoutComponent} from '../layout/platform-layout/platform-layout.component';import {ReservationAuthService} from '../services/reservation-auth.service';import {AssetAccessService} from '../services/asset-access.service';import {LanguageService} from '../services/language.service';import {conciergeText} from '../services/concierge-text';
 @Component({selector:'app-concierge',standalone:true,imports:[MessageLinkComponent,AssetListFiltersComponent,AssetCalendarLinkComponent,CommonModule,FormsModule,RouterModule,PlatformLayoutComponent],templateUrl:'./concierge.component.html',styleUrls:['./concierge.component.scss']})
 export class ConciergeComponent implements OnInit,OnDestroy{
+ cover=portfolioCover;async openManaged(a:any){try{await this.entryService.open(a,'concierge');}catch{this.error='Ce site est indisponible ou votre accès a changé.';}}
+
  filters=emptyAssetFilters();
  rows:any[]=[];payments:any[]=[];uid='';busy=false;error='';message='';selected='';query='';email='';confirm:any=null;permissions:any={content:true,bookings:true,customers:true,payments:true};readonly permissionKeys=['content','bookings','customers','payments'];private sequence=0;
- constructor(private http:HttpClient,private auth:ReservationAuthService,public access:AssetAccessService,public language:LanguageService,private route:ActivatedRoute){}
+ constructor(private entryService:ManagementEntryService,private http:HttpClient,private auth:ReservationAuthService,public access:AssetAccessService,public language:LanguageService,private route:ActivatedRoute){}
  get delegation(){return this.route.snapshot.data['delegations']===true;}
  t(key:string){return conciergeText(this.language.currentLanguage,key);}
  get asset(){return this.rows.find(a=>a.assetType+'/'+a.id===this.selected);}

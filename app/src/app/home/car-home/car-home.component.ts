@@ -1,3 +1,4 @@
+import { carOfferLabels } from '../../services/car-offer';
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ResourceContextService } from '../../../../services/resource-context.service';
@@ -52,6 +53,8 @@ export class CarHomeComponent implements OnInit {
   get description(): string {
     return this.vehiclePage.description || this.asset?.description || this.asset?.headline || '';
   }
+
+  get carOffer(): string[] { return carOfferLabels(this.p, 'fr'); }
 
   get features(): string[] {
     if (Array.isArray(this.vehiclePage.features) && this.vehiclePage.features.length) return this.vehiclePage.features;

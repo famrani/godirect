@@ -1,3 +1,4 @@
+import { carOfferLabels } from '../../../../services/car-offer';
 import {assetPhotoPaths} from '../../../../services/asset-photos';
 import {SiteContentService} from '../../../../home/site-content-service/site-content.service';
 import { LanguageService } from '../../../../services/language.service';
@@ -61,6 +62,8 @@ export class CarHomeComponent implements OnInit {
   get description(): string {
     return this.localized.description || this.vehiclePage.description || this.localizedDescription || this.localizedHeadline;
   }
+
+  get carOffer(): string[] { return carOfferLabels(this.p, this.language.currentLanguage); }
 
   get features(): string[] {
     if (Array.isArray(this.localized.features) && this.localized.features.length) return this.localized.features;

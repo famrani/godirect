@@ -1,6 +1,6 @@
 <ng-container *ngIf="asset; else loading">
   <main *ngIf="showAdmin; else customerHome" class="management-home">
-    <header class="management-heading">
+    <div *ngIf="images.length" style="display:flex;gap:.5rem;overflow-x:auto;margin-bottom:1rem"><img *ngFor="let src of images" [src]="src" [alt]="asset.name" loading="lazy" style="height:clamp(90px,14vw,175px);max-width:85%;object-fit:cover;border-radius:10px"></div><header class="management-heading">
       <div><span class="eyebrow">{{adminT('eyebrow')}}</span><h1>{{asset.name}}</h1><p class="asset-location" *ngIf="asset.location?.city">{{asset.location.area ? asset.location.area+' · ':''}}{{asset.location.city}} · {{asset.location.country}}</p><h2>{{adminT('title')}}</h2><p>{{adminT('intro')}}</p></div>
       <a class="management-primary" [routerLink]="'/admin/reservations' | resourceRoute" [queryParams]="{create:'1'}">+ {{adminT('newBooking')}}</a>
     </header>

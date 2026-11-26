@@ -1,8 +1,4 @@
 <main class="listings-shell">
-  <header class="page-header" *ngIf="!adminScope">
-    <div><h1>{{'ui.labels.t85f3d8ebb393' | siteText:'Mes annonces et abonnements'}}</h1><p>{{sx('wizardIntro')}}</p></div>
-    <button *ngIf="!creating && !deleting" type="button" (click)="toggleCreate()" [disabled]="busy || importBusy">{{'ui.labels.te9129d054a5a' | siteText:'Créer une annonce'}}</button>
-  </header>
   <p *ngIf="error" class="error" role="alert">{{error | siteText}}</p>
   <p *ngIf="message" role="status">{{message | siteText}}</p>
   <p *ngIf="busy" role="status">{{uploadProgress || ('ui.labels.t01cba1dfba2e' | siteText:'Chargement…')}}</p>
@@ -43,11 +39,12 @@
             <label>{{'ui.labels.t3deb74565196' | siteText:'Type de bien'}}<select name="assetType" [(ngModel)]="form.assetType" [disabled]="!!editing" (ngModelChange)="changeType()"><option *ngFor="let type of types" [value]="type.id">{{type.label | siteText}}</option></select></label>
             <label>{{wx('title')}} *<input name="name" [(ngModel)]="form.name" required maxlength="120" [placeholder]="wx(form.assetType==='car'?'carTitle':'titleExample')"><small>{{wx('titleHint')}}</small></label>
           </div>
-          <p *ngIf="editing?.prefix">{{prefixText('Adresse actuelle','Current address')}} : <a [href]="'https://'+editing.prefix+'.godirect.fr'" target="_blank" rel="noopener">{{editing.prefix}}.godirect.fr</a></p>
-          <section class="prefix-picker" aria-labelledby="prefix-label">
-            <h3 id="prefix-label">{{prefixText('Adresse de votre annonce','Your listing address')}}</h3>
+          <p *ngIf="editing?.prefix">{{prefixText('Adresse actuelle','Current address')}} : <a [href]="'/b/'+editing.prefix" target="_blank" rel="noopener">{{editing.prefix}}.godirect.fr</a></p>
+          <p *ngIf="sitePrefix || editing?.prefix">Site du propriétaire : {{sitePrefix || editing?.prefix}}.godirect.fr · Un abonnement par bien.</p>
+          <section *ngIf="!sitePrefix && !editing?.prefix" class="prefix-picker" aria-labelledby="prefix-label">
+            <h3 id="prefix-label">{{prefixText('Préfixe du site de tous vos biens','Your listing address')}}</h3>
             <label>{{prefixText('Saisissez au moins six lettres','Enter at least six letters')}}<input name="prefixQuery" (blur)="prefixTouched=true" [class.prefix-invalid]="prefixInvalid" [attr.aria-invalid]="prefixInvalid" [ngModel]="prefixInput" (ngModelChange)="prefixChanged($event)" maxlength="63" autocomplete="off" placeholder="monbien" aria-describedby="prefix-hint prefix-error"></label>
-            <small id="prefix-hint">{{prefixText('Choisissez une proposition disponible. Vous pourrez modifier cette adresse.','Select an available suggestion. You can change this address later.')}}</small>
+            <small id="prefix-hint">{{prefixText('Choisissez une proposition disponible. Ce préfixe sera partagé par vos prochains biens.','Select an available suggestion. You can change this address later.')}}</small>
             <p *ngIf="prefixReady && !prefixLoading && !prefixError && !prefixChoices.length" role="status">{{prefixText('Aucune proposition disponible. Essayez un nom plus précis.','No suggestions available. Try a more specific name.')}}</p>
             <p *ngIf="prefixLoading" role="status">{{prefixText('Recherche…','Searching…')}}</p>
             <p *ngIf="prefixValidation" id="prefix-error" class="prefix-error" role="alert">{{prefixValidation}} <button *ngIf="prefixError" type="button" (click)="prefixChanged(prefixInput)">{{prefixText('Réessayer','Retry')}}</button></p>
@@ -58,6 +55,22 @@
           <details class="optional"><summary>{{wx('subtitle')}}</summary><label>{{wx('subtitle')}}<input name="headline" [(ngModel)]="form.headline" maxlength="240"></label></details>
           <h3>{{wx('characteristics')}}</h3>
           <div class="fields"><ng-container *ngFor="let field of fields[form.assetType]"><label *ngIf="field.key!=='rangeKm'" [class.checkbox]="field.type==='checkbox'">{{field.label | siteText}}<input [name]="field.key" [type]="field.type" [(ngModel)]="form.properties[field.key]" [attr.min]="field.type==='number'?0:null"></label></ng-container></div>
+          <div class="fields" *ngIf="form.assetType==='car'">
+            <label>{{prefixText('Catégorie de voiture', 'Car category')}}
+              <select name="carCategory" [(ngModel)]="form.properties.carCategory">
+                <option [ngValue]="undefined" disabled>{{prefixText('Choisir une catégorie', 'Choose a category')}}</option>
+                <option value="standard">{{carChoice('standard')}}</option>
+                <option value="prestige">{{carChoice('prestige')}}</option>
+              </select>
+            </label>
+            <label>{{prefixText('Service de chauffeur', 'Chauffeur service')}}
+              <select name="carService" [(ngModel)]="form.properties.carService">
+                <option [ngValue]="undefined" disabled>{{prefixText('Choisir un service', 'Choose a service')}}</option>
+                <option value="selfDrive">{{carChoice('selfDrive')}}</option>
+                <option value="chauffeured">{{carChoice('chauffeured')}}</option>
+              </select>
+            </label>
+          </div>
           <details *ngIf="form.assetType==='car'" class="optional"><summary>{{wx('moreCharacteristics')}}</summary><label>{{'ui.labels.t43a4bb274dfb' | siteText:'Autonomie (km)'}}<input name="rangeKm" type="number" min="0" [(ngModel)]="form.properties.rangeKm"></label></details>
           <h3>{{wx('location')}}</h3><p class="muted">{{wx('locationHint')}}</p>
           <div class="fields">
@@ -111,21 +124,26 @@
   <ng-template #impactWarning><div class="reservation-warning" *ngIf="impact"><strong *ngIf="impact.active>0">{{lx('warning')}}</strong><p>{{lx('pending')}} {{impact.pending}} · {{lx('confirmed')}} {{impact.confirmed}}</p><p>{{lx('preserve')}}</p><p *ngIf="impact.subscriptionContinues && deleting">{{lx('subscription')}}</p><label class="checkbox" *ngIf="deleting || impact.active>0"><input type="checkbox" [(ngModel)]="acknowledged" [ngModelOptions]="{standalone:true}" [disabled]="busy">{{lx('acknowledge')}}</label></div><button class="quiet" type="button" *ngIf="!impact" (click)="reloadImpact()" [disabled]="busy">{{lx('review')}}</button></ng-template>
 
   <ng-container *ngIf="!adminScope && !creating && !deleting">
-  <nav class="list-toolbar"><label class="checkbox"><input type="checkbox" [(ngModel)]="showArchived" [disabled]="busy">{{lx('showArchived')}}</label><button class="quiet" type="button" (click)="refresh()" [disabled]="busy">{{'ui.labels.t9d3b2a7d8b0d' | siteText:'Actualiser'}}</button></nav>
+  <nav class="list-toolbar"><button class="quiet" type="button" (click)="refresh()" [disabled]="busy">{{'ui.labels.t9d3b2a7d8b0d' | siteText:'Actualiser'}}</button></nav>
   <p *ngIf="!busy && !error && !visibleRows.length">{{'ui.labels.t8a71f9afe03f' | siteText:'Vous n’avez pas encore d’annonce.'}}</p>
   <article *ngFor="let a of visibleRows">
-    <header><div><h2>{{a.name}}</h2><p>{{label(a.assetType) | siteText}} · {{a.public?('ui.labels.t2810e213c9b3' | siteText:'En ligne'):('ui.labels.t2b3e7dcedd58' | siteText:'Hors ligne')}}</p><p *ngIf="a.moderation">{{moderationLabel(a)}}<span *ngIf="a.moderation.reason"> — {{a.moderation.reason}}</span></p></div><span class="status">{{a.billing?.status==='checkout_expired'?wx('checkoutExpired'):(('ui.billingStatus.'+(a.billing?.status || 'required')) | siteText)}}</span></header>
-    <p *ngIf="a.documents">{{ 'ui.documents.title' | siteText }} : {{ ('ui.documents.status_'+a.documents.status) | siteText }} · {{a.documents.validated}} / {{a.documents.total}}</p>
-    <p *ngIf="a.prefix"><a [href]="'https://'+a.prefix+'.godirect.fr'" target="_blank" rel="noopener">{{a.prefix}}.godirect.fr</a></p>
+    <img class="gd-cover" *ngIf="cover(a) as photo" [src]="photo" alt="" loading="lazy" (error)="$any($event.target).hidden=true"><button *ngIf="!adminScope" type="button" (click)="openManaged(a)">Ouvrir mon site</button><header><div><h2>{{a.name}}</h2><p>{{label(a.assetType) | siteText}} · {{a.public?('ui.labels.t2810e213c9b3' | siteText:'En ligne'):('ui.labels.t2b3e7dcedd58' | siteText:'Hors ligne')}}</p><p *ngIf="carOffer(a) as offer">{{offer}}</p><p *ngIf="a.moderation">{{moderationLabel(a)}}<span *ngIf="a.moderation.reason"> — {{a.moderation.reason}}</span></p></div></header>
+    <nav class="listing-checks" aria-label="État du bien">
+    <button type="button" (click)="openSubscription(a)" [class.ready]="a.billing?.active" [attr.aria-expanded]="subscriptionAsset?.id===a.id">{{a.billing?.active?'✓':'○'}} Abonnement</button>
+    <a [routerLink]="['/owner/listings',a.assetType,a.id,'documents']" [class.ready]="['exempted','validated'].includes(a.documents?.status)">{{['exempted','validated'].includes(a.documents?.status)?'✓':'○'}} Justificatifs</a>
+    <span *ngIf="a.moderation?.status==='approved';else needsReview" class="ready">✓ Modération</span>
+    <ng-template #needsReview><a *ngIf="!a.deletedAt;else archived" routerLink="/messages" [queryParams]="{kind:'subscription',audience:'management',type:a.assetType,assetId:a.id,open:'moderation'}" title="Contacter l’administration pour ce bien">○ Modération ↗</a><ng-template #archived><span>○ Modération</span></ng-template></ng-template>
+    </nav>
+    <p *ngIf="a.prefix"><a [href]="'/b/'+a.prefix" target="_blank" rel="noopener" (click)="adminScope ? null : openManagedLink($event,a)">{{a.prefix}}.godirect.fr</a></p>
     <p *ngIf="a.location?.city">{{a.location.city}} · {{a.location.country}}</p>
     <p *ngIf="a.billing?.paidUntil">{{'ui.labels.t0d63aefb4029' | siteText:'Échéance :'}} {{a.billing.paidUntil*1000 | date:'dd/MM/yyyy'}}</p>
     <p class="reservation-warning" *ngIf="a.reservationSummary?.active>0">{{lx('pending')}} {{a.reservationSummary.pending}} · {{lx('confirmed')}} {{a.reservationSummary.confirmed}}</p>
-    <div class="actions"><a [routerLink]="['/owner/listings',a.assetType,a.id,'documents']">{{ 'ui.documents.title' | siteText }}</a>
+    <div class="actions"><app-message-link *ngIf="!a.deletedAt" kind="subscription" audience="management" [type]="a.assetType" [assetId]="a.id"></app-message-link><app-asset-calendar-link *ngIf="!a.deletedAt" [type]="a.assetType" [assetId]="a.id"></app-asset-calendar-link><details #actionsMenu class="more-actions"><summary>{{prefixText('Actions du bien','Listing actions')}}</summary><div (click)="actionsMenu.open=false"><a [routerLink]="['/owner/listings',a.assetType,a.id,'documents']">{{ 'ui.documents.title' | siteText }}</a>
       <button *ngIf="!a.deletedAt" type="button" (click)="prepare(a,'edit')" [disabled]="busy">{{wx('manage')}}</button>
       <a *ngIf="!a.deletedAt" class="secondary" [routerLink]="path(a,'home')">{{'ui.labels.ta79cb6e52048' | siteText:'Voir l’annonce'}}</a>
       <button type="button" class="quiet" (click)="openSubscription(a)" [disabled]="busy" [attr.aria-expanded]="subscriptionAsset?.id===a.id">{{wx('subscription')}}</button>
-      <app-message-link *ngIf="!a.deletedAt" kind="subscription" audience="management" [type]="a.assetType" [assetId]="a.id"></app-message-link><app-asset-calendar-link *ngIf="!a.deletedAt" [type]="a.assetType" [assetId]="a.id"></app-asset-calendar-link><details class="more-actions"><summary>{{wx('more')}}</summary><div>
-        <a [routerLink]="path(a,'admin/reservations')">{{'ui.labels.t3571ba76f535' | siteText:'Réservations'}}</a>
+      
+        <a routerLink="/owner/activity/reservations" [queryParams]="{type:a.assetType,id:a.id}">{{'ui.labels.t3571ba76f535' | siteText:'Réservations'}}</a>
         <button type="button" *ngIf="!a.deletedAt" (click)="action(a,a.moderation?.status==='rejected'?'resubmit':'publication')" [disabled]="busy">{{a.moderation?.status==='rejected'?wx('requestPublication'):(a.published?('ui.labels.tadb05f2ba3e9' | siteText:'Masquer'):('ui.labels.tac3d5933ad45' | siteText:'Demander la publication'))}}</button>
         <button type="button" class="danger-text" *ngIf="!a.deletedAt" (click)="prepare(a,'delete')" [disabled]="busy">{{lx('remove')}}</button>
       </div></details>

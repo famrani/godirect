@@ -39,6 +39,19 @@ const OWNER_DASHBOARD_TEXT = {
     "reservations": "Réservations à suivre",
     "noReservations": "Aucune réservation en cours sur vos annonces.",
     "noAssets": "Vous n’avez pas encore de bien. Créez votre première annonce pour démarrer.",
+    "assetIntro": "Cliquez sur un bien pour modifier son annonce ou utilisez directement l’une des actions proposées.",
+    "edit": "Modifier le bien",
+    "subscribe": "Souscrire l’abonnement",
+    "manageSubscription": "Gérer l’abonnement",
+    "viewListing": "Voir l’annonce",
+    "filters": "Filtres des biens",
+    "typeFilter": "Type",
+    "stateFilter": "État",
+    "locationFilter": "Localisation",
+    "allTypes": "Tous les types",
+    "allStates": "Tous les états",
+    "locationPlaceholder": "Ville, secteur ou pays",
+    "noFilterResult": "Aucun bien ne correspond à ces filtres.",
     "newAsset": "Créer une annonce",
     "reservationAction": "Gérer les réservations",
     "calendar": "Calendrier",
@@ -87,6 +100,19 @@ const OWNER_DASHBOARD_TEXT = {
     "reservations": "Reservations to manage",
     "noReservations": "No ongoing reservations for your listings.",
     "noAssets": "You have no assets yet. Create your first listing to get started.",
+    "assetIntro": "Select an asset to edit its listing, or use one of the quick actions.",
+    "edit": "Edit asset",
+    "subscribe": "Subscribe",
+    "manageSubscription": "Manage subscription",
+    "viewListing": "View listing",
+    "filters": "Asset filters",
+    "typeFilter": "Type",
+    "stateFilter": "Status",
+    "locationFilter": "Location",
+    "allTypes": "All types",
+    "allStates": "All statuses",
+    "locationPlaceholder": "City, area or country",
+    "noFilterResult": "No asset matches these filters.",
     "newAsset": "Create a listing",
     "reservationAction": "Manage reservations",
     "calendar": "Calendar",
@@ -430,11 +456,16 @@ let PlatformAdminGuard = class PlatformAdminGuard {
     this.access = access;
     this.router = router;
   }
-  canActivate() {
+  canActivate(_route, state) {
     var _this = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      yield _this.access.refresh();
-      return _this.access.isPlatformAdmin || _this.router.parseUrl('/');
+      if (yield _this.access.checkPlatformAdmin()) return true;
+      return _this.router.createUrlTree(['/admin-access'], {
+        queryParams: {
+          reason: _this.access.adminAccessFailure || 'session_check_failed',
+          returnUrl: state.url
+        }
+      });
     })();
   }
   static ctorParameters = () => [{
@@ -458,7 +489,7 @@ let OwnerWorkspaceGuard = class OwnerWorkspaceGuard {
     var _this2 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       yield _this2.access.refresh();
-      return _this2.access.isPlatformAdmin ? _this2.router.parseUrl('/platform/admin') : true;
+      return _this2.access.isPlatformAdmin ? _this2.router.parseUrl('/platform/admin') : _this2.access.isOwner || _this2.router.parseUrl('/account/bookings');
     })();
   }
   static ctorParameters = () => [{
@@ -510,22 +541,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ConciergeComponent: () => (/* binding */ ConciergeComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _concierge_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./concierge.component.html?ngResource */ 2042);
 /* harmony import */ var _concierge_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./concierge.component.scss?ngResource */ 55748);
 /* harmony import */ var _concierge_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_concierge_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/common/http */ 93262);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! rxjs */ 56196);
-/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
-/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
-/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/language.service */ 48756);
-/* harmony import */ var _services_concierge_text__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../services/concierge-text */ 90190);
+/* harmony import */ var _services_management_entry_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/management-entry.service */ 32356);
+/* harmony import */ var _messaging_message_link_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../messaging/message-link.component */ 870);
+/* harmony import */ var _shared_asset_list_filters_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../shared/asset-list-filters.component */ 56244);
+/* harmony import */ var _shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../shared/asset-list-filters */ 87461);
+/* harmony import */ var _calendar_asset_calendar_link_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../calendar/asset-calendar-link.component */ 84168);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../services/language.service */ 48756);
+/* harmony import */ var _services_concierge_text__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../services/concierge-text */ 90190);
+
+
+
+
+
 
 
 
@@ -542,11 +583,24 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let ConciergeComponent = class ConciergeComponent {
+  entryService;
   http;
   auth;
   access;
   language;
   route;
+  cover = _services_management_entry_service__WEBPACK_IMPORTED_MODULE_3__.portfolioCover;
+  openManaged(a) {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        yield _this.entryService.open(a, 'concierge');
+      } catch {
+        _this.error = 'Ce site est indisponible ou votre accès a changé.';
+      }
+    })();
+  }
+  filters = (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.emptyAssetFilters)();
   rows = [];
   payments = [];
   uid = '';
@@ -565,7 +619,8 @@ let ConciergeComponent = class ConciergeComponent {
   };
   permissionKeys = ['content', 'bookings', 'customers', 'payments'];
   sequence = 0;
-  constructor(http, auth, access, language, route) {
+  constructor(entryService, http, auth, access, language, route) {
+    this.entryService = entryService;
     this.http = http;
     this.auth = auth;
     this.access = access;
@@ -576,14 +631,14 @@ let ConciergeComponent = class ConciergeComponent {
     return this.route.snapshot.data['delegations'] === true;
   }
   t(key) {
-    return (0,_services_concierge_text__WEBPACK_IMPORTED_MODULE_7__.conciergeText)(this.language.currentLanguage, key);
+    return (0,_services_concierge_text__WEBPACK_IMPORTED_MODULE_12__.conciergeText)(this.language.currentLanguage, key);
   }
   get asset() {
     return this.rows.find(a => a.assetType + '/' + a.id === this.selected);
   }
   get filtered() {
-    const q = this.query.trim().toLowerCase();
-    return this.rows.filter(a => (a.name + ' ' + a.ownerName + ' ' + a.prefix).toLowerCase().includes(q));
+    const q = (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.searchText)(this.query);
+    return (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.sortAssetRows)(this.rows.filter(a => (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.matchesAssetFilters)(a, this.filters) && (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.searchText)([a.name, a.ownerName, a.prefix, a.id].join(' ')).includes(q)));
   }
   get hasPayments() {
     return this.rows.some(a => a.permissions?.payments);
@@ -606,67 +661,67 @@ let ConciergeComponent = class ConciergeComponent {
     return ['/', a.assetType, a.id, ...tail.split('/')];
   }
   refresh() {
-    var _this = this;
+    var _this2 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this.busy) return;
-      const sequence = ++_this.sequence;
-      _this.busy = true;
-      _this.error = '';
-      _this.rows = [];
-      _this.payments = [];
+      if (_this2.busy) return;
+      const sequence = ++_this2.sequence;
+      _this2.busy = true;
+      _this2.error = '';
+      _this2.rows = [];
+      _this2.payments = [];
       try {
-        const uid = (yield _this.auth.user()).uid;
-        _this.uid = uid;
-        const rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this.http.get(_this.delegation ? '/api/owner/delegations' : '/api/concierge/assets', {
-          headers: yield _this.auth.headers()
+        const uid = (yield _this2.auth.user()).uid;
+        _this2.uid = uid;
+        const rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this2.http.get(_this2.delegation ? '/api/owner/delegations' : '/api/concierge/assets', {
+          headers: yield _this2.auth.headers()
         }));
-        if (sequence !== _this.sequence || (yield _this.auth.user()).uid !== uid) return;
-        _this.rows = rows;
-        if (_this.delegation && !_this.selected) {
-          const q = _this.route.snapshot.queryParamMap,
+        if (sequence !== _this2.sequence || (yield _this2.auth.user()).uid !== uid) return;
+        _this2.rows = rows;
+        if (_this2.delegation && !_this2.selected) {
+          const q = _this2.route.snapshot.queryParamMap,
             type = q?.get('type'),
             id = q?.get('id');
-          if (type && id && rows.some(a => a.assetType === type && a.id === id)) _this.selected = type + '/' + id;
+          if (type && id && rows.some(a => a.assetType === type && a.id === id)) _this2.selected = type + '/' + id;
         }
-        if (!_this.delegation && _this.hasPayments) {
-          const payments = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this.http.get('/api/concierge/payments', {
-            headers: yield _this.auth.headers()
+        if (!_this2.delegation && _this2.hasPayments) {
+          const payments = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this2.http.get('/api/concierge/payments', {
+            headers: yield _this2.auth.headers()
           }));
-          if (sequence === _this.sequence && (yield _this.auth.user()).uid === uid) _this.payments = payments;
+          if (sequence === _this2.sequence && (yield _this2.auth.user()).uid === uid) _this2.payments = payments;
         }
-        yield _this.access.refresh();
+        yield _this2.access.refresh();
       } catch {
-        _this.error = _this.t('error');
-        _this.rows = [];
-        _this.payments = [];
+        _this2.error = _this2.t('error');
+        _this2.rows = [];
+        _this2.payments = [];
       } finally {
-        if (sequence === _this.sequence) _this.busy = false;
+        if (sequence === _this2.sequence) _this2.busy = false;
       }
     })();
   }
   save() {
-    var _this2 = this;
+    var _this3 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this2.busy || !_this2.asset || !_this2.email.trim() || !Object.values(_this2.permissions).some(Boolean)) return;
-      _this2.busy = true;
-      _this2.error = '';
-      _this2.message = '';
+      if (_this3.busy || !_this3.asset || !_this3.email.trim() || !Object.values(_this3.permissions).some(Boolean)) return;
+      _this3.busy = true;
+      _this3.error = '';
+      _this3.message = '';
       try {
-        if ((yield _this2.auth.user()).uid !== _this2.uid) throw Error('auth');
-        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this2.http.put('/api/owner/delegations/' + [_this2.asset.assetType, _this2.asset.id].map(encodeURIComponent).join('/'), {
-          email: _this2.email.trim(),
-          permissions: _this2.permissions
+        if ((yield _this3.auth.user()).uid !== _this3.uid) throw Error('auth');
+        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this3.http.put('/api/owner/delegations/' + [_this3.asset.assetType, _this3.asset.id].map(encodeURIComponent).join('/'), {
+          email: _this3.email.trim(),
+          permissions: _this3.permissions
         }, {
-          headers: yield _this2.auth.headers()
+          headers: yield _this3.auth.headers()
         }));
-        _this2.message = _this2.t('saved');
-        _this2.email = '';
+        _this3.message = _this3.t('saved');
+        _this3.email = '';
       } catch (e) {
-        _this2.error = _this2.t(e?.error?.error === 'concierge_account_required' ? 'accountRequired' : 'error');
+        _this3.error = _this3.t(e?.error?.error === 'concierge_account_required' ? 'accountRequired' : 'error');
       } finally {
-        _this2.busy = false;
+        _this3.busy = false;
       }
-      if (!_this2.error) yield _this2.refresh();
+      if (!_this3.error) yield _this3.refresh();
     })();
   }
   edit(g) {
@@ -677,45 +732,122 @@ let ConciergeComponent = class ConciergeComponent {
     this.confirm = null;
   }
   revoke(g) {
-    var _this3 = this;
+    var _this4 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this3.busy || !_this3.asset) return;
-      _this3.busy = true;
-      _this3.error = '';
+      if (_this4.busy || !_this4.asset) return;
+      _this4.busy = true;
+      _this4.error = '';
       try {
-        if ((yield _this3.auth.user()).uid !== _this3.uid) throw Error('auth');
-        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this3.http.delete('/api/owner/delegations/' + [_this3.asset.assetType, _this3.asset.id, g.conciergeId].map(encodeURIComponent).join('/'), {
-          headers: yield _this3.auth.headers()
+        if ((yield _this4.auth.user()).uid !== _this4.uid) throw Error('auth');
+        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_13__.firstValueFrom)(_this4.http.delete('/api/owner/delegations/' + [_this4.asset.assetType, _this4.asset.id, g.conciergeId].map(encodeURIComponent).join('/'), {
+          headers: yield _this4.auth.headers()
         }));
-        _this3.confirm = null;
-        _this3.message = _this3.t('revoked');
+        _this4.confirm = null;
+        _this4.message = _this4.t('revoked');
       } catch {
-        _this3.error = _this3.t('error');
+        _this4.error = _this4.t('error');
       } finally {
-        _this3.busy = false;
+        _this4.busy = false;
       }
-      if (!_this3.error) yield _this3.refresh();
+      if (!_this4.error) yield _this4.refresh();
     })();
   }
   static ctorParameters = () => [{
-    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_9__.HttpClient
+    type: _services_management_entry_service__WEBPACK_IMPORTED_MODULE_3__.ManagementEntryService
   }, {
-    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_4__.ReservationAuthService
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_14__.HttpClient
   }, {
-    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_5__.AssetAccessService
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_9__.ReservationAuthService
   }, {
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_6__.LanguageService
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_10__.AssetAccessService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_10__.ActivatedRoute
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_11__.LanguageService
+  }, {
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_15__.ActivatedRoute
   }];
 };
-ConciergeComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_12__.Component)({
+ConciergeComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_16__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_17__.Component)({
   selector: 'app-concierge',
   standalone: true,
-  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_13__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_14__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_15__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_3__.PlatformLayoutComponent],
+  imports: [_messaging_message_link_component__WEBPACK_IMPORTED_MODULE_4__.MessageLinkComponent, _shared_asset_list_filters_component__WEBPACK_IMPORTED_MODULE_5__.AssetListFiltersComponent, _calendar_asset_calendar_link_component__WEBPACK_IMPORTED_MODULE_7__.AssetCalendarLinkComponent, _angular_common__WEBPACK_IMPORTED_MODULE_18__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_19__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_20__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_8__.PlatformLayoutComponent],
   template: _concierge_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_concierge_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], ConciergeComponent);
+
+
+/***/ }),
+
+/***/ 870:
+/*!*****************************************************!*\
+  !*** ./src/app/messaging/message-link.component.ts ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MessageLinkComponent: () => (/* binding */ MessageLinkComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_link_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2t9YXtkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjttaW4taGVpZ2h0OjQwcHg7cGFkZGluZzo4cHggMTJweDttYXJnaW46NHB4IDhweCA0cHggMDtib3JkZXI6MXB4IHNvbGlkICNiYmQwZDg7Ym9yZGVyLXJhZGl1czo4cHg7dGV4dC1kZWNvcmF0aW9uOm5vbmU7Y29sb3I6IzE2NGY2MjtiYWNrZ3JvdW5kOiNmM2Y4Zjg7Zm9udC1zaXplOjE0cHg7Zm9udC13ZWlnaHQ6NjAwO2JveC1zaXppbmc6Ym9yZGVyLWJveH1hOmZvY3VzLXZpc2libGV7b3V0bGluZTozcHggc29saWQgIzQzOGJhMztvdXRsaW5lLW9mZnNldDoycHh9_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_link_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/messaging/message-link.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2t9YXtkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjttaW4taGVpZ2h0OjQwcHg7cGFkZGluZzo4cHggMTJweDttYXJnaW46NHB4IDhweCA0cHggMDtib3JkZXI6MXB4IHNvbGlkICNiYmQwZDg7Ym9yZGVyLXJhZGl1czo4cHg7dGV4dC1kZWNvcmF0aW9uOm5vbmU7Y29sb3I6IzE2NGY2MjtiYWNrZ3JvdW5kOiNmM2Y4Zjg7Zm9udC1zaXplOjE0cHg7Zm9udC13ZWlnaHQ6NjAwO2JveC1zaXppbmc6Ym9yZGVyLWJveH1hOmZvY3VzLXZpc2libGV7b3V0bGluZTozcHggc29saWQgIzQzOGJhMztvdXRsaW5lLW9mZnNldDoycHh9!./src/app/messaging/message-link.component.ts */ 58735);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_link_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2t9YXtkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjttaW4taGVpZ2h0OjQwcHg7cGFkZGluZzo4cHggMTJweDttYXJnaW46NHB4IDhweCA0cHggMDtib3JkZXI6MXB4IHNvbGlkICNiYmQwZDg7Ym9yZGVyLXJhZGl1czo4cHg7dGV4dC1kZWNvcmF0aW9uOm5vbmU7Y29sb3I6IzE2NGY2MjtiYWNrZ3JvdW5kOiNmM2Y4Zjg7Zm9udC1zaXplOjE0cHg7Zm9udC13ZWlnaHQ6NjAwO2JveC1zaXppbmc6Ym9yZGVyLWJveH1hOmZvY3VzLXZpc2libGV7b3V0bGluZTozcHggc29saWQgIzQzOGJhMztvdXRsaW5lLW9mZnNldDoycHh9_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_link_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_link_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2t9YXtkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjttaW4taGVpZ2h0OjQwcHg7cGFkZGluZzo4cHggMTJweDttYXJnaW46NHB4IDhweCA0cHggMDtib3JkZXI6MXB4IHNvbGlkICNiYmQwZDg7Ym9yZGVyLXJhZGl1czo4cHg7dGV4dC1kZWNvcmF0aW9uOm5vbmU7Y29sb3I6IzE2NGY2MjtiYWNrZ3JvdW5kOiNmM2Y4Zjg7Zm9udC1zaXplOjE0cHg7Zm9udC13ZWlnaHQ6NjAwO2JveC1zaXppbmc6Ym9yZGVyLWJveH1hOmZvY3VzLXZpc2libGV7b3V0bGluZTozcHggc29saWQgIzQzOGJhMztvdXRsaW5lLW9mZnNldDoycHh9_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_link_component_ts__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _message_presentation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./message-presentation */ 34795);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/language.service */ 48756);
+/* harmony import */ var _messaging_text__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./messaging-text */ 17289);
+
+
+
+
+
+
+
+let MessageLinkComponent = class MessageLinkComponent {
+  language;
+  threadId = '';
+  kind = 'reservation';
+  type = '';
+  assetId = '';
+  bookingId = '';
+  audience = 'rental';
+  constructor(language) {
+    this.language = language;
+  }
+  get label() {
+    return (0,_messaging_text__WEBPACK_IMPORTED_MODULE_3__.messagingText)(this.language.currentLanguage, 0) + ' · ' + (this.kind === 'subscription' ? (0,_messaging_text__WEBPACK_IMPORTED_MODULE_3__.messagingText)(this.language.currentLanguage, 7) : this.audience === 'rental' ? (0,_message_presentation__WEBPACK_IMPORTED_MODULE_1__.presentationText)(this.language.currentLanguage, 0) : (0,_messaging_text__WEBPACK_IMPORTED_MODULE_3__.messagingText)(this.language.currentLanguage, 6));
+  }
+  static ctorParameters = () => [{
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_2__.LanguageService
+  }];
+  static propDecorators = {
+    threadId: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+    }],
+    kind: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+    }],
+    type: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+    }],
+    assetId: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+    }],
+    bookingId: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+    }],
+    audience: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+    }]
+  };
+};
+MessageLinkComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.Component)({
+  selector: 'app-message-link',
+  standalone: true,
+  imports: [_angular_router__WEBPACK_IMPORTED_MODULE_6__.RouterModule],
+  template: `<a routerLink="/messages" [queryParams]="threadId?{threadId}:{kind,type,assetId,bookingId,audience}">{{label}}</a>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_link_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2t9YXtkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjttaW4taGVpZ2h0OjQwcHg7cGFkZGluZzo4cHggMTJweDttYXJnaW46NHB4IDhweCA0cHggMDtib3JkZXI6MXB4IHNvbGlkICNiYmQwZDg7Ym9yZGVyLXJhZGl1czo4cHg7dGV4dC1kZWNvcmF0aW9uOm5vbmU7Y29sb3I6IzE2NGY2MjtiYWNrZ3JvdW5kOiNmM2Y4Zjg7Zm9udC1zaXplOjE0cHg7Zm9udC13ZWlnaHQ6NjAwO2JveC1zaXppbmc6Ym9yZGVyLWJveH1hOmZvY3VzLXZpc2libGV7b3V0bGluZTozcHggc29saWQgIzQzOGJhMztvdXRsaW5lLW9mZnNldDoycHh9_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_link_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
+})], MessageLinkComponent);
 
 
 /***/ }),
@@ -735,7 +867,7 @@ __webpack_require__.r(__webpack_exports__);
 const ACCOUNT_HEADER_TEXT = {
   fr: {
     account: 'Compte',
-    client: 'Client',
+    client: 'Locataire',
     owner: 'Propriétaire',
     admin: 'Administrateur',
     guest: 'Invité',
@@ -958,8 +1090,8 @@ const PROFILE_FIELDS = {
 };
 for (const lang of Object.keys(PROFILE_FIELDS)) PROFILE_FIELDS[lang].forEach((label, i) => ACCOUNT_HEADER_TEXT[lang][['firstname', 'lastname', 'email', 'phone', 'address'][i]] = label);
 const VIEW_LABELS = {
-  "fr": ["Vue client", "Vue propriétaire"],
-  "en": ["Client view", "Owner view"],
+  "fr": ["Vue locataire", "Vue propriétaire"],
+  "en": ["Renter view", "Owner view"],
   "es": ["Vista cliente", "Vista propietario"],
   "it": ["Vista cliente", "Vista proprietario"],
   "de": ["Kundenansicht", "Eigentümeransicht"],
@@ -1016,6 +1148,7 @@ for (const [lang, label] of Object.entries({
   nl: 'Objecteigenaar',
   ru: 'Владелец объекта'
 })) ACCOUNT_HEADER_TEXT[lang].assetOwnerRole = label;
+ACCOUNT_HEADER_TEXT.fr.concierge = 'Propriétaire par délégation';
 
 /***/ }),
 
@@ -1102,7 +1235,7 @@ function gcsPhotoPath(value) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<app-platform-layout><main class=\"concierge-shell\"><header><div><h1>{{t(delegation?'delegations':'title')}}</h1><p>{{t(delegation?'ownerIntro':'intro')}}</p></div><button (click)=\"refresh()\" [disabled]=\"busy\">{{t('refresh')}}</button></header><p *ngIf=\"error\" class=\"error\" role=\"alert\">{{error}}</p><p *ngIf=\"message\" class=\"notice\" role=\"status\">{{message}}</p>\n<ng-container *ngIf=\"uid && access.authenticatedUid===uid\"><p class=\"notice\">{{t('reserved')}}</p>\n<ng-container *ngIf=\"delegation; else portfolio\"><label>{{t('choose')}}<select [(ngModel)]=\"selected\" (ngModelChange)=\"confirm=null;email=''\" [disabled]=\"busy\"><option value=\"\">—</option><option *ngFor=\"let a of rows\" [value]=\"a.assetType+'/'+a.id\">{{a.name}} — {{a.ownerName}}</option></select></label>\n<section *ngIf=\"asset\" class=\"panel\"><h2>{{asset.name}}</h2><p>{{t('owner')}} : {{asset.ownerName}}</p><label>{{t('email')}}<input type=\"email\" [(ngModel)]=\"email\" [disabled]=\"busy\" autocomplete=\"off\"></label><p>{{t('accountRequired')}}</p><fieldset [disabled]=\"busy\"><legend>{{t('permissions')}}</legend><label *ngFor=\"let key of permissionKeys\" class=\"check\"><input type=\"checkbox\" [(ngModel)]=\"permissions[key]\"> {{t(key)}}</label></fieldset><button (click)=\"save()\" [disabled]=\"busy || !email.trim()\">{{t('save')}}</button>\n<article *ngFor=\"let g of asset.delegations\" class=\"grant\"><strong>{{g.displayName}}</strong><p>{{g.email}}</p><span *ngFor=\"let key of permissionKeys\"><small *ngIf=\"g.permissions[key]\">{{t(key)}} · </small></span><div><button (click)=\"edit(g)\" [disabled]=\"busy\">{{t('permissions')}}</button><button class=\"danger\" *ngIf=\"confirm!==g\" (click)=\"confirm=g\" [disabled]=\"busy\">{{t('revoke')}}</button><ng-container *ngIf=\"confirm===g\"><button class=\"danger\" (click)=\"revoke(g)\" [disabled]=\"busy\">{{t('confirmRevoke')}}</button><button (click)=\"confirm=null\" [disabled]=\"busy\">{{t('cancel')}}</button></ng-container></div></article><p *ngIf=\"!asset.delegations.length\">{{t('noGrants')}}</p></section></ng-container>\n<ng-template #portfolio><nav><a *ngIf=\"hasBookings\" routerLink=\"/concierge/activity/reservations\">{{t('bookings')}}</a><a *ngIf=\"hasCustomers\" routerLink=\"/concierge/customers\">{{t('clients')}}</a></nav><label>{{t('search')}}<input [(ngModel)]=\"query\" type=\"search\"></label><div class=\"table-scroll\"><table><thead><tr><th>{{t('asset')}}</th><th>{{t('owner')}}</th><th>{{t('permissions')}}</th><th></th></tr></thead><tbody><tr *ngFor=\"let a of filtered\"><td><strong>{{a.name}}</strong><small>{{a.assetType}} · {{a.prefix}}.godirect.fr</small></td><td>{{a.ownerName}}</td><td><span *ngFor=\"let key of permissionKeys\"><small *ngIf=\"a.permissions[key]\">{{t(key)}}</small></span></td><td><a [routerLink]=\"path(a)\">{{t('open')}}</a><a *ngIf=\"a.permissions.content\" [routerLink]=\"path(a,'admin/site-content')\">{{t('edit')}}</a><a *ngIf=\"a.permissions.bookings\" [routerLink]=\"path(a,'admin/reservations')\">{{t('manage')}}</a></td></tr></tbody></table></div><p *ngIf=\"!rows.length && !busy\">{{t('empty')}}</p>\n<section *ngIf=\"hasPayments\" class=\"panel\" id=\"payments\"><h2>{{t('payments')}}</h2><div class=\"table-scroll\"><table><thead><tr><th>{{t('asset')}}</th><th>{{t('date')}}</th><th>{{t('kind')}}</th><th>{{t('amount')}}</th><th>{{t('status')}}</th><th>{{t('reference')}}</th></tr></thead><tbody><tr *ngFor=\"let p of payments\"><td>{{p.assetName}}<small>{{p.bookingId}}</small></td><td>{{p.createdAt|date:'dd/MM/yyyy HH:mm'}}</td><td>{{t(p.kind)}}</td><td>{{p.kind==='security_deposit'?'—':(p.amount|number:'1.2-2')}} {{p.kind==='security_deposit'?'':p.currency}}</td><td>{{p.status}}<small>{{p.stripeMode}}</small></td><td>{{p.id}}</td></tr></tbody></table></div></section></ng-template>\n</ng-container></main></app-platform-layout>\n";
+module.exports = "<app-platform-layout><main class=\"concierge-shell\"><header><div><h1>{{t(delegation?'delegations':'title')}}</h1><p>{{t(delegation?'ownerIntro':'intro')}}</p></div><button (click)=\"refresh()\" [disabled]=\"busy\">{{t('refresh')}}</button></header><p *ngIf=\"error\" class=\"error\" role=\"alert\">{{error}}</p><p *ngIf=\"message\" class=\"notice\" role=\"status\">{{message}}</p>\n<ng-container *ngIf=\"uid && access.authenticatedUid===uid\"><p class=\"notice\">{{t('reserved')}}</p>\n<ng-container *ngIf=\"delegation; else portfolio\"><label>{{t('choose')}}<select [(ngModel)]=\"selected\" (ngModelChange)=\"confirm=null;email=''\" [disabled]=\"busy\"><option value=\"\">—</option><option *ngFor=\"let a of rows\" [value]=\"a.assetType+'/'+a.id\">{{a.name}} — {{a.ownerName}}</option></select></label>\n<section *ngIf=\"asset\" class=\"panel\"><h2>{{asset.name}}</h2><p>{{t('owner')}} : {{asset.ownerName}}</p><label>{{t('email')}}<input type=\"email\" [(ngModel)]=\"email\" [disabled]=\"busy\" autocomplete=\"off\"></label><p>{{t('accountRequired')}}</p><fieldset [disabled]=\"busy\"><legend>{{t('permissions')}}</legend><label *ngFor=\"let key of permissionKeys\" class=\"check\"><input type=\"checkbox\" [(ngModel)]=\"permissions[key]\"> {{t(key)}}</label></fieldset><button (click)=\"save()\" [disabled]=\"busy || !email.trim()\">{{t('save')}}</button>\n<article *ngFor=\"let g of asset.delegations\" class=\"grant\"><strong>{{g.displayName}}</strong><p>{{g.email}}</p><span *ngFor=\"let key of permissionKeys\"><small *ngIf=\"g.permissions[key]\">{{t(key)}} · </small></span><div><button (click)=\"edit(g)\" [disabled]=\"busy\">{{t('permissions')}}</button><button class=\"danger\" *ngIf=\"confirm!==g\" (click)=\"confirm=g\" [disabled]=\"busy\">{{t('revoke')}}</button><ng-container *ngIf=\"confirm===g\"><button class=\"danger\" (click)=\"revoke(g)\" [disabled]=\"busy\">{{t('confirmRevoke')}}</button><button (click)=\"confirm=null\" [disabled]=\"busy\">{{t('cancel')}}</button></ng-container></div></article><p *ngIf=\"!asset.delegations.length\">{{t('noGrants')}}</p></section></ng-container>\n<ng-template #portfolio><nav><a *ngIf=\"hasBookings\" routerLink=\"/concierge/activity/reservations\">{{t('bookings')}}</a><a *ngIf=\"hasCustomers\" routerLink=\"/concierge/customers\">{{t('clients')}}</a></nav><label>{{t('search')}}<input [(ngModel)]=\"query\" type=\"search\"></label><app-asset-list-filters [(value)]=\"filters\" [language]=\"language.currentLanguage\"></app-asset-list-filters><div class=\"table-scroll\"><table><thead><tr><th>{{t('asset')}}</th><th>{{t('owner')}}</th><th>{{t('permissions')}}</th><th></th></tr></thead><tbody><tr *ngFor=\"let a of filtered\"><td><img *ngIf=\"cover(a) as photo\" class=\"gd-cover\" [src]=\"photo\" alt=\"\" loading=\"lazy\" (error)=\"$any($event.target).hidden=true\"><button type=\"button\" (click)=\"openManaged(a)\">{{a.name}}</button><small>{{a.assetType}} · godirect.fr/b/{{a.prefix}}</small><small>{{a.location?.city}} {{a.location?.area}} {{a.location?.country}}</small><small *ngIf=\"a.createdAt\">{{a.createdAt|date:'dd/MM/yyyy'}}</small></td><td>{{a.ownerName}}</td><td><span *ngFor=\"let key of permissionKeys\"><small *ngIf=\"a.permissions[key]\">{{t(key)}}</small></span></td><td><app-message-link *ngIf=\"a.permissions.content\" kind=\"subscription\" audience=\"management\" [type]=\"a.assetType\" [assetId]=\"a.id\"></app-message-link><app-asset-calendar-link *ngIf=\"a.permissions.bookings\" [type]=\"a.assetType\" [assetId]=\"a.id\"></app-asset-calendar-link><button (click)=\"openManaged(a)\">{{t('open')}}</button><a *ngIf=\"a.permissions.content\" [routerLink]=\"path(a,'admin/site-content')\">{{t('edit')}}</a><a *ngIf=\"a.permissions.bookings\" [routerLink]=\"path(a,'admin/reservations')\">{{t('manage')}}</a></td></tr></tbody></table></div><p *ngIf=\"!filtered.length && !busy\">{{t('empty')}}</p>\n<section *ngIf=\"hasPayments\" class=\"panel\" id=\"payments\"><h2>{{t('payments')}}</h2><div class=\"table-scroll\"><table><thead><tr><th>{{t('asset')}}</th><th>{{t('date')}}</th><th>{{t('kind')}}</th><th>{{t('amount')}}</th><th>{{t('status')}}</th><th>{{t('reference')}}</th></tr></thead><tbody><tr *ngFor=\"let p of payments\"><td>{{p.assetName}}<small>{{p.bookingId}}</small></td><td>{{p.createdAt|date:'dd/MM/yyyy HH:mm'}}</td><td>{{t(p.kind)}}</td><td>{{p.kind==='security_deposit'?'—':(p.amount|number:'1.2-2')}} {{p.kind==='security_deposit'?'':p.currency}}</td><td>{{p.status}}<small>{{p.stripeMode}}</small></td><td>{{p.id}}</td></tr></tbody></table></div></section></ng-template>\n</ng-container></main></app-platform-layout>\n";
 
 /***/ }),
 
@@ -1189,7 +1322,7 @@ const LISTING_MODERATION_TEXT = {
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<header class=\"site-header\">\n  <div class=\"platform-return\" *ngIf=\"!isDedicatedAssetSite\"><div class=\"container\"><a routerLink=\"/\" (click)=\"closeMenu()\"><span aria-hidden=\"true\">←</span> {{goDirectHomeLabel}}</a></div></div>\n  <div class=\"container header-bar\">\n    <a class=\"brand\" [routerLink]=\"(homeRoute) | resourceRoute\" (click)=\"closeMenu()\">\n      <img class=\"brand-logo\" [src]=\"logoUrl\" [alt]=\"resourceBrandName\" />\n      <span class=\"brand-text\">\n        <strong>{{ resourceBrandName }}</strong>\n\n      </span>\n    </a>\n\n      <span class=\"account-identity\" *ngIf=\"assetAccess.isAuthenticated\"><strong>{{assetAccess.displayName}}</strong><small>{{accountText(assetAccess.accountMode)}}</small><small *ngIf=\"assetAccess.isManager\">{{accountText(assetAccess.viewMode==='client'?'clientViewMode':(assetAccess.accountMode==='concierge'?'conciergeView':'ownerViewMode'))}}</small></span><button class=\"workspace-view-switch\" type=\"button\" *ngIf=\"assetAccess.isManager\" (click)=\"assetAccess.switchView()\" [disabled]=\"assetAccess.switchingView\">⇄ {{accountText(assetAccess.viewMode==='client'?(assetAccess.accountMode==='concierge'?'conciergeView':'ownerViewMode'):'clientViewMode')}}</button>\n    <button class=\"menu-toggle\" type=\"button\" (click)=\"toggleMenu()\" [attr.aria-label]=\"t('nav.openMenu')\">\n      ☰\n    </button>\n\n    <nav class=\"main-nav\" [class.open]=\"menuOpen\">\n      <div class=\"language-switcher\">\n        <select [value]=\"currentLanguage\" (change)=\"changeLanguage($any($event.target).value)\" [attr.aria-label]=\"t('nav.languageSelector')\">\n          <option value=\"fr\">{{ 'layout.languages.fr' | siteText:'Français' }}</option>\n          <option value=\"en\">{{ 'layout.languages.en' | siteText:'English' }}</option>\n          <option value=\"es\">{{ 'layout.languages.es' | siteText:'Español' }}</option>\n          <option value=\"it\">{{ 'layout.languages.it' | siteText:'Italiano' }}</option>\n          <option value=\"de\">{{ 'layout.languages.de' | siteText:'Deutsch' }}</option>\n          <option value=\"nl\">{{ 'layout.languages.nl' | siteText:'Nederlands' }}</option>\n          <option value=\"ru\">{{ 'layout.languages.ru' | siteText:'Русский' }}</option>\n        </select>\n      </div>\n\n\n      <a [routerLink]=\"'/home' | resourceRoute\" (click)=\"closeMenu()\">{{accountText('clientView')}}</a><a *ngIf=\"!assetAccess.isPlatformAdmin\" [routerLink]=\"'/reserver' | resourceRoute\" (click)=\"closeMenu()\">{{reserveLabel}}</a>\n      <details class=\"nav-dropdown\" *ngIf=\"isAdmin && assetAccess.viewMode==='owner'\" (toggle)=\"onDropdownToggle($event)\"><summary>{{accountText('assetManagement')}}</summary><div class=\"dropdown-panel\"><a [routerLink]=\"assetAccess.isPlatformAdmin?'/platform/admin/assets/'+bookingAssetType+'/'+bookingAssetId:assetAccess.ownsCurrentAsset?'/owner/listings':'/concierge'\" (click)=\"closeMenu()\">{{accountText('assets')}}</a><a *ngIf=\"assetAccess.isConcierge\" routerLink=\"/concierge\">{{accountText('concierge')}}</a><a *ngIf=\"assetAccess.isOwner && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/delegations\">{{accountText('delegations')}}</a><button class=\"dropdown-action\" type=\"button\" (click)=\"switchOwnerView()\">{{switchOwnerViewLabel}}</button></div></details>\n      <details class=\"nav-dropdown\" *ngIf=\"isLoggedIn && !assetAccess.isPlatformAdmin\" (toggle)=\"onDropdownToggle($event)\"><summary>{{accountText('reservations')}}</summary><div class=\"dropdown-panel\"><ng-container *ngIf=\"isAdmin && assetAccess.viewMode==='owner'; else customerBookingLinks\"><a *ngIf=\"assetAccess.canUse('bookings')\" [routerLink]=\"'/admin/reservations' | resourceRoute\" (click)=\"closeMenu()\">{{reservationsLabel}}</a><a *ngIf=\"assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin\" [routerLink]=\"'/admin/calendar' | resourceRoute\" (click)=\"closeMenu()\">{{calendarLabel}}</a><a *ngIf=\"assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/activity/ratings\" [queryParams]=\"{type:bookingAssetType,id:bookingAssetId}\" (click)=\"closeMenu()\">{{accountText('ratings')}}</a><a *ngIf=\"assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/activity/payments\" [queryParams]=\"{type:bookingAssetType,id:bookingAssetId}\" (click)=\"closeMenu()\">{{accountText('payments')}}</a><a *ngIf=\"assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/customers\">{{accountText('customers')}}</a><a *ngIf=\"assetAccess.canConcierge('bookings')\" routerLink=\"/concierge/activity/reservations\">{{accountText('concierge')}} — {{accountText('reservations')}}</a><a *ngIf=\"assetAccess.canConcierge('customers')\" routerLink=\"/concierge/customers\">{{accountText('customers')}}</a><a *ngIf=\"assetAccess.canConcierge('payments')\" routerLink=\"/concierge\" fragment=\"payments\">{{accountText('payments')}}</a></ng-container><ng-template #customerBookingLinks><a [routerLink]=\"'/my-bookings' | resourceRoute\" (click)=\"closeMenu()\">{{myBookingsLabel}}</a><a routerLink=\"/account/ratings\" (click)=\"closeMenu()\">{{accountText('ratings')}}</a><a routerLink=\"/account/payments\" (click)=\"closeMenu()\">{{myPaymentsLabel}}</a></ng-template></div></details>\n      <details class=\"nav-dropdown account-dropdown\" (toggle)=\"onDropdownToggle($event)\"><summary>{{accountText('account')}}</summary><div class=\"dropdown-panel dropdown-panel-right\"><ng-container *ngIf=\"isLoggedIn; else guestAccount\"><a routerLink=\"/account/profile\" (click)=\"closeMenu()\">{{myProfileLabel}}</a><a *ngIf=\"assetAccess.isOwner && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/payments\" (click)=\"closeMenu()\">{{accountText('stripe')}}</a><button class=\"dropdown-action\" type=\"button\" (click)=\"logout()\">{{logoutLabel}}</button></ng-container><ng-template #guestAccount><a [routerLink]=\"'/login' | resourceRoute\" (click)=\"closeMenu()\">{{loginLabel}}</a><a [routerLink]=\"'/signup' | resourceRoute\" (click)=\"closeMenu()\">{{signupLabel}}</a></ng-template></div></details>\n\n    </nav>\n  </div>\n</header>\n";
+module.exports = "<header class=\"site-header\">\n  <div class=\"platform-return\" *ngIf=\"!isDedicatedAssetSite\"><div class=\"container\"><a routerLink=\"/\" (click)=\"closeMenu()\"><span aria-hidden=\"true\">←</span> {{goDirectHomeLabel}}</a></div></div>\n  <div class=\"container header-bar\">\n    <a class=\"brand\" [attr.href]=\"isDedicatedAssetSite ? assetAccess.siteHomeHref : (homeRoute | resourceRoute)\" (click)=\"assetAccess.rememberSiteMode();closeMenu()\">\n      <img class=\"brand-logo\" [src]=\"logoUrl\" [alt]=\"resourceBrandName\" />\n      <span class=\"brand-text\">\n        <strong>{{ resourceBrandName }}</strong>\n\n      </span>\n    </a>\n\n      <span class=\"account-identity\" *ngIf=\"assetAccess.isAuthenticated\"><strong [title]=\"assetAccess.displayName\">{{assetAccess.displayName}}</strong><small>{{accountText(assetAccess.accountMode)}}</small></span>\n<div class=\"language-switcher\">\n        <select [value]=\"currentLanguage\" (change)=\"changeLanguage($any($event.target).value)\" [attr.aria-label]=\"t('nav.languageSelector')\">\n          <option value=\"fr\">{{ 'layout.languages.fr' | siteText:'Français' }}</option>\n          <option value=\"en\">{{ 'layout.languages.en' | siteText:'English' }}</option>\n          <option value=\"es\">{{ 'layout.languages.es' | siteText:'Español' }}</option>\n          <option value=\"it\">{{ 'layout.languages.it' | siteText:'Italiano' }}</option>\n          <option value=\"de\">{{ 'layout.languages.de' | siteText:'Deutsch' }}</option>\n          <option value=\"nl\">{{ 'layout.languages.nl' | siteText:'Nederlands' }}</option>\n          <option value=\"ru\">{{ 'layout.languages.ru' | siteText:'Русский' }}</option>\n        </select>\n      </div>\n<button class=\"menu-toggle\" aria-controls=\"asset-main-nav\" [attr.aria-expanded]=\"menuOpen\" type=\"button\" (click)=\"toggleMenu()\" [attr.aria-label]=\"t('nav.openMenu')\">\n      ☰\n    </button>\n\n    <nav id=\"asset-main-nav\" class=\"main-nav\" [class.open]=\"menuOpen\"><button class=\"workspace-view-switch\" type=\"button\" *ngIf=\"assetAccess.isManager\" (click)=\"assetAccess.switchView()\" [disabled]=\"assetAccess.switchingView\">⇄ {{accountText(assetAccess.viewMode==='client'?(assetAccess.accountMode==='concierge'?'conciergeView':'ownerViewMode'):'clientViewMode')}}</button><a *ngIf=\"assetAccess.isAuthenticated && !assetAccess.isManager\" href=\"https://godirect.fr/owner/start\">{{currentLanguage==='fr'?'Mettre mon bien en location':'List my property'}}</a>\n    \n    \n      \n\n\n      \n      \n      <details class=\"nav-dropdown\" *ngIf=\"isAdmin && assetAccess.viewMode==='owner'\" (toggle)=\"onDropdownToggle($event)\"><summary>{{accountText('assetManagement')}}</summary><div class=\"dropdown-panel\"><a [routerLink]=\"assetAccess.isPlatformAdmin?'/platform/admin/assets/'+bookingAssetType+'/'+bookingAssetId:assetAccess.ownsCurrentAsset?'/owner/listings':'/concierge'\" (click)=\"closeMenu()\">{{accountText('assets')}}</a><a *ngIf=\"assetAccess.isConcierge\" routerLink=\"/concierge\">{{accountText('concierge')}}</a><a *ngIf=\"assetAccess.isOwner && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/delegations\">{{accountText('delegations')}}</a><button class=\"dropdown-action\" type=\"button\" (click)=\"switchOwnerView()\">{{switchOwnerViewLabel}}</button></div></details>\n      <ng-container *ngIf=\"!assetAccess.isPlatformAdmin && (!assetAccess.isManager || assetAccess.viewMode==='client' || assetAccess.canUse('bookings'))\">\n   <div class=\"booking-nav\"><a [routerLink]=\"(!isLoggedIn ? '/login' : assetAccess.isManager && assetAccess.viewMode==='owner' ? '/admin/reservations' : '/my-bookings') | resourceRoute\" (click)=\"closeMenu()\">{{accountText('reservations')}}</a>\n   <details class=\"nav-dropdown\" (toggle)=\"onDropdownToggle($event)\"><summary aria-label=\"Actions de réservation\"><span aria-hidden=\"true\">▾</span></summary><div class=\"dropdown-panel\">\n   <a [routerLink]=\"(assetAccess.isManager && assetAccess.viewMode==='owner' ? '/admin/reservations' : '/reserver') | resourceRoute\" [queryParams]=\"assetAccess.isManager && assetAccess.viewMode==='owner' ? {create:1} : {}\" (click)=\"closeMenu()\">{{currentLanguage==='fr'?'Nouvelle réservation':reserveLabel}}</a><a *ngIf=\"isLoggedIn && assetAccess.isOwner && !assetAccess.isPlatformAdmin && assetAccess.viewMode==='owner'\" routerLink=\"/owner/listings\" [queryParams]=\"{create:1}\" (click)=\"closeMenu()\">{{'ui.labels.te9129d054a5a' | siteText:'Créer une annonce'}}</a><a *ngIf=\"isDedicatedAssetSite && isLoggedIn && (!assetAccess.isManager || assetAccess.viewMode==='client')\" routerLink=\"/site-client\">{{currentLanguage==='fr'?'Mon espace locataire':'My customer space'}}</a><a *ngIf=\"assetAccess.viewMode==='owner' && assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin\" [routerLink]=\"'/admin/calendar' | resourceRoute\" (click)=\"closeMenu()\">{{calendarLabel}}</a><a *ngIf=\"assetAccess.viewMode==='owner' && assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/customers\">{{accountText('customers')}}</a><a *ngIf=\"assetAccess.canConcierge('customers')\" routerLink=\"/concierge/customers\">{{accountText('customers')}}</a></div></details></div></ng-container><details class=\"nav-dropdown account-dropdown\" (toggle)=\"onDropdownToggle($event)\"><summary>{{accountText('account')}}</summary><div class=\"dropdown-panel dropdown-panel-right\"><ng-container *ngIf=\"isLoggedIn; else guestAccount\"><a routerLink=\"/messages\" [queryParams]=\"messageQuery()\" (click)=\"closeMenu()\"><span style=\"position:relative;display:inline-flex;margin-right:12px\">{{messageLabel()}}<app-message-badge></app-message-badge></span></a><a *ngIf=\"assetAccess.viewMode==='owner' && assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/activity/ratings\" [queryParams]=\"{type:bookingAssetType,id:bookingAssetId}\" (click)=\"closeMenu()\">{{accountText('ratings')}}</a><a *ngIf=\"assetAccess.viewMode==='owner' && assetAccess.ownsCurrentAsset && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/activity/payments\" [queryParams]=\"{type:bookingAssetType,id:bookingAssetId}\" (click)=\"closeMenu()\">{{accountText('payments')}}</a><a *ngIf=\"assetAccess.viewMode==='owner' && assetAccess.canConcierge('payments')\" routerLink=\"/concierge\" fragment=\"payments\">{{accountText('payments')}}</a><a *ngIf=\"!assetAccess.isManager || assetAccess.viewMode==='client'\" routerLink=\"/account/ratings\" (click)=\"closeMenu()\">{{accountText('ratings')}}</a><a *ngIf=\"!assetAccess.isManager || assetAccess.viewMode==='client'\" routerLink=\"/account/payments\" (click)=\"closeMenu()\">{{myPaymentsLabel}}</a><a *ngIf=\"assetAccess.isOwner && !assetAccess.isPlatformAdmin && assetAccess.viewMode==='owner'\" routerLink=\"/owner/site-settings\">{{currentLanguage==='fr'?'Paramètres de mon site':'My site settings'}}</a><a routerLink=\"/account/profile\" (click)=\"closeMenu()\">{{myProfileLabel}}</a><a *ngIf=\"assetAccess.isOwner && !assetAccess.isPlatformAdmin\" routerLink=\"/owner/payments\" (click)=\"closeMenu()\">{{accountText('stripe')}}</a><button class=\"dropdown-action\" type=\"button\" (click)=\"logout()\">{{logoutLabel}}</button></ng-container><ng-template #guestAccount><a [routerLink]=\"'/login' | resourceRoute\" (click)=\"closeMenu()\">{{loginLabel}}</a><a [routerLink]=\"'/signup' | resourceRoute\" (click)=\"closeMenu()\">{{signupLabel}}</a></ng-template></div></details>\n\n    </nav>\n  </div>\n</header>\n";
 
 /***/ }),
 
@@ -1708,7 +1841,480 @@ LegalService = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_co
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<app-platform-layout><main class=\"owner-dashboard\">\n<header class=\"dashboard-heading\"><div><p class=\"eyebrow\">GoDirect / {{t('eyebrow')}}</p><h1>{{t('title')}}</h1><p>{{t('intro')}}</p></div><div class=\"dashboard-actions\"><button type=\"button\" (click)=\"refresh()\" [disabled]=\"loading\">{{t('refresh')}}</button><button type=\"button\" class=\"secondary\" (click)=\"browse.emit()\">{{t('browse')}}</button></div></header><aside class=\"offer-summary\"><strong>{{o('commission')}}</strong><p>{{o('service')}}</p><small>{{o('fees')}}</small><details><summary>{{o('features')}}</summary><p *ngFor=\"let feature of ['bookings','payments','ratings','editListings']\"><strong>{{o(feature)}}</strong> — {{o(feature+'Text')}}</p><p>{{o('warrantyNote')}}</p></details></aside>\n<p *ngIf=\"loading\" role=\"status\">{{t('loading')}}</p><p class=\"error\" *ngIf=\"listError\" role=\"alert\">{{t('error')}}</p>\n<section class=\"metrics\" [attr.aria-label]=\"t('eyebrow')\"><a routerLink=\"/owner/listings\"><span>{{t('assets')}}</span><strong>{{loading||listError?t('unknown'):current.length}}</strong></a><a routerLink=\"/owner/listings\"><span>{{t('online')}}</span><strong>{{loading||listError?t('unknown'):online}}</strong></a><a href=\"#owner-reservations\"><span>{{t('pending')}}</span><strong>{{loading||listError?t('unknown'):pending}}</strong></a><a href=\"#owner-reservations\"><span>{{t('confirmed')}}</span><strong>{{loading||listError?t('unknown'):confirmed}}</strong></a></section>\n<section class=\"attention\" *ngIf=\"!loading&&!listError&&(pending>0||subscriptionIssues.length||archivedSubscriptions.length)\"><h2>{{t('attention')}}</h2><p *ngIf=\"pending>0\">{{t('pending')}} : <strong>{{pending}}</strong></p><p *ngIf=\"subscriptionIssues.length\">{{subscriptionIssues.length}} {{t('subscriptionIssue')}}</p><p *ngIf=\"archivedSubscriptions.length\">{{archivedSubscriptions.length}} {{t('archivedSubscription')}}</p><a routerLink=\"/owner/listings\">{{t('review')}} →</a></section>\n<div class=\"management-grid\"><section class=\"panel\"><h2>{{t('subscriptions')}}</h2><p>{{t('subscriptionIntro')}}</p><a class=\"button\" routerLink=\"/owner/listings\">{{t('manage')}} →</a></section><section class=\"panel\"><h2>{{t('payments')}}</h2><p>{{t('paymentIntro')}}</p><p *ngIf=\"stripeError\" class=\"error\" role=\"alert\">{{t('error')}}</p><ng-container *ngIf=\"!loading&&!stripeError\"><strong [class.needs-setup]=\"!stripeReady\">{{t(stripeReady?'ready':'setup')}}</strong><small *ngIf=\"stripe?.mode==='test'\">{{t('testMode')}}</small></ng-container><a class=\"button\" routerLink=\"/owner/payments\">{{t('stripeAction')}} →</a></section></div>\n<section class=\"panel\" id=\"owner-reservations\"><h2>{{t('reservations')}}</h2><p *ngIf=\"!loading&&!listError&&!reservationAssets.length\">{{t('noReservations')}}</p><article class=\"reservation-row\" *ngFor=\"let a of reservationAssets\"><div><h3>{{a.name}} <small *ngIf=\"a.deletedAt\">{{t('archived')}}</small></h3><p>{{t('pending')}} : {{a.reservationSummary.pending}} · {{t('confirmed')}} : {{a.reservationSummary.confirmed}}</p></div><div class=\"dashboard-actions\"><a class=\"button\" [routerLink]=\"path(a,'admin/reservations')\">{{t('reservationAction')}}</a><a [routerLink]=\"path(a,'admin/calendar')\">{{t('calendar')}}</a></div></article></section>\n<section class=\"panel\"><header class=\"section-heading\"><h2>{{t('assets')}}</h2><a routerLink=\"/owner/listings\">{{t('allAssets')}} →</a></header><p *ngIf=\"!loading&&!listError&&!current.length\">{{t('noAssets')}}</p><div class=\"table-scroll\" *ngIf=\"current.length\"><table><thead><tr><th>{{t('name')}}</th><th>{{t('status')}}</th><th>{{t('subscription')}}</th><th>{{t('expiry')}}</th><th>{{t('actions')}}</th></tr></thead><tbody><tr *ngFor=\"let a of current\"><td><strong>{{a.name}}</strong><small>{{a.location?.city}}</small></td><td>{{t(a.public?'published':'offline')}}</td><td>{{t(!a.billing?'required':a.billing.status==='active'?'active':'otherStatus')}}<small *ngIf=\"a.billing?.cancelAtPeriodEnd\">{{t('cancelAtEnd')}}</small></td><td>{{a.billing?.paidUntil?(a.billing.paidUntil*1000|date:'dd/MM/yyyy'):t('unknown')}}</td><td><a [routerLink]=\"path(a,'admin/reservations')\">{{t('reservationAction')}}</a><br><a [routerLink]=\"path(a,'admin/site-content')\">{{t('content')}}</a><br><a *ngIf=\"a.assetType==='boat'\" [routerLink]=\"path(a,'admin/site-content')\" [queryParams]=\"{tab:'outings'}\">{{'ui.boatOutings.edit' | siteText}}</a></td></tr></tbody></table></div><a class=\"button\" routerLink=\"/owner/listings\">{{t('newAsset')}} →</a></section>\n</main></app-platform-layout>\n";
+module.exports = "<app-platform-layout><main class=\"owner-dashboard\">\n<header class=\"dashboard-heading\"><div><p class=\"eyebrow\">GoDirect / {{t('eyebrow')}}</p><h1>{{t('title')}}</h1><p>{{t('intro')}}</p></div><div class=\"dashboard-actions\"><button type=\"button\" (click)=\"refresh()\" [disabled]=\"loading\">{{t('refresh')}}</button><button type=\"button\" class=\"secondary\" (click)=\"browse.emit()\">{{t('browse')}}</button></div></header><aside class=\"offer-summary\"><strong>{{o('commission')}}</strong><p>{{o('service')}}</p><small>{{o('fees')}}</small><details><summary>{{o('features')}}</summary><p *ngFor=\"let feature of ['bookings','payments','ratings','editListings']\"><strong>{{o(feature)}}</strong> — {{o(feature+'Text')}}</p><p>{{o('warrantyNote')}}</p></details></aside>\n<p *ngIf=\"loading\" role=\"status\">{{t('loading')}}</p><p class=\"error\" *ngIf=\"listError\" role=\"alert\">{{t('error')}}</p>\n<section class=\"metrics\" [attr.aria-label]=\"t('eyebrow')\"><a routerLink=\"/owner/listings\"><span>{{t('assets')}}</span><strong>{{loading||listError?t('unknown'):current.length}}</strong></a><a routerLink=\"/owner/listings\"><span>{{t('online')}}</span><strong>{{loading||listError?t('unknown'):online}}</strong></a><a href=\"#owner-reservations\"><span>{{t('pending')}}</span><strong>{{loading||listError?t('unknown'):pending}}</strong></a><a href=\"#owner-reservations\"><span>{{t('confirmed')}}</span><strong>{{loading||listError?t('unknown'):confirmed}}</strong></a></section>\n<section class=\"attention\" *ngIf=\"!loading&&!listError&&(pending>0||subscriptionIssues.length||archivedSubscriptions.length)\"><h2>{{t('attention')}}</h2><p *ngIf=\"pending>0\">{{t('pending')}} : <strong>{{pending}}</strong></p><p *ngIf=\"subscriptionIssues.length\">{{subscriptionIssues.length}} {{t('subscriptionIssue')}}</p><p *ngIf=\"archivedSubscriptions.length\">{{archivedSubscriptions.length}} {{t('archivedSubscription')}}</p><a routerLink=\"/owner/listings\">{{t('review')}} →</a></section>\n<div class=\"management-grid\"><section class=\"panel\"><h2>{{t('subscriptions')}}</h2><p>{{t('subscriptionIntro')}}</p><a class=\"button\" routerLink=\"/owner/listings\">{{t('manage')}} →</a></section><section class=\"panel\"><h2>{{t('payments')}}</h2><p>{{t('paymentIntro')}}</p><p *ngIf=\"stripeError\" class=\"error\" role=\"alert\">{{t('error')}}</p><ng-container *ngIf=\"!loading&&!stripeError\"><strong [class.needs-setup]=\"!stripeReady\">{{t(stripeReady?'ready':'setup')}}</strong><small *ngIf=\"stripe?.mode==='test'\">{{t('testMode')}}</small></ng-container><a class=\"button\" routerLink=\"/owner/payments\">{{t('stripeAction')}} →</a></section></div>\n<section class=\"panel\" id=\"owner-reservations\"><h2>{{t('reservations')}}</h2><p *ngIf=\"!loading&&!listError&&!reservationAssets.length\">{{t('noReservations')}}</p><article class=\"reservation-row\" *ngFor=\"let a of reservationAssets\"><div><h3>{{a.name}} <small *ngIf=\"a.deletedAt\">{{t('archived')}}</small></h3><p>{{t('pending')}} : {{a.reservationSummary.pending}} · {{t('confirmed')}} : {{a.reservationSummary.confirmed}}</p></div><div class=\"dashboard-actions\"><a class=\"button\" [routerLink]=\"path(a,'admin/reservations')\">{{t('reservationAction')}}</a><a [routerLink]=\"path(a,'admin/calendar')\">{{t('calendar')}}</a></div></article></section>\n<section class=\"panel assets-panel\"><header class=\"section-heading\"><div><h2>{{t('assets')}}</h2><p>{{t('assetIntro')}}</p></div><a routerLink=\"/owner/listings\">{{t('allAssets')}} →</a></header><p *ngIf=\"!loading&&!listError&&!current.length\">{{t('noAssets')}}</p>\n<div class=\"asset-filters\" *ngIf=\"current.length\" [attr.aria-label]=\"t('filters')\">\n  <label>{{t('typeFilter')}}<select [(ngModel)]=\"assetTypeFilter\"><option value=\"\">{{t('allTypes')}}</option><option *ngFor=\"let type of assetTypes\" [value]=\"type\">{{('ui.assetTypes.'+type) | siteText:type}}</option></select></label>\n  <label>{{t('stateFilter')}}<select [(ngModel)]=\"assetStateFilter\"><option value=\"\">{{t('allStates')}}</option><option value=\"online\">{{t('published')}}</option><option value=\"offline\">{{t('offline')}}</option></select></label>\n  <label>{{t('locationFilter')}}<input type=\"search\" [(ngModel)]=\"assetLocationFilter\" [placeholder]=\"t('locationPlaceholder')\"></label>\n</div>\n<p class=\"empty-filter\" *ngIf=\"current.length&&!visibleAssets.length\">{{t('noFilterResult')}}</p>\n<div class=\"asset-grid\" *ngIf=\"visibleAssets.length\"><article class=\"asset-card\" *ngFor=\"let a of visibleAssets\">\n  <a class=\"asset-main\" routerLink=\"/owner/listings\" [queryParams]=\"{asset:a.id,action:'edit'}\" [attr.aria-label]=\"t('edit')+' '+a.name\">\n    <div class=\"asset-card-heading\"><div><span class=\"asset-type\">{{('ui.assetTypes.'+a.assetType) | siteText:a.assetType}}</span><h3>{{a.name}}</h3><small>{{a.location?.city || t('unknown')}}</small></div><span class=\"edit-arrow\" aria-hidden=\"true\">→</span></div>\n    <div class=\"asset-statuses\"><span [class.ok]=\"a.public\">{{t(a.public?'published':'offline')}}</span><span [class.ok]=\"a.billing?.status==='active'\">{{t(!a.billing?'required':a.billing.status==='active'?'active':'otherStatus')}}</span></div>\n    <p class=\"expiry\" *ngIf=\"a.billing?.paidUntil\">{{t('expiry')}} : {{a.billing.paidUntil*1000|date:'dd/MM/yyyy'}}</p>\n    <p class=\"expiry warning-text\" *ngIf=\"a.billing?.cancelAtPeriodEnd\">{{t('cancelAtEnd')}}</p>\n  </a>\n  <div class=\"asset-actions\">\n    <a class=\"button\" routerLink=\"/owner/listings\" [queryParams]=\"{asset:a.id,action:'edit'}\">{{t('edit')}}</a>\n    <a class=\"button subscription-button\" routerLink=\"/owner/listings\" [queryParams]=\"{asset:a.id,action:'subscription'}\">{{t(a.billing?.status==='active'?'manageSubscription':'subscribe')}}</a>\n    <a [routerLink]=\"path(a,'admin/reservations')\">{{t('reservationAction')}}</a>\n    <a [routerLink]=\"path(a,'home')\">{{t('viewListing')}}</a>\n  </div>\n</article></div><a class=\"button\" routerLink=\"/owner/listings\">{{t('newAsset')}} →</a></section>\n</main></app-platform-layout>\n";
+
+/***/ }),
+
+/***/ 6636:
+/*!*******************************************!*\
+  !*** ./src/app/services/portal-policy.ts ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PORTAL_HOSTS: () => (/* binding */ PORTAL_HOSTS),
+/* harmony export */   dedicatedPortalHome: () => (/* binding */ dedicatedPortalHome),
+/* harmony export */   portalFor: () => (/* binding */ portalFor),
+/* harmony export */   portalOrigin: () => (/* binding */ portalOrigin),
+/* harmony export */   workspacePortal: () => (/* binding */ workspacePortal)
+/* harmony export */ });
+const PORTAL_HOSTS = ['owner', 'client', 'concierge', 'admin', 'www'];
+function portalFor(host) {
+  const h = String(host || '').toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '');
+  if (h === 'godirect.fr' || h === 'www.godirect.fr' || h === 'owner.godirect.fr') return 'owner';
+  if (h === 'client.godirect.fr') return 'client';
+  if (h === 'concierge.godirect.fr') return 'concierge';
+  if (h === 'admin.godirect.fr') return 'admin';
+  return /^[a-z0-9-]+\.godirect\.fr$/.test(h) ? 'asset' : 'local';
+}
+function dedicatedPortalHome(host) {
+  switch (host.toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '')) {
+    case 'owner.godirect.fr':
+      return '/owner/listings';
+    case 'admin.godirect.fr':
+      return '/platform/admin';
+    case 'concierge.godirect.fr':
+      return '/concierge';
+    default:
+      return null;
+  }
+}
+function workspacePortal(path) {
+  const p = path.split(/[?#]/)[0];
+  if (/^\/(platform\/admin|admin-access)(\/|$)/.test(p)) return 'admin';
+  if (/^\/concierge(\/|$)/.test(p)) return 'concierge';
+  if (/^\/owner(\/|$)/.test(p)) return 'owner';
+  return null;
+}
+function portalOrigin(portal) {
+  return `https://${portal}.godirect.fr`;
+}
+
+/***/ }),
+
+/***/ 8969:
+/*!***************************************************************!*\
+  !*** ./src/app/portals/portal-home.component.scss?ngResource ***!
+  \***************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `:host {
+  display: block;
+  color: #173d37;
+  background: #f8f6ef;
+}
+
+.portal-page {
+  max-width: 1240px;
+  margin: auto;
+  padding: 0 32px;
+}
+
+header, nav, .actions, footer {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+header {
+  justify-content: space-between;
+  padding: 28px 0;
+  border-bottom: 1px solid #dce3de;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+
+.brand {
+  text-decoration: none;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.brand span {
+  color: #9cbe58;
+}
+
+nav a {
+  text-decoration: none;
+}
+
+select {
+  background: white;
+  border: 1px solid #bccfc6;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.portal-hero {
+  padding: 80px 0 55px;
+  max-width: 960px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 13px;
+  font-weight: 700;
+  color: #57736a;
+}
+
+h1 {
+  font-size: clamp(34px, 5vw, 64px);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  margin: 22px 0;
+}
+
+h2 {
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.2;
+}
+
+p {
+  line-height: 1.75;
+  font-size: 17px;
+}
+
+.intro {
+  font-size: 21px;
+  max-width: 850px;
+}
+
+.actions {
+  margin: 28px 0;
+}
+
+.button {
+  display: inline-block;
+  background: #174e46;
+  color: white;
+  padding: 15px 22px;
+  border: 1px solid #174e46;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 650;
+}
+
+.secondary {
+  background: transparent;
+  color: #174e46;
+}
+
+.note {
+  font-size: 14px;
+  color: #587167;
+}
+
+.dedicated {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 45px;
+  background: #e7efe7;
+  padding: 35px;
+  border-radius: 24px;
+}
+
+.site-example {
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  align-self: center;
+  overflow-wrap: anywhere;
+}
+
+.site-example strong {
+  display: block;
+  font-size: clamp(20px, 3vw, 29px);
+  margin: 20px 0;
+}
+
+section {
+  padding: 32px 0;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.cards article {
+  background: white;
+  border: 1px solid #dce3de;
+  border-radius: 18px;
+  padding: 28px;
+}
+
+.cards article > span {
+  font-size: 24px;
+  color: #76964c;
+}
+
+.cards h3 {
+  font-size: 23px;
+}
+
+.delegation {
+  margin: 35px 0;
+  border-block: 1px solid #dce3de;
+}
+
+.client-note {
+  max-width: 850px;
+}
+
+footer {
+  border-top: 1px solid #dce3de;
+  padding: 30px 0;
+  margin-top: 30px;
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .portal-page {
+    padding: 0 20px;
+  }
+  header {
+    gap: 20px;
+  }
+  nav {
+    gap: 14px;
+  }
+  .portal-hero {
+    padding-top: 45px;
+  }
+  .cards, .dedicated {
+    grid-template-columns: 1fr;
+  }
+  .dedicated {
+    padding: 24px;
+    gap: 12px;
+  }
+  .actions a {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+.portal-hero--with-image {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
+  max-width: none;
+}
+
+.portal-hero--with-image h1 {
+  font-size: clamp(34px, 4.2vw, 58px);
+}
+
+.portal-hero-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  object-position: 65% center;
+  border-radius: 24px;
+}
+
+@media (max-width: 900px) {
+  .portal-hero--with-image {
+    grid-template-columns: 1fr;
+  }
+  .portal-hero-image {
+    aspect-ratio: 3/2;
+    object-position: center;
+  }
+}
+.store-home {
+  max-width: 74rem;
+  margin: auto;
+  padding: clamp(1rem, 4vw, 3rem);
+}
+
+.store-home .intro {
+  white-space: pre-line;
+  max-width: 65ch;
+}
+
+.catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+}
+
+.catalog article {
+  background: white;
+  border: 1px solid #d6e1db;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.catalog img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 0.65rem;
+}
+
+.catalog nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.store-home a {
+  color: #175449;
+}
+
+.owner-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(20px, 5vw, 72px);
+  align-items: center;
+  padding: clamp(28px, 5vw, 72px) 0 28px;
+}
+
+.owner-hero h1 {
+  font-size: clamp(38px, 6vw, 76px);
+  margin: 12px 0;
+  letter-spacing: -0.055em;
+}
+
+.owner-hero h1 span {
+  color: #416641;
+}
+
+.owner-lead {
+  max-width: 33ch;
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.45;
+}
+
+.owner-points {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.owner-points div {
+  flex: 1 1 135px;
+  background: #e7efe2;
+  border-radius: 14px;
+  padding: 10px 13px;
+}
+
+.owner-points strong, .owner-points span {
+  display: block;
+}
+
+.owner-points strong {
+  font-size: clamp(18px, 2.3vw, 28px);
+}
+
+.owner-points span {
+  font-size: 14px;
+}
+
+.owner-hero .actions {
+  gap: 10px;
+  margin: 20px 0 10px;
+}
+
+.owner-photos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.owner-photos img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2/1;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.owner-photos .villa {
+  grid-column: 1/-1;
+  aspect-ratio: 1.65;
+  object-position: center;
+}
+
+.owner-tools {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 8px 0 28px;
+}
+
+.owner-tools article {
+  padding: clamp(16px, 3vw, 30px);
+  background: white;
+  border: 1px solid #d4e1d8;
+  border-radius: 18px;
+}
+
+.owner-tools p, .owner-delegate p {
+  line-height: 1.5;
+}
+
+.example-address {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  background: #e7efe2;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.owner-delegate {
+  border-top: 1px solid #d4e1d8;
+  padding: 24px 0;
+}
+
+.owner-landing a:focus-visible {
+  outline: 3px solid #966229;
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .owner-hero, .owner-tools {
+    grid-template-columns: 1fr;
+  }
+  .owner-hero .actions a {
+    padding: 12px;
+  }
+  .owner-photos .villa {
+    aspect-ratio: 2;
+  }
+  .owner-landing footer {
+    margin-top: 0;
+  }
+}
+.admin-welcome .button {
+  color: #fff;
+}
+
+.admin-welcome .admin-public-link {
+  display: inline-block;
+  margin: 0.75rem;
+}`, "",{"version":3,"sources":["webpack://./src/app/portals/portal-home.component.scss"],"names":[],"mappings":"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","sourcesContent":[":host{display:block;color:#173d37;background:#f8f6ef}.portal-page{max-width:1240px;margin:auto;padding:0 32px}header,nav,.actions,footer{display:flex;align-items:center;gap:20px;flex-wrap:wrap}header{justify-content:space-between;padding:28px 0;border-bottom:1px solid #dce3de}a{color:inherit;text-underline-offset:4px}.brand{text-decoration:none;font-size:32px;font-weight:800}.brand span{color:#9cbe58}nav a{text-decoration:none}select{background:white;border:1px solid #bccfc6;padding:10px;border-radius:8px}.portal-hero{padding:80px 0 55px;max-width:960px}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:13px;font-weight:700;color:#57736a}h1{font-size:clamp(34px,5vw,64px);line-height:1.12;letter-spacing:-.035em;margin:22px 0}h2{font-size:clamp(24px,3vw,36px);line-height:1.2}p{line-height:1.75;font-size:17px}.intro{font-size:21px;max-width:850px}.actions{margin:28px 0}.button{display:inline-block;background:#174e46;color:white;padding:15px 22px;border:1px solid #174e46;border-radius:12px;text-decoration:none;font-weight:650}.secondary{background:transparent;color:#174e46}.note{font-size:14px;color:#587167}.dedicated{display:grid;grid-template-columns:1.2fr 1fr;gap:45px;background:#e7efe7;padding:35px;border-radius:24px}.site-example{background:#fff;padding:30px;border-radius:16px;align-self:center;overflow-wrap:anywhere}.site-example strong{display:block;font-size:clamp(20px,3vw,29px);margin:20px 0}section{padding:32px 0}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.cards article{background:white;border:1px solid #dce3de;border-radius:18px;padding:28px}.cards article>span{font-size:24px;color:#76964c}.cards h3{font-size:23px}.delegation{margin:35px 0;border-block:1px solid #dce3de}.client-note{max-width:850px}footer{border-top:1px solid #dce3de;padding:30px 0;margin-top:30px;font-size:14px}@media(max-width:760px){.portal-page{padding:0 20px}header{gap:20px}nav{gap:14px}.portal-hero{padding-top:45px}.cards,.dedicated{grid-template-columns:1fr}.dedicated{padding:24px;gap:12px}.actions a{width:100%;text-align:center;box-sizing:border-box}}\n\n.portal-hero--with-image{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:center;gap:clamp(24px,4vw,56px);max-width:none}\n.portal-hero--with-image h1{font-size:clamp(34px,4.2vw,58px)}\n.portal-hero-image{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;object-position:65% center;border-radius:24px}\n@media(max-width:900px){.portal-hero--with-image{grid-template-columns:1fr}.portal-hero-image{aspect-ratio:3/2;object-position:center}}\n\n.store-home{max-width:74rem;margin:auto;padding:clamp(1rem,4vw,3rem)}.store-home .intro{white-space:pre-line;max-width:65ch}.catalog{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:1rem}.catalog article{background:white;border:1px solid #d6e1db;border-radius:1rem;padding:1rem}.catalog img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:.65rem}.catalog nav{display:flex;flex-wrap:wrap;gap:1rem}.store-home a{color:#175449}\n.owner-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(20px,5vw,72px);align-items:center;padding:clamp(28px,5vw,72px) 0 28px}.owner-hero h1{font-size:clamp(38px,6vw,76px);margin:12px 0;letter-spacing:-.055em}.owner-hero h1 span{color:#416641}.owner-lead{max-width:33ch;font-size:clamp(17px,2vw,22px);line-height:1.45}.owner-points{display:flex;gap:12px;flex-wrap:wrap}.owner-points div{flex:1 1 135px;background:#e7efe2;border-radius:14px;padding:10px 13px}.owner-points strong,.owner-points span{display:block}.owner-points strong{font-size:clamp(18px,2.3vw,28px)}.owner-points span{font-size:14px}.owner-hero .actions{gap:10px;margin:20px 0 10px}.owner-photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.owner-photos img{width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;border-radius:14px}.owner-photos .villa{grid-column:1/-1;aspect-ratio:1.65;object-position:center}.owner-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:8px 0 28px}.owner-tools article{padding:clamp(16px,3vw,30px);background:white;border:1px solid #d4e1d8;border-radius:18px}.owner-tools p,.owner-delegate p{line-height:1.5}.example-address{display:inline-block;max-width:100%;overflow-wrap:anywhere;background:#e7efe2;border-radius:8px;padding:6px 10px}.owner-delegate{border-top:1px solid #d4e1d8;padding:24px 0}.owner-landing a:focus-visible{outline:3px solid #966229;outline-offset:3px}@media(max-width:760px){.owner-hero,.owner-tools{grid-template-columns:1fr}.owner-hero .actions a{padding:12px}.owner-photos .villa{aspect-ratio:2}.owner-landing footer{margin-top:0}}\n\n.admin-welcome .button{color:#fff}.admin-welcome .admin-public-link{display:inline-block;margin:.75rem}\n"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
 
 /***/ }),
 
@@ -1729,9 +2335,13 @@ __webpack_require__.r(__webpack_exports__);
 
 function workspaceView(url, preferred = 'owner') {
   const path = url.split(/[?#]/)[0];
+  if (path === '/site-management') return 'owner';
+  if (path === '/owner/client-view' || path === '/site-client') return 'client';
   if (/^\/(owner|platform|concierge)(?:\/|$)/.test(path)) return 'owner';
   const query = new URLSearchParams(url.split('?')[1]?.split('#')[0] || '');
   if (query.get('view') === 'rentals' || query.get('view') === 'client') return 'client';
+  if (query.get('view') === 'owner' && (0,_workspace_navigation__WEBPACK_IMPORTED_MODULE_0__.explicitAsset)(url)) return 'owner';
+  if (path === '/locations' || path.startsWith('/account/bookings') || path.startsWith('/account/rental-history')) return 'client';
   if ((0,_workspace_navigation__WEBPACK_IMPORTED_MODULE_0__.explicitAsset)(url)) return /\/admin(?:\/|$)/.test(path) ? 'owner' : 'client';
   return preferred;
 }
@@ -1750,10 +2360,7 @@ function viewDestination(url, next, manage, admin, concierge = false) {
       view: 'client'
     }
   } : {
-    path: '/',
-    query: {
-      view: 'rentals'
-    }
+    path: '/locations'
   };
   if (concierge) return {
     path: '/concierge'
@@ -1789,6 +2396,190 @@ function prefixQueryReady(value) {
 function prefixSelectionValid(prefix, choices) {
   return !!prefix && choices.includes(prefix);
 }
+
+/***/ }),
+
+/***/ 11142:
+/*!********************************************************************************!*\
+  !*** ./src/app/layout/platform-layout/shared-header.component.html?ngResource ***!
+  \********************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<header class=\"platform-header\"><div class=\"platform-header-inner\" (click)=\"closeAfterLink($event)\">\n    <a class=\"platform-brand\" [href]=\"access.siteHomeHref\" (click)=\"access.rememberSiteMode()\" aria-label=\"GoDirect\"><span class=\"brand-mark\" aria-hidden=\"true\">G↗</span><span>GoDirect<span class=\"brand-dot\">.</span></span></a>\n    <span class=\"account-identity\" *ngIf=\"access.isAuthenticated\"><strong>{{access.displayName}}</strong><small>{{accountText(access.firstListingView?'owner':access.viewMode==='client'&&access.isManager&&!access.isPlatformAdmin?'client':access.accountMode)}}</small><small *ngIf=\"access.isManager\">{{accountText(access.viewMode==='client'?'clientViewMode':(access.accountMode==='concierge'?'conciergeView':'ownerViewMode'))}}</small></span><label><span class=\"sr-only\">{{ \"ui.pages.t62d442269a5e\" | siteText }}</span><select [ngModel]=\"language.currentLanguage\" (ngModelChange)=\"setLanguage($event)\"><option *ngFor=\"let lang of languages\" [value]=\"lang\">{{lang.toUpperCase()}}</option></select></label><ng-template #navigation><a *ngIf=\"!site && !access.isPlatformAdmin\" routerLink=\"/locations\">{{language.currentLanguage==='fr'?'Trouver une location':'Find a rental'}}</a><ng-container *ngIf=\"!authenticated\"><a *ngIf=\"site\" [routerLink]=\"assetActionPath\">{{language.currentLanguage==='fr'?'Réserver':'Book'}}</a><ng-container *ngIf=\"!site\"><a href=\"/owner/start\">{{language.currentLanguage==='fr'?'Propriétaires':'Owners'}}</a><a href=\"/concierge-role\">Concierges</a></ng-container></ng-container><a *ngIf=\"authenticated && !access.isOwner && !access.isPlatformAdmin && !access.firstListingView\" class=\"workspace-view-switch\" routerLink=\"/owner/start\">{{language.currentLanguage==='fr'?'Mettre mon bien en location':'List my property'}}</a><a *ngIf=\"authenticated && !access.isManager && access.firstListingView\" class=\"workspace-view-switch\" href=\"https://godirect.fr/locations\">{{accountText('clientViewMode')}}</a><button class=\"workspace-view-switch\" type=\"button\" *ngIf=\"access.isManager\" (click)=\"access.switchView()\" [disabled]=\"access.switchingView\">⇄ {{accountText(access.viewMode==='client'?(access.accountMode==='concierge'?'conciergeView':'ownerViewMode'):'clientViewMode')}}</button>\n      \n      <details #assetMenu class=\"platform-account\" *ngIf=\"authenticated && access.isManager && access.viewMode==='owner'\"><summary>{{access.isPlatformAdmin?adminLabel:accountText('assets')}}</summary><div class=\"account-options\" (click)=\"assetMenu.open=false\"><ng-container *ngIf=\"access.isPlatformAdmin; else ownedLinks\"><a routerLink=\"/platform/admin/documents\">{{ 'ui.documents.adminTitle' | siteText }}</a><a routerLink=\"/platform/admin/notifications\">{{language.currentLanguage==='fr'?'Notifications email':'Email notifications'}}</a><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'owners'}\">{{adminNav('owners')}}</a><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'assets'}\">{{adminNav('assets')}}</a><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'subscriptions'}\">{{adminNav('subscriptions')}}</a><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'requests'}\">{{adminNav('requests')}}</a></ng-container><ng-template #ownedLinks><a *ngIf=\"access.isOwner\" routerLink=\"/owner/listings\">{{t('listings')}}</a><a *ngIf=\"access.isConcierge\" routerLink=\"/concierge\">{{accountText('concierge')}}</a><a *ngIf=\"authenticated && access.isOwner && !access.isPlatformAdmin && access.viewMode==='owner'\" routerLink=\"/owner/listings\" [queryParams]=\"{create:1}\" (click)=\"compactMenu.open=false\">{{'ui.labels.te9129d054a5a' | siteText:'Créer une annonce'}}</a><a *ngIf=\"access.isOwner\" routerLink=\"/owner/delegations\">{{accountText('delegations')}}</a></ng-template></div></details>\n      <details #bookingMenu class=\"platform-account\" *ngIf=\"authenticated && !access.isPlatformAdmin\"><summary>{{accountText('reservations')}}</summary><div class=\"account-options\" (click)=\"bookingMenu.open=false\"><a *ngIf=\"authenticated && !access.isPlatformAdmin && (!access.isManager || access.viewMode==='client' || access.isOwner || access.canConcierge('bookings'))\" [routerLink]=\"bookingPath\" (click)=\"compactMenu.open=false\">{{accountText('reservations')}}</a><a *ngIf=\"site && (!access.isManager || access.viewMode==='client' || access.canUse('bookings'))\" [routerLink]=\"assetActionPath\" [queryParams]=\"access.isManager && access.viewMode==='owner'?{create:1}:{}\">{{access.isManager && access.viewMode==='owner'?(language.currentLanguage==='fr'?'Réserver pour un client':'Book for a customer'):(language.currentLanguage==='fr'?'Nouvelle réservation':'New booking')}}</a><ng-container *ngIf=\"access.isOwner && access.viewMode==='owner'\"><strong class=\"menu-heading\">{{accountText('bookingManagement')}}</strong><a *ngIf=\"site\" [routerLink]=\"calendarPath\">{{language.currentLanguage==='fr'?'Calendrier · disponibilités et tarifs':'Calendar · availability and rates'}}</a><a *ngIf=\"site\" routerLink=\"/owner/activity/reservations\">{{accountText('reservations')}}</a><a routerLink=\"/owner/customers\">{{accountText('customers')}}</a></ng-container><ng-container *ngIf=\"access.isConcierge && access.viewMode==='owner'\"><strong>{{accountText('concierge')}}</strong><a *ngIf=\"site && access.canConcierge('bookings')\" routerLink=\"/concierge/activity/reservations\">{{accountText('reservations')}}</a><a *ngIf=\"access.canConcierge('customers')\" routerLink=\"/concierge/customers\">{{accountText('customers')}}</a><a *ngIf=\"access.canConcierge('payments')\" routerLink=\"/concierge\" fragment=\"payments\">{{accountText('payments')}}</a></ng-container><ng-container *ngIf=\"access.viewMode==='client' || !access.isManager\"><strong class=\"menu-heading\">{{accountText('customerBookings')}}</strong><a *ngIf=\"site\" routerLink=\"/account/bookings\">{{t('bookings')}}</a><a href=\"https://godirect.fr/account/rental-history\">{{language.currentLanguage==='fr'?'Mes biens déjà loués':'Previously rented properties'}}</a></ng-container><a routerLink=\"/messages\" [queryParams]=\"site &amp;&amp; (!access.isManager || access.viewMode==='client') ? {contactType:site?.assetType,contactAsset:site?.assetId} : {}\"><span style=\"position:relative;display:inline-flex;margin-right:12px\">{{messageLabel()}}<app-message-badge></app-message-badge></span></a><a *ngIf=\"access.isOwner && access.viewMode==='owner'\" routerLink=\"/owner/activity/ratings\">{{accountText('ratings')}}</a><a *ngIf=\"access.isOwner && access.viewMode==='owner'\" routerLink=\"/owner/activity/payments\">{{accountText('payments')}}</a><a *ngIf=\"!access.isManager || access.viewMode==='client'\" routerLink=\"/account/ratings\">{{accountText('ratings')}}</a><a *ngIf=\"!access.isManager || access.viewMode==='client'\" routerLink=\"/account/payments\">{{accountText('payments')}}</a></div></details>\n      <details #accountMenu class=\"platform-account\"><summary>{{accountText('account')}}</summary><div class=\"account-options\" (click)=\"accountMenu.open=false\"><ng-container *ngIf=\"authenticated\"><a *ngIf=\"access.isOwner && !access.isPlatformAdmin && access.viewMode==='owner'\" routerLink=\"/owner/site-settings\">{{language.currentLanguage==='fr'?'Paramètres de mon site':'My site settings'}}</a><a *ngIf=\"access.isOwner||access.isConcierge\" [routerLink]=\"access.isOwner?'/owner/alerts':'/concierge/alerts'\">{{language.currentLanguage==='fr'?'Alertes SMS et WhatsApp':'SMS and WhatsApp alerts'}}</a><a *ngIf=\"!access.isPlatformAdmin\" routerLink=\"/espaces\">{{language.currentLanguage==='fr'?'Mes espaces':'My workspaces'}}</a><a *ngIf=\"access.isPlatformAdmin\" routerLink=\"/messages\" [queryParams]=\"site &amp;&amp; (!access.isManager || access.viewMode==='client') ? {contactType:site?.assetType,contactAsset:site?.assetId} : {}\"><span style=\"position:relative;display:inline-flex;margin-right:12px\">{{messageLabel()}}<app-message-badge></app-message-badge></span></a><a routerLink=\"/account/profile\">{{t('profile')}}</a><a *ngIf=\"access.isOwner && !access.isPlatformAdmin\" routerLink=\"/owner/payments\">{{accountText('stripe')}}</a><button type=\"button\" (click)=\"logout()\" [disabled]=\"leaving\">{{t('logout')}}</button></ng-container><ng-container *ngIf=\"!authenticated\"><button type=\"button\" (click)=\"authenticate('login')\">{{t('login')}}</button><button type=\"button\" (click)=\"authenticate('signup')\">{{t('signup')}}</button></ng-container></div></details>\n\n\n    </ng-template><div class=\"platform-controls wide-controls\"><ng-container *ngTemplateOutlet=\"navigation\"></ng-container></div><details #compactMenu class=\"compact-menu\"><summary>☰ Menu</summary><div class=\"compact-panel\"><ng-container *ngTemplateOutlet=\"navigation\"></ng-container></div></details>\n  </div></header><p *ngIf=\"error\" role=\"alert\" class=\"platform-error\">{{error}}</p>";
+
+/***/ }),
+
+/***/ 11612:
+/*!*************************************************!*\
+  !*** ./src/app/services/listing-description.ts ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   descriptionBlocks: () => (/* binding */ descriptionBlocks),
+/* harmony export */   descriptionParts: () => (/* binding */ descriptionParts),
+/* harmony export */   descriptionPlainText: () => (/* binding */ descriptionPlainText),
+/* harmony export */   formatDescription: () => (/* binding */ formatDescription)
+/* harmony export */ });
+function descriptionParts(text) {
+  const parts = [];
+  let from = 0;
+  const pattern = /\*\*([^*\n]+)\*\*/g;
+  let match;
+  while (match = pattern.exec(text)) {
+    if (match.index > from) parts.push({
+      text: text.slice(from, match.index),
+      bold: false
+    });
+    parts.push({
+      text: match[1],
+      bold: true
+    });
+    from = match.index + match[0].length;
+  }
+  if (from < text.length) parts.push({
+    text: text.slice(from),
+    bold: false
+  });
+  return parts;
+}
+// Existing imported text is only divided visually. No words or facts are added.
+function readableParagraphs(text) {
+  if (text.length < 550) return [text];
+  const sentences = text.split(/(?<=[.!?])\s+(?=[A-ZÀ-ÖØ-ÞА-Я])/u);
+  const result = [];
+  let current = '';
+  for (const sentence of sentences) {
+    if (current && current.length + sentence.length > 480) {
+      result.push(current);
+      current = '';
+    }
+    if (sentence.length > 700) {
+      if (current) {
+        result.push(current);
+        current = '';
+      }
+      let chunk = '';
+      for (const word of sentence.split(/\s+/)) {
+        if (chunk && chunk.length + word.length > 480) {
+          result.push(chunk);
+          chunk = '';
+        }
+        chunk += (chunk ? ' ' : '') + word;
+      }
+      current = chunk;
+    } else current += (current ? ' ' : '') + sentence;
+  }
+  if (current) result.push(current);
+  return result;
+}
+function descriptionBlocks(value) {
+  const blocks = [];
+  let paragraph = [];
+  const flush = () => {
+    if (paragraph.length) {
+      for (const p of readableParagraphs(paragraph.join('\n'))) blocks.push({
+        kind: 'paragraph',
+        parts: descriptionParts(p),
+        items: []
+      });
+      paragraph = [];
+    }
+  };
+  for (const line of String(value || '').replace(/\r\n?/g, '\n').split('\n')) {
+    const text = line.trim();
+    if (!text) {
+      flush();
+      continue;
+    }
+    const heading = /^#{1,3}\s+(.+)$/.exec(text);
+    if (heading) {
+      flush();
+      blocks.push({
+        kind: 'heading',
+        parts: descriptionParts(heading[1]),
+        items: []
+      });
+      continue;
+    }
+    const bullet = /^[-*•]\s+(.+)$/.exec(text),
+      number = /^\d+[.)]\s+(.+)$/.exec(text);
+    if (bullet || number) {
+      flush();
+      const kind = bullet ? 'bullets' : 'numbers';
+      let block = blocks[blocks.length - 1];
+      if (block?.kind !== kind) {
+        block = {
+          kind,
+          parts: [],
+          items: []
+        };
+        blocks.push(block);
+      }
+      block.items.push(descriptionParts((bullet || number)[1]));
+      continue;
+    }
+    paragraph.push(line.trimEnd());
+  }
+  flush();
+  return blocks;
+}
+function formatDescription(value, start, end, format, placeholder) {
+  if (format === 'bold') {
+    const text = value.slice(start, end) || placeholder;
+    const added = '**' + text + '**';
+    return {
+      value: value.slice(0, start) + added + value.slice(end),
+      start: start + 2,
+      end: start + 2 + text.length
+    };
+  }
+  if (format === 'paragraph') {
+    const added = '\n\n';
+    return {
+      value: value.slice(0, start) + added + value.slice(start),
+      start: start + 2,
+      end: start + 2
+    };
+  }
+  const a = start === 0 ? 0 : value.lastIndexOf('\n', start - 1) + 1;
+  const next = value.indexOf('\n', Math.max(start, end - 1)),
+    b = next < 0 ? value.length : next;
+  const text = value.slice(a, b) || placeholder;
+  const added = text.split('\n').map((line, i) => {
+    const clean = line.replace(/^(?:#{1,3}\s+|[-*•]\s+|\d+[.)]\s+)/, '');
+    return (format === 'heading' ? '## ' : format === 'numbers' ? i + 1 + '. ' : '- ') + clean;
+  }).join('\n');
+  return {
+    value: value.slice(0, a) + added + value.slice(b),
+    start: a,
+    end: a + added.length
+  };
+}
+function descriptionPlainText(value) {
+  return descriptionBlocks(value).map(block => block.kind === 'bullets' || block.kind === 'numbers' ? block.items.map(parts => parts.map(p => p.text).join('')).join(' ') : block.parts.map(p => p.text).join('')).join(' ');
+}
+
+/***/ }),
+
+/***/ 13520:
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/messaging/message-badge.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7cG9zaXRpb246YWJzb2x1dGU7dG9wOi0xMHB4O3JpZ2h0Oi0xMHB4O3otaW5kZXg6Mjtwb2ludGVyLWV2ZW50czpub25lO2Rpc3BsYXk6YmxvY2t9LnVucmVhZC1zdGlja2Vye2Rpc3BsYXk6Z3JpZDtwbGFjZS1pdGVtczpjZW50ZXI7bWluLXdpZHRoOjI0cHg7aGVpZ2h0OjI0cHg7Ym94LXNpemluZzpib3JkZXItYm94O3BhZGRpbmc6MCA1cHg7Ym9yZGVyOjJweCBzb2xpZCB3aGl0ZTtib3JkZXItcmFkaXVzOjk5OXB4O2JhY2tncm91bmQ6I2Q5MmQyMCFpbXBvcnRhbnQ7Y29sb3I6d2hpdGUhaW1wb3J0YW50O2ZvbnQ6NzAwIDEycHgvMSBzYW5zLXNlcmlmIWltcG9ydGFudDtib3gtc2hhZG93OjAgMnB4IDZweCAjMDAwNDt3aGl0ZS1zcGFjZTpub3dyYXB9!./src/app/messaging/message-badge.component.ts ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `:host{position:absolute;top:-10px;right:-10px;z-index:2;pointer-events:none;display:block}.unread-sticker{display:grid;place-items:center;min-width:24px;height:24px;box-sizing:border-box;padding:0 5px;border:2px solid white;border-radius:999px;background:#d92d20!important;color:white!important;font:700 12px/1 sans-serif!important;box-shadow:0 2px 6px #0004;white-space:nowrap}`, "",{"version":3,"sources":["webpack://./src/app/messaging/message-badge.component.ts"],"names":[],"mappings":"AAAA,MAAM,iBAAiB,CAAC,SAAS,CAAC,WAAW,CAAC,SAAS,CAAC,mBAAmB,CAAC,aAAa,CAAC,gBAAgB,YAAY,CAAC,kBAAkB,CAAC,cAAc,CAAC,WAAW,CAAC,qBAAqB,CAAC,aAAa,CAAC,sBAAsB,CAAC,mBAAmB,CAAC,4BAA4B,CAAC,qBAAqB,CAAC,oCAAoC,CAAC,0BAA0B,CAAC,kBAAkB","sourcesContent":[":host{position:absolute;top:-10px;right:-10px;z-index:2;pointer-events:none;display:block}.unread-sticker{display:grid;place-items:center;min-width:24px;height:24px;box-sizing:border-box;padding:0 5px;border:2px solid white;border-radius:999px;background:#d92d20!important;color:white!important;font:700 12px/1 sans-serif!important;box-shadow:0 2px 6px #0004;white-space:nowrap}"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
 
 /***/ }),
 
@@ -10239,26 +11030,6 @@ HomelayoutComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_ang
 
 /***/ }),
 
-/***/ 14331:
-/*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./src/app/owner-payments.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=CiAgICA6aG9zdHtkaXNwbGF5OmJsb2NrO2JhY2tncm91bmQ6I2Y3ZjdmNTtjb2xvcjojMTcyMDJhfS5vd25lci1wYXltZW50c3ttYXgtd2lkdGg6ODIwcHg7bWFyZ2luOjAgYXV0bztwYWRkaW5nOjM2cHggMjJweCA3MHB4fS5iYWNre2JvcmRlcjowO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Zm9udC13ZWlnaHQ6NzAwO2N1cnNvcjpwb2ludGVyO21hcmdpbi1ib3R0b206MjRweH0uY2FyZHtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyOjFweCBzb2xpZCAjZTVlMmRiO2JvcmRlci1yYWRpdXM6MjJweDtwYWRkaW5nOjM0cHg7Ym94LXNoYWRvdzowIDEycHggMzRweCByZ2JhKDAsMCwwLC4wNil9LmtpY2tlcnt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjEyZW07Zm9udC1zaXplOjEycHg7Zm9udC13ZWlnaHQ6ODAwfWgxe2ZvbnQtc2l6ZTozNHB4O21hcmdpbjo4cHggMCAxMnB4fXB7bGluZS1oZWlnaHQ6MS42O2NvbG9yOiM1NjYwNmF9LnN0YXR1cy1yb3cgc3Ryb25ne292ZXJmbG93LXdyYXA6YW55d2hlcmU7bWluLXdpZHRoOjB9LnN0YXR1cy1yb3csLmZlZS1ib3h7ZGlzcGxheTpmbGV4O2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO2dhcDoyMHB4O3BhZGRpbmc6MTVweCAwO2JvcmRlci10b3A6MXB4IHNvbGlkICNlY2U5ZTJ9LmZlZS1ib3h7bWFyZ2luLXRvcDoxMnB4O3BhZGRpbmc6MThweDtib3JkZXI6MXB4IHNvbGlkICNkOWU4ZGQ7Ym9yZGVyLXJhZGl1czoxNHB4O2JhY2tncm91bmQ6I2Y0ZmFmNn0uZmVlLWJveCBzdHJvbmd7Zm9udC1zaXplOjIycHh9LnByaW1hcnl7bWFyZ2luLXRvcDoyNHB4O2JvcmRlcjowO2JvcmRlci1yYWRpdXM6MTJweDtwYWRkaW5nOjE0cHggMjBweDtiYWNrZ3JvdW5kOiMxNzIwMmE7Y29sb3I6d2hpdGU7Zm9udC13ZWlnaHQ6ODAwO2N1cnNvcjpwb2ludGVyfS5wcmltYXJ5OmRpc2FibGVke29wYWNpdHk6LjZ9LmVycm9ye3BhZGRpbmc6MTRweDtib3JkZXItcmFkaXVzOjEycHg7YmFja2dyb3VuZDojZmZmMGYwO2NvbG9yOiM5YTFkMWR9QG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmNhcmR7cGFkZGluZzoyNHB4IDE4cHh9aDF7Zm9udC1zaXplOjI4cHh9fQogIA%3D%3D!./src/app/owner-payments.component.ts ***!
-  \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-// Imports
-var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
-var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ 35950);
-var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
-// Module
-___CSS_LOADER_EXPORT___.push([module.id, `
-    :host{display:block;background:#f7f7f5;color:#17202a}.owner-payments{max-width:820px;margin:0 auto;padding:36px 22px 70px}.back{border:0;background:transparent;font-weight:700;cursor:pointer;margin-bottom:24px}.card{background:#fff;border:1px solid #e5e2db;border-radius:22px;padding:34px;box-shadow:0 12px 34px rgba(0,0,0,.06)}.kicker{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:800}h1{font-size:34px;margin:8px 0 12px}p{line-height:1.6;color:#56606a}.status-row strong{overflow-wrap:anywhere;min-width:0}.status-row,.fee-box{display:flex;justify-content:space-between;gap:20px;padding:15px 0;border-top:1px solid #ece9e2}.fee-box{margin-top:12px;padding:18px;border:1px solid #d9e8dd;border-radius:14px;background:#f4faf6}.fee-box strong{font-size:22px}.primary{margin-top:24px;border:0;border-radius:12px;padding:14px 20px;background:#17202a;color:white;font-weight:800;cursor:pointer}.primary:disabled{opacity:.6}.error{padding:14px;border-radius:12px;background:#fff0f0;color:#9a1d1d}@media(max-width:600px){.card{padding:24px 18px}h1{font-size:28px}}
-  `, "",{"version":3,"sources":["webpack://./src/app/owner-payments.component.ts"],"names":[],"mappings":";IACI,MAAM,aAAa,CAAC,kBAAkB,CAAC,aAAa,CAAC,gBAAgB,eAAe,CAAC,aAAa,CAAC,sBAAsB,CAAC,MAAM,QAAQ,CAAC,sBAAsB,CAAC,eAAe,CAAC,cAAc,CAAC,kBAAkB,CAAC,MAAM,eAAe,CAAC,wBAAwB,CAAC,kBAAkB,CAAC,YAAY,CAAC,sCAAsC,CAAC,QAAQ,wBAAwB,CAAC,oBAAoB,CAAC,cAAc,CAAC,eAAe,CAAC,GAAG,cAAc,CAAC,iBAAiB,CAAC,EAAE,eAAe,CAAC,aAAa,CAAC,mBAAmB,sBAAsB,CAAC,WAAW,CAAC,qBAAqB,YAAY,CAAC,6BAA6B,CAAC,QAAQ,CAAC,cAAc,CAAC,4BAA4B,CAAC,SAAS,eAAe,CAAC,YAAY,CAAC,wBAAwB,CAAC,kBAAkB,CAAC,kBAAkB,CAAC,gBAAgB,cAAc,CAAC,SAAS,eAAe,CAAC,QAAQ,CAAC,kBAAkB,CAAC,iBAAiB,CAAC,kBAAkB,CAAC,WAAW,CAAC,eAAe,CAAC,cAAc,CAAC,kBAAkB,UAAU,CAAC,OAAO,YAAY,CAAC,kBAAkB,CAAC,kBAAkB,CAAC,aAAa,CAAC,wBAAwB,MAAM,iBAAiB,CAAC,GAAG,cAAc,CAAC","sourcesContent":["\n    :host{display:block;background:#f7f7f5;color:#17202a}.owner-payments{max-width:820px;margin:0 auto;padding:36px 22px 70px}.back{border:0;background:transparent;font-weight:700;cursor:pointer;margin-bottom:24px}.card{background:#fff;border:1px solid #e5e2db;border-radius:22px;padding:34px;box-shadow:0 12px 34px rgba(0,0,0,.06)}.kicker{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:800}h1{font-size:34px;margin:8px 0 12px}p{line-height:1.6;color:#56606a}.status-row strong{overflow-wrap:anywhere;min-width:0}.status-row,.fee-box{display:flex;justify-content:space-between;gap:20px;padding:15px 0;border-top:1px solid #ece9e2}.fee-box{margin-top:12px;padding:18px;border:1px solid #d9e8dd;border-radius:14px;background:#f4faf6}.fee-box strong{font-size:22px}.primary{margin-top:24px;border:0;border-radius:12px;padding:14px 20px;background:#17202a;color:white;font-weight:800;cursor:pointer}.primary:disabled{opacity:.6}.error{padding:14px;border-radius:12px;background:#fff0f0;color:#9a1d1d}@media(max-width:600px){.card{padding:24px 18px}h1{font-size:28px}}\n  "],"sourceRoot":""}]);
-// Exports
-module.exports = ___CSS_LOADER_EXPORT___.toString();
-
-
-/***/ }),
-
 /***/ 14475:
 /*!*************************************************!*\
   !*** ./src/app/services/listing-wizard-text.ts ***!
@@ -10608,6 +11379,26 @@ const LISTING_WIZARD_TEXT = {
     "requestPublication": "Запросить публикацию"
   }
 };
+const DOCUMENT_STEP_COPY = {
+  fr: ['Justificatifs', 'Créez votre annonce en quatre étapes : présentation, photos, tarifs et justificatifs.', 'Choisir plusieurs photos', 'Sélectionnez plusieurs fichiers avec Cmd (Mac) ou Ctrl, ou sélectionnez une plage avec Maj.', 'photos sélectionnées', 'Enregistrer et ajouter les justificatifs', 'Votre annonce est enregistrée. Ajoutez les justificatifs demandés pour ce type de bien. Vous pouvez fermer et reprendre plus tard.', 'Ajoutez les pièces requises ou demandez les dispenses applicables pour terminer. La publication reste soumise à la validation GoDirect.', 'Terminer', 'Annonce enregistrée. Les justificatifs seront examinés par GoDirect.'],
+  en: ['Documents', 'Create your listing in four steps: description, photos, pricing and documents.', 'Choose multiple photos', 'Select several files with Cmd (Mac) or Ctrl, or a range with Shift.', 'photos selected', 'Save and add documents', 'Your listing has been saved. Add the documents required for this asset type. You can close and resume later.', 'Add required documents or request applicable waivers to finish. Publication still requires GoDirect approval.', 'Finish', 'Listing saved. GoDirect will review the documents.'],
+  es: ['Justificantes', 'Crea tu anuncio en cuatro pasos: presentación, fotos, precios y justificantes.', 'Elegir varias fotos', 'Selecciona varios archivos con Cmd o Ctrl, o un intervalo con Mayús.', 'fotos seleccionadas', 'Guardar y añadir justificantes', 'Anuncio guardado. Añade los documentos de este tipo de bien. Puedes cerrar y continuar más tarde.', 'Añade las piezas requeridas o solicita las exenciones aplicables. La publicación requiere validación GoDirect.', 'Terminar', 'Anuncio guardado. GoDirect revisará los documentos.'],
+  it: ['Documenti', 'Crea l’annuncio in quattro passi: presentazione, foto, prezzi e documenti.', 'Scegli più foto', 'Seleziona più file con Cmd o Ctrl, oppure un intervallo con Maiusc.', 'foto selezionate', 'Salva e aggiungi documenti', 'Annuncio salvato. Aggiungi i documenti richiesti per questo bene. Puoi chiudere e riprendere più tardi.', 'Aggiungi i documenti obbligatori o richiedi le esenzioni applicabili. La pubblicazione richiede l’approvazione GoDirect.', 'Termina', 'Annuncio salvato. GoDirect esaminerà i documenti.'],
+  de: ['Nachweise', 'Erstellen Sie Ihr Inserat in vier Schritten: Beschreibung, Fotos, Preise und Nachweise.', 'Mehrere Fotos auswählen', 'Mehrere Dateien mit Cmd oder Strg, einen Bereich mit Umschalt auswählen.', 'Fotos ausgewählt', 'Speichern und Nachweise hinzufügen', 'Inserat gespeichert. Fügen Sie die erforderlichen Nachweise hinzu. Sie können später fortfahren.', 'Pflichtnachweise hinzufügen oder passende Ausnahmen beantragen. Veröffentlichung erfordert GoDirect-Freigabe.', 'Abschließen', 'Inserat gespeichert. GoDirect prüft die Nachweise.'],
+  nl: ['Documenten', 'Maak uw advertentie in vier stappen: presentatie, foto’s, prijzen en documenten.', 'Meerdere foto’s kiezen', 'Selecteer meerdere bestanden met Cmd of Ctrl, of een reeks met Shift.', 'foto’s geselecteerd', 'Opslaan en documenten toevoegen', 'Advertentie opgeslagen. Voeg de vereiste documenten toe. U kunt sluiten en later doorgaan.', 'Voeg vereiste documenten toe of vraag toepasselijke vrijstellingen aan. Publicatie vereist goedkeuring van GoDirect.', 'Afronden', 'Advertentie opgeslagen. GoDirect beoordeelt de documenten.'],
+  ru: ['Документы', 'Создайте объявление в четыре этапа: описание, фото, цены и документы.', 'Выбрать несколько фото', 'Выберите файлы с Cmd или Ctrl либо диапазон с Shift.', 'фото выбрано', 'Сохранить и добавить документы', 'Объявление сохранено. Добавьте документы для этого типа объекта. Можно продолжить позже.', 'Добавьте обязательные документы или запросите освобождение. Публикация требует одобрения GoDirect.', 'Завершить', 'Объявление сохранено. GoDirect проверит документы.']
+};
+for (const [lang, copy] of Object.entries(DOCUMENT_STEP_COPY)) for (const [i, key] of ['documents', 'introWithDocuments', 'selectMultiplePhotos', 'multiPhotoHint', 'selectedPhotos', 'saveAndDocuments', 'draftBeforeDocuments', 'documentsNeeded', 'finish', 'finishedWithDocuments'].entries()) LISTING_WIZARD_TEXT[lang][key] = copy[i];
+const CHECKOUT_EXPIRY_COPY = {
+  "en": ["Checkout expired", "This payment session has expired. No payment was confirmed. You can resume with a new secure Stripe session.", "Resume payment", "Continue payment"],
+  "fr": ["Session de paiement expirée", "Cette session de paiement a expiré. Aucun paiement n’a été confirmé. Vous pouvez reprendre avec une nouvelle session Stripe sécurisée.", "Reprendre le paiement", "Continuer le paiement"],
+  "es": ["Sesión de pago caducada", "Esta sesión ha caducado. No se ha confirmado ningún pago. Puede continuar con una nueva sesión segura de Stripe.", "Reanudar el pago", "Continuar el pago"],
+  "it": ["Sessione di pagamento scaduta", "Questa sessione è scaduta. Nessun pagamento è stato confermato. Puoi riprendere con una nuova sessione Stripe sicura.", "Riprendi il pagamento", "Continua il pagamento"],
+  "de": ["Zahlungssitzung abgelaufen", "Diese Zahlungssitzung ist abgelaufen. Es wurde keine Zahlung bestätigt. Sie können mit einer neuen sicheren Stripe-Sitzung fortfahren.", "Zahlung erneut starten", "Zahlung fortsetzen"],
+  "nl": ["Betaalsessie verlopen", "Deze betaalsessie is verlopen. Er is geen betaling bevestigd. U kunt doorgaan met een nieuwe beveiligde Stripe-sessie.", "Betaling hervatten", "Doorgaan met betalen"],
+  "ru": ["Сессия оплаты истекла", "Срок действия этой сессии истёк. Оплата не подтверждена. Вы можете продолжить в новой защищённой сессии Stripe.", "Возобновить оплату", "Продолжить оплату"]
+};
+for (const [lang, copy] of Object.entries(CHECKOUT_EXPIRY_COPY)) for (const [i, key] of ["checkoutExpired", "checkoutExpiredHint", "resumeCheckout", "continueCheckout"].entries()) LISTING_WIZARD_TEXT[lang][key] = copy[i];
 
 /***/ }),
 
@@ -10623,12 +11414,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   ResourceRegistryService: () => (/* binding */ ResourceRegistryService)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _media_routes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./media-routes */ 79906);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ 56196);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs */ 72354);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _listing_description__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./listing-description */ 11612);
+/* harmony import */ var _media_routes__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./media-routes */ 79906);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs */ 72354);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common/http */ 93262);
+
 
 
 
@@ -10682,7 +11475,7 @@ let ResourceRegistryService = class ResourceRegistryService {
         resourceId: key.split('/')[1],
         resourceType: type,
         name: asset.name || key.split('/')[1],
-        description: asset.description || '',
+        description: (0,_listing_description__WEBPACK_IMPORTED_MODULE_1__.descriptionPlainText)(asset.description || ''),
         coverImage: asset.media?.cover || '',
         enabled: true,
         locationLabel: [asset.location?.area, asset.location?.city, asset.location?.country].filter(Boolean).join(' · ')
@@ -10694,14 +11487,15 @@ let ResourceRegistryService = class ResourceRegistryService {
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const params = {};
       for (const [key, value] of Object.entries(filters)) if (value) params[key] = value;
-      const rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_2__.firstValueFrom)(_this4.http.get('/api/assets', {
+      const rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_3__.firstValueFrom)(_this4.http.get('/api/assets', {
         params
-      }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_3__.timeout)(12000)));
+      }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_4__.timeout)(12000)));
       return (rows || []).filter(a => _this4.isPublic(a)).map(a => ({
+        siteUrl: a.siteUrl,
         resourceId: a.id,
         resourceType: a.assetType,
         name: a.name || a.id,
-        description: a.headline || a.description || '',
+        description: (0,_listing_description__WEBPACK_IMPORTED_MODULE_1__.descriptionPlainText)(a.headline || a.description || ''),
         coverImage: a.media?.hero || a.media?.cover || a.media?.gallery?.[0] || '',
         locationLabel: [a.location?.area, a.location?.city, a.location?.country].filter(Boolean).join(' · '),
         pricing: a.pricing,
@@ -10710,15 +11504,63 @@ let ResourceRegistryService = class ResourceRegistryService {
     })();
   }
   mediaUrl(path) {
-    return (0,_media_routes__WEBPACK_IMPORTED_MODULE_1__.mediaObjectUrl)(path || '');
+    return (0,_media_routes__WEBPACK_IMPORTED_MODULE_2__.mediaObjectUrl)(path || '');
   }
   static ctorParameters = () => [{
-    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_4__.HttpClient
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_5__.HttpClient
   }];
 };
-ResourceRegistryService = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_6__.Injectable)({
+ResourceRegistryService = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.Injectable)({
   providedIn: 'root'
 })], ResourceRegistryService);
+
+
+/***/ }),
+
+/***/ 14995:
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/workspace/rental-history.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Cjpob3N0e2Rpc3BsYXk6YmxvY2s7Ym94LXNpemluZzpib3JkZXItYm94O21heC13aWR0aDoxNDQwcHg7bWFyZ2luOmF1dG87cGFkZGluZzowIDV2d30Kc2VjdGlvbntiYWNrZ3JvdW5kOiNlZGY0ZjY7Y29sb3I6IzEwM2Y2NDtib3JkZXI6MXB4IHNvbGlkICNkNGUzZTk7Ym9yZGVyLXJhZGl1czoyMHB4O3BhZGRpbmc6Y2xhbXAoMTZweCwydncsMjhweCk7bWFyZ2luLWJvdHRvbToyNHB4fQpoZWFkZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcH0KaDJ7Zm9udDo2MDAgY2xhbXAoMjFweCwydncsMjhweCkvMS4yIEdlb3JnaWEsc2VyaWY7bWFyZ2luOjB9cHttYXJnaW46NnB4IDAgMDtjb2xvcjojNDM1ZTcwfQpidXR0b257YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTAzZjY0O2JvcmRlcjoxcHggc29saWQgI2E1YmJjODtib3JkZXItcmFkaXVzOjEycHg7bWluLWhlaWdodDo0NHB4O3BhZGRpbmc6MCAxNnB4O2ZvbnQ6aW5oZXJpdDtjdXJzb3I6cG9pbnRlcn0KdWx7bGlzdC1zdHlsZTpub25lO2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KGF1dG8tZml0LG1pbm1heChtaW4oMTAwJSwyMzBweCksMWZyKSk7Z2FwOjEycHg7bWFyZ2luOjE2cHggMCAwO3BhZGRpbmc6MH0KbGl7bWluLXdpZHRoOjB9YSwub2ZmbGluZXtib3gtc2l6aW5nOmJvcmRlci1ib3g7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTZweDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxMDNmNjQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkZGU1O3BhZGRpbmc6MTRweCAxOHB4O2JvcmRlci1yYWRpdXM6MTJweDt0ZXh0LWRlY29yYXRpb246bm9uZTttYXgtd2lkdGg6NDQwcHh9CnN0cm9uZ3tvdmVyZmxvdy13cmFwOmFueXdoZXJlfXNtYWxse2Rpc3BsYXk6YmxvY2s7bWFyZ2luLXRvcDozcHg7Y29sb3I6IzQ5Njc3YX0ub2ZmbGluZXtkaXNwbGF5OmJsb2NrfWE6aG92ZXJ7Ym9yZGVyLWNvbG9yOiM0OTc4OTV9YTpmb2N1cy12aXNpYmxlLGJ1dHRvbjpmb2N1cy12aXNpYmxle291dGxpbmU6M3B4IHNvbGlkICMxNzZkOTg7b3V0bGluZS1vZmZzZXQ6MnB4fQo%3D!./src/app/workspace/rental-history.component.ts ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `
+:host{display:block;box-sizing:border-box;max-width:1440px;margin:auto;padding:0 5vw}
+section{background:#edf4f6;color:#103f64;border:1px solid #d4e3e9;border-radius:20px;padding:clamp(16px,2vw,28px);margin-bottom:24px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h2{font:600 clamp(21px,2vw,28px)/1.2 Georgia,serif;margin:0}p{margin:6px 0 0;color:#435e70}
+button{background:white;color:#103f64;border:1px solid #a5bbc8;border-radius:12px;min-height:44px;padding:0 16px;font:inherit;cursor:pointer}
+ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px;margin:16px 0 0;padding:0}
+li{min-width:0}a,.offline{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:16px;background:white;color:#103f64;border:1px solid #ccdde5;padding:14px 18px;border-radius:12px;text-decoration:none;max-width:440px}
+strong{overflow-wrap:anywhere}small{display:block;margin-top:3px;color:#49677a}.offline{display:block}a:hover{border-color:#497895}a:focus-visible,button:focus-visible{outline:3px solid #176d98;outline-offset:2px}
+`, "",{"version":3,"sources":["webpack://./src/app/workspace/rental-history.component.ts"],"names":[],"mappings":";AACA,MAAM,aAAa,CAAC,qBAAqB,CAAC,gBAAgB,CAAC,WAAW,CAAC,aAAa;AACpF,QAAQ,kBAAkB,CAAC,aAAa,CAAC,wBAAwB,CAAC,kBAAkB,CAAC,4BAA4B,CAAC,kBAAkB;AACpI,OAAO,YAAY,CAAC,kBAAkB,CAAC,6BAA6B,CAAC,QAAQ,CAAC,cAAc;AAC5F,GAAG,+CAA+C,CAAC,QAAQ,CAAC,EAAE,cAAc,CAAC,aAAa;AAC1F,OAAO,gBAAgB,CAAC,aAAa,CAAC,wBAAwB,CAAC,kBAAkB,CAAC,eAAe,CAAC,cAAc,CAAC,YAAY,CAAC,cAAc;AAC5I,GAAG,eAAe,CAAC,YAAY,CAAC,kEAAkE,CAAC,QAAQ,CAAC,eAAe,CAAC,SAAS;AACrI,GAAG,WAAW,CAAC,WAAW,qBAAqB,CAAC,YAAY,CAAC,kBAAkB,CAAC,6BAA6B,CAAC,QAAQ,CAAC,gBAAgB,CAAC,aAAa,CAAC,wBAAwB,CAAC,iBAAiB,CAAC,kBAAkB,CAAC,oBAAoB,CAAC,eAAe;AACxP,OAAO,sBAAsB,CAAC,MAAM,aAAa,CAAC,cAAc,CAAC,aAAa,CAAC,SAAS,aAAa,CAAC,QAAQ,oBAAoB,CAAC,qCAAqC,yBAAyB,CAAC,kBAAkB","sourcesContent":["\n:host{display:block;box-sizing:border-box;max-width:1440px;margin:auto;padding:0 5vw}\nsection{background:#edf4f6;color:#103f64;border:1px solid #d4e3e9;border-radius:20px;padding:clamp(16px,2vw,28px);margin-bottom:24px}\nheader{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}\nh2{font:600 clamp(21px,2vw,28px)/1.2 Georgia,serif;margin:0}p{margin:6px 0 0;color:#435e70}\nbutton{background:white;color:#103f64;border:1px solid #a5bbc8;border-radius:12px;min-height:44px;padding:0 16px;font:inherit;cursor:pointer}\nul{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px;margin:16px 0 0;padding:0}\nli{min-width:0}a,.offline{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:16px;background:white;color:#103f64;border:1px solid #ccdde5;padding:14px 18px;border-radius:12px;text-decoration:none;max-width:440px}\nstrong{overflow-wrap:anywhere}small{display:block;margin-top:3px;color:#49677a}.offline{display:block}a:hover{border-color:#497895}a:focus-visible,button:focus-visible{outline:3px solid #176d98;outline-offset:2px}\n"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
+/***/ 15091:
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/owner-payments.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=CiAgICAuc3RyaXBlLWFjdGlvbnN7ZGlzcGxheTpmbGV4O2ZsZXgtZGlyZWN0aW9uOmNvbHVtbjtnYXA6MTZweDttYXJnaW4tdG9wOjI0cHh9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbnttYXJnaW46MDttaW4taGVpZ2h0OjQ4cHg7cGFkZGluZzoxNHB4IDIwcHg7Ym9yZGVyLXJhZGl1czoxMnB4O2ZvbnQ6aW5oZXJpdDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXJ9LnNlY29uZGFyeXtib3JkZXI6MXB4IHNvbGlkICNiY2M5Y2Q7YmFja2dyb3VuZDojZmZmO2NvbG9yOiMxNzIwMmF9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbjpkaXNhYmxlZHtvcGFjaXR5Oi42O2N1cnNvcjp3YWl0fS5zdHJpcGUtYWN0aW9ucyBidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjMTQ3ZjkwO291dGxpbmUtb2Zmc2V0OjNweH0KICAgIDpob3N0e2Rpc3BsYXk6YmxvY2s7YmFja2dyb3VuZDojZjdmN2Y1O2NvbG9yOiMxNzIwMmF9Lm93bmVyLXBheW1lbnRze21heC13aWR0aDo4MjBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MzZweCAyMnB4IDcwcHh9LmJhY2t7Ym9yZGVyOjA7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXI7bWFyZ2luLWJvdHRvbToyNHB4fS5jYXJke2JhY2tncm91bmQ6I2ZmZjtib3JkZXI6MXB4IHNvbGlkICNlNWUyZGI7Ym9yZGVyLXJhZGl1czoyMnB4O3BhZGRpbmc6MzRweDtib3gtc2hhZG93OjAgMTJweCAzNHB4IHJnYmEoMCwwLDAsLjA2KX0ua2lja2Vye3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtsZXR0ZXItc3BhY2luZzouMTJlbTtmb250LXNpemU6MTJweDtmb250LXdlaWdodDo4MDB9aDF7Zm9udC1zaXplOjM0cHg7bWFyZ2luOjhweCAwIDEycHh9cHtsaW5lLWhlaWdodDoxLjY7Y29sb3I6IzU2NjA2YX0uc3RhdHVzLXJvdyBzdHJvbmd7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZTttaW4td2lkdGg6MH0uc3RhdHVzLXJvdywuZmVlLWJveHtkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47Z2FwOjIwcHg7cGFkZGluZzoxNXB4IDA7Ym9yZGVyLXRvcDoxcHggc29saWQgI2VjZTllMn0uZmVlLWJveHttYXJnaW4tdG9wOjEycHg7cGFkZGluZzoxOHB4O2JvcmRlcjoxcHggc29saWQgI2Q5ZThkZDtib3JkZXItcmFkaXVzOjE0cHg7YmFja2dyb3VuZDojZjRmYWY2fS5mZWUtYm94IHN0cm9uZ3tmb250LXNpemU6MjJweH0ucHJpbWFyeXttYXJnaW4tdG9wOjI0cHg7Ym9yZGVyOjA7Ym9yZGVyLXJhZGl1czoxMnB4O3BhZGRpbmc6MTRweCAyMHB4O2JhY2tncm91bmQ6IzE3MjAyYTtjb2xvcjp3aGl0ZTtmb250LXdlaWdodDo4MDA7Y3Vyc29yOnBvaW50ZXJ9LnByaW1hcnk6ZGlzYWJsZWR7b3BhY2l0eTouNn0uZXJyb3J7cGFkZGluZzoxNHB4O2JvcmRlci1yYWRpdXM6MTJweDtiYWNrZ3JvdW5kOiNmZmYwZjA7Y29sb3I6IzlhMWQxZH1AbWVkaWEobWF4LXdpZHRoOjYwMHB4KXsuY2FyZHtwYWRkaW5nOjI0cHggMThweH1oMXtmb250LXNpemU6MjhweH19CiAg!./src/app/owner-payments.component.ts ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `
+    .stripe-actions{display:flex;flex-direction:column;gap:16px;margin-top:24px}.stripe-actions button{margin:0;min-height:48px;padding:14px 20px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer}.secondary{border:1px solid #bcc9cd;background:#fff;color:#17202a}.stripe-actions button:disabled{opacity:.6;cursor:wait}.stripe-actions button:focus-visible{outline:3px solid #147f90;outline-offset:3px}
+    :host{display:block;background:#f7f7f5;color:#17202a}.owner-payments{max-width:820px;margin:0 auto;padding:36px 22px 70px}.back{border:0;background:transparent;font-weight:700;cursor:pointer;margin-bottom:24px}.card{background:#fff;border:1px solid #e5e2db;border-radius:22px;padding:34px;box-shadow:0 12px 34px rgba(0,0,0,.06)}.kicker{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:800}h1{font-size:34px;margin:8px 0 12px}p{line-height:1.6;color:#56606a}.status-row strong{overflow-wrap:anywhere;min-width:0}.status-row,.fee-box{display:flex;justify-content:space-between;gap:20px;padding:15px 0;border-top:1px solid #ece9e2}.fee-box{margin-top:12px;padding:18px;border:1px solid #d9e8dd;border-radius:14px;background:#f4faf6}.fee-box strong{font-size:22px}.primary{margin-top:24px;border:0;border-radius:12px;padding:14px 20px;background:#17202a;color:white;font-weight:800;cursor:pointer}.primary:disabled{opacity:.6}.error{padding:14px;border-radius:12px;background:#fff0f0;color:#9a1d1d}@media(max-width:600px){.card{padding:24px 18px}h1{font-size:28px}}
+  `, "",{"version":3,"sources":["webpack://./src/app/owner-payments.component.ts"],"names":[],"mappings":";IACI,gBAAgB,YAAY,CAAC,qBAAqB,CAAC,QAAQ,CAAC,eAAe,CAAC,uBAAuB,QAAQ,CAAC,eAAe,CAAC,iBAAiB,CAAC,kBAAkB,CAAC,YAAY,CAAC,eAAe,CAAC,cAAc,CAAC,WAAW,wBAAwB,CAAC,eAAe,CAAC,aAAa,CAAC,gCAAgC,UAAU,CAAC,WAAW,CAAC,qCAAqC,yBAAyB,CAAC,kBAAkB;IACvZ,MAAM,aAAa,CAAC,kBAAkB,CAAC,aAAa,CAAC,gBAAgB,eAAe,CAAC,aAAa,CAAC,sBAAsB,CAAC,MAAM,QAAQ,CAAC,sBAAsB,CAAC,eAAe,CAAC,cAAc,CAAC,kBAAkB,CAAC,MAAM,eAAe,CAAC,wBAAwB,CAAC,kBAAkB,CAAC,YAAY,CAAC,sCAAsC,CAAC,QAAQ,wBAAwB,CAAC,oBAAoB,CAAC,cAAc,CAAC,eAAe,CAAC,GAAG,cAAc,CAAC,iBAAiB,CAAC,EAAE,eAAe,CAAC,aAAa,CAAC,mBAAmB,sBAAsB,CAAC,WAAW,CAAC,qBAAqB,YAAY,CAAC,6BAA6B,CAAC,QAAQ,CAAC,cAAc,CAAC,4BAA4B,CAAC,SAAS,eAAe,CAAC,YAAY,CAAC,wBAAwB,CAAC,kBAAkB,CAAC,kBAAkB,CAAC,gBAAgB,cAAc,CAAC,SAAS,eAAe,CAAC,QAAQ,CAAC,kBAAkB,CAAC,iBAAiB,CAAC,kBAAkB,CAAC,WAAW,CAAC,eAAe,CAAC,cAAc,CAAC,kBAAkB,UAAU,CAAC,OAAO,YAAY,CAAC,kBAAkB,CAAC,kBAAkB,CAAC,aAAa,CAAC,wBAAwB,MAAM,iBAAiB,CAAC,GAAG,cAAc,CAAC","sourcesContent":["\n    .stripe-actions{display:flex;flex-direction:column;gap:16px;margin-top:24px}.stripe-actions button{margin:0;min-height:48px;padding:14px 20px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer}.secondary{border:1px solid #bcc9cd;background:#fff;color:#17202a}.stripe-actions button:disabled{opacity:.6;cursor:wait}.stripe-actions button:focus-visible{outline:3px solid #147f90;outline-offset:3px}\n    :host{display:block;background:#f7f7f5;color:#17202a}.owner-payments{max-width:820px;margin:0 auto;padding:36px 22px 70px}.back{border:0;background:transparent;font-weight:700;cursor:pointer;margin-bottom:24px}.card{background:#fff;border:1px solid #e5e2db;border-radius:22px;padding:34px;box-shadow:0 12px 34px rgba(0,0,0,.06)}.kicker{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:800}h1{font-size:34px;margin:8px 0 12px}p{line-height:1.6;color:#56606a}.status-row strong{overflow-wrap:anywhere;min-width:0}.status-row,.fee-box{display:flex;justify-content:space-between;gap:20px;padding:15px 0;border-top:1px solid #ece9e2}.fee-box{margin-top:12px;padding:18px;border:1px solid #d9e8dd;border-radius:14px;background:#f4faf6}.fee-box strong{font-size:22px}.primary{margin-top:24px;border:0;border-radius:12px;padding:14px 20px;background:#17202a;color:white;font-weight:800;cursor:pointer}.primary:disabled{opacity:.6}.error{padding:14px;border-radius:12px;background:#fff0f0;color:#9a1d1d}@media(max-width:600px){.card{padding:24px 18px}h1{font-size:28px}}\n  "],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
 
 
 /***/ }),
@@ -10942,6 +11784,81 @@ const LISTING_ACTIONS_TEXT = {
 
 /***/ }),
 
+/***/ 16101:
+/*!******************************************************!*\
+  !*** ./src/app/messaging/message-badge.component.ts ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MessageBadgeComponent: () => (/* binding */ MessageBadgeComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_badge_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7cG9zaXRpb246YWJzb2x1dGU7dG9wOi0xMHB4O3JpZ2h0Oi0xMHB4O3otaW5kZXg6Mjtwb2ludGVyLWV2ZW50czpub25lO2Rpc3BsYXk6YmxvY2t9LnVucmVhZC1zdGlja2Vye2Rpc3BsYXk6Z3JpZDtwbGFjZS1pdGVtczpjZW50ZXI7bWluLXdpZHRoOjI0cHg7aGVpZ2h0OjI0cHg7Ym94LXNpemluZzpib3JkZXItYm94O3BhZGRpbmc6MCA1cHg7Ym9yZGVyOjJweCBzb2xpZCB3aGl0ZTtib3JkZXItcmFkaXVzOjk5OXB4O2JhY2tncm91bmQ6I2Q5MmQyMCFpbXBvcnRhbnQ7Y29sb3I6d2hpdGUhaW1wb3J0YW50O2ZvbnQ6NzAwIDEycHgvMSBzYW5zLXNlcmlmIWltcG9ydGFudDtib3gtc2hhZG93OjAgMnB4IDZweCAjMDAwNDt3aGl0ZS1zcGFjZTpub3dyYXB9_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_badge_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/messaging/message-badge.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7cG9zaXRpb246YWJzb2x1dGU7dG9wOi0xMHB4O3JpZ2h0Oi0xMHB4O3otaW5kZXg6Mjtwb2ludGVyLWV2ZW50czpub25lO2Rpc3BsYXk6YmxvY2t9LnVucmVhZC1zdGlja2Vye2Rpc3BsYXk6Z3JpZDtwbGFjZS1pdGVtczpjZW50ZXI7bWluLXdpZHRoOjI0cHg7aGVpZ2h0OjI0cHg7Ym94LXNpemluZzpib3JkZXItYm94O3BhZGRpbmc6MCA1cHg7Ym9yZGVyOjJweCBzb2xpZCB3aGl0ZTtib3JkZXItcmFkaXVzOjk5OXB4O2JhY2tncm91bmQ6I2Q5MmQyMCFpbXBvcnRhbnQ7Y29sb3I6d2hpdGUhaW1wb3J0YW50O2ZvbnQ6NzAwIDEycHgvMSBzYW5zLXNlcmlmIWltcG9ydGFudDtib3gtc2hhZG93OjAgMnB4IDZweCAjMDAwNDt3aGl0ZS1zcGFjZTpub3dyYXB9!./src/app/messaging/message-badge.component.ts */ 13520);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_badge_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7cG9zaXRpb246YWJzb2x1dGU7dG9wOi0xMHB4O3JpZ2h0Oi0xMHB4O3otaW5kZXg6Mjtwb2ludGVyLWV2ZW50czpub25lO2Rpc3BsYXk6YmxvY2t9LnVucmVhZC1zdGlja2Vye2Rpc3BsYXk6Z3JpZDtwbGFjZS1pdGVtczpjZW50ZXI7bWluLXdpZHRoOjI0cHg7aGVpZ2h0OjI0cHg7Ym94LXNpemluZzpib3JkZXItYm94O3BhZGRpbmc6MCA1cHg7Ym9yZGVyOjJweCBzb2xpZCB3aGl0ZTtib3JkZXItcmFkaXVzOjk5OXB4O2JhY2tncm91bmQ6I2Q5MmQyMCFpbXBvcnRhbnQ7Y29sb3I6d2hpdGUhaW1wb3J0YW50O2ZvbnQ6NzAwIDEycHgvMSBzYW5zLXNlcmlmIWltcG9ydGFudDtib3gtc2hhZG93OjAgMnB4IDZweCAjMDAwNDt3aGl0ZS1zcGFjZTpub3dyYXB9_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_badge_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_badge_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7cG9zaXRpb246YWJzb2x1dGU7dG9wOi0xMHB4O3JpZ2h0Oi0xMHB4O3otaW5kZXg6Mjtwb2ludGVyLWV2ZW50czpub25lO2Rpc3BsYXk6YmxvY2t9LnVucmVhZC1zdGlja2Vye2Rpc3BsYXk6Z3JpZDtwbGFjZS1pdGVtczpjZW50ZXI7bWluLXdpZHRoOjI0cHg7aGVpZ2h0OjI0cHg7Ym94LXNpemluZzpib3JkZXItYm94O3BhZGRpbmc6MCA1cHg7Ym9yZGVyOjJweCBzb2xpZCB3aGl0ZTtib3JkZXItcmFkaXVzOjk5OXB4O2JhY2tncm91bmQ6I2Q5MmQyMCFpbXBvcnRhbnQ7Y29sb3I6d2hpdGUhaW1wb3J0YW50O2ZvbnQ6NzAwIDEycHgvMSBzYW5zLXNlcmlmIWltcG9ydGFudDtib3gtc2hhZG93OjAgMnB4IDZweCAjMDAwNDt3aGl0ZS1zcGFjZTpub3dyYXB9_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_badge_component_ts__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/language.service */ 48756);
+/* harmony import */ var _message_notifications_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./message-notifications.service */ 54230);
+/* harmony import */ var _message_unread__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./message-unread */ 87516);
+
+
+
+
+
+
+
+const COPY = {
+  fr: 'messages non lus',
+  en: 'unread messages',
+  es: 'mensajes sin leer',
+  it: 'messaggi non letti',
+  de: 'ungelesene Nachrichten',
+  nl: 'ongelezen berichten',
+  ru: 'непрочитанных сообщений'
+};
+let MessageBadgeComponent = class MessageBadgeComponent {
+  notifications;
+  language;
+  type = '';
+  assetId = '';
+  constructor(notifications, language) {
+    this.notifications = notifications;
+    this.language = language;
+  }
+  count(summary) {
+    return (0,_message_unread__WEBPACK_IMPORTED_MODULE_3__.unreadCount)(summary, this.type, this.assetId);
+  }
+  label() {
+    return COPY[this.language.currentLanguage] || COPY.en;
+  }
+  static ctorParameters = () => [{
+    type: _message_notifications_service__WEBPACK_IMPORTED_MODULE_2__.MessageNotificationsService
+  }, {
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_1__.LanguageService
+  }];
+  static propDecorators = {
+    type: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+    }],
+    assetId: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_4__.Input
+    }]
+  };
+};
+MessageBadgeComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.Component)({
+  selector: 'app-message-badge',
+  standalone: true,
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_6__.CommonModule],
+  template: `<ng-container *ngIf="notifications.summary|async as summary"><span *ngIf="count(summary) as n" class="unread-sticker" role="status" aria-live="polite" [attr.aria-label]="n+' '+label()">{{n>99?'99+':n}}</span></ng-container>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_badge_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7cG9zaXRpb246YWJzb2x1dGU7dG9wOi0xMHB4O3JpZ2h0Oi0xMHB4O3otaW5kZXg6Mjtwb2ludGVyLWV2ZW50czpub25lO2Rpc3BsYXk6YmxvY2t9LnVucmVhZC1zdGlja2Vye2Rpc3BsYXk6Z3JpZDtwbGFjZS1pdGVtczpjZW50ZXI7bWluLXdpZHRoOjI0cHg7aGVpZ2h0OjI0cHg7Ym94LXNpemluZzpib3JkZXItYm94O3BhZGRpbmc6MCA1cHg7Ym9yZGVyOjJweCBzb2xpZCB3aGl0ZTtib3JkZXItcmFkaXVzOjk5OXB4O2JhY2tncm91bmQ6I2Q5MmQyMCFpbXBvcnRhbnQ7Y29sb3I6d2hpdGUhaW1wb3J0YW50O2ZvbnQ6NzAwIDEycHgvMSBzYW5zLXNlcmlmIWltcG9ydGFudDtib3gtc2hhZG93OjAgMnB4IDZweCAjMDAwNDt3aGl0ZS1zcGFjZTpub3dyYXB9_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_badge_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
+})], MessageBadgeComponent);
+
+
+/***/ }),
+
 /***/ 16379:
 /*!**************************************************!*\
   !*** ./src/app/services/asset-access.service.ts ***!
@@ -10954,16 +11871,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   AssetAccessService: () => (/* binding */ AssetAccessService)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _session_presentation__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./session-presentation */ 9576);
-/* harmony import */ var _workspace_navigation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./workspace-navigation */ 91613);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/common/http */ 93262);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! rxjs */ 56196);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! rxjs */ 72354);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! godigital-lib */ 22464);
-/* harmony import */ var _resource_context_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./resource-context.service */ 54560);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _asset_domain__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./asset-domain */ 94984);
+/* harmony import */ var _portal_policy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./portal-policy */ 6636);
+/* harmony import */ var _session_presentation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./session-presentation */ 9576);
+/* harmony import */ var _workspace_navigation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./workspace-navigation */ 91613);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! rxjs */ 72354);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var _resource_context_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./resource-context.service */ 54560);
+
+
 
 
 
@@ -10992,7 +11913,7 @@ let AssetAccessService = class AssetAccessService {
     this.router = router;
     this.main = main;
     router.events.subscribe(event => {
-      if (event instanceof _angular_router__WEBPACK_IMPORTED_MODULE_4__.NavigationEnd) void this.refresh();
+      if (event instanceof _angular_router__WEBPACK_IMPORTED_MODULE_6__.NavigationEnd) void this.refresh();
     });
     const a = this.store;
     const auth = a.firebaseauth || a.firebaseAuth || a.auth;
@@ -11011,6 +11932,17 @@ let AssetAccessService = class AssetAccessService {
   signOut() {
     var _this = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const current = _this.user();
+      try {
+        if (current?.uid && localStorage.getItem('gd.push.uid') === current.uid) {
+          const sdk = yield Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! firebase/messaging */ 91904));
+          const a = _this.store;
+          const auth = a.firebaseauth || a.firebaseAuth || a.auth;
+          const m = sdk.getMessaging(auth.app?._delegate || auth.app);
+          yield sdk.deleteToken(m);
+          localStorage.removeItem('gd.push.uid');
+        }
+      } catch {}
       _this.request++;
       _this.state = null;
       _this.profile = null;
@@ -11039,9 +11971,9 @@ let AssetAccessService = class AssetAccessService {
       const target = type && id ? {
         assetType: type,
         assetId: id
-      } : (0,_workspace_navigation__WEBPACK_IMPORTED_MODULE_2__.explicitAsset)(typeof window === 'undefined' ? '/' : window.location.pathname);
+      } : (0,_workspace_navigation__WEBPACK_IMPORTED_MODULE_4__.explicitAsset)(typeof window === 'undefined' ? '/' : window.location.pathname) || (0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.dedicatedAsset)();
       try {
-        const value = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_5__.firstValueFrom)(_this2.http.get('/api/me/context', {
+        const value = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_7__.firstValueFrom)(_this2.http.get('/api/me/context', {
           headers: {
             Authorization: `Bearer ${yield u.getIdToken()}`
           },
@@ -11049,10 +11981,48 @@ let AssetAccessService = class AssetAccessService {
             type: target.assetType,
             id: target.assetId
           } : {}
-        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_6__.timeout)(10000)));
+        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_8__.timeout)(10000)));
         if (request === _this2.request && _this2.user()?.uid === u.uid) _this2.state = value;
       } catch {
         if (request === _this2.request) _this2.state = null;
+      }
+    })();
+  }
+  adminAccessFailure = "";
+  checkPlatformAdmin() {
+    var _this3 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this3.adminAccessFailure = "";
+      try {
+        // Bootstrap may create the Firebase Auth instance after the router starts.
+        // Wait for the usable session, including late Auth instance initialization.
+        const deadline = Date.now() + 15000;
+        while (!_this3.user()?.getIdToken && Date.now() < deadline) {
+          yield new Promise(resolve => setTimeout(resolve, 100));
+        }
+        const user = _this3.user();
+        if (!user?.getIdToken) {
+          _this3.adminAccessFailure = "session_unavailable";
+          return false;
+        }
+        const token = yield user.getIdToken();
+        const value = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_7__.firstValueFrom)(_this3.http.get('/api/me/context', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_8__.timeout)(10000)));
+        if (_this3.user()?.uid !== user.uid || value?.uid !== user.uid) {
+          _this3.adminAccessFailure = 'session_mismatch';
+          return false;
+        }
+        if (value.platformAdmin !== true) {
+          _this3.adminAccessFailure = 'admin_required';
+          return false;
+        }
+        return true;
+      } catch (error) {
+        _this3.adminAccessFailure = error?.status === 401 ? 'authentication_required' : error?.status === 403 ? 'admin_required' : error?.name === 'TimeoutError' ? 'request_timeout' : error?.status === 0 ? 'network_unavailable' : error?.status ? 'http_' + error.status : 'session_check_failed';
+        return false;
       }
     })();
   }
@@ -11065,53 +12035,83 @@ let AssetAccessService = class AssetAccessService {
     return !!uid && (!passed || passed === uid) && this.state?.uid === uid && this.state.scope === this.scope && this.canManageFor(this.ctx.resourceType, this.ctx.resourceId);
   }
   get displayName() {
-    return (0,_session_presentation__WEBPACK_IMPORTED_MODULE_1__.identityName)(this.user(), this.state, this.profile || this.main?.bnUser);
+    return (0,_session_presentation__WEBPACK_IMPORTED_MODULE_3__.identityName)(this.user(), this.state, this.profile || this.main?.bnUser);
+  }
+  get firstListingView() {
+    return this.router.url.split(/[?#]/)[0] === '/owner/start';
+  }
+  get siteHomeHref() {
+    return typeof window === 'undefined' ? '/' : window.location.origin + '/';
+  }
+  get onOwnerSite() {
+    return typeof location !== 'undefined' && !!(0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.assetDomainSlug)(location.hostname);
+  }
+  rememberSiteMode(mode = this.viewMode) {
+    const uid = this.authenticatedUid;
+    if (this.onOwnerSite && uid) {
+      try {
+        sessionStorage.setItem('godirect.view.' + uid, mode);
+      } catch {}
+    }
+  }
+  get siteManagerMode() {
+    const a = (0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.dedicatedAsset)();
+    return !!a && this.canManageFor(a.assetType, a.assetId) && this.viewMode === 'owner';
   }
   get viewMode() {
+    if (typeof window !== 'undefined' && (0,_portal_policy__WEBPACK_IMPORTED_MODULE_2__.portalFor)(window.location.hostname) === 'client') return 'client';
+    if (this.firstListingView) return 'owner';
+    if (!this.isManager) return 'client';
+    if (this.onOwnerSite && (0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.dedicatedAsset)() && !this.canManageFor((0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.dedicatedAsset)().assetType, (0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.dedicatedAsset)().assetId)) return 'client';
+    if (typeof window !== 'undefined' && (0,_portal_policy__WEBPACK_IMPORTED_MODULE_2__.portalFor)(window.location.hostname) === 'asset' && (!this.isManager || /^\/(site-client|account)(?:[/?#]|$)/.test(this.router.url))) return 'client';
     const uid = this.user()?.uid;
     let preferred = this.preferredView;
     try {
       if (uid) preferred = sessionStorage.getItem('godirect.view.' + uid) === 'client' ? 'client' : 'owner';
     } catch {}
-    return (0,_session_presentation__WEBPACK_IMPORTED_MODULE_1__.workspaceView)(this.router?.url || (typeof window === 'undefined' ? '/' : window.location.pathname + window.location.search), preferred);
+    return (0,_session_presentation__WEBPACK_IMPORTED_MODULE_3__.workspaceView)(this.router?.url || (typeof window === 'undefined' ? '/' : window.location.pathname + window.location.search), preferred);
   }
   switchView() {
-    var _this3 = this;
+    var _this4 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this3.switchingView) return;
-      _this3.switchingView = true;
+      if (_this4.switchingView) return;
+      _this4.switchingView = true;
       try {
-        yield _this3.refresh();
-        if (!_this3.isManager) return;
-        const next = _this3.viewMode === 'owner' ? 'client' : 'owner';
-        const url = _this3.router.url || '/';
-        const scope = (0,_workspace_navigation__WEBPACK_IMPORTED_MODULE_2__.explicitAsset)(url);
-        const target = (0,_session_presentation__WEBPACK_IMPORTED_MODULE_1__.viewDestination)(url, next, !!scope && _this3.canManageFor(scope.assetType, scope.assetId), _this3.isPlatformAdmin, _this3.isConcierge && (!scope || !_this3.isOwnerOf(scope.assetType, scope.assetId)));
-        const previous = _this3.viewMode;
-        _this3.preferredView = next;
-        const uid = _this3.user()?.uid;
+        yield _this4.refresh();
+        if (!_this4.isManager) return;
+        const next = _this4.viewMode === 'owner' ? 'client' : 'owner';
+        const url = _this4.router.url || '/';
+        const scope = (0,_workspace_navigation__WEBPACK_IMPORTED_MODULE_4__.explicitAsset)(url);
+        const target = (0,_session_presentation__WEBPACK_IMPORTED_MODULE_3__.viewDestination)(url, next, !!scope && _this4.canManageFor(scope.assetType, scope.assetId), _this4.isPlatformAdmin, _this4.isConcierge && (!scope || !_this4.isOwnerOf(scope.assetType, scope.assetId)));
+        const previous = _this4.viewMode;
+        _this4.preferredView = next;
+        const uid = _this4.user()?.uid;
         try {
           if (uid) sessionStorage.setItem('godirect.view.' + uid, next);
         } catch {}
         try {
-          const changed = yield _this3.router.navigate([target.path], {
+          if (_this4.onOwnerSite) {
+            location.assign('/');
+            return;
+          }
+          const changed = yield _this4.router.navigate([target.path], {
             queryParams: target.query || {}
           });
           if (changed === false) {
-            _this3.preferredView = previous;
+            _this4.preferredView = previous;
             try {
               if (uid) sessionStorage.setItem('godirect.view.' + uid, previous);
             } catch {}
           }
         } catch (error) {
-          _this3.preferredView = previous;
+          _this4.preferredView = previous;
           try {
             if (uid) sessionStorage.setItem('godirect.view.' + uid, previous);
           } catch {}
           throw error;
         }
       } finally {
-        _this3.switchingView = false;
+        _this4.switchingView = false;
       }
     })();
   }
@@ -11119,7 +12119,7 @@ let AssetAccessService = class AssetAccessService {
     if (!this.isAuthenticated) return 'guest';
     if (this.state?.uid !== this.user()?.uid) return 'loading';
     const path = this.router?.url || '',
-      scope = (0,_workspace_navigation__WEBPACK_IMPORTED_MODULE_2__.explicitAsset)(path);
+      scope = (0,_workspace_navigation__WEBPACK_IMPORTED_MODULE_4__.explicitAsset)(path);
     return this.isPlatformAdmin ? 'admin' : this.isConcierge && (!this.isOwner || path.startsWith('/concierge') || !!scope && !this.isOwnerOf(scope.assetType, scope.assetId)) ? 'concierge' : this.isOwner ? 'owner' : 'client';
   }
   get authenticatedUid() {
@@ -11153,24 +12153,60 @@ let AssetAccessService = class AssetAccessService {
     return this.state?.uid === this.user()?.uid && this.state?.platformAdmin === true;
   }
   static ctorParameters = () => [{
-    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_7__.HttpClient
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_9__.HttpClient
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_8__.StoreDbService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_10__.StoreDbService
   }, {
-    type: _resource_context_service__WEBPACK_IMPORTED_MODULE_3__.ResourceContextService
+    type: _resource_context_service__WEBPACK_IMPORTED_MODULE_5__.ResourceContextService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_4__.Router
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_6__.Router
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_8__.ServicesService,
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_10__.ServicesService,
     decorators: [{
-      type: _angular_core__WEBPACK_IMPORTED_MODULE_9__.Optional
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_11__.Optional
     }]
   }];
 };
-AssetAccessService = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Injectable)({
+AssetAccessService = (0,tslib__WEBPACK_IMPORTED_MODULE_12__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_11__.Injectable)({
   providedIn: 'root'
 })], AssetAccessService);
 
+
+/***/ }),
+
+/***/ 17289:
+/*!*********************************************!*\
+  !*** ./src/app/messaging/messaging-text.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   messagingText: () => (/* binding */ messagingText)
+/* harmony export */ });
+const COPY = {
+  fr: ['Messagerie', 'Conversations', 'Nouvelle conversation', 'Choisissez une réservation ou un abonnement', 'Ouvrir la conversation', 'Réservation · échanges avec le client', 'Gestion · échanges avec GoDirect', 'Abonnement', 'Aucune conversation', 'Écrivez votre message…', 'Envoyer', 'Envoi…', 'Messages précédents', 'En direct', 'Connexion interrompue · réessai automatique', 'Connexion en cours…', 'Impossible de charger la messagerie. Vérifiez votre connexion et vos accès.', 'Nouveau', 'Message non envoyé. Votre texte est conservé ; réessayez.', 'Rechercher un bien ou un client', 'Client, propriétaire et concierges autorisés.', 'Propriétaire, équipe GoDirect et concierges habilités.', 'Recharger', 'Sélectionnez une conversation.', '4 000 caractères maximum', 'Réessayez dans une minute : trop de messages.', 'Connectez-vous pour accéder à la messagerie.'],
+  en: ['Messages', 'Conversations', 'New conversation', 'Choose a reservation or subscription', 'Open conversation', 'Reservation · customer conversation', 'Management · GoDirect conversation', 'Subscription', 'No conversations', 'Write your message…', 'Send', 'Sending…', 'Older messages', 'Live', 'Disconnected · reconnecting automatically', 'Connecting…', 'Could not load messages. Check your connection and access.', 'New', 'Message not sent. Your text is kept; try again.', 'Search an asset or customer', 'Customer, owner and authorized concierges.', 'Owner, GoDirect team and authorized concierges.', 'Reload', 'Select a conversation.', '4,000 characters maximum', 'Too many messages. Try again in a minute.', 'Sign in to access messages.'],
+  es: ['Mensajes', 'Conversaciones', 'Nueva conversación', 'Elija una reserva o suscripción', 'Abrir conversación', 'Reserva · cliente', 'Gestión · GoDirect', 'Suscripción', 'Sin conversaciones', 'Escriba su mensaje…', 'Enviar', 'Enviando…', 'Mensajes anteriores', 'En directo', 'Desconectado · reconectando', 'Conectando…', 'No se pudieron cargar los mensajes.', 'Nuevo', 'Mensaje no enviado. El texto se conserva.', 'Buscar un bien o cliente', 'Cliente, propietario y conserjes autorizados.', 'Propietario, GoDirect y conserjes autorizados.', 'Recargar', 'Seleccione una conversación.', 'Máximo 4.000 caracteres', 'Demasiados mensajes. Espere un minuto.', 'Inicie sesión para acceder a los mensajes.'],
+  it: ['Messaggi', 'Conversazioni', 'Nuova conversazione', 'Scegli una prenotazione o un abbonamento', 'Apri conversazione', 'Prenotazione · cliente', 'Gestione · GoDirect', 'Abbonamento', 'Nessuna conversazione', 'Scrivi un messaggio…', 'Invia', 'Invio…', 'Messaggi precedenti', 'In diretta', 'Disconnesso · riconnessione', 'Connessione…', 'Impossibile caricare i messaggi.', 'Nuovo', 'Messaggio non inviato. Il testo è conservato.', 'Cerca un bene o cliente', 'Cliente, proprietario e concierge autorizzati.', 'Proprietario, GoDirect e concierge autorizzati.', 'Ricarica', 'Seleziona una conversazione.', 'Massimo 4.000 caratteri', 'Troppi messaggi. Riprova tra un minuto.', 'Accedi per leggere i messaggi.'],
+  de: ['Nachrichten', 'Gespräche', 'Neues Gespräch', 'Buchung oder Abonnement wählen', 'Gespräch öffnen', 'Buchung · Kunde', 'Verwaltung · GoDirect', 'Abonnement', 'Keine Gespräche', 'Nachricht schreiben…', 'Senden', 'Wird gesendet…', 'Ältere Nachrichten', 'Live', 'Getrennt · neue Verbindung', 'Verbindung…', 'Nachrichten konnten nicht geladen werden.', 'Neu', 'Nicht gesendet. Ihr Text bleibt erhalten.', 'Objekt oder Kunde suchen', 'Kunde, Eigentümer und autorisierte Betreuer.', 'Eigentümer, GoDirect und autorisierte Betreuer.', 'Neu laden', 'Gespräch auswählen.', 'Maximal 4.000 Zeichen', 'Zu viele Nachrichten. Warten Sie eine Minute.', 'Melden Sie sich für Nachrichten an.'],
+  nl: ['Berichten', 'Gesprekken', 'Nieuw gesprek', 'Kies een boeking of abonnement', 'Gesprek openen', 'Boeking · klant', 'Beheer · GoDirect', 'Abonnement', 'Geen gesprekken', 'Schrijf een bericht…', 'Verzenden', 'Verzenden…', 'Oudere berichten', 'Live', 'Verbroken · opnieuw verbinden', 'Verbinden…', 'Berichten konden niet worden geladen.', 'Nieuw', 'Niet verzonden. Uw tekst blijft bewaard.', 'Zoek een object of klant', 'Klant, eigenaar en bevoegde beheerders.', 'Eigenaar, GoDirect en bevoegde beheerders.', 'Vernieuwen', 'Selecteer een gesprek.', 'Maximaal 4.000 tekens', 'Te veel berichten. Wacht een minuut.', 'Log in om berichten te lezen.'],
+  ru: ['Сообщения', 'Переписка', 'Новый разговор', 'Выберите бронирование или подписку', 'Открыть переписку', 'Бронирование · клиент', 'Управление · GoDirect', 'Подписка', 'Нет переписок', 'Напишите сообщение…', 'Отправить', 'Отправка…', 'Предыдущие сообщения', 'На связи', 'Нет связи · переподключение', 'Подключение…', 'Не удалось загрузить сообщения.', 'Новое', 'Сообщение не отправлено. Текст сохранён.', 'Поиск объекта или клиента', 'Клиент, владелец и уполномоченные консьержи.', 'Владелец, GoDirect и уполномоченные консьержи.', 'Обновить', 'Выберите переписку.', 'Не более 4 000 символов', 'Слишком много сообщений. Подождите минуту.', 'Войдите для доступа к сообщениям.']
+};
+function messagingText(lang, i) {
+  return (COPY[lang] || COPY.en)[i];
+}
+const UNAVAILABLE = {
+  fr: "La messagerie doit être activée par l’administrateur : vérifiez les règles privées Firebase.",
+  en: "Messaging must be enabled by the administrator: check private Firebase rules.",
+  es: "El administrador debe activar la mensajería y verificar las reglas privadas de Firebase.",
+  it: "L’amministratore deve attivare i messaggi e verificare le regole private Firebase.",
+  de: "Der Administrator muss Nachrichten aktivieren und die privaten Firebase-Regeln prüfen.",
+  nl: "De beheerder moet berichten activeren en de privéregels van Firebase controleren.",
+  ru: "Администратор должен активировать сообщения и проверить закрытые правила Firebase."
+};
+for (const [lang, text] of Object.entries(UNAVAILABLE)) COPY[lang].push(text);
 
 /***/ }),
 
@@ -11186,19 +12222,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   OwnerPaymentsComponent: () => (/* binding */ OwnerPaymentsComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiAgICA6aG9zdHtkaXNwbGF5OmJsb2NrO2JhY2tncm91bmQ6I2Y3ZjdmNTtjb2xvcjojMTcyMDJhfS5vd25lci1wYXltZW50c3ttYXgtd2lkdGg6ODIwcHg7bWFyZ2luOjAgYXV0bztwYWRkaW5nOjM2cHggMjJweCA3MHB4fS5iYWNre2JvcmRlcjowO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Zm9udC13ZWlnaHQ6NzAwO2N1cnNvcjpwb2ludGVyO21hcmdpbi1ib3R0b206MjRweH0uY2FyZHtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyOjFweCBzb2xpZCAjZTVlMmRiO2JvcmRlci1yYWRpdXM6MjJweDtwYWRkaW5nOjM0cHg7Ym94LXNoYWRvdzowIDEycHggMzRweCByZ2JhKDAsMCwwLC4wNil9LmtpY2tlcnt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjEyZW07Zm9udC1zaXplOjEycHg7Zm9udC13ZWlnaHQ6ODAwfWgxe2ZvbnQtc2l6ZTozNHB4O21hcmdpbjo4cHggMCAxMnB4fXB7bGluZS1oZWlnaHQ6MS42O2NvbG9yOiM1NjYwNmF9LnN0YXR1cy1yb3cgc3Ryb25ne292ZXJmbG93LXdyYXA6YW55d2hlcmU7bWluLXdpZHRoOjB9LnN0YXR1cy1yb3csLmZlZS1ib3h7ZGlzcGxheTpmbGV4O2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO2dhcDoyMHB4O3BhZGRpbmc6MTVweCAwO2JvcmRlci10b3A6MXB4IHNvbGlkICNlY2U5ZTJ9LmZlZS1ib3h7bWFyZ2luLXRvcDoxMnB4O3BhZGRpbmc6MThweDtib3JkZXI6MXB4IHNvbGlkICNkOWU4ZGQ7Ym9yZGVyLXJhZGl1czoxNHB4O2JhY2tncm91bmQ6I2Y0ZmFmNn0uZmVlLWJveCBzdHJvbmd7Zm9udC1zaXplOjIycHh9LnByaW1hcnl7bWFyZ2luLXRvcDoyNHB4O2JvcmRlcjowO2JvcmRlci1yYWRpdXM6MTJweDtwYWRkaW5nOjE0cHggMjBweDtiYWNrZ3JvdW5kOiMxNzIwMmE7Y29sb3I6d2hpdGU7Zm9udC13ZWlnaHQ6ODAwO2N1cnNvcjpwb2ludGVyfS5wcmltYXJ5OmRpc2FibGVke29wYWNpdHk6LjZ9LmVycm9ye3BhZGRpbmc6MTRweDtib3JkZXItcmFkaXVzOjEycHg7YmFja2dyb3VuZDojZmZmMGYwO2NvbG9yOiM5YTFkMWR9QG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmNhcmR7cGFkZGluZzoyNHB4IDE4cHh9aDF7Zm9udC1zaXplOjI4cHh9fQogIA_3D_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./src/app/owner-payments.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=CiAgICA6aG9zdHtkaXNwbGF5OmJsb2NrO2JhY2tncm91bmQ6I2Y3ZjdmNTtjb2xvcjojMTcyMDJhfS5vd25lci1wYXltZW50c3ttYXgtd2lkdGg6ODIwcHg7bWFyZ2luOjAgYXV0bztwYWRkaW5nOjM2cHggMjJweCA3MHB4fS5iYWNre2JvcmRlcjowO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Zm9udC13ZWlnaHQ6NzAwO2N1cnNvcjpwb2ludGVyO21hcmdpbi1ib3R0b206MjRweH0uY2FyZHtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyOjFweCBzb2xpZCAjZTVlMmRiO2JvcmRlci1yYWRpdXM6MjJweDtwYWRkaW5nOjM0cHg7Ym94LXNoYWRvdzowIDEycHggMzRweCByZ2JhKDAsMCwwLC4wNil9LmtpY2tlcnt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjEyZW07Zm9udC1zaXplOjEycHg7Zm9udC13ZWlnaHQ6ODAwfWgxe2ZvbnQtc2l6ZTozNHB4O21hcmdpbjo4cHggMCAxMnB4fXB7bGluZS1oZWlnaHQ6MS42O2NvbG9yOiM1NjYwNmF9LnN0YXR1cy1yb3cgc3Ryb25ne292ZXJmbG93LXdyYXA6YW55d2hlcmU7bWluLXdpZHRoOjB9LnN0YXR1cy1yb3csLmZlZS1ib3h7ZGlzcGxheTpmbGV4O2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO2dhcDoyMHB4O3BhZGRpbmc6MTVweCAwO2JvcmRlci10b3A6MXB4IHNvbGlkICNlY2U5ZTJ9LmZlZS1ib3h7bWFyZ2luLXRvcDoxMnB4O3BhZGRpbmc6MThweDtib3JkZXI6MXB4IHNvbGlkICNkOWU4ZGQ7Ym9yZGVyLXJhZGl1czoxNHB4O2JhY2tncm91bmQ6I2Y0ZmFmNn0uZmVlLWJveCBzdHJvbmd7Zm9udC1zaXplOjIycHh9LnByaW1hcnl7bWFyZ2luLXRvcDoyNHB4O2JvcmRlcjowO2JvcmRlci1yYWRpdXM6MTJweDtwYWRkaW5nOjE0cHggMjBweDtiYWNrZ3JvdW5kOiMxNzIwMmE7Y29sb3I6d2hpdGU7Zm9udC13ZWlnaHQ6ODAwO2N1cnNvcjpwb2ludGVyfS5wcmltYXJ5OmRpc2FibGVke29wYWNpdHk6LjZ9LmVycm9ye3BhZGRpbmc6MTRweDtib3JkZXItcmFkaXVzOjEycHg7YmFja2dyb3VuZDojZmZmMGYwO2NvbG9yOiM5YTFkMWR9QG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmNhcmR7cGFkZGluZzoyNHB4IDE4cHh9aDF7Zm9udC1zaXplOjI4cHh9fQogIA%3D%3D!./src/app/owner-payments.component.ts */ 14331);
-/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiAgICA6aG9zdHtkaXNwbGF5OmJsb2NrO2JhY2tncm91bmQ6I2Y3ZjdmNTtjb2xvcjojMTcyMDJhfS5vd25lci1wYXltZW50c3ttYXgtd2lkdGg6ODIwcHg7bWFyZ2luOjAgYXV0bztwYWRkaW5nOjM2cHggMjJweCA3MHB4fS5iYWNre2JvcmRlcjowO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Zm9udC13ZWlnaHQ6NzAwO2N1cnNvcjpwb2ludGVyO21hcmdpbi1ib3R0b206MjRweH0uY2FyZHtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyOjFweCBzb2xpZCAjZTVlMmRiO2JvcmRlci1yYWRpdXM6MjJweDtwYWRkaW5nOjM0cHg7Ym94LXNoYWRvdzowIDEycHggMzRweCByZ2JhKDAsMCwwLC4wNil9LmtpY2tlcnt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjEyZW07Zm9udC1zaXplOjEycHg7Zm9udC13ZWlnaHQ6ODAwfWgxe2ZvbnQtc2l6ZTozNHB4O21hcmdpbjo4cHggMCAxMnB4fXB7bGluZS1oZWlnaHQ6MS42O2NvbG9yOiM1NjYwNmF9LnN0YXR1cy1yb3cgc3Ryb25ne292ZXJmbG93LXdyYXA6YW55d2hlcmU7bWluLXdpZHRoOjB9LnN0YXR1cy1yb3csLmZlZS1ib3h7ZGlzcGxheTpmbGV4O2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO2dhcDoyMHB4O3BhZGRpbmc6MTVweCAwO2JvcmRlci10b3A6MXB4IHNvbGlkICNlY2U5ZTJ9LmZlZS1ib3h7bWFyZ2luLXRvcDoxMnB4O3BhZGRpbmc6MThweDtib3JkZXI6MXB4IHNvbGlkICNkOWU4ZGQ7Ym9yZGVyLXJhZGl1czoxNHB4O2JhY2tncm91bmQ6I2Y0ZmFmNn0uZmVlLWJveCBzdHJvbmd7Zm9udC1zaXplOjIycHh9LnByaW1hcnl7bWFyZ2luLXRvcDoyNHB4O2JvcmRlcjowO2JvcmRlci1yYWRpdXM6MTJweDtwYWRkaW5nOjE0cHggMjBweDtiYWNrZ3JvdW5kOiMxNzIwMmE7Y29sb3I6d2hpdGU7Zm9udC13ZWlnaHQ6ODAwO2N1cnNvcjpwb2ludGVyfS5wcmltYXJ5OmRpc2FibGVke29wYWNpdHk6LjZ9LmVycm9ye3BhZGRpbmc6MTRweDtib3JkZXItcmFkaXVzOjEycHg7YmFja2dyb3VuZDojZmZmMGYwO2NvbG9yOiM5YTFkMWR9QG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmNhcmR7cGFkZGluZzoyNHB4IDE4cHh9aDF7Zm9udC1zaXplOjI4cHh9fQogIA_3D_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiAgICA6aG9zdHtkaXNwbGF5OmJsb2NrO2JhY2tncm91bmQ6I2Y3ZjdmNTtjb2xvcjojMTcyMDJhfS5vd25lci1wYXltZW50c3ttYXgtd2lkdGg6ODIwcHg7bWFyZ2luOjAgYXV0bztwYWRkaW5nOjM2cHggMjJweCA3MHB4fS5iYWNre2JvcmRlcjowO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Zm9udC13ZWlnaHQ6NzAwO2N1cnNvcjpwb2ludGVyO21hcmdpbi1ib3R0b206MjRweH0uY2FyZHtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyOjFweCBzb2xpZCAjZTVlMmRiO2JvcmRlci1yYWRpdXM6MjJweDtwYWRkaW5nOjM0cHg7Ym94LXNoYWRvdzowIDEycHggMzRweCByZ2JhKDAsMCwwLC4wNil9LmtpY2tlcnt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjEyZW07Zm9udC1zaXplOjEycHg7Zm9udC13ZWlnaHQ6ODAwfWgxe2ZvbnQtc2l6ZTozNHB4O21hcmdpbjo4cHggMCAxMnB4fXB7bGluZS1oZWlnaHQ6MS42O2NvbG9yOiM1NjYwNmF9LnN0YXR1cy1yb3cgc3Ryb25ne292ZXJmbG93LXdyYXA6YW55d2hlcmU7bWluLXdpZHRoOjB9LnN0YXR1cy1yb3csLmZlZS1ib3h7ZGlzcGxheTpmbGV4O2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO2dhcDoyMHB4O3BhZGRpbmc6MTVweCAwO2JvcmRlci10b3A6MXB4IHNvbGlkICNlY2U5ZTJ9LmZlZS1ib3h7bWFyZ2luLXRvcDoxMnB4O3BhZGRpbmc6MThweDtib3JkZXI6MXB4IHNvbGlkICNkOWU4ZGQ7Ym9yZGVyLXJhZGl1czoxNHB4O2JhY2tncm91bmQ6I2Y0ZmFmNn0uZmVlLWJveCBzdHJvbmd7Zm9udC1zaXplOjIycHh9LnByaW1hcnl7bWFyZ2luLXRvcDoyNHB4O2JvcmRlcjowO2JvcmRlci1yYWRpdXM6MTJweDtwYWRkaW5nOjE0cHggMjBweDtiYWNrZ3JvdW5kOiMxNzIwMmE7Y29sb3I6d2hpdGU7Zm9udC13ZWlnaHQ6ODAwO2N1cnNvcjpwb2ludGVyfS5wcmltYXJ5OmRpc2FibGVke29wYWNpdHk6LjZ9LmVycm9ye3BhZGRpbmc6MTRweDtib3JkZXItcmFkaXVzOjEycHg7YmFja2dyb3VuZDojZmZmMGYwO2NvbG9yOiM5YTFkMWR9QG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmNhcmR7cGFkZGluZzoyNHB4IDE4cHh9aDF7Zm9udC1zaXplOjI4cHh9fQogIA_3D_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _services_stripe_test_fixture_text__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./services/stripe-test-fixture-text */ 47435);
-/* harmony import */ var _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./services/owner-onboarding-text */ 73286);
-/* harmony import */ var _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./services/owner-offer-text */ 61407);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./services/language.service */ 48756);
-/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./home/site-content-service/site-content.service */ 73196);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/common/http */ 93262);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! godigital-lib */ 22464);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! rxjs */ 56196);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiAgICAuc3RyaXBlLWFjdGlvbnN7ZGlzcGxheTpmbGV4O2ZsZXgtZGlyZWN0aW9uOmNvbHVtbjtnYXA6MTZweDttYXJnaW4tdG9wOjI0cHh9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbnttYXJnaW46MDttaW4taGVpZ2h0OjQ4cHg7cGFkZGluZzoxNHB4IDIwcHg7Ym9yZGVyLXJhZGl1czoxMnB4O2ZvbnQ6aW5oZXJpdDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXJ9LnNlY29uZGFyeXtib3JkZXI6MXB4IHNvbGlkICNiY2M5Y2Q7YmFja2dyb3VuZDojZmZmO2NvbG9yOiMxNzIwMmF9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbjpkaXNhYmxlZHtvcGFjaXR5Oi42O2N1cnNvcjp3YWl0fS5zdHJpcGUtYWN0aW9ucyBidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjMTQ3ZjkwO291dGxpbmUtb2Zmc2V0OjNweH0KICAgIDpob3N0e2Rpc3BsYXk6YmxvY2s7YmFja2dyb3VuZDojZjdmN2Y1O2NvbG9yOiMxNzIwMmF9Lm93bmVyLXBheW1lbnRze21heC13aWR0aDo4MjBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MzZweCAyMnB4IDcwcHh9LmJhY2t7Ym9yZGVyOjA7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXI7bWFyZ2luLWJvdHRvbToyNHB4fS5jYXJke2JhY2tncm91bmQ6I2ZmZjtib3JkZXI6MXB4IHNvbGlkICNlNWUyZGI7Ym9yZGVyLXJhZGl1czoyMnB4O3BhZGRpbmc6MzRweDtib3gtc2hhZG93OjAgMTJweCAzNHB4IHJnYmEoMCwwLDAsLjA2KX0ua2lja2Vye3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtsZXR0ZXItc3BhY2luZzouMTJlbTtmb250LXNpemU6MTJweDtmb250LXdlaWdodDo4MDB9aDF7Zm9udC1zaXplOjM0cHg7bWFyZ2luOjhweCAwIDEycHh9cHtsaW5lLWhlaWdodDoxLjY7Y29sb3I6IzU2NjA2YX0uc3RhdHVzLXJvdyBzdHJvbmd7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZTttaW4td2lkdGg6MH0uc3RhdHVzLXJvdywuZmVlLWJveHtkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47Z2FwOjIwcHg7cGFkZGluZzoxNXB4IDA7Ym9yZGVyLXRvcDoxcHggc29saWQgI2VjZTllMn0uZmVlLWJveHttYXJnaW4tdG9wOjEycHg7cGFkZGluZzoxOHB4O2JvcmRlcjoxcHggc29saWQgI2Q5ZThkZDtib3JkZXItcmFkaXVzOjE0cHg7YmFja2dyb3VuZDojZjRmYWY2fS5mZWUtYm94IHN0cm9uZ3tmb250LXNpemU6MjJweH0ucHJpbWFyeXttYXJnaW4tdG9wOjI0cHg7Ym9yZGVyOjA7Ym9yZGVyLXJhZGl1czoxMnB4O3BhZGRpbmc6MTRweCAyMHB4O2JhY2tncm91bmQ6IzE3MjAyYTtjb2xvcjp3aGl0ZTtmb250LXdlaWdodDo4MDA7Y3Vyc29yOnBvaW50ZXJ9LnByaW1hcnk6ZGlzYWJsZWR7b3BhY2l0eTouNn0uZXJyb3J7cGFkZGluZzoxNHB4O2JvcmRlci1yYWRpdXM6MTJweDtiYWNrZ3JvdW5kOiNmZmYwZjA7Y29sb3I6IzlhMWQxZH1AbWVkaWEobWF4LXdpZHRoOjYwMHB4KXsuY2FyZHtwYWRkaW5nOjI0cHggMThweH1oMXtmb250LXNpemU6MjhweH19CiAg_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./src/app/owner-payments.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=CiAgICAuc3RyaXBlLWFjdGlvbnN7ZGlzcGxheTpmbGV4O2ZsZXgtZGlyZWN0aW9uOmNvbHVtbjtnYXA6MTZweDttYXJnaW4tdG9wOjI0cHh9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbnttYXJnaW46MDttaW4taGVpZ2h0OjQ4cHg7cGFkZGluZzoxNHB4IDIwcHg7Ym9yZGVyLXJhZGl1czoxMnB4O2ZvbnQ6aW5oZXJpdDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXJ9LnNlY29uZGFyeXtib3JkZXI6MXB4IHNvbGlkICNiY2M5Y2Q7YmFja2dyb3VuZDojZmZmO2NvbG9yOiMxNzIwMmF9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbjpkaXNhYmxlZHtvcGFjaXR5Oi42O2N1cnNvcjp3YWl0fS5zdHJpcGUtYWN0aW9ucyBidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjMTQ3ZjkwO291dGxpbmUtb2Zmc2V0OjNweH0KICAgIDpob3N0e2Rpc3BsYXk6YmxvY2s7YmFja2dyb3VuZDojZjdmN2Y1O2NvbG9yOiMxNzIwMmF9Lm93bmVyLXBheW1lbnRze21heC13aWR0aDo4MjBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MzZweCAyMnB4IDcwcHh9LmJhY2t7Ym9yZGVyOjA7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXI7bWFyZ2luLWJvdHRvbToyNHB4fS5jYXJke2JhY2tncm91bmQ6I2ZmZjtib3JkZXI6MXB4IHNvbGlkICNlNWUyZGI7Ym9yZGVyLXJhZGl1czoyMnB4O3BhZGRpbmc6MzRweDtib3gtc2hhZG93OjAgMTJweCAzNHB4IHJnYmEoMCwwLDAsLjA2KX0ua2lja2Vye3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtsZXR0ZXItc3BhY2luZzouMTJlbTtmb250LXNpemU6MTJweDtmb250LXdlaWdodDo4MDB9aDF7Zm9udC1zaXplOjM0cHg7bWFyZ2luOjhweCAwIDEycHh9cHtsaW5lLWhlaWdodDoxLjY7Y29sb3I6IzU2NjA2YX0uc3RhdHVzLXJvdyBzdHJvbmd7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZTttaW4td2lkdGg6MH0uc3RhdHVzLXJvdywuZmVlLWJveHtkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47Z2FwOjIwcHg7cGFkZGluZzoxNXB4IDA7Ym9yZGVyLXRvcDoxcHggc29saWQgI2VjZTllMn0uZmVlLWJveHttYXJnaW4tdG9wOjEycHg7cGFkZGluZzoxOHB4O2JvcmRlcjoxcHggc29saWQgI2Q5ZThkZDtib3JkZXItcmFkaXVzOjE0cHg7YmFja2dyb3VuZDojZjRmYWY2fS5mZWUtYm94IHN0cm9uZ3tmb250LXNpemU6MjJweH0ucHJpbWFyeXttYXJnaW4tdG9wOjI0cHg7Ym9yZGVyOjA7Ym9yZGVyLXJhZGl1czoxMnB4O3BhZGRpbmc6MTRweCAyMHB4O2JhY2tncm91bmQ6IzE3MjAyYTtjb2xvcjp3aGl0ZTtmb250LXdlaWdodDo4MDA7Y3Vyc29yOnBvaW50ZXJ9LnByaW1hcnk6ZGlzYWJsZWR7b3BhY2l0eTouNn0uZXJyb3J7cGFkZGluZzoxNHB4O2JvcmRlci1yYWRpdXM6MTJweDtiYWNrZ3JvdW5kOiNmZmYwZjA7Y29sb3I6IzlhMWQxZH1AbWVkaWEobWF4LXdpZHRoOjYwMHB4KXsuY2FyZHtwYWRkaW5nOjI0cHggMThweH1oMXtmb250LXNpemU6MjhweH19CiAg!./src/app/owner-payments.component.ts */ 15091);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiAgICAuc3RyaXBlLWFjdGlvbnN7ZGlzcGxheTpmbGV4O2ZsZXgtZGlyZWN0aW9uOmNvbHVtbjtnYXA6MTZweDttYXJnaW4tdG9wOjI0cHh9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbnttYXJnaW46MDttaW4taGVpZ2h0OjQ4cHg7cGFkZGluZzoxNHB4IDIwcHg7Ym9yZGVyLXJhZGl1czoxMnB4O2ZvbnQ6aW5oZXJpdDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXJ9LnNlY29uZGFyeXtib3JkZXI6MXB4IHNvbGlkICNiY2M5Y2Q7YmFja2dyb3VuZDojZmZmO2NvbG9yOiMxNzIwMmF9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbjpkaXNhYmxlZHtvcGFjaXR5Oi42O2N1cnNvcjp3YWl0fS5zdHJpcGUtYWN0aW9ucyBidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjMTQ3ZjkwO291dGxpbmUtb2Zmc2V0OjNweH0KICAgIDpob3N0e2Rpc3BsYXk6YmxvY2s7YmFja2dyb3VuZDojZjdmN2Y1O2NvbG9yOiMxNzIwMmF9Lm93bmVyLXBheW1lbnRze21heC13aWR0aDo4MjBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MzZweCAyMnB4IDcwcHh9LmJhY2t7Ym9yZGVyOjA7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXI7bWFyZ2luLWJvdHRvbToyNHB4fS5jYXJke2JhY2tncm91bmQ6I2ZmZjtib3JkZXI6MXB4IHNvbGlkICNlNWUyZGI7Ym9yZGVyLXJhZGl1czoyMnB4O3BhZGRpbmc6MzRweDtib3gtc2hhZG93OjAgMTJweCAzNHB4IHJnYmEoMCwwLDAsLjA2KX0ua2lja2Vye3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtsZXR0ZXItc3BhY2luZzouMTJlbTtmb250LXNpemU6MTJweDtmb250LXdlaWdodDo4MDB9aDF7Zm9udC1zaXplOjM0cHg7bWFyZ2luOjhweCAwIDEycHh9cHtsaW5lLWhlaWdodDoxLjY7Y29sb3I6IzU2NjA2YX0uc3RhdHVzLXJvdyBzdHJvbmd7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZTttaW4td2lkdGg6MH0uc3RhdHVzLXJvdywuZmVlLWJveHtkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47Z2FwOjIwcHg7cGFkZGluZzoxNXB4IDA7Ym9yZGVyLXRvcDoxcHggc29saWQgI2VjZTllMn0uZmVlLWJveHttYXJnaW4tdG9wOjEycHg7cGFkZGluZzoxOHB4O2JvcmRlcjoxcHggc29saWQgI2Q5ZThkZDtib3JkZXItcmFkaXVzOjE0cHg7YmFja2dyb3VuZDojZjRmYWY2fS5mZWUtYm94IHN0cm9uZ3tmb250LXNpemU6MjJweH0ucHJpbWFyeXttYXJnaW4tdG9wOjI0cHg7Ym9yZGVyOjA7Ym9yZGVyLXJhZGl1czoxMnB4O3BhZGRpbmc6MTRweCAyMHB4O2JhY2tncm91bmQ6IzE3MjAyYTtjb2xvcjp3aGl0ZTtmb250LXdlaWdodDo4MDA7Y3Vyc29yOnBvaW50ZXJ9LnByaW1hcnk6ZGlzYWJsZWR7b3BhY2l0eTouNn0uZXJyb3J7cGFkZGluZzoxNHB4O2JvcmRlci1yYWRpdXM6MTJweDtiYWNrZ3JvdW5kOiNmZmYwZjA7Y29sb3I6IzlhMWQxZH1AbWVkaWEobWF4LXdpZHRoOjYwMHB4KXsuY2FyZHtwYWRkaW5nOjI0cHggMThweH1oMXtmb250LXNpemU6MjhweH19CiAg_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiAgICAuc3RyaXBlLWFjdGlvbnN7ZGlzcGxheTpmbGV4O2ZsZXgtZGlyZWN0aW9uOmNvbHVtbjtnYXA6MTZweDttYXJnaW4tdG9wOjI0cHh9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbnttYXJnaW46MDttaW4taGVpZ2h0OjQ4cHg7cGFkZGluZzoxNHB4IDIwcHg7Ym9yZGVyLXJhZGl1czoxMnB4O2ZvbnQ6aW5oZXJpdDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXJ9LnNlY29uZGFyeXtib3JkZXI6MXB4IHNvbGlkICNiY2M5Y2Q7YmFja2dyb3VuZDojZmZmO2NvbG9yOiMxNzIwMmF9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbjpkaXNhYmxlZHtvcGFjaXR5Oi42O2N1cnNvcjp3YWl0fS5zdHJpcGUtYWN0aW9ucyBidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjMTQ3ZjkwO291dGxpbmUtb2Zmc2V0OjNweH0KICAgIDpob3N0e2Rpc3BsYXk6YmxvY2s7YmFja2dyb3VuZDojZjdmN2Y1O2NvbG9yOiMxNzIwMmF9Lm93bmVyLXBheW1lbnRze21heC13aWR0aDo4MjBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MzZweCAyMnB4IDcwcHh9LmJhY2t7Ym9yZGVyOjA7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXI7bWFyZ2luLWJvdHRvbToyNHB4fS5jYXJke2JhY2tncm91bmQ6I2ZmZjtib3JkZXI6MXB4IHNvbGlkICNlNWUyZGI7Ym9yZGVyLXJhZGl1czoyMnB4O3BhZGRpbmc6MzRweDtib3gtc2hhZG93OjAgMTJweCAzNHB4IHJnYmEoMCwwLDAsLjA2KX0ua2lja2Vye3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtsZXR0ZXItc3BhY2luZzouMTJlbTtmb250LXNpemU6MTJweDtmb250LXdlaWdodDo4MDB9aDF7Zm9udC1zaXplOjM0cHg7bWFyZ2luOjhweCAwIDEycHh9cHtsaW5lLWhlaWdodDoxLjY7Y29sb3I6IzU2NjA2YX0uc3RhdHVzLXJvdyBzdHJvbmd7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZTttaW4td2lkdGg6MH0uc3RhdHVzLXJvdywuZmVlLWJveHtkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47Z2FwOjIwcHg7cGFkZGluZzoxNXB4IDA7Ym9yZGVyLXRvcDoxcHggc29saWQgI2VjZTllMn0uZmVlLWJveHttYXJnaW4tdG9wOjEycHg7cGFkZGluZzoxOHB4O2JvcmRlcjoxcHggc29saWQgI2Q5ZThkZDtib3JkZXItcmFkaXVzOjE0cHg7YmFja2dyb3VuZDojZjRmYWY2fS5mZWUtYm94IHN0cm9uZ3tmb250LXNpemU6MjJweH0ucHJpbWFyeXttYXJnaW4tdG9wOjI0cHg7Ym9yZGVyOjA7Ym9yZGVyLXJhZGl1czoxMnB4O3BhZGRpbmc6MTRweCAyMHB4O2JhY2tncm91bmQ6IzE3MjAyYTtjb2xvcjp3aGl0ZTtmb250LXdlaWdodDo4MDA7Y3Vyc29yOnBvaW50ZXJ9LnByaW1hcnk6ZGlzYWJsZWR7b3BhY2l0eTouNn0uZXJyb3J7cGFkZGluZzoxNHB4O2JvcmRlci1yYWRpdXM6MTJweDtiYWNrZ3JvdW5kOiNmZmYwZjA7Y29sb3I6IzlhMWQxZH1AbWVkaWEobWF4LXdpZHRoOjYwMHB4KXsuY2FyZHtwYWRkaW5nOjI0cHggMThweH1oMXtmb250LXNpemU6MjhweH19CiAg_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _services_asset_domain__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./services/asset-domain */ 94984);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./services/reservation-auth.service */ 46709);
+/* harmony import */ var _services_stripe_test_fixture_text__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./services/stripe-test-fixture-text */ 47435);
+/* harmony import */ var _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./services/owner-onboarding-text */ 73286);
+/* harmony import */ var _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./services/owner-offer-text */ 61407);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./services/language.service */ 48756);
+/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./home/site-content-service/site-content.service */ 73196);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/router */ 50085);
+
+
 
 
 
@@ -11221,6 +12261,7 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
   route;
   language;
   texts;
+  reservationAuth;
   loading = true;
   working = false;
   statusKnown = false;
@@ -11232,7 +12273,7 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
   assetName = '';
   assetType = '';
   assetId = '';
-  constructor(http, mainSvc, storeDb, router, route, language, texts) {
+  constructor(http, mainSvc, storeDb, router, route, language, texts, reservationAuth) {
     this.http = http;
     this.mainSvc = mainSvc;
     this.storeDb = storeDb;
@@ -11240,13 +12281,14 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
     this.route = route;
     this.language = language;
     this.texts = texts;
+    this.reservationAuth = reservationAuth;
   }
   fixtureConsent = false;
   fixturePending = false;
   refreshing = false;
   fx(key) {
     const lang = this.language.currentLanguage;
-    return this.texts?.tFromContent(this.copy, 'ui.stripeTestFixture.' + key, lang, _services_stripe_test_fixture_text__WEBPACK_IMPORTED_MODULE_2__.STRIPE_TEST_FIXTURE_TEXT[lang]?.[key] || _services_stripe_test_fixture_text__WEBPACK_IMPORTED_MODULE_2__.STRIPE_TEST_FIXTURE_TEXT.en[key]) || _services_stripe_test_fixture_text__WEBPACK_IMPORTED_MODULE_2__.STRIPE_TEST_FIXTURE_TEXT.en[key];
+    return this.texts?.tFromContent(this.copy, 'ui.stripeTestFixture.' + key, lang, _services_stripe_test_fixture_text__WEBPACK_IMPORTED_MODULE_4__.STRIPE_TEST_FIXTURE_TEXT[lang]?.[key] || _services_stripe_test_fixture_text__WEBPACK_IMPORTED_MODULE_4__.STRIPE_TEST_FIXTURE_TEXT.en[key]) || _services_stripe_test_fixture_text__WEBPACK_IMPORTED_MODULE_4__.STRIPE_TEST_FIXTURE_TEXT.en[key];
   }
   provisionTest() {
     var _this = this;
@@ -11255,7 +12297,7 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
       _this.working = true;
       _this.error = '';
       try {
-        _this.status = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_7__.firstValueFrom)(_this.http.post(`/api/owners/${encodeURIComponent(_this.ownerId)}/stripe/test/provision`, {
+        _this.status = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_9__.firstValueFrom)(_this.http.post(`/api/owners/${encodeURIComponent(_this.ownerId)}/stripe/test/provision`, {
           acceptSyntheticTestData: true,
           replaceExisting: _this.status.connected
         }, {
@@ -11275,11 +12317,11 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
   copy;
   onb(key) {
     const lang = this.language.currentLanguage;
-    return this.texts?.tFromContent(this.copy, 'ui.ownerOnboarding.' + key, lang, _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_3__.OWNER_ONBOARDING_TEXT[lang]?.[key] || _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_3__.OWNER_ONBOARDING_TEXT.en[key]) || _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_3__.OWNER_ONBOARDING_TEXT.en[key];
+    return this.texts?.tFromContent(this.copy, 'ui.ownerOnboarding.' + key, lang, _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_5__.OWNER_ONBOARDING_TEXT[lang]?.[key] || _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_5__.OWNER_ONBOARDING_TEXT.en[key]) || _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_5__.OWNER_ONBOARDING_TEXT.en[key];
   }
   offer(key) {
     const lang = this.language?.currentLanguage || 'en';
-    return this.texts?.tFromContent(this.copy, 'ui.ownerOffer.' + key, lang, _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_4__.OWNER_OFFER_TEXT[lang]?.[key] || _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_4__.OWNER_OFFER_TEXT.en[key]) || _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_4__.OWNER_OFFER_TEXT[lang]?.[key] || _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_4__.OWNER_OFFER_TEXT.en[key];
+    return this.texts?.tFromContent(this.copy, 'ui.ownerOffer.' + key, lang, _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_6__.OWNER_OFFER_TEXT[lang]?.[key] || _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_6__.OWNER_OFFER_TEXT.en[key]) || _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_6__.OWNER_OFFER_TEXT[lang]?.[key] || _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_6__.OWNER_OFFER_TEXT.en[key];
   }
   ngOnInit() {
     void this.initialize();
@@ -11288,13 +12330,20 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
   initialize() {
     var _this2 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      _this2.assetType = String(_this2.route.snapshot.paramMap.get('assetType') || '');
-      _this2.assetId = String(_this2.route.snapshot.paramMap.get('assetId') || '');
+      _this2.assetType = String(_this2.route.snapshot.paramMap.get('assetType') || (0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_2__.dedicatedAsset)()?.assetType || '');
+      _this2.assetId = String(_this2.route.snapshot.paramMap.get('assetId') || (0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_2__.dedicatedAsset)()?.assetId || '');
       const svc = _this2.mainSvc;
       const u = svc.bnUser || svc.currentUser || null;
       // Canonical owner identifier in R7 is the authenticated Firebase UID.
       const auth = _this2.storeDb;
-      const firebaseUser = auth.firebaseauth?.currentUser || auth.firebaseAuth?.currentUser || auth.auth?.currentUser;
+      const deadline = Date.now() + 15000;
+      while (!(auth.firebaseauth || auth.firebaseAuth || auth.auth) && Date.now() < deadline) {
+        yield new Promise(resolve => setTimeout(resolve, 100));
+      }
+      let firebaseUser;
+      try {
+        firebaseUser = yield _this2.reservationAuth.user();
+      } catch {}
       _this2.ownerId = String(firebaseUser?.uid || '').trim();
       if (_this2.assetId) {
         if (!['boat', 'car', 'property', 'parking', 'pool'].includes(_this2.assetType)) {
@@ -11304,7 +12353,9 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
         }
         try {
           // Asset ownership is resolved from the registry, never inferred from the user's UID.
-          const asset = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_7__.firstValueFrom)(_this2.http.get(`/api/assets/${encodeURIComponent(_this2.assetId)}`));
+          const asset = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_9__.firstValueFrom)(_this2.http.get(`/api/resources/${encodeURIComponent(_this2.assetType)}/${encodeURIComponent(_this2.assetId)}`, {
+            headers: yield _this2.reservationAuth.headers()
+          }));
           if (!asset || asset.assetType !== _this2.assetType || !asset.ownerId) {
             _this2.loading = false;
             _this2.error = 'Asset or asset owner not found.';
@@ -11328,6 +12379,7 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
         return;
       }
       yield _this2.refresh();
+      if (_this2.route.snapshot.queryParamMap.get('stripeOAuth') === 'unchanged') _this2.error = _this2.onb('sameAccount');
       if (_this2.route.snapshot.queryParamMap.get('stripeOAuth') === 'cancelled') _this2.error = 'Stripe connection was cancelled. Your existing account was kept.';
     })();
   }
@@ -11336,6 +12388,15 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
       localStorage.setItem('alegria-owner-view', 'admin');
     } catch {}
     this.router.navigateByUrl(this.assetId ? `/${this.assetType}/${this.assetId}/home` : '/');
+  }
+  get requirementLabels() {
+    const fields = [...(this.status.requirementsCurrentlyDue || []), ...(this.status.requirementsPastDue || [])];
+    const labels = new Set();
+    for (const field of fields) {
+      const key = field.includes('address') ? 'missingAddress' : /first_name|last_name|dob|verification/.test(field) ? 'missingIdentity' : field.includes('phone') ? 'missingPhone' : field.startsWith('tos_acceptance') ? 'missingTerms' : 'missingOther';
+      labels.add(this.onb(key));
+    }
+    return [...labels];
   }
   get maskedAccount() {
     const id = this.status.accountId || '';
@@ -11347,7 +12408,7 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
       const auth = _this3.storeDb;
       const user = auth.firebaseauth?.currentUser || auth.firebaseAuth?.currentUser || auth.auth?.currentUser;
       if (!user?.getIdToken) throw new Error('Please sign in again to connect Stripe.');
-      return new _angular_common_http__WEBPACK_IMPORTED_MODULE_8__.HttpHeaders({
+      return new _angular_common_http__WEBPACK_IMPORTED_MODULE_10__.HttpHeaders({
         Authorization: `Bearer ${yield user.getIdToken()}`
       });
     })();
@@ -11412,7 +12473,7 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
       _this4.fixtureConsent = false;
       _this4.error = '';
       try {
-        _this4.status = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_7__.firstValueFrom)(_this4.http.get(`/api/owners/${encodeURIComponent(_this4.ownerId)}/stripe/status`, {
+        _this4.status = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_9__.firstValueFrom)(_this4.http.get(`/api/owners/${encodeURIComponent(_this4.ownerId)}/stripe/status`, {
           headers: yield _this4.headers()
         }));
         if (typeof _this4.status?.connected !== 'boolean') throw Error('invalid_stripe_status');
@@ -11426,16 +12487,19 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
       }
     })();
   }
-  connect() {
+  connect(replaceExisting = false) {
     var _this5 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (_this5.working || _this5.loading || !_this5.statusKnown) return;
       _this5.working = true;
       _this5.error = '';
       try {
-        const r = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_7__.firstValueFrom)(_this5.http.post(`/api/owners/${encodeURIComponent(_this5.ownerId)}/stripe/connect`, {
+        const r = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_9__.firstValueFrom)(_this5.http.post(`/api/owners/${encodeURIComponent(_this5.ownerId)}/stripe/connect`, {
           assetType: _this5.assetType,
-          assetId: _this5.assetId
+          assetId: _this5.assetId,
+          returnOrigin: window.location.origin,
+          replaceExisting,
+          expectedAccountId: _this5.status.accountId
         }, {
           headers: yield _this5.headers()
         }));
@@ -11452,22 +12516,24 @@ let OwnerPaymentsComponent = class OwnerPaymentsComponent {
     })();
   }
   static ctorParameters = () => [{
-    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_8__.HttpClient
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_10__.HttpClient
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_9__.ServicesService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_11__.ServicesService
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_9__.StoreDbService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_11__.StoreDbService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_10__.Router
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_12__.Router
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_10__.ActivatedRoute
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_12__.ActivatedRoute
   }, {
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_5__.LanguageService
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_7__.LanguageService
   }, {
-    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_6__.SiteContentService
+    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_8__.SiteContentService
+  }, {
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_3__.ReservationAuthService
   }];
 };
-OwnerPaymentsComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_12__.Component)({
+OwnerPaymentsComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_13__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_14__.Component)({
   standalone: false,
   selector: 'app-owner-payments',
   template: `
@@ -11484,13 +12550,15 @@ OwnerPaymentsComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,
 
       <button type="button" [disabled]="working || loading" (click)="refresh()">{{ 'ui.messages.t79fc27bcf930' | siteText }}</button>
       <ng-container *ngIf="!loading && statusKnown">
+        <p *ngIf="status.connected&&!status.chargesEnabled" role="status">{{onb('incompleteAccount')}}</p>
+        <p *ngIf="status.requirementsPendingVerification?.length" role="status">{{onb('pendingVerification')}}</p>
         <p *ngIf="status.mode==='test' && !status.testProvisioningEnabled" class="fee-box">{{ 'ui.messages.t29b92bcaeca9' | siteText }} <span *ngIf="status.perOwnerTestAccount">{{ 'ui.messages.t521b8f1764c5' | siteText }}</span></p>
         <div class="status-row"><span>{{ 'ui.messages.t0f2604b8ff95' | siteText }}</span><strong>{{ status.connected ? ('ui.messages.tc2f9b7b4897f' | siteText) : ('ui.messages.t8b02f3de3906' | siteText) }}</strong></div>
         <div class="status-row" *ngIf="status.accountId"><span>{{ 'ui.messages.t85dfa32c97d8' | siteText }}</span><strong>{{ maskedAccount }}</strong></div>
         <div class="status-row" *ngIf="status.connected"><span>{{ 'ui.messages.t44357ae55a21' | siteText }}</span><strong>{{ status.chargesEnabled ? ('ui.messages.tdf174a3f2faa' | siteText) : ('ui.messages.t9fa0e005a03c' | siteText) }}</strong></div>
         <div class="status-row" *ngIf="status.connected"><span>{{ 'ui.messages.te0e7ea13f8f5' | siteText }}</span><strong>{{ status.payoutsEnabled ? ('ui.messages.tdf174a3f2faa' | siteText) : ('ui.messages.t9fa0e005a03c' | siteText) }}</strong></div>
         <div class="status-row" *ngIf="status.connected"><span>{{ 'ui.messages.tade2f9461d99' | siteText }}</span><strong>{{ status.detailsSubmitted ? ('ui.messages.t2e00359b9802' | siteText) : ('ui.messages.t387fd1bbc184' | siteText) }}</strong></div>
-        <div class="status-row" *ngIf="status.requirementsCurrentlyDue?.length"><span>{{ 'ui.messages.tf78be09f9405' | siteText }}</span><strong>{{ status.requirementsCurrentlyDue?.join(', ') }}</strong></div>
+        <div class="status-row" *ngIf="status.requirementsCurrentlyDue?.length || status.requirementsPastDue?.length"><span>{{ 'ui.messages.tf78be09f9405' | siteText }}</span><strong>{{ requirementLabels.join(', ') }}</strong></div>
         <div class="fee-box"><span>{{offer('commission')}}</span><strong>0%</strong></div><p>{{offer('fees')}}</p>
 
         <section *ngIf="status.mode==='test' && status.testProvisioningEnabled && !status.chargesEnabled">
@@ -11499,13 +12567,17 @@ OwnerPaymentsComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,
           <button class="primary" type="button" [disabled]="working || !fixtureConsent" (click)="provisionTest()">{{fx('create')}}</button>
         </section>
         <p *ngIf="fixturePending" role="status">{{fx('pending')}}</p>
-        <button *ngIf="!status.testProvisioningEnabled" class="primary" type="button" [disabled]="working" (click)="connect()">
-          {{ working ? ('ui.messages.t8ed3c2197f2d' | siteText) : (status.perOwnerTestAccount ? (status.connected ? ('ui.messages.tadca3cb0974e' | siteText) : ('ui.messages.t02b204fa8a58' | siteText)) : (status.onboardingComplete ? ('ui.messages.td30345b2eb9e' | siteText) : ('ui.messages.t7ef3a611e4ee' | siteText))) }}
+        <div class="stripe-actions">
+        <button *ngIf="!status.testProvisioningEnabled || status.connected" class="primary" type="button" [disabled]="working" (click)="connect()">
+          {{ working ? ('ui.messages.t8ed3c2197f2d' | siteText) : (status.connected ? onb(status.chargesEnabled?'manageAccount':'finishSetup') : (status.perOwnerTestAccount ? ('ui.messages.t02b204fa8a58' | siteText) : ('ui.messages.t7ef3a611e4ee' | siteText))) }}
         </button>
+        <button class="secondary" *ngIf="status.connected&&status.perOwnerTestAccount&&!status.testProvisioningEnabled" type="button" (click)="connect(true)" [disabled]="working||loading">{{onb('replaceAccount')}}</button>
+        </div>
+        <p *ngIf="status.connected&&status.perOwnerTestAccount">{{onb('replacementHelp')}}</p>
       </ng-container>
     </section>
   </main>`,
-  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiAgICA6aG9zdHtkaXNwbGF5OmJsb2NrO2JhY2tncm91bmQ6I2Y3ZjdmNTtjb2xvcjojMTcyMDJhfS5vd25lci1wYXltZW50c3ttYXgtd2lkdGg6ODIwcHg7bWFyZ2luOjAgYXV0bztwYWRkaW5nOjM2cHggMjJweCA3MHB4fS5iYWNre2JvcmRlcjowO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Zm9udC13ZWlnaHQ6NzAwO2N1cnNvcjpwb2ludGVyO21hcmdpbi1ib3R0b206MjRweH0uY2FyZHtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyOjFweCBzb2xpZCAjZTVlMmRiO2JvcmRlci1yYWRpdXM6MjJweDtwYWRkaW5nOjM0cHg7Ym94LXNoYWRvdzowIDEycHggMzRweCByZ2JhKDAsMCwwLC4wNil9LmtpY2tlcnt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7bGV0dGVyLXNwYWNpbmc6LjEyZW07Zm9udC1zaXplOjEycHg7Zm9udC13ZWlnaHQ6ODAwfWgxe2ZvbnQtc2l6ZTozNHB4O21hcmdpbjo4cHggMCAxMnB4fXB7bGluZS1oZWlnaHQ6MS42O2NvbG9yOiM1NjYwNmF9LnN0YXR1cy1yb3cgc3Ryb25ne292ZXJmbG93LXdyYXA6YW55d2hlcmU7bWluLXdpZHRoOjB9LnN0YXR1cy1yb3csLmZlZS1ib3h7ZGlzcGxheTpmbGV4O2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO2dhcDoyMHB4O3BhZGRpbmc6MTVweCAwO2JvcmRlci10b3A6MXB4IHNvbGlkICNlY2U5ZTJ9LmZlZS1ib3h7bWFyZ2luLXRvcDoxMnB4O3BhZGRpbmc6MThweDtib3JkZXI6MXB4IHNvbGlkICNkOWU4ZGQ7Ym9yZGVyLXJhZGl1czoxNHB4O2JhY2tncm91bmQ6I2Y0ZmFmNn0uZmVlLWJveCBzdHJvbmd7Zm9udC1zaXplOjIycHh9LnByaW1hcnl7bWFyZ2luLXRvcDoyNHB4O2JvcmRlcjowO2JvcmRlci1yYWRpdXM6MTJweDtwYWRkaW5nOjE0cHggMjBweDtiYWNrZ3JvdW5kOiMxNzIwMmE7Y29sb3I6d2hpdGU7Zm9udC13ZWlnaHQ6ODAwO2N1cnNvcjpwb2ludGVyfS5wcmltYXJ5OmRpc2FibGVke29wYWNpdHk6LjZ9LmVycm9ye3BhZGRpbmc6MTRweDtib3JkZXItcmFkaXVzOjEycHg7YmFja2dyb3VuZDojZmZmMGYwO2NvbG9yOiM5YTFkMWR9QG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmNhcmR7cGFkZGluZzoyNHB4IDE4cHh9aDF7Zm9udC1zaXplOjI4cHh9fQogIA_3D_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts__WEBPACK_IMPORTED_MODULE_1___default())]
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiAgICAuc3RyaXBlLWFjdGlvbnN7ZGlzcGxheTpmbGV4O2ZsZXgtZGlyZWN0aW9uOmNvbHVtbjtnYXA6MTZweDttYXJnaW4tdG9wOjI0cHh9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbnttYXJnaW46MDttaW4taGVpZ2h0OjQ4cHg7cGFkZGluZzoxNHB4IDIwcHg7Ym9yZGVyLXJhZGl1czoxMnB4O2ZvbnQ6aW5oZXJpdDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXJ9LnNlY29uZGFyeXtib3JkZXI6MXB4IHNvbGlkICNiY2M5Y2Q7YmFja2dyb3VuZDojZmZmO2NvbG9yOiMxNzIwMmF9LnN0cmlwZS1hY3Rpb25zIGJ1dHRvbjpkaXNhYmxlZHtvcGFjaXR5Oi42O2N1cnNvcjp3YWl0fS5zdHJpcGUtYWN0aW9ucyBidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjMTQ3ZjkwO291dGxpbmUtb2Zmc2V0OjNweH0KICAgIDpob3N0e2Rpc3BsYXk6YmxvY2s7YmFja2dyb3VuZDojZjdmN2Y1O2NvbG9yOiMxNzIwMmF9Lm93bmVyLXBheW1lbnRze21heC13aWR0aDo4MjBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MzZweCAyMnB4IDcwcHh9LmJhY2t7Ym9yZGVyOjA7YmFja2dyb3VuZDp0cmFuc3BhcmVudDtmb250LXdlaWdodDo3MDA7Y3Vyc29yOnBvaW50ZXI7bWFyZ2luLWJvdHRvbToyNHB4fS5jYXJke2JhY2tncm91bmQ6I2ZmZjtib3JkZXI6MXB4IHNvbGlkICNlNWUyZGI7Ym9yZGVyLXJhZGl1czoyMnB4O3BhZGRpbmc6MzRweDtib3gtc2hhZG93OjAgMTJweCAzNHB4IHJnYmEoMCwwLDAsLjA2KX0ua2lja2Vye3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtsZXR0ZXItc3BhY2luZzouMTJlbTtmb250LXNpemU6MTJweDtmb250LXdlaWdodDo4MDB9aDF7Zm9udC1zaXplOjM0cHg7bWFyZ2luOjhweCAwIDEycHh9cHtsaW5lLWhlaWdodDoxLjY7Y29sb3I6IzU2NjA2YX0uc3RhdHVzLXJvdyBzdHJvbmd7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZTttaW4td2lkdGg6MH0uc3RhdHVzLXJvdywuZmVlLWJveHtkaXNwbGF5OmZsZXg7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47Z2FwOjIwcHg7cGFkZGluZzoxNXB4IDA7Ym9yZGVyLXRvcDoxcHggc29saWQgI2VjZTllMn0uZmVlLWJveHttYXJnaW4tdG9wOjEycHg7cGFkZGluZzoxOHB4O2JvcmRlcjoxcHggc29saWQgI2Q5ZThkZDtib3JkZXItcmFkaXVzOjE0cHg7YmFja2dyb3VuZDojZjRmYWY2fS5mZWUtYm94IHN0cm9uZ3tmb250LXNpemU6MjJweH0ucHJpbWFyeXttYXJnaW4tdG9wOjI0cHg7Ym9yZGVyOjA7Ym9yZGVyLXJhZGl1czoxMnB4O3BhZGRpbmc6MTRweCAyMHB4O2JhY2tncm91bmQ6IzE3MjAyYTtjb2xvcjp3aGl0ZTtmb250LXdlaWdodDo4MDA7Y3Vyc29yOnBvaW50ZXJ9LnByaW1hcnk6ZGlzYWJsZWR7b3BhY2l0eTouNn0uZXJyb3J7cGFkZGluZzoxNHB4O2JvcmRlci1yYWRpdXM6MTJweDtiYWNrZ3JvdW5kOiNmZmYwZjA7Y29sb3I6IzlhMWQxZH1AbWVkaWEobWF4LXdpZHRoOjYwMHB4KXsuY2FyZHtwYWRkaW5nOjI0cHggMThweH1oMXtmb250LXNpemU6MjhweH19CiAg_Users_faycalamrani_data_ADN_boatify_app_src_app_owner_payments_component_ts__WEBPACK_IMPORTED_MODULE_1___default())]
 })], OwnerPaymentsComponent);
 
 
@@ -11759,7 +12831,7 @@ let AppComponent = class AppComponent {
       try {
         const status = yield _this.legal.ensure();
         if (identity !== _this.lastLoginIdentity) return;
-        if (status && status.accepting && !status.accepted) {
+        if (status && status.role !== 'customer' && status.accepting && !status.accepted) {
           yield _this.router.navigate(['/account/accept-terms'], {
             queryParams: {
               role: status.role,
@@ -11848,6 +12920,30 @@ AppComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_19__.__decorate)([(0,_angular_c
   styles: [(_app_component_css_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], AppComponent);
 
+
+/***/ }),
+
+/***/ 20141:
+/*!**********************************************!*\
+  !*** ./src/app/messaging/prebooking-text.ts ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   prebookingText: () => (/* binding */ prebookingText)
+/* harmony export */ });
+const COPY = {
+  fr: ['Poser une question sur ces dates', 'Projet de réservation', 'Début', 'Fin', 'Demander la réservation', 'Une question ne réserve pas les dates. Le prix et la disponibilité seront vérifiés lors de la demande.', 'Sélectionnez des dates et heures valides : la fin doit être après le début.', 'Ouvrir la réservation', 'Personnes', 'Prise en charge', 'Restitution', 'Conducteur additionnel', 'Siège enfant', 'Immatriculation', 'Choisissez vos dates pour réserver ou poser une question.', 'Ces dates sont liées à cette conversation. Modifier la période ouvre un autre projet.', 'Réservation demandée', 'Ouvrir la conversation', 'Tarif de base', 'Les détails de ce projet ne correspondent plus à cette réservation. Revenez à la conversation.'],
+  en: ['Ask a question about these dates', 'Booking enquiry', 'Start', 'End', 'Request booking', 'A question does not reserve the dates. Price and availability will be checked when booking.', 'Choose valid dates and times: the end must be after the start.', 'Open booking', 'Guests', 'Pick-up', 'Return', 'Additional driver', 'Child seat', 'Vehicle plate', 'Choose your dates to book or ask a question.', 'These dates belong to this conversation. Changing the period opens a different enquiry.', 'Booking requested', 'Open conversation', 'Base rate', 'This enquiry no longer matches the booking. Return to the conversation.'],
+  es: ['Preguntar por estas fechas', 'Consulta de reserva', 'Inicio', 'Fin', 'Solicitar reserva', 'Una pregunta no reserva las fechas. El precio y la disponibilidad se comprobarán al reservar.', 'Elija fechas válidas: el fin debe ser posterior al inicio.', 'Abrir reserva', 'Personas', 'Recogida', 'Devolución', 'Conductor adicional', 'Silla infantil', 'Matrícula', 'Elija fechas para reservar o preguntar.', 'Cambiar las fechas abre otra consulta.', 'Reserva solicitada', 'Abrir conversación', 'Tarifa base', 'La consulta ya no coincide con la reserva. Vuelva a la conversación.'],
+  it: ['Chiedi informazioni sulle date', 'Richiesta di prenotazione', 'Inizio', 'Fine', 'Richiedi prenotazione', 'Una domanda non riserva le date. Prezzo e disponibilità saranno verificati alla prenotazione.', 'Scegli date valide: la fine deve seguire l’inizio.', 'Apri prenotazione', 'Persone', 'Ritiro', 'Restituzione', 'Conducente aggiuntivo', 'Seggiolino', 'Targa', 'Scegli le date per prenotare o fare una domanda.', 'Cambiare il periodo apre una nuova richiesta.', 'Prenotazione richiesta', 'Apri conversazione', 'Tariffa base', 'La richiesta non corrisponde alla prenotazione. Torna alla conversazione.'],
+  de: ['Frage zu diesen Daten stellen', 'Buchungsanfrage', 'Beginn', 'Ende', 'Buchung anfragen', 'Eine Frage reserviert die Daten nicht. Preis und Verfügbarkeit werden bei der Buchung geprüft.', 'Wählen Sie gültige Daten: Ende muss nach Beginn liegen.', 'Buchung öffnen', 'Personen', 'Abholung', 'Rückgabe', 'Zusatzfahrer', 'Kindersitz', 'Kennzeichen', 'Wählen Sie Daten, um zu buchen oder eine Frage zu stellen.', 'Ein anderer Zeitraum öffnet eine neue Anfrage.', 'Buchung angefragt', 'Gespräch öffnen', 'Grundpreis', 'Diese Anfrage entspricht nicht mehr der Buchung. Kehren Sie zum Gespräch zurück.'],
+  nl: ['Vraag stellen over deze datums', 'Boekingsaanvraag', 'Begin', 'Einde', 'Boeking aanvragen', 'Een vraag reserveert de datums niet. Prijs en beschikbaarheid worden bij de boeking gecontroleerd.', 'Kies geldige datums: het einde moet na het begin liggen.', 'Boeking openen', 'Personen', 'Ophalen', 'Terugbrengen', 'Extra bestuurder', 'Kinderzitje', 'Kenteken', 'Kies datums om te boeken of een vraag te stellen.', 'Een andere periode opent een nieuwe aanvraag.', 'Boeking aangevraagd', 'Gesprek openen', 'Basistarief', 'Deze aanvraag komt niet meer overeen met de boeking. Ga terug naar het gesprek.'],
+  ru: ['Задать вопрос об этих датах', 'Запрос о бронировании', 'Начало', 'Окончание', 'Запросить бронирование', 'Вопрос не резервирует даты. Цена и доступность проверяются при бронировании.', 'Выберите корректные даты: окончание должно быть после начала.', 'Открыть бронирование', 'Гости', 'Получение', 'Возврат', 'Дополнительный водитель', 'Детское кресло', 'Номер автомобиля', 'Выберите даты для бронирования или вопроса.', 'Изменение периода открывает новый запрос.', 'Бронирование запрошено', 'Открыть переписку', 'Базовая цена', 'Запрос больше не соответствует бронированию. Вернитесь к переписке.']
+};
+const prebookingText = (lang, i) => (COPY[lang] || COPY.en)[i];
 
 /***/ }),
 
@@ -13518,28 +14614,43 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   OwnerListingsComponent: () => (/* binding */ OwnerListingsComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _owner_listings_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./owner-listings.component.html?ngResource */ 99266);
 /* harmony import */ var _owner_listings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./owner-listings.component.scss?ngResource */ 51470);
 /* harmony import */ var _owner_listings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_owner_listings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _services_asset_prefix__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./services/asset-prefix */ 10384);
-/* harmony import */ var _services_listing_wizard_text__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./services/listing-wizard-text */ 14475);
-/* harmony import */ var _services_listing_wizard__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./services/listing-wizard */ 98719);
-/* harmony import */ var _services_asset_photos__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./services/asset-photos */ 19009);
-/* harmony import */ var _services_media_routes__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./services/media-routes */ 79906);
-/* harmony import */ var _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./services/owner-onboarding-text */ 73286);
-/* harmony import */ var _services_listing_moderation_text__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./services/listing-moderation-text */ 3210);
-/* harmony import */ var _services_listing_actions_text__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./services/listing-actions-text */ 15441);
-/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./home/site-content-service/site-content.service */ 73196);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./services/language.service */ 48756);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./home/site-text.pipe */ 99343);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/common/http */ 93262);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! rxjs */ 56196);
-/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./services/reservation-auth.service */ 46709);
+/* harmony import */ var _services_management_entry_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./services/management-entry.service */ 32356);
+/* harmony import */ var _messaging_message_link_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./messaging/message-link.component */ 870);
+/* harmony import */ var _calendar_asset_calendar_link_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./calendar/asset-calendar-link.component */ 84168);
+/* harmony import */ var _shared_listing_description_editor_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./shared/listing-description-editor.component */ 67918);
+/* harmony import */ var _services_wizard_stripe_text__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./services/wizard-stripe-text */ 74742);
+/* harmony import */ var _services_listing_import_text__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./services/listing-import-text */ 75017);
+/* harmony import */ var _workspace_asset_documents_component__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./workspace/asset-documents.component */ 88246);
+/* harmony import */ var _services_asset_prefix__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./services/asset-prefix */ 10384);
+/* harmony import */ var _services_listing_wizard_text__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./services/listing-wizard-text */ 14475);
+/* harmony import */ var _services_listing_wizard__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./services/listing-wizard */ 98719);
+/* harmony import */ var _services_asset_photos__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./services/asset-photos */ 19009);
+/* harmony import */ var _services_media_routes__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./services/media-routes */ 79906);
+/* harmony import */ var _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./services/owner-onboarding-text */ 73286);
+/* harmony import */ var _services_listing_moderation_text__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./services/listing-moderation-text */ 3210);
+/* harmony import */ var _services_listing_actions_text__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./services/listing-actions-text */ 15441);
+/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./home/site-content-service/site-content.service */ 73196);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./services/language.service */ 48756);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./home/site-text.pipe */ 99343);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./services/reservation-auth.service */ 46709);
+
+
+
+
+
+
+
 
 
 
@@ -13563,36 +14674,213 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let OwnerListingsComponent = class OwnerListingsComponent {
+  route;
+  router;
+  entryService;
   http;
   auth;
   siteContent;
   language;
-  adminScope = null;
-  editorClosed = new _angular_core__WEBPACK_IMPORTED_MODULE_15__.EventEmitter();
-  listingSaved = new _angular_core__WEBPACK_IMPORTED_MODULE_15__.EventEmitter();
-  loadAdminEditor() {
+  openManagedLink(e, a) {
+    e.preventDefault();
+    void this.openManaged(a);
+  }
+  cover = _services_management_entry_service__WEBPACK_IMPORTED_MODULE_3__.portfolioCover;
+  openManaged(a) {
     var _this = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      _this.error = '';
       try {
-        const headers = yield _this.auth.headers();
-        const scope = _this.adminScope;
-        const plans = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this.http.get('/api/listing-plans'));
-        _this.prices = plans.prices;
-        _this.billingMode = plans.mode;
-        const data = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this.http.get('/api/manage/assets/' + [scope.type, scope.id].map(encodeURIComponent).join('/') + '/content', {
+        yield _this.entryService.open(a, 'owner');
+      } catch (e) {
+        _this.error = e?.message === 'popup_blocked' ? 'Autorisez l’ouverture d’un nouvel onglet pour ouvrir votre site.' : 'Ce site est indisponible ou votre accès a changé.';
+      }
+    })();
+  }
+  adminScope = null;
+  editorClosed = new _angular_core__WEBPACK_IMPORTED_MODULE_22__.EventEmitter();
+  listingSaved = new _angular_core__WEBPACK_IMPORTED_MODULE_22__.EventEmitter();
+  loadAdminEditor() {
+    var _this2 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this2.error = '';
+      try {
+        const headers = yield _this2.auth.headers();
+        const scope = _this2.adminScope;
+        const plans = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this2.http.get('/api/listing-plans'));
+        _this2.prices = plans.prices;
+        _this2.billingMode = plans.mode;
+        const data = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this2.http.get('/api/manage/assets/' + [scope.type, scope.id].map(encodeURIComponent).join('/') + '/content', {
           headers: headers.set('X-Skip-Media-Resolution', 'true')
         }));
-        yield _this.prepare({
+        yield _this2.prepare({
           ...data.asset,
           id: scope.id,
           assetType: scope.type
         }, 'edit');
       } catch (e) {
-        _this.error = _this.err(e);
+        _this2.error = _this2.err(e);
       }
     })();
   }
+  creationChoice = false;
+  importBusy = false;
+  importUrl = '';
+  importAssetType = '';
+  importText = '';
+  importRights = false;
+  importResult = null;
+  importError = '';
+  importPhotoChoices = [];
+  importPreviews = [];
+  importPreviewsLoading = false;
+  importPreviewRequest = 0;
+  ix(key) {
+    const lang = this.language.currentLanguage;
+    return this.text('ui.listingImport.' + key, _services_listing_import_text__WEBPACK_IMPORTED_MODULE_8__.LISTING_IMPORT_TEXT[lang]?.[key] || _services_listing_import_text__WEBPACK_IMPORTED_MODULE_8__.LISTING_IMPORT_TEXT.en[key] || key);
+  }
+  startManual() {
+    this.clearImportPreviews();
+    this.creationChoice = false;
+    this.closeEditor(true);
+    this.creating = true;
+    this.focusWizard();
+  }
+  clearImportPreviews() {
+    this.importPreviewRequest++;
+    for (const photo of this.importPreviews) if (photo.url) URL.revokeObjectURL(photo.url);
+    this.importPreviews = [];
+    this.importPhotoChoices = [];
+    this.importPreviewsLoading = false;
+  }
+  previewImport() {
+    var _this3 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this3.importBusy || !_this3.importRights || !_this3.importUrl.trim()) return;
+      _this3.clearImportPreviews();
+      const request = _this3.importPreviewRequest;
+      _this3.importBusy = true;
+      _this3.importError = '';
+      _this3.importResult = null;
+      try {
+        const result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this3.http.post('/api/owner/listing-import/preview', {
+          url: _this3.importUrl,
+          text: _this3.importText,
+          assetType: _this3.importAssetType,
+          rightsConfirmed: true
+        }, {
+          headers: yield _this3.auth.headers()
+        }));
+        if (request !== _this3.importPreviewRequest) return;
+        _this3.importResult = result;
+        _this3.importPhotoChoices = (result.draft.photos || []).map(() => false);
+        _this3.importPreviews = (result.draft.photos || []).map(() => ({
+          url: '',
+          state: 'loading'
+        }));
+      } catch {
+        if (request === _this3.importPreviewRequest) _this3.importError = _this3.ix('failed');
+      } finally {
+        _this3.importBusy = false;
+      }
+      if (request === _this3.importPreviewRequest && _this3.importResult) void _this3.loadImportPreviews();
+    })();
+  }
+  loadImportPreviews() {
+    var _this4 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this4.importPreviewsLoading || _this4.importBusy || !_this4.importResult || !_this4.importRights) return;
+      const request = _this4.importPreviewRequest;
+      const sources = _this4.importResult.draft.photos || [];
+      _this4.importPreviewsLoading = true;
+      try {
+        const headers = yield _this4.auth.headers();
+        for (let i = 0; i < sources.length; i++) {
+          if (request !== _this4.importPreviewRequest) return;
+          const photo = _this4.importPreviews[i];
+          if (photo.file) continue;
+          photo.state = 'loading';
+          try {
+            const blob = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this4.http.post('/api/owner/listing-import/photo', {
+              url: sources[i],
+              rightsConfirmed: true
+            }, {
+              headers,
+              responseType: 'blob'
+            }));
+            if (request !== _this4.importPreviewRequest) return;
+            const extension = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : 'jpg';
+            const file = new File([blob], 'import-' + (i + 1) + '.' + extension, {
+              type: blob.type
+            });
+            if (!(0,_services_listing_wizard__WEBPACK_IMPORTED_MODULE_12__.listingPhotoFileValid)(file)) throw Error('invalid_photo');
+            photo.file = file;
+            photo.url = URL.createObjectURL(file);
+            photo.state = 'ready';
+          } catch {
+            if (request === _this4.importPreviewRequest) {
+              photo.state = 'error';
+              _this4.importPhotoChoices[i] = false;
+            }
+          }
+        }
+      } catch {
+        if (request === _this4.importPreviewRequest) for (const photo of _this4.importPreviews) if (photo.state === 'loading') photo.state = 'error';
+      } finally {
+        if (request === _this4.importPreviewRequest) _this4.importPreviewsLoading = false;
+      }
+    })();
+  }
+  importPreviewFailed(index) {
+    const photo = this.importPreviews[index];
+    if (!photo) return;
+    if (photo.url) URL.revokeObjectURL(photo.url);
+    photo.url = '';
+    photo.file = undefined;
+    photo.state = 'error';
+    this.importPhotoChoices[index] = false;
+  }
+  applyImport() {
+    var _this5 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this5.importBusy || !_this5.importResult || !_this5.importRights) return;
+      _this5.importBusy = true;
+      const draft = _this5.importResult.draft;
+      const files = [];
+      let failed = 0;
+      try {
+        for (let i = 0; i < (draft.photos || []).length; i++) {
+          if (!_this5.importPhotoChoices[i]) continue;
+          const preview = _this5.importPreviews[i];
+          if (preview?.state === 'ready' && preview.file) files.push(preview.file);else failed++;
+        }
+        _this5.startManual();
+        _this5.form.assetType = draft.assetType;
+        _this5.changeType();
+        _this5.form.name = draft.name || '';
+        _this5.form.description = [draft.description, ...(draft.amenities || [])].filter(Boolean).join('\n\n').slice(0, 10000);
+        _this5.form.location = {
+          city: draft.location?.city || '',
+          area: '',
+          country: draft.location?.country || 'France'
+        };
+        _this5.form.properties = {
+          ...(draft.properties || {})
+        };
+        _this5.form.pricing.basePrice = null;
+        for (const file of files) _this5.photos.push({
+          file,
+          preview: URL.createObjectURL(file)
+        });
+        _this5.photosDirty = files.length > 0;
+        _this5.wizardDirty = true;
+        _this5.message = _this5.ix(failed ? 'partialPhotos' : 'reviewNotice');
+        _this5.importResult = null;
+      } finally {
+        _this5.importBusy = false;
+      }
+    })();
+  }
+  sitePrefix = '';
   prefixInput = '';
   prefixChoices = [];
   prefixLoading = false;
@@ -13603,7 +14891,7 @@ let OwnerListingsComponent = class OwnerListingsComponent {
   prefixTimer;
   prefixRequest = 0;
   get prefixReady() {
-    return (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_3__.prefixQueryReady)(this.prefixInput);
+    return (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_10__.prefixQueryReady)(this.prefixInput);
   }
   get prefixInvalid() {
     return this.prefixTouched && (!this.prefixReady || this.prefixTaken || !!this.prefixError);
@@ -13627,12 +14915,12 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     this.prefixLoading = false;
     const request = ++this.prefixRequest;
     clearTimeout(this.prefixTimer);
-    if (!(0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_3__.prefixQueryReady)(value)) return;
+    if (!(0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_10__.prefixQueryReady)(value)) return;
     this.prefixLoading = true;
     this.prefixTimer = setTimeout(() => this.loadPrefixes(request, value), 350);
   }
   choosePrefix(value) {
-    if (!(0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_3__.prefixSelectionValid)(value, this.prefixChoices)) return;
+    if (!(0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_10__.prefixSelectionValid)(value, this.prefixChoices)) return;
     clearTimeout(this.prefixTimer);
     this.prefixRequest++;
     this.prefixInput = value;
@@ -13644,43 +14932,139 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     this.wizardDirty = true;
   }
   loadPrefixes(request, value) {
-    var _this2 = this;
+    var _this6 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
-        const headers = yield _this2.auth.headers();
-        if (request !== _this2.prefixRequest) return;
-        const query = (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_3__.prefixQuery)(value);
-        const result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this2.http.get(_this2.adminScope ? _this2.url(_this2.editing) + '/prefixes' : '/api/owner/prefixes', {
+        const headers = yield _this6.auth.headers();
+        if (request !== _this6.prefixRequest) return;
+        const query = (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_10__.prefixQuery)(value);
+        const result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this6.http.get(_this6.adminScope ? _this6.url(_this6.editing) + '/prefixes' : '/api/owner/prefixes', {
           headers,
           params: {
             q: query,
-            ...(_this2.editing ? {
-              type: _this2.editing.assetType,
-              id: _this2.editing.id
+            ...(_this6.editing ? {
+              type: _this6.editing.assetType,
+              id: _this6.editing.id
             } : {})
           }
         }));
-        if (request !== _this2.prefixRequest) return;
-        _this2.prefixChoices = result.suggestions || [];
-        _this2.prefixChecked = query;
-        const available = result.available ?? _this2.prefixChoices.includes(query);
-        _this2.prefixTaken = result.reason === 'taken' || !available && result.reason !== 'invalid';
-        if (result.reason === 'invalid') _this2.prefixError = _this2.prefixText('Utilisez au moins six lettres, avec des chiffres ou tirets si nécessaire.', 'Use at least six letters, with optional digits or hyphens.');
-        if (available && _this2.prefixChoices.includes(query)) _this2.form.prefix = query;
+        if (request !== _this6.prefixRequest) return;
+        _this6.prefixChoices = result.suggestions || [];
+        _this6.prefixChecked = query;
+        const available = result.available ?? _this6.prefixChoices.includes(query);
+        _this6.prefixTaken = result.reason === 'taken' || !available && result.reason !== 'invalid';
+        if (result.reason === 'invalid') _this6.prefixError = _this6.prefixText('Utilisez au moins six lettres, avec des chiffres ou tirets si nécessaire.', 'Use at least six letters, with optional digits or hyphens.');
+        if (available && _this6.prefixChoices.includes(query)) _this6.form.prefix = query;
       } catch {
-        if (request === _this2.prefixRequest) _this2.prefixError = _this2.prefixText('Impossible de vérifier la disponibilité. Réessayez.', 'Could not check availability. Please retry.');
+        if (request === _this6.prefixRequest) _this6.prefixError = _this6.prefixText('Impossible de vérifier la disponibilité. Réessayez.', 'Could not check availability. Please retry.');
       } finally {
-        if (request === _this2.prefixRequest) _this2.prefixLoading = false;
+        if (request === _this6.prefixRequest) _this6.prefixLoading = false;
       }
     })();
   }
   prefixValid() {
-    if (this.editing?.prefix && this.form.prefix === this.editing.prefix && (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_3__.prefixQuery)(this.prefixInput) === this.editing.prefix && !this.prefixLoading) return true;
+    if (!this.editing && this.sitePrefix) return true;
+    if (this.editing?.prefix && this.form.prefix === this.editing.prefix && (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_10__.prefixQuery)(this.prefixInput) === this.editing.prefix && !this.prefixLoading) return true;
     if (this.editing && !this.editing.prefix && !this.prefixInput && !this.form.prefix && !this.prefixTouched) return true;
-    return !this.prefixLoading && !this.prefixInvalid && this.prefixChecked === (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_3__.prefixQuery)(this.prefixInput) && (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_3__.prefixSelectionValid)(this.form.prefix, this.prefixChoices);
+    return !this.prefixLoading && !this.prefixInvalid && this.prefixChecked === (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_10__.prefixQuery)(this.prefixInput) && (0,_services_asset_prefix__WEBPACK_IMPORTED_MODULE_10__.prefixSelectionValid)(this.form.prefix, this.prefixChoices);
+  }
+  stripeKnown = false;
+  stripeLoading = false;
+  stripeConnecting = false;
+  stripeStatus = null;
+  stripeError = '';
+  stripeOwnerId = '';
+  stripeRequest = 0;
+  submittedDocumentFingerprint = '';
+  sx(key) {
+    const lang = this.language.currentLanguage;
+    return this.text('ui.wizardStripe.' + key, _services_wizard_stripe_text__WEBPACK_IMPORTED_MODULE_7__.WIZARD_STRIPE_TEXT[lang]?.[key] || _services_wizard_stripe_text__WEBPACK_IMPORTED_MODULE_7__.WIZARD_STRIPE_TEXT.en[key] || key);
+  }
+  loadWizardStripe() {
+    var _this7 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const request = ++_this7.stripeRequest;
+      _this7.stripeLoading = true;
+      _this7.stripeKnown = false;
+      _this7.stripeError = '';
+      try {
+        const user = yield _this7.auth.user();
+        const result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this7.http.get('/api/owners/' + encodeURIComponent(user.uid) + '/stripe/status', {
+          headers: yield _this7.auth.headers()
+        }));
+        if (request !== _this7.stripeRequest) return;
+        if (typeof result?.connected !== 'boolean') throw Error('invalid_stripe_status');
+        _this7.stripeOwnerId = user.uid;
+        _this7.stripeStatus = result;
+        _this7.stripeKnown = true;
+      } catch (e) {
+        if (request === _this7.stripeRequest) _this7.stripeError = _this7.sx(e?.error?.error === 'legal_documents_not_published' ? 'legalUnavailable' : 'statusError');
+      } finally {
+        if (request === _this7.stripeRequest) _this7.stripeLoading = false;
+      }
+    })();
+  }
+  connectWizardStripe() {
+    var _this8 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this8.adminScope || !_this8.editing || _this8.stripeLoading || _this8.stripeConnecting || !_this8.stripeKnown) return;
+      _this8.stripeConnecting = true;
+      const asset = _this8.editing;
+      try {
+        yield _this8.loadWizardStripe();
+        if (!_this8.stripeKnown || _this8.stripeStatus.connected) return;
+        const uid = (yield _this8.auth.user()).uid;
+        if (uid !== _this8.stripeOwnerId) throw Error('account_changed');
+        const result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this8.http.post('/api/owners/' + encodeURIComponent(uid) + '/stripe/connect', {
+          assetType: asset.assetType,
+          assetId: asset.id,
+          resumeWizard: true,
+          returnOrigin: window.location.origin
+        }, {
+          headers: yield _this8.auth.headers()
+        }));
+        if (!result?.url) throw Error('stripe_url_missing');
+        const url = new URL(result.url);
+        if (url.protocol !== 'https:' || !(url.hostname === 'stripe.com' || url.hostname.endsWith('.stripe.com'))) throw Error('invalid_stripe_url');
+        window.location.assign(url.href);
+      } catch {
+        _this8.stripeError = _this8.sx('connectError');
+      } finally {
+        _this8.stripeConnecting = false;
+      }
+    })();
+  }
+  completeWizard() {
+    var _this9 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this9.busy || _this9.documentBusy || _this9.stripeConnecting) return;
+      _this9.closeEditor(true);
+      _this9.message = _this9.sx('savedForLater');
+      yield _this9.refresh();
+    })();
+  }
+  documentsSummary = null;
+  documentBusy = false;
+  documentScopeValue = null;
+  get documentScope() {
+    if (!this.editing) return null;
+    const a = this.editing;
+    if (this.documentScopeValue?.type !== a.assetType || this.documentScopeValue?.id !== a.id) this.documentScopeValue = {
+      type: a.assetType,
+      id: a.id
+    };
+    return this.documentScopeValue;
+  }
+  get documentsReady() {
+    return !!this.documentsSummary && (this.documentsSummary.provided === true || this.documentsSummary.approved === true);
+  }
+  documentsUpdated(summary) {
+    this.documentsSummary = summary;
   }
   step = 0;
-  steps = _services_listing_wizard__WEBPACK_IMPORTED_MODULE_5__.LISTING_WIZARD_STEPS;
+  get steps() {
+    return this.adminScope ? _services_listing_wizard__WEBPACK_IMPORTED_MODULE_12__.LISTING_WIZARD_STEPS : [..._services_listing_wizard__WEBPACK_IMPORTED_MODULE_12__.LISTING_WIZARD_STEPS, 'stripe'];
+  }
   photos = [];
   photosLoaded = true;
   photosDirty = false;
@@ -13689,10 +15073,12 @@ let OwnerListingsComponent = class OwnerListingsComponent {
   subscriptionAsset = null;
   wx(key) {
     const lang = this.language.currentLanguage;
-    return this.text('ui.listingWizard.' + key, _services_listing_wizard_text__WEBPACK_IMPORTED_MODULE_4__.LISTING_WIZARD_TEXT[lang]?.[key] || _services_listing_wizard_text__WEBPACK_IMPORTED_MODULE_4__.LISTING_WIZARD_TEXT.en[key] || key);
+    return this.text('ui.listingWizard.' + key, _services_listing_wizard_text__WEBPACK_IMPORTED_MODULE_11__.LISTING_WIZARD_TEXT[lang]?.[key] || _services_listing_wizard_text__WEBPACK_IMPORTED_MODULE_11__.LISTING_WIZARD_TEXT.en[key] || key);
   }
   stepValid(n) {
-    return (0,_services_listing_wizard__WEBPACK_IMPORTED_MODULE_5__.listingStepValid)(this.form, n) && (n !== 0 || this.prefixValid());
+    if (n === 4) return true;
+    if (n === 3) return this.documentsReady;
+    return (0,_services_listing_wizard__WEBPACK_IMPORTED_MODULE_12__.listingStepValid)(this.form, n) && (n !== 0 || this.prefixValid());
   }
   nextStep() {
     if (this.stepValid(this.step)) {
@@ -13700,9 +15086,35 @@ let OwnerListingsComponent = class OwnerListingsComponent {
       this.focusWizard();
     }
   }
+  goToStep(index) {
+    var _this10 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this10.busy || _this10.documentBusy || _this10.stripeConnecting || index < 0 || index >= _this10.steps.length) return;
+      if (index < 3) {
+        _this10.step = index;
+        if (_this10.editing && !_this10.impact) yield _this10.reloadImpact();
+        _this10.focusWizard();
+        return;
+      }
+      if (!_this10.editing || _this10.wizardDirty || _this10.photosDirty) {
+        if (_this10.editing && !_this10.impact) yield _this10.reloadImpact();
+        yield _this10.saveWizard(true);
+        if (!_this10.editing || _this10.wizardDirty || _this10.photosDirty || _this10.step !== 3) return;
+      }
+      _this10.step = index;
+      _this10.focusWizard();
+      if (index === 4 && !_this10.adminScope) yield _this10.loadWizardStripe();
+    })();
+  }
+  skipDocuments() {
+    var _this11 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this11.adminScope) return;
+      yield _this11.goToStep(4);
+    })();
+  }
   previousStep() {
-    this.step = Math.max(0, this.step - 1);
-    this.focusWizard();
+    this.goToStep(Math.max(0, this.step - 1));
   }
   focusWizard() {
     setTimeout(() => {
@@ -13720,7 +15132,11 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     for (const photo of this.photos) if (photo.preview.startsWith('blob:')) URL.revokeObjectURL(photo.preview);
     this.photos = [];
   }
+  createQuery;
   ngOnDestroy() {
+    this.createQuery?.unsubscribe();
+    this.clearImportPreviews();
+    this.stripeRequest++;
     clearTimeout(this.prefixTimer);
     this.prefixRequest++;
     this.clearPhotoPreviews();
@@ -13729,7 +15145,7 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     const input = event.target;
     const files = Array.from(input.files || []);
     this.error = '';
-    if (files.some(f => !(0,_services_listing_wizard__WEBPACK_IMPORTED_MODULE_5__.listingPhotoFileValid)(f)) || files.length + this.photos.length > 50) {
+    if (files.some(f => !(0,_services_listing_wizard__WEBPACK_IMPORTED_MODULE_12__.listingPhotoFileValid)(f)) || files.length + this.photos.length > 50) {
       this.error = this.wx('photoError');
       input.value = '';
       return;
@@ -13757,32 +15173,32 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     this.wizardDirty = true;
   }
   openSubscription(a) {
-    var _this3 = this;
+    var _this12 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this3.busy) return;
-      if (_this3.subscriptionAsset?.id === a.id) {
-        _this3.subscriptionAsset = null;
+      if (_this12.busy) return;
+      if (_this12.subscriptionAsset?.id === a.id) {
+        _this12.subscriptionAsset = null;
         return;
       }
-      _this3.subscriptionAsset = a;
-      _this3.busy = true;
-      _this3.error = '';
+      _this12.subscriptionAsset = a;
+      _this12.busy = true;
+      _this12.error = '';
       try {
-        const detail = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this3.http.get(_this3.url(a) + '/subscription', {
-          headers: yield _this3.auth.headers()
+        const detail = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this12.http.get(_this12.url(a) + '/subscription', {
+          headers: yield _this12.auth.headers()
         }));
         a.billing = detail.billing;
       } catch (e) {
-        _this3.error = _this3.err(e);
+        _this12.error = _this12.err(e);
       } finally {
-        _this3.busy = false;
+        _this12.busy = false;
       }
     })();
   }
   uiContent = null;
   onb(key) {
     const lang = this.language.currentLanguage;
-    return this.siteContent?.tFromContent(this.uiContent, 'ui.ownerOnboarding.' + key, lang, _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_8__.OWNER_ONBOARDING_TEXT[lang]?.[key] || _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_8__.OWNER_ONBOARDING_TEXT.en[key]) || _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_8__.OWNER_ONBOARDING_TEXT.en[key];
+    return this.siteContent?.tFromContent(this.uiContent, 'ui.ownerOnboarding.' + key, lang, _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_15__.OWNER_ONBOARDING_TEXT[lang]?.[key] || _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_15__.OWNER_ONBOARDING_TEXT.en[key]) || _services_owner_onboarding_text__WEBPACK_IMPORTED_MODULE_15__.OWNER_ONBOARDING_TEXT.en[key];
   }
   text(key, fallback) {
     return this.siteContent?.tFromContent(this.uiContent, key, this.language?.currentLanguage || 'fr', fallback) || fallback;
@@ -13790,19 +15206,18 @@ let OwnerListingsComponent = class OwnerListingsComponent {
   moderationLabel(a) {
     const status = a.moderation?.status;
     const lang = this.language?.currentLanguage || 'fr';
-    return this.text('ui.listingModeration.' + status, _services_listing_moderation_text__WEBPACK_IMPORTED_MODULE_9__.LISTING_MODERATION_TEXT[lang]?.[status] || _services_listing_moderation_text__WEBPACK_IMPORTED_MODULE_9__.LISTING_MODERATION_TEXT.en[status] || status);
+    return this.text('ui.listingModeration.' + status, _services_listing_moderation_text__WEBPACK_IMPORTED_MODULE_16__.LISTING_MODERATION_TEXT[lang]?.[status] || _services_listing_moderation_text__WEBPACK_IMPORTED_MODULE_16__.LISTING_MODERATION_TEXT.en[status] || status);
   }
   editing = null;
   deleting = null;
   impact = null;
   acknowledged = false;
-  showArchived = false;
   lx(key) {
     const lang = this.language?.currentLanguage || 'fr';
-    return this.text('ui.listingActions.' + key, _services_listing_actions_text__WEBPACK_IMPORTED_MODULE_10__.LISTING_ACTIONS_TEXT[lang]?.[key] || _services_listing_actions_text__WEBPACK_IMPORTED_MODULE_10__.LISTING_ACTIONS_TEXT.en[key] || key);
+    return this.text('ui.listingActions.' + key, _services_listing_actions_text__WEBPACK_IMPORTED_MODULE_17__.LISTING_ACTIONS_TEXT[lang]?.[key] || _services_listing_actions_text__WEBPACK_IMPORTED_MODULE_17__.LISTING_ACTIONS_TEXT.en[key] || key);
   }
   get visibleRows() {
-    return this.rows.filter(a => this.showArchived ? !!a.deletedAt : !a.deletedAt);
+    return this.rows.filter(a => !a.deletedAt);
   }
   billingMode = '';
   rows = [];
@@ -13935,7 +15350,10 @@ let OwnerListingsComponent = class OwnerListingsComponent {
       type: 'checkbox'
     }]
   };
-  constructor(http, auth, siteContent, language) {
+  constructor(route, router, entryService, http, auth, siteContent, language) {
+    this.route = route;
+    this.router = router;
+    this.entryService = entryService;
     this.http = http;
     this.auth = auth;
     this.siteContent = siteContent;
@@ -13977,38 +15395,78 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     return `/${a.assetType}/${a.id}/${tail}`;
   }
   ngOnInit() {
-    var _this4 = this;
+    var _this13 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      _this4.uiContent = yield _this4.siteContent?.getContent();
-      if (_this4.adminScope) yield _this4.loadAdminEditor();else {
-        yield _this4.refresh();
+      if (_this13.route.snapshot.data['firstListing'] && !_this13.adminScope) _this13.creationChoice = true;
+      if (!_this13.adminScope) _this13.createQuery = _this13.route.queryParamMap.subscribe(q => {
+        if (q.get("create") !== "1") return;
+        if (!_this13.creating && !_this13.editing && !_this13.deleting) _this13.creationChoice = true;
+        void _this13.router.navigate([], {
+          relativeTo: _this13.route,
+          queryParams: {
+            create: null
+          },
+          queryParamsHandling: "merge",
+          replaceUrl: true
+        });
+      });
+      _this13.uiContent = yield _this13.siteContent?.getContent();
+      if (_this13.adminScope) yield _this13.loadAdminEditor();else {
+        yield _this13.refresh();
         const params = new URLSearchParams(window.location.search);
-        const a = _this4.rows.find(x => x.assetType === params.get('editType') && x.id === params.get('editId'));
-        if (a) yield _this4.prepare(a, 'edit');
+        const a = _this13.rows.find(x => x.assetType === params.get('editType') && x.id === params.get('editId'));
+        if (a) {
+          yield _this13.prepare(a, 'edit');
+          if (params.get('wizard') === 'stripe') {
+            _this13.step = 4;
+            yield _this13.loadWizardStripe();
+          }
+        }
       }
     })();
   }
+  deepLinkHandled = false;
   refresh() {
-    var _this5 = this;
+    var _this14 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this5.adminScope) return;
-      if (_this5.busy) return;
-      _this5.busy = true;
-      _this5.error = '';
+      if (_this14.adminScope) return;
+      if (_this14.busy) return;
+      _this14.busy = true;
+      _this14.error = '';
       try {
-        const plans = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this5.http.get('/api/listing-plans'));
-        _this5.prices = plans.prices;
-        _this5.billingMode = plans.mode;
-        _this5.rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this5.http.get('/api/owner/listings', {
-          headers: yield _this5.auth.headers()
+        const plans = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this14.http.get('/api/listing-plans'));
+        _this14.prices = plans.prices;
+        _this14.billingMode = plans.mode;
+        _this14.rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this14.http.get('/api/owner/listings', {
+          headers: yield _this14.auth.headers()
         }));
-        if (_this5.subscriptionAsset) _this5.subscriptionAsset = _this5.rows.find(a => a.id === _this5.subscriptionAsset.id) || null;
-        if (new URLSearchParams(window.location.search).get('billing') === 'success') _this5.message = _this5.text('ui.labels.tbd4b83f35532', 'Retour de Stripe : actualisez pour vérifier la confirmation serveur. Le retour seul ne publie pas votre annonce.');
+        const site = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this14.http.get('/api/owner/site-settings', {
+          headers: yield _this14.auth.headers()
+        }));
+        _this14.sitePrefix = site.prefix || '';
+        if (_this14.subscriptionAsset) _this14.subscriptionAsset = _this14.rows.find(a => a.id === _this14.subscriptionAsset.id) || null;
+        if (new URLSearchParams(window.location.search).get('billing') === 'success') _this14.message = _this14.text('ui.labels.tbd4b83f35532', 'Retour de Stripe : actualisez pour vérifier la confirmation serveur. Le retour seul ne publie pas votre annonce.');
       } catch (e) {
-        _this5.error = _this5.err(e);
+        _this14.error = _this14.err(e);
       } finally {
-        _this5.busy = false;
+        _this14.busy = false;
       }
+      yield _this14.applyDeepLink();
+    })();
+  }
+  applyDeepLink() {
+    var _this15 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this15.deepLinkHandled || _this15.error || !_this15.rows.length) return;
+      const params = new URLSearchParams(window.location.search),
+        id = params.get('asset'),
+        action = params.get('action');
+      if (!id || !action) return;
+      const asset = _this15.rows.find(a => a.id === id && !a.deletedAt);
+      if (!asset) return;
+      _this15.deepLinkHandled = true;
+      if (action === 'edit') yield _this15.prepare(asset, 'edit');
+      if (action === 'subscription') yield _this15.openSubscription(asset);
     })();
   }
   changeType() {
@@ -14016,8 +15474,15 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     this.form.pricing.pricingUnit = this.form.assetType === 'property' ? 'night' : 'day';
   }
   closeEditor(force = false) {
+    if (!force && this.stripeConnecting) return false;
     const hadEditor = this.creating || !!this.editing;
     if (!force && this.wizardDirty && typeof window !== 'undefined' && !window.confirm(this.wx('discard'))) return false;
+    this.stripeRequest++;
+    this.stripeKnown = false;
+    this.stripeLoading = false;
+    this.stripeStatus = null;
+    this.stripeError = '';
+    this.submittedDocumentFingerprint = '';
     clearTimeout(this.prefixTimer);
     this.prefixRequest++;
     this.prefixInput = '';
@@ -14034,6 +15499,8 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     this.impact = null;
     this.acknowledged = false;
     this.step = 0;
+    this.documentsSummary = null;
+    this.documentBusy = false;
     this.photosLoaded = true;
     this.photosDirty = false;
     this.wizardDirty = false;
@@ -14042,25 +15509,27 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     return true;
   }
   toggleCreate() {
+    if (this.importBusy) return;
     if (this.creating || this.editing || this.deleting) {
       this.closeEditor();
       return;
     }
-    this.closeEditor(true);
-    this.creating = true;
-    this.focusWizard();
+    this.clearImportPreviews();
+    this.creationChoice = !this.creationChoice;
+    this.importResult = null;
+    this.importError = '';
   }
   prepare(a, mode) {
-    var _this6 = this;
+    var _this16 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this6.busy || a.deletedAt) return;
-      if (!_this6.closeEditor()) return;
-      _this6.error = '';
-      _this6.message = '';
+      if (_this16.busy || a.deletedAt) return;
+      if (!_this16.closeEditor()) return;
+      _this16.error = '';
+      _this16.message = '';
       if (mode === 'edit') {
-        _this6.editing = a;
-        _this6.form = {
-          ..._this6.empty(),
+        _this16.editing = a;
+        _this16.form = {
+          ..._this16.empty(),
           prefix: a.prefix || '',
           assetType: a.assetType,
           name: a.name || '',
@@ -14073,7 +15542,7 @@ let OwnerListingsComponent = class OwnerListingsComponent {
             ...(a.location || {})
           },
           pricing: {
-            ..._this6.empty().pricing,
+            ..._this16.empty().pricing,
             ...(a.pricing || {})
           },
           properties: {
@@ -14083,20 +15552,20 @@ let OwnerListingsComponent = class OwnerListingsComponent {
           depositPercent: Number(a.paymentPolicy?.bookingDeposit?.value || 0),
           securityDeposit: Number(a.paymentPolicy?.securityDeposit?.value || 0)
         };
-        _this6.prefixInput = a.prefix || '';
-        _this6.prefixChoices = a.prefix ? [a.prefix] : [];
-        _this6.prefixChecked = a.prefix || '';
-        _this6.creating = true;
-        _this6.photos = (0,_services_asset_photos__WEBPACK_IMPORTED_MODULE_6__.assetPhotoPaths)(a, a.assetType, a.id).map(raw => {
-          const path = (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_7__.mediaObjectPath)(raw) || raw;
+        _this16.prefixInput = a.prefix || '';
+        _this16.prefixChoices = a.prefix ? [a.prefix] : [];
+        _this16.prefixChecked = a.prefix || '';
+        _this16.creating = true;
+        _this16.photos = (0,_services_asset_photos__WEBPACK_IMPORTED_MODULE_13__.assetPhotoPaths)(a, a.assetType, a.id).map(raw => {
+          const path = (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_14__.mediaObjectPath)(raw) || raw;
           return {
             path,
-            preview: (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_7__.mediaObjectUrl)(path)
+            preview: (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_14__.mediaObjectUrl)(path)
           };
         });
-      } else _this6.deleting = a;
-      yield _this6.reloadImpact();
-      if (mode === 'edit') yield _this6.loadWizardPhotos(a);
+      } else _this16.deleting = a;
+      yield _this16.reloadImpact();
+      if (mode === 'edit') yield _this16.loadWizardPhotos(a);
       if (typeof document !== 'undefined') {
         const el = document.getElementById(mode === 'delete' ? 'listing-delete' : 'listing-editor');
         el?.scrollIntoView({
@@ -14110,207 +15579,260 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     })();
   }
   loadWizardPhotos(a) {
-    var _this7 = this;
+    var _this17 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      _this7.busy = true;
-      _this7.photosLoaded = false;
+      _this17.busy = true;
+      _this17.photosLoaded = false;
       try {
-        const data = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this7.http.get(`/api/manage/assets/${encodeURIComponent(a.assetType)}/${encodeURIComponent(a.id)}/content`, {
-          headers: (yield _this7.auth.headers()).set('X-Skip-Media-Resolution', 'true')
+        const data = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this17.http.get(`/api/manage/assets/${encodeURIComponent(a.assetType)}/${encodeURIComponent(a.id)}/content`, {
+          headers: (yield _this17.auth.headers()).set('X-Skip-Media-Resolution', 'true')
         }));
         const asset = data.asset || a;
-        const paths = (0,_services_asset_photos__WEBPACK_IMPORTED_MODULE_6__.assetPhotoPaths)(asset, a.assetType, a.id);
+        const paths = (0,_services_asset_photos__WEBPACK_IMPORTED_MODULE_13__.assetPhotoPaths)(asset, a.assetType, a.id);
         if (a.assetType === 'boat' && asset.media?.configured !== true) {
           const content = data.siteContent?.fr || data.siteContent?.en || {};
           paths.push(...[content.boatHeroImage, ...(Array.isArray(content.galleryImages) ? content.galleryImages : [])].filter(v => typeof v === 'string' && !!v));
         }
-        _this7.clearPhotoPreviews();
-        _this7.photos = [...new Set(paths)].map(raw => {
-          const path = (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_7__.mediaObjectPath)(raw) || raw;
+        _this17.clearPhotoPreviews();
+        _this17.photos = [...new Set(paths)].map(raw => {
+          const path = (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_14__.mediaObjectPath)(raw) || raw;
           return {
             path,
-            preview: (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_7__.mediaObjectUrl)(path)
+            preview: (0,_services_media_routes__WEBPACK_IMPORTED_MODULE_14__.mediaObjectUrl)(path)
           };
         });
-        _this7.photosLoaded = true;
+        _this17.photosLoaded = true;
       } catch (e) {
-        _this7.error = _this7.wx('saveError') + ' ' + _this7.err(e);
+        _this17.error = _this17.wx('saveError') + ' ' + _this17.err(e);
       } finally {
-        _this7.busy = false;
+        _this17.busy = false;
       }
     })();
   }
   reloadImpact() {
-    var _this8 = this;
+    var _this18 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const a = _this8.editing || _this8.deleting;
-      if (!a || _this8.busy) return;
-      _this8.busy = true;
-      _this8.impact = null;
-      _this8.acknowledged = false;
-      _this8.error = '';
+      const a = _this18.editing || _this18.deleting;
+      if (!a || _this18.busy) return;
+      _this18.busy = true;
+      _this18.impact = null;
+      _this18.acknowledged = false;
+      _this18.error = '';
       try {
-        _this8.impact = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this8.http.get(_this8.url(a) + '/impact', {
-          headers: yield _this8.auth.headers()
+        _this18.impact = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this18.http.get(_this18.url(a) + '/impact', {
+          headers: yield _this18.auth.headers()
         }));
       } catch (e) {
-        _this8.error = _this8.err(e) || _this8.lx('loadFailed');
+        _this18.error = _this18.err(e) || _this18.lx('loadFailed');
       } finally {
-        _this8.busy = false;
+        _this18.busy = false;
       }
     })();
   }
   commitListing() {
-    var _this9 = this;
+    var _this19 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this9.editing) {
-        yield _this9.saveWizard();
+      if (_this19.editing) {
+        yield _this19.saveWizard();
         return;
       }
-      const a = _this9.deleting;
-      if (!a || _this9.busy || !_this9.impact || (_this9.deleting || _this9.impact.active > 0) && !_this9.acknowledged) return;
-      const removing = !!_this9.deleting;
-      _this9.busy = true;
-      _this9.error = '';
+      const a = _this19.deleting;
+      if (!a || _this19.busy || !_this19.impact || (_this19.deleting || _this19.impact.active > 0) && !_this19.acknowledged) return;
+      const removing = !!_this19.deleting;
+      _this19.busy = true;
+      _this19.error = '';
       try {
         const body = {
-          revision: _this9.impact.revision,
-          acknowledgeReservations: _this9.acknowledged,
+          revision: _this19.impact.revision,
+          acknowledgeReservations: _this19.acknowledged,
           ...(!removing ? {
-            listing: _this9.form
+            listing: _this19.form
           } : {})
         };
         const options = {
-          headers: yield _this9.auth.headers()
+          headers: yield _this19.auth.headers()
         };
-        if (removing) yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this9.http.delete(_this9.url(a), {
+        if (removing) yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this19.http.delete(_this19.url(a), {
           ...options,
           body
-        }));else yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this9.http.patch(_this9.url(a), body, options));
-        _this9.closeEditor(true);
-        _this9.message = _this9.lx(removing ? 'deleted' : 'saved');
+        }));else yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this19.http.patch(_this19.url(a), body, options));
+        _this19.closeEditor(true);
+        _this19.message = _this19.lx(removing ? 'deleted' : 'saved');
       } catch (e) {
-        _this9.error = _this9.err(e);
+        _this19.error = _this19.err(e);
         if (e?.status === 409 || e?.error?.error === 'listing_changed_reload_required') {
-          _this9.impact = null;
-          _this9.acknowledged = false;
+          _this19.impact = null;
+          _this19.acknowledged = false;
         }
         return;
       } finally {
-        _this9.busy = false;
+        _this19.busy = false;
       }
-      yield _this9.refresh();
+      yield _this19.refresh();
     })();
   }
   create() {
-    var _this10 = this;
+    var _this20 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this10.step < 2) {
-        _this10.nextStep();
+      if (_this20.step < 2) {
+        _this20.nextStep();
         return;
       }
-      yield _this10.saveWizard();
+      if (_this20.step === 2) {
+        yield _this20.saveWizard(true);
+        return;
+      }
+      yield _this20.finishWizard();
     })();
   }
-  saveWizard() {
-    var _this11 = this;
+  finishWizard() {
+    var _this21 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this11.busy) return;
-      if (!_this11.photosLoaded) {
-        _this11.step = 1;
-        return;
-      }
-      if (!_this11.stepValid(0)) {
-        _this11.step = 0;
-        _this11.focusWizard();
-        return;
-      }
-      if (!_this11.stepValid(2)) {
-        _this11.step = 2;
-        _this11.focusWizard();
-        return;
-      }
-      if (_this11.editing && (!_this11.impact || _this11.impact.active > 0 && !_this11.acknowledged)) {
-        _this11.step = 2;
-        return;
-      }
-      _this11.busy = true;
-      _this11.error = '';
-      _this11.uploadProgress = '';
+      if (_this21.busy || _this21.documentBusy || !_this21.editing || !_this21.adminScope && !_this21.documentsReady) return;
+      _this21.busy = true;
+      _this21.error = '';
       try {
-        const headers = yield _this11.auth.headers();
-        if (!_this11.editing) {
-          const a = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this11.http.post('/api/owner/listings', (0,_services_listing_wizard__WEBPACK_IMPORTED_MODULE_5__.sanitizedListingForm)(_this11.form), {
+        const fingerprint = _this21.documentsSummary?.fingerprint || '';
+        if (!_this21.adminScope && !_this21.documentsSummary?.approved && (!fingerprint || fingerprint !== _this21.submittedDocumentFingerprint)) {
+          const scope = _this21.documentScope;
+          yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this21.http.post('/api/manage/assets/' + [scope.type, scope.id].map(encodeURIComponent).join('/') + '/documents/submit', {}, {
+            headers: yield _this21.auth.headers()
+          }));
+          _this21.submittedDocumentFingerprint = fingerprint;
+        }
+        if (!_this21.adminScope) {
+          _this21.step = 4;
+          _this21.wizardDirty = false;
+        } else {
+          _this21.closeEditor(true);
+          _this21.message = _this21.wx('finishedWithDocuments');
+          _this21.listingSaved.emit();
+        }
+      } catch (e) {
+        _this21.error = _this21.err(e);
+      } finally {
+        _this21.busy = false;
+      }
+      if (_this21.creating && _this21.step === 4) yield _this21.loadWizardStripe();else if (!_this21.creating) yield _this21.refresh();
+    })();
+  }
+  saveWizard(keepOpen = false) {
+    var _this22 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this22.busy) return;
+      if (!_this22.photosLoaded) {
+        _this22.step = 1;
+        return;
+      }
+      if (!_this22.stepValid(0)) {
+        _this22.step = 0;
+        _this22.focusWizard();
+        return;
+      }
+      if (!_this22.stepValid(2)) {
+        _this22.step = 2;
+        _this22.focusWizard();
+        return;
+      }
+      if (_this22.editing && (!_this22.impact || _this22.impact.active > 0 && !_this22.acknowledged)) {
+        _this22.step = 2;
+        return;
+      }
+      _this22.busy = true;
+      _this22.error = '';
+      _this22.uploadProgress = '';
+      try {
+        const headers = yield _this22.auth.headers();
+        if (!_this22.editing) {
+          const a = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this22.http.post('/api/owner/listings', (0,_services_listing_wizard__WEBPACK_IMPORTED_MODULE_12__.sanitizedListingForm)({
+            ..._this22.form,
+            prefix: _this22.sitePrefix || _this22.form.prefix
+          }), {
             headers
           }));
-          _this11.editing = a;
-          _this11.rows.unshift(a);
-          _this11.impact = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this11.http.get(_this11.url(a) + '/impact', {
+          _this22.sitePrefix = a.prefix;
+          _this22.form.prefix = a.prefix;
+          _this22.prefixInput = a.prefix;
+          _this22.prefixChecked = a.prefix;
+          _this22.prefixChoices = [a.prefix];
+          _this22.editing = a;
+          _this22.rows.unshift(a);
+          _this22.impact = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this22.http.get(_this22.url(a) + '/impact', {
             headers
           }));
         }
-        const a = _this11.editing;
-        for (let i = 0; i < _this11.photos.length; i++) {
-          const photo = _this11.photos[i];
+        const a = _this22.editing;
+        for (let i = 0; i < _this22.photos.length; i++) {
+          const photo = _this22.photos[i];
           if (!photo.file || photo.path) continue;
-          _this11.uploadProgress = _this11.wx('uploading') + ' ' + (i + 1) + ' / ' + _this11.photos.length;
+          _this22.uploadProgress = _this22.wx('uploading') + ' ' + (i + 1) + ' / ' + _this22.photos.length;
           const data = new FormData();
           data.append('file', photo.file, photo.file.name);
           data.append('category', a.assetType === 'boat' ? 'boat' : 'gallery');
           data.append('subject', a.id);
           data.append('resourceType', a.assetType);
           data.append('resourceId', a.id);
-          const uploaded = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this11.http.post(_services_media_routes__WEBPACK_IMPORTED_MODULE_7__.MEDIA_ROUTES.upload, data, {
+          const uploaded = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this22.http.post(_services_media_routes__WEBPACK_IMPORTED_MODULE_14__.MEDIA_ROUTES.upload, data, {
             headers
           }));
-          if (!uploaded?.path) throw Error(_this11.wx('photoError'));
+          if (!uploaded?.path) throw Error(_this22.wx('photoError'));
           photo.path = uploaded.path;
         }
         const listing = {
-          ...(0,_services_listing_wizard__WEBPACK_IMPORTED_MODULE_5__.sanitizedListingForm)(_this11.form),
-          ...(_this11.photosDirty ? {
-            photos: _this11.photos.map(p => p.path)
+          ...(0,_services_listing_wizard__WEBPACK_IMPORTED_MODULE_12__.sanitizedListingForm)(_this22.form),
+          ...(_this22.photosDirty ? {
+            photos: _this22.photos.map(p => p.path)
           } : {})
         };
-        const saved = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this11.http.patch(_this11.url(a), {
-          revision: _this11.impact.revision,
-          acknowledgeReservations: _this11.acknowledged,
+        const saved = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this22.http.patch(_this22.url(a), {
+          revision: _this22.impact.revision,
+          acknowledgeReservations: _this22.acknowledged,
           listing
         }, {
           headers
         }));
-        if (_this11.form.prefix && saved?.prefix !== _this11.form.prefix) throw Error(_this11.prefixText('Le serveur n’a pas confirmé l’enregistrement du préfixe. Mettez aussi le backend à jour puis réessayez.', 'The server did not confirm saving the prefix. Update the backend too, then retry.'));
+        if (_this22.form.prefix && saved?.prefix !== _this22.form.prefix) throw Error(_this22.prefixText('Le serveur n’a pas confirmé l’enregistrement du préfixe. Mettez aussi le backend à jour puis réessayez.', 'The server did not confirm saving the prefix. Update the backend too, then retry.'));
         if (saved?.prefix) a.prefix = saved.prefix;
-        _this11.closeEditor(true);
-        _this11.message = _this11.wx('saved');
-        if (_this11.adminScope) _this11.listingSaved.emit();
+        if (keepOpen) {
+          _this22.photosDirty = false;
+          _this22.wizardDirty = false;
+          _this22.impact = null;
+          _this22.documentsSummary = null;
+          _this22.step = 3;
+          _this22.message = _this22.wx('draftBeforeDocuments');
+          _this22.focusWizard();
+        } else {
+          _this22.closeEditor(true);
+          _this22.message = _this22.wx('saved');
+          if (_this22.adminScope) _this22.listingSaved.emit();
+        }
       } catch (e) {
-        _this11.error = _this11.wx('saveError') + ' ' + _this11.err(e);
+        _this22.error = _this22.wx('saveError') + ' ' + _this22.err(e);
         if (e?.status === 409) {
-          _this11.impact = null;
-          _this11.acknowledged = false;
+          _this22.impact = null;
+          _this22.acknowledged = false;
         }
       } finally {
-        _this11.busy = false;
-        _this11.uploadProgress = '';
+        _this22.busy = false;
+        _this22.uploadProgress = '';
       }
-      if (!_this11.creating) yield _this11.refresh();
+      if (!_this22.creating) yield _this22.refresh();
     })();
   }
   action(a, kind) {
-    var _this12 = this;
+    var _this23 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (_this12.busy) return;
-      _this12.busy = true;
-      _this12.error = '';
+      if (_this23.busy) return;
+      _this23.busy = true;
+      _this23.error = '';
       try {
-        const headers = yield _this12.auth.headers();
+        const headers = yield _this23.auth.headers();
         let result;
-        if (kind === 'publication' || kind === 'resubmit') result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this12.http.patch(_this12.url(a) + '/publication', {
+        if (kind === 'publication' || kind === 'resubmit') result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this23.http.patch(_this23.url(a) + '/publication', {
           published: kind === 'resubmit' ? true : a.published !== true
         }, {
           headers
-        }));else result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this12.http.post(_this12.url(a) + '/' + kind, kind === 'renewal' ? {
+        }));else result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_23__.firstValueFrom)(_this23.http.post(_this23.url(a) + '/' + kind, kind === 'renewal' ? {
           cancelAtPeriodEnd: !a.billing?.cancelAtPeriodEnd
         } : {}, {
           headers
@@ -14322,11 +15844,11 @@ let OwnerListingsComponent = class OwnerListingsComponent {
           return;
         }
       } catch (e) {
-        _this12.error = _this12.err(e);
+        _this23.error = _this23.err(e);
       } finally {
-        _this12.busy = false;
+        _this23.busy = false;
       }
-      yield _this12.refresh();
+      yield _this23.refresh();
     })();
   }
   err(e) {
@@ -14356,30 +15878,36 @@ let OwnerListingsComponent = class OwnerListingsComponent {
     }[code] || (e?.error?.issues?.some(i => i.path?.[0] === 'location') ? 'Indiquez la ville et le pays pour ce bien.' : null) || e?.error?.message || code || e?.message || 'Opération impossible.';
   }
   static ctorParameters = () => [{
-    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_17__.HttpClient
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_24__.ActivatedRoute
   }, {
-    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_14__.ReservationAuthService
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_24__.Router
   }, {
-    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_11__.SiteContentService
+    type: _services_management_entry_service__WEBPACK_IMPORTED_MODULE_3__.ManagementEntryService
   }, {
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_12__.LanguageService
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_25__.HttpClient
+  }, {
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_21__.ReservationAuthService
+  }, {
+    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_18__.SiteContentService
+  }, {
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_19__.LanguageService
   }];
   static propDecorators = {
     adminScope: [{
-      type: _angular_core__WEBPACK_IMPORTED_MODULE_15__.Input
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_22__.Input
     }],
     editorClosed: [{
-      type: _angular_core__WEBPACK_IMPORTED_MODULE_15__.Output
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_22__.Output
     }],
     listingSaved: [{
-      type: _angular_core__WEBPACK_IMPORTED_MODULE_15__.Output
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_22__.Output
     }]
   };
 };
-OwnerListingsComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_18__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_15__.Component)({
+OwnerListingsComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_26__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_22__.Component)({
   selector: 'app-owner-listings',
   standalone: true,
-  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_19__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_20__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_21__.RouterModule, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_13__.SiteTextPipe],
+  imports: [_messaging_message_link_component__WEBPACK_IMPORTED_MODULE_4__.MessageLinkComponent, _calendar_asset_calendar_link_component__WEBPACK_IMPORTED_MODULE_5__.AssetCalendarLinkComponent, _shared_listing_description_editor_component__WEBPACK_IMPORTED_MODULE_6__.ListingDescriptionEditorComponent, _workspace_asset_documents_component__WEBPACK_IMPORTED_MODULE_9__.AssetDocumentsComponent, _angular_common__WEBPACK_IMPORTED_MODULE_27__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_28__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_29__.RouterModule, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_20__.SiteTextPipe],
   template: _owner_listings_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_owner_listings_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], OwnerListingsComponent);
@@ -18100,7 +19628,7 @@ class ServicesService {
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<app-platform-admin *ngIf=\"isPlatformAdmin && !browseAsCustomer\"></app-platform-admin>\n<app-owner-dashboard *ngIf=\"isOwner && !isPlatformAdmin && !browseAsCustomer\" (browse)=\"browseRentals()\"></app-owner-dashboard>\n<app-concierge *ngIf=\"assetAccess.isConcierge && !isOwner && !isPlatformAdmin && !browseAsCustomer\"></app-concierge>\n<div class=\"registry-page\" *ngIf=\"(!isOwner && !assetAccess.isConcierge) || browseAsCustomer\">\n<button class=\"button primary\" style=\"margin:16px 5vw\" type=\"button\" *ngIf=\"isOwner\" (click)=\"showOwnerDashboard()\">← {{t('ownerWorkspace')}}</button>\n<p class=\"offline-notice\" *ngIf=\"listingOffline\" role=\"status\">{{d('offline')}}</p>\n<header class=\"site-header\"><a class=\"brand-link\" routerLink=\"/\" aria-label=\"GoDirect\"><span class=\"brand-mark\" aria-hidden=\"true\">G↗</span>GoDirect<span class=\"brand-dot\">.</span></a><label class=\"language-switch\"><span class=\"sr-only\">{{ \"ui.pages.t62d442269a5e\" | siteText }}</span><select [ngModel]=\"lang\" (ngModelChange)=\"setLang($event)\"><option *ngFor=\"let code of languages\" [value]=\"code\">{{code.toUpperCase()}}</option></select></label><span class=\"account-identity\" *ngIf=\"assetAccess.isAuthenticated\"><strong>{{assetAccess.displayName}}</strong><small>{{accountText(assetAccess.accountMode)}}</small><small *ngIf=\"assetAccess.isManager\">{{accountText(assetAccess.viewMode==='client'?'clientViewMode':(assetAccess.accountMode==='concierge'?'conciergeView':'ownerViewMode'))}}</small></span><button class=\"workspace-view-switch\" type=\"button\" *ngIf=\"assetAccess.isManager\" (click)=\"assetAccess.switchView()\" [disabled]=\"assetAccess.switchingView\">⇄ {{accountText(assetAccess.viewMode==='client'?(assetAccess.accountMode==='concierge'?'conciergeView':'ownerViewMode'):'clientViewMode')}}</button><details #assetsMenu class=\"account-menu\" *ngIf=\"assetAccess.isManager && assetAccess.viewMode==='owner'\"><summary>{{accountText('assets')}}</summary><div class=\"account-panel\" (click)=\"assetsMenu.open=false\"><a *ngIf=\"assetAccess.isOwner\" routerLink=\"/owner/listings\">{{d('manage')}}</a><a *ngIf=\"assetAccess.isConcierge\" routerLink=\"/concierge\">{{accountText('concierge')}}</a><a *ngIf=\"assetAccess.isOwner\" routerLink=\"/owner/delegations\">{{accountText('delegations')}}</a></div></details><details #bookMenu class=\"account-menu\" *ngIf=\"isLoggedIn\"><summary>{{accountText('reservations')}}</summary><div class=\"account-panel\" (click)=\"bookMenu.open=false\"><ng-container *ngIf=\"isOwner && assetAccess.viewMode==='owner'\"><strong>{{accountText('bookingManagement')}}</strong><a routerLink=\"/owner/activity/reservations\">{{accountText('reservations')}}</a><a routerLink=\"/owner/activity/ratings\">{{accountText('ratings')}}</a><a routerLink=\"/owner/activity/payments\">{{accountText('payments')}}</a><a routerLink=\"/owner/customers\">{{accountText('customers')}}</a></ng-container><ng-container *ngIf=\"assetAccess.isConcierge && assetAccess.viewMode==='owner'\"><strong>{{accountText('concierge')}}</strong><a *ngIf=\"assetAccess.canConcierge('bookings')\" routerLink=\"/concierge/activity/reservations\">{{accountText('reservations')}}</a><a *ngIf=\"assetAccess.canConcierge('customers')\" routerLink=\"/concierge/customers\">{{accountText('customers')}}</a><a *ngIf=\"assetAccess.canConcierge('payments')\" routerLink=\"/concierge\" fragment=\"payments\">{{accountText('payments')}}</a></ng-container><strong>{{accountText('customerBookings')}}</strong><a routerLink=\"/account/bookings\">{{t('bookings')}}</a><a routerLink=\"/account/ratings\">{{accountText('ratings')}}</a><a routerLink=\"/account/payments\">{{accountText('payments')}}</a></div></details><details #accountMenu class=\"account-menu\"><summary>{{accountText('account')}}</summary><div class=\"account-panel\" (click)=\"accountMenu.open=false\"><ng-container *ngIf=\"isLoggedIn; else publicAccount\"><a routerLink=\"/account/profile\">{{t('profile')}}</a><button *ngIf=\"isOwner && !isPlatformAdmin\" type=\"button\" (click)=\"ownerPayments()\">{{accountText('stripe')}}</button><button type=\"button\" (click)=\"logout()\">{{t('logout')}}</button></ng-container><ng-template #publicAccount><button type=\"button\" (click)=\"login()\">{{t('login')}}</button><button type=\"button\" (click)=\"signup()\">{{t('signup')}}</button></ng-template></div></details></header>\n<main><section class=\"hero\"><div class=\"hero-copy\"><span class=\"eyebrow\">● {{d('eyebrow')}}</span><h1>{{d('title')}}<br><em>{{d('titleAccent')}}</em></h1><p>{{d('intro')}}</p><div class=\"hero-actions\"><a class=\"button primary\" href=\"#rentals\">{{d('find')}} ↓</a><button class=\"button subtle\" type=\"button\" (click)=\"publish()\">{{o('publish')}} ↗</button></div><p><a class=\"concierge-hero-link\" routerLink=\"/\" [queryParams]=\"{view:'rentals'}\" fragment=\"concierge\">{{homeRoleCopy().join}} ↗</a></p><p class=\"commission-badge\">{{o('commission')}}</p><p class=\"commission-detail\">{{o('commissionDetail')}}</p><p class=\"hero-note\">✓ {{d('direct')}}</p></div><div class=\"hero-art\" aria-hidden=\"true\"><img class=\"hero-photo\" src=\"/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-2.jpg\" alt=\"\" width=\"1440\" height=\"810\" fetchpriority=\"high\" decoding=\"async\"><div class=\"art-caption\">{{d('artTop')}}<br>GoDirect.</div></div></section>\n<app-owner-site-promo (createSite)=\"publish()\"></app-owner-site-promo>\n<section id=\"rentals\" class=\"rental-section\"><form class=\"search-panel\" (ngSubmit)=\"search()\"><div class=\"search-heading\"><h2>{{d('find')}}</h2><span>{{d('allFive')}}</span></div><div class=\"search-fields\"><label><span>{{d('type')}}</span><select name=\"assetType\" [(ngModel)]=\"selectedType\"><option value=\"\">{{d('allTypes')}}</option><option *ngFor=\"let kind of ['boat','car','property','parking','pool']\" [value]=\"kind\">{{typeLabel(kind)}}</option></select></label><label class=\"location-field\"><span>{{d('where')}}</span><input name=\"location\" [(ngModel)]=\"location\" [placeholder]=\"d('address')\" list=\"discovery-locations\" maxlength=\"200\" aria-describedby=\"address-hint\" autocomplete=\"off\"><datalist id=\"discovery-locations\"><option *ngFor=\"let place of locationOptions\" [value]=\"place\"></option></datalist></label><label><span>{{d('start')}}</span><input name=\"start\" [(ngModel)]=\"startDate\" type=\"datetime-local\" aria-describedby=\"date-hint\"></label><label><span>{{d('end')}}</span><input name=\"end\" [(ngModel)]=\"endDate\" type=\"datetime-local\" [min]=\"startDate\" aria-describedby=\"date-hint\"></label><button class=\"button primary\" type=\"submit\" [disabled]=\"searching\">{{searching?t('loading'):d('search')}} ↗</button></div><div class=\"search-hints\"><p id=\"address-hint\">{{d('addressHint')}}</p><p id=\"date-hint\">{{d('dateHint')}}</p></div></form>\n<div class=\"section-heading category-heading\"><div><h2>{{d('browse')}}</h2><p>{{d('browseIntro')}}</p></div></div><div class=\"categories\"><button class=\"category-card\" type=\"button\" *ngFor=\"let kind of ['boat','car','property','parking','pool']\" (click)=\"open(kind)\" [class.selected]=\"selectedType===kind\"><span aria-hidden=\"true\">{{icon(kind)}}</span><strong>{{typeLabel(kind)}}</strong><span aria-hidden=\"true\">↗</span></button></div>\n<div class=\"section-heading results-heading\"><div><span class=\"eyebrow\">GoDirect / {{d('find')}}</span><h2>{{searched?d('results'):d('discover')}}</h2><p *ngIf=\"hasDates && !searchError\">{{appliedPeriod.startAt | date:'dd/MM/yyyy HH:mm'}} → {{appliedPeriod.endAt | date:'dd/MM/yyyy HH:mm'}}<br>{{d('availabilityNote')}}</p></div><span role=\"status\" aria-live=\"polite\" *ngIf=\"!searching && !searchError\">{{results.length}} {{d(results.length===1?'resultOne':'resultMany')}}</span></div>\n<p class=\"search-error\" role=\"alert\" *ngIf=\"searchError\">{{d(searchError)}}</p><p class=\"loading-state\" role=\"status\" *ngIf=\"searching\">{{t('loading')}}</p><div class=\"rental-grid\" *ngIf=\"!searching && !searchError\"><article class=\"rental-card\" *ngFor=\"let item of results\"><button class=\"rental-open\" type=\"button\" (click)=\"openResult(item)\"><div class=\"rental-image\"><span class=\"image-placeholder\" aria-hidden=\"true\">{{icon(item.resourceType)}}</span><img *ngIf=\"item.coverImage\" [src]=\"registryMedia(item.coverImage)\" [alt]=\"title(item)\" loading=\"lazy\" (error)=\"imageFailed($event)\"><span class=\"type-badge\">{{typeLabel(item.resourceType)}}</span></div><div class=\"rental-body\"><p class=\"rental-location\">{{item.locationLabel}}</p><h3>{{title(item)}}</h3><p class=\"rental-description\">{{description(item)}}</p><span class=\"availability-badge\" *ngIf=\"hasDates\">{{d('availableDates')}}</span><div class=\"rental-footer\"><span *ngIf=\"item.pricing?.basePrice != null\">{{d('from')}} <strong>{{item.pricing.basePrice | currency:(item.pricing.currency || 'EUR'):'symbol':'1.0-2'}}</strong><small> / {{priceUnit(item.pricing.pricingUnit)}}</small></span><span>{{d('view')}} ↗</span></div></div></button></article></div><div class=\"empty-state\" *ngIf=\"!searching && !searchError && !results.length\"><h3>{{d('noResults')}}</h3><p>{{d('noResultsHint')}}</p><button class=\"button subtle\" type=\"button\" (click)=\"clearSearch()\">{{d('clear')}}</button></div></section>\n<app-home-roles (publishAsset)=\"publish()\"></app-home-roles><section class=\"offer-features\"><span class=\"eyebrow\">GoDirect / {{o('features')}}</span><h2>{{o('service')}}</h2><div class=\"offer-grid\"><article *ngFor=\"let feature of ['bookings','payments','ratings','editListings']\"><h3>{{o(feature)}}</h3><p>{{o(feature+'Text')}}</p></article></div><p>{{o('warrantyNote')}}</p><p>{{o('fees')}}</p></section></main><footer class=\"site-footer\"><a class=\"brand-link\" routerLink=\"/\">GoDirect.</a><span>{{d('direct')}}</span><a href=\"#rentals\">{{d('find')}} ↑</a></footer>\n</div>\n\n<dialog #publicationDialog class=\"publication-dialog\" aria-labelledby=\"publication-title\" aria-describedby=\"publication-description\" (close)=\"publishChoiceOpen=false\" (click)=\"publicationBackdrop($event)\">\n  <button class=\"publication-close\" type=\"button\" (click)=\"closePublicationChoice()\" [attr.aria-label]=\"d('publishCancel')\">×</button>\n  <span class=\"publication-brand\">GoDirect.</span>\n  <h2 id=\"publication-title\">{{d('publishChoiceTitle')}}</h2>\n  <p id=\"publication-description\">{{d('publishChoiceDescription')}}</p>\n  <div class=\"publication-actions\"><button type=\"button\" autofocus (click)=\"continuePublication('login')\">{{d('publishLogin')}}</button><button type=\"button\" (click)=\"continuePublication('signup')\">{{d('publishSignup')}}</button></div>\n  <button class=\"publication-cancel\" type=\"button\" (click)=\"closePublicationChoice()\">{{d('publishCancel')}}</button>\n</dialog>\n";
+module.exports = "<app-platform-layout><div class=\"registry-page\"><main><section class=\"client-intro\"><h1>{{lang==='fr'?'Trouvez votre prochaine location en direct':'Find your next direct rental'}}</h1><p>{{lang==='fr'?'Choisissez un bien. Vous rejoindrez son site dédié pour poser vos questions et réserver auprès du propriétaire ou de son concierge autorisé.':'Choose a rental. You will visit its dedicated website to ask questions and book with the owner or authorized concierge.'}}</p></section><section id=\"rentals\" class=\"rental-section\"><form class=\"search-panel\" (ngSubmit)=\"search()\"><div class=\"search-heading\"><h2>{{d('find')}}</h2><span>{{d('allFive')}}</span></div><div class=\"search-fields\"><label><span>{{d('type')}}</span><select name=\"assetType\" [(ngModel)]=\"selectedType\"><option value=\"\">{{d('allTypes')}}</option><option *ngFor=\"let kind of ['boat','car','property','parking','pool']\" [value]=\"kind\">{{typeLabel(kind)}}</option></select></label><label class=\"location-field\"><span>{{d('where')}}</span><input name=\"location\" [(ngModel)]=\"location\" [placeholder]=\"d('address')\" list=\"discovery-locations\" maxlength=\"200\" aria-describedby=\"address-hint\" autocomplete=\"off\"><datalist id=\"discovery-locations\"><option *ngFor=\"let place of locationOptions\" [value]=\"place\"></option></datalist></label><label><span>{{d('start')}}</span><input name=\"start\" [(ngModel)]=\"startDate\" type=\"datetime-local\" aria-describedby=\"date-hint\"></label><label><span>{{d('end')}}</span><input name=\"end\" [(ngModel)]=\"endDate\" type=\"datetime-local\" [min]=\"startDate\" aria-describedby=\"date-hint\"></label><button class=\"button primary\" type=\"submit\" [disabled]=\"searching\">{{searching?t('loading'):d('search')}} ↗</button></div><div class=\"search-hints\"><p id=\"address-hint\">{{d('addressHint')}}</p><p id=\"date-hint\">{{d('dateHint')}}</p></div></form>\n<div class=\"section-heading category-heading\"><div><h2>{{d('browse')}}</h2><p>{{d('browseIntro')}}</p></div></div><div class=\"categories\"><button class=\"category-card\" type=\"button\" *ngFor=\"let kind of ['boat','car','property','parking','pool']\" (click)=\"open(kind)\" [class.selected]=\"selectedType===kind\"><span aria-hidden=\"true\">{{icon(kind)}}</span><strong>{{typeLabel(kind)}}</strong><span aria-hidden=\"true\">↗</span></button></div>\n<div id=\"results\" class=\"section-heading results-heading\" style=\"scroll-margin-top:140px\"><div><span class=\"eyebrow\">GoDirect / {{d('find')}}</span><h2>{{searched?d('results'):d('discover')}}</h2><p *ngIf=\"hasDates && !searchError\">{{appliedPeriod.startAt | date:'dd/MM/yyyy HH:mm'}} → {{appliedPeriod.endAt | date:'dd/MM/yyyy HH:mm'}}<br>{{d('availabilityNote')}}</p></div><span role=\"status\" aria-live=\"polite\" *ngIf=\"!searching && !searchError\">{{results.length}} {{d(results.length===1?'resultOne':'resultMany')}}</span></div>\n<p class=\"search-error\" role=\"alert\" *ngIf=\"searchError\">{{d(searchError)}} <button *ngIf=\"searchError==='searchFailed'\" type=\"button\" (click)=\"search()\">{{lang==='fr'?'Réessayer':'Retry'}}</button></p><p class=\"loading-state\" role=\"status\" *ngIf=\"searching\">{{t('loading')}}</p><div class=\"rental-grid\" *ngIf=\"!searching && !searchError\"><article class=\"rental-card\" *ngFor=\"let item of results\"><button class=\"rental-open\" type=\"button\" (click)=\"openResult(item)\"><div class=\"rental-image\"><span class=\"image-placeholder\" aria-hidden=\"true\">{{icon(item.resourceType)}}</span><img *ngIf=\"item.coverImage\" [src]=\"registryMedia(item.coverImage)\" [alt]=\"title(item)\" loading=\"lazy\" (error)=\"imageFailed($event)\"><span class=\"type-badge\">{{typeLabel(item.resourceType)}}</span></div><div class=\"rental-body\"><p class=\"rental-location\">{{item.locationLabel}}</p><h3>{{title(item)}}</h3><p class=\"rental-description\">{{description(item)}}</p><span class=\"availability-badge\" *ngIf=\"hasDates\">{{d('availableDates')}}</span><div class=\"rental-footer\"><span *ngIf=\"item.pricing?.basePrice != null\">{{d('from')}} <strong>{{item.pricing.basePrice | currency:(item.pricing.currency || 'EUR'):'symbol':'1.0-2'}}</strong><small> / {{priceUnit(item.pricing.pricingUnit)}}</small></span><span>{{d('view')}} ↗</span></div></div></button></article></div><div class=\"empty-state\" *ngIf=\"!searching && !searchError && !results.length\"><h3>{{d('noResults')}}</h3><p>{{d('noResultsHint')}}</p><button class=\"button subtle\" type=\"button\" (click)=\"clearSearch()\">{{d('clear')}}</button></div></section></main></div></app-platform-layout>";
 
 /***/ }),
 
@@ -18288,25 +19816,37 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PlatformAdminComponent: () => (/* binding */ PlatformAdminComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _platform_admin_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./platform-admin.component.html?ngResource */ 65696);
 /* harmony import */ var _platform_admin_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./platform-admin.component.scss?ngResource */ 92218);
 /* harmony import */ var _platform_admin_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_platform_admin_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var _services_private_media_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/private-media.service */ 71260);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/common/http */ 93262);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! rxjs */ 56196);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! rxjs */ 72354);
-/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
-/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../home/site-content-service/site-content.service */ 73196);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../services/language.service */ 48756);
-/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
-/* harmony import */ var _platform_admin_text__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./platform-admin.text */ 45440);
+/* harmony import */ var _shared_admin_success_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../shared/admin-success.component */ 62834);
+/* harmony import */ var _messaging_message_link_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../messaging/message-link.component */ 870);
+/* harmony import */ var _shared_asset_list_filters_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../shared/asset-list-filters.component */ 56244);
+/* harmony import */ var _shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../shared/asset-list-filters */ 87461);
+/* harmony import */ var _calendar_asset_calendar_link_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../calendar/asset-calendar-link.component */ 84168);
+/* harmony import */ var _shared_listing_description_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../shared/listing-description.component */ 41644);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _services_private_media_service__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../services/private-media.service */ 71260);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! rxjs */ 72354);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
+/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../home/site-content-service/site-content.service */ 73196);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../services/language.service */ 48756);
+/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
+/* harmony import */ var _platform_admin_text__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./platform-admin.text */ 45440);
+
+
+
+
+
+
 
 
 
@@ -18332,6 +19872,8 @@ let PlatformAdminComponent = class PlatformAdminComponent {
   texts;
   route;
   media;
+  success = '';
+  filters = (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.emptyAssetFilters)();
   showArchived = false;
   data = null;
   loading = false;
@@ -18358,7 +19900,7 @@ let PlatformAdminComponent = class PlatformAdminComponent {
   }
   t(k) {
     const lang = this.language.currentLanguage;
-    return this.texts.tFromContent(this.content, 'ui.platformAdmin.' + k, lang, _platform_admin_text__WEBPACK_IMPORTED_MODULE_9__.PLATFORM_ADMIN_TEXT[lang]?.[k] || _platform_admin_text__WEBPACK_IMPORTED_MODULE_9__.PLATFORM_ADMIN_TEXT.en[k] || k);
+    return this.texts.tFromContent(this.content, 'ui.platformAdmin.' + k, lang, _platform_admin_text__WEBPACK_IMPORTED_MODULE_15__.PLATFORM_ADMIN_TEXT[lang]?.[k] || _platform_admin_text__WEBPACK_IMPORTED_MODULE_15__.PLATFORM_ADMIN_TEXT.en[k] || k);
   }
   ngOnInit() {
     this.querySub = this.route?.queryParamMap.subscribe(p => {
@@ -18386,9 +19928,9 @@ let PlatformAdminComponent = class PlatformAdminComponent {
       const request = ++_this.request;
       try {
         const uid = (yield _this.auth.user()).uid;
-        const value = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_10__.firstValueFrom)(_this.http.get('/api/platform/admin/overview', {
+        const value = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this.http.get('/api/platform/admin/overview', {
           headers: yield _this.auth.headers()
-        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_11__.timeout)(20000)));
+        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_17__.timeout)(20000)));
         if (!_this.destroyed && request === _this.request && (yield _this.auth.user()).uid === uid) {
           _this.data = value;
           _this.page = 0;
@@ -18411,13 +19953,20 @@ let PlatformAdminComponent = class PlatformAdminComponent {
     this.select('assets');
   }
   reset() {
+    this.filters = (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.emptyAssetFilters)();
     this.ownerId = '';
     this.query = '';
     this.page = 0;
   }
   get rows() {
     const q = this.query.trim().toLocaleLowerCase();
-    return (this.tab === 'requests' ? (this.data?.assets || []).filter(a => !a.archived && a.moderation?.status === 'pending') : this.data?.[this.tab] || []).filter(r => (this.tab !== 'assets' || this.showArchived || !r.archived) && (!this.ownerId || (this.tab === 'owners' ? r.uid : r.ownerId) === this.ownerId) && (!q || [r.name, r.email, r.uid, r.id, r.assetId, r.assetName, r.assetType, r.ownerId, r.status, r.subscriptionStatus].some(v => String(v || '').toLocaleLowerCase().includes(q))));
+    const includeArchived = this.showArchived || this.filters.state === 'archived';
+    const rows = (this.tab === 'requests' ? (this.data?.assets || []).filter(a => !a.archived && a.moderation?.status === 'pending') : this.data?.[this.tab] || []).filter(r => (this.tab !== 'assets' || includeArchived || !r.archived) && (!this.ownerId || (this.tab === 'owners' ? r.uid : r.ownerId) === this.ownerId) && (!q || [r.name, r.email, r.uid, r.id, r.assetId, r.assetName, r.assetType, r.ownerId, this.ownerName(r.ownerId), this.ownerEmail(r.ownerId), r.status, r.subscriptionStatus].some(v => String(v || '').toLocaleLowerCase().includes(q))));
+    const matching = rows.filter(r => this.tab === 'owners' ? (this.data?.assets || []).some(a => a.ownerId === r.uid && (!a.archived || includeArchived) && (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.matchesAssetFilters)(a, this.filters)) : (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.matchesAssetFilters)(this.assetForRow(r), this.filters));
+    return (0,_shared_asset_list_filters__WEBPACK_IMPORTED_MODULE_6__.sortAssetRows)(matching, r => this.assetForRow(r));
+  }
+  assetForRow(r) {
+    return this.tab === 'subscriptions' ? (this.data?.assets || []).find(a => a.assetType === r.assetType && a.id === r.assetId) : r;
   }
   review(a) {
     this.selected = a;
@@ -18439,15 +19988,19 @@ let PlatformAdminComponent = class PlatformAdminComponent {
       _this2.error = '';
       const a = _this2.selected;
       try {
-        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_10__.firstValueFrom)(_this2.http.post(`/api/platform/admin/listings/${encodeURIComponent(a.assetType)}/${encodeURIComponent(a.id)}/moderation`, {
+        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_16__.firstValueFrom)(_this2.http.post(`/api/platform/admin/listings/${encodeURIComponent(a.assetType)}/${encodeURIComponent(a.id)}/moderation`, {
           decision,
           revision: a.moderation.revision,
           reason: _this2.reason.trim()
         }, {
           headers: yield _this2.auth.headers()
-        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_11__.timeout)(20000)));
+        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_17__.timeout)(20000)));
         if (!_this2.destroyed) {
           _this2.selected = null;
+          if (decision === 'approved') {
+            _this2.select('assets');
+            _this2.success = 'Annonce validée.';
+          }
           yield _this2.refresh();
         }
       } catch (e) {
@@ -18478,27 +20031,30 @@ let PlatformAdminComponent = class PlatformAdminComponent {
   get activeSubscriptions() {
     return (this.data?.subscriptions || []).filter(b => b.entitled).length;
   }
+  ownerEmail(uid) {
+    return this.data?.owners?.find(o => o.uid === uid)?.email || '';
+  }
   ownerName(uid) {
     return this.data?.owners?.find(o => o.uid === uid)?.name || uid || '—';
   }
   static ctorParameters = () => [{
-    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_12__.HttpClient
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_18__.HttpClient
   }, {
-    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_5__.ReservationAuthService
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_11__.ReservationAuthService
   }, {
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_7__.LanguageService
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_13__.LanguageService
   }, {
-    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_6__.SiteContentService
+    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_12__.SiteContentService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_13__.ActivatedRoute
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_19__.ActivatedRoute
   }, {
-    type: _services_private_media_service__WEBPACK_IMPORTED_MODULE_4__.PrivateMediaService
+    type: _services_private_media_service__WEBPACK_IMPORTED_MODULE_10__.PrivateMediaService
   }];
 };
-PlatformAdminComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_14__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_15__.Component)({
+PlatformAdminComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_20__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_21__.Component)({
   selector: 'app-platform-admin',
   standalone: true,
-  imports: [_home_site_text_pipe__WEBPACK_IMPORTED_MODULE_3__.SiteTextPipe, _angular_common__WEBPACK_IMPORTED_MODULE_16__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_17__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_18__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_8__.PlatformLayoutComponent],
+  imports: [_shared_admin_success_component__WEBPACK_IMPORTED_MODULE_3__.AdminSuccessComponent, _messaging_message_link_component__WEBPACK_IMPORTED_MODULE_4__.MessageLinkComponent, _shared_asset_list_filters_component__WEBPACK_IMPORTED_MODULE_5__.AssetListFiltersComponent, _calendar_asset_calendar_link_component__WEBPACK_IMPORTED_MODULE_7__.AssetCalendarLinkComponent, _shared_listing_description_component__WEBPACK_IMPORTED_MODULE_8__.ListingDescriptionComponent, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_9__.SiteTextPipe, _angular_common__WEBPACK_IMPORTED_MODULE_22__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_23__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_24__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_14__.PlatformLayoutComponent],
   template: _platform_admin_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_platform_admin_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], PlatformAdminComponent);
@@ -56197,6 +57753,24 @@ const LITERAL_KEYS = {
 
 /***/ }),
 
+/***/ 28180:
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/layout/release-footer/release-footer.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiNmOGY2ZjE7Y29sb3I6IzE3M2IzNjtib3JkZXItdG9wOjFweCBzb2xpZCAjZDJkY2Q0O2ZvbnQtc2l6ZToxM3B4O2JveC1zaXppbmc6Ym9yZGVyLWJveH0ucmVsZWFzZS1mb290ZXIgYXtjb2xvcjppbmhlcml0fQ%3D%3D!./src/app/layout/release-footer/release-footer.component.ts ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `:host{display:block;width:100%;margin-top:auto}.release-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px max(20px,5vw);background:#f8f6f1;color:#173b36;border-top:1px solid #d2dcd4;font-size:13px;box-sizing:border-box}.release-footer a{color:inherit}`, "",{"version":3,"sources":["webpack://./src/app/layout/release-footer/release-footer.component.ts"],"names":[],"mappings":"AAAA,MAAM,aAAa,CAAC,UAAU,CAAC,eAAe,CAAC,gBAAgB,YAAY,CAAC,kBAAkB,CAAC,6BAA6B,CAAC,QAAQ,CAAC,cAAc,CAAC,0BAA0B,CAAC,kBAAkB,CAAC,aAAa,CAAC,4BAA4B,CAAC,cAAc,CAAC,qBAAqB,CAAC,kBAAkB,aAAa","sourcesContent":[":host{display:block;width:100%;margin-top:auto}.release-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px max(20px,5vw);background:#f8f6f1;color:#173b36;border-top:1px solid #d2dcd4;font-size:13px;box-sizing:border-box}.release-footer a{color:inherit}"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
 /***/ 28622:
 /*!***************************************************************************!*\
   !*** ./src/app/owner-dashboard/owner-dashboard.component.scss?ngResource ***!
@@ -56445,7 +58019,202 @@ a:focus-visible, button:focus-visible {
 .offer-summary summary {
   cursor: pointer;
   font-weight: 700;
-}`, "",{"version":3,"sources":["webpack://./src/app/owner-dashboard/owner-dashboard.component.scss"],"names":[],"mappings":"AAAA;EAAM,cAAA;AAEN;;AAFoB;EAAiB,iBAAA;EAAiB,uBAAA;EAAuB,YAAA;EAAY,cAAA;AASzF;;AATuG;EAAqD,aAAA;EAAa,8BAAA;EAA8B,mBAAA;EAAmB,SAAA;AAgB1N;;AAhBmO;EAAS,yBAAA;EAAyB,eAAA;EAAe,mBAAA;EAAmB,gBAAA;AAuBvS;;AAvBuT;EAAG,mDAAA;EAAgD,cAAA;AA4B1W;;AA5BwX;EAAG,eAAA;EAAe,gBAAA;AAiC1Y;;AAjC0Z;EAAG,eAAA;EAAe,SAAA;AAsC5a;;AAtCqb;EAAE,gBAAA;EAAgB,cAAA;AA2Cvc;;AA3Cqd;EAAmB,aAAA;EAAa,SAAA;EAAS,mBAAA;EAAmB,eAAA;AAkDjhB;;AAlDgiB;EAAE,cAAA;AAsDliB;;AAtDgjB;EAAe,qBAAA;EAAqB,SAAA;EAAS,kBAAA;EAAkB,mBAAA;EAAmB,YAAA;EAAY,kBAAA;EAAkB,qBAAA;EAAqB,oCAAA;EAAmC,eAAA;AAkExtB;;AAlEuuB;EAAW,iBAAA;EAAiB,cAAA;EAAc,yBAAA;AAwEjxB;;AAxE0yB;EAAS,aAAA;EAAa,qCAAA;EAAoC,SAAA;EAAS,cAAA;AA+E72B;;AA/E23B;EAAW,aAAA;EAAa,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;EAAmB,qBAAA;AAuFh9B;;AAvFq+B;EAAc,eAAA;AA2Fn/B;;AA3FkgC;EAAgB,cAAA;EAAc,eAAA;EAAe,gBAAA;AAiG/iC;;AAjG+jC;EAAO,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;EAAmB,aAAA;EAAa,mBAAA;AAyGhpC;;AAzGmqC;EAAiB,aAAA;EAAa,8BAAA;EAA8B,SAAA;AA+G/tC;;AA/GwuC;EAAW,aAAA;EAAa,mBAAA;EAAmB,yBAAA;EAAyB,mBAAA;EAAmB,mBAAA;AAuH/zC;;AAvHk1C;EAAa,aAAA;AA2H/1C;;AA3H42C;EAAc,cAAA;AA+H13C;;AA/Hw4C;EAAa,cAAA;EAAc,aAAA;EAAa,cAAA;AAqIh7C;;AArI87C;EAAe,gBAAA;AAyI78C;;AAzI69C;EAAa,cAAA;AA6I1+C;;AA7Iw/C;EAAiB,eAAA;EAAe,6BAAA;AAkJxhD;;AAlJqjD;EAAyB,aAAA;AAsJ9kD;;AAtJ2lD;EAAc,cAAA;AA0JzmD;;AA1JunD;EAAM,yBAAA;EAAyB,gBAAA;EAAgB,WAAA;EAAW,eAAA;AAiKjrD;;AAjKgsD;EAAM,gBAAA;EAAgB,kBAAA;EAAkB,gCAAA;EAAgC,gBAAA;AAwKxwD;;AAxKwxD;EAAO,mBAAA;EAAmB,cAAA;EAAc,aAAA;EAAa,kBAAA;AA+K70D;;AA/K+1D;EAAgB,YAAA;EAAW,YAAA;AAoL13D;;AApLs4D;EAAqC,0BAAA;EAA0B,mBAAA;AAyLr8D;;AAzLw9D;EAAoB,wBAAA;AA6L5+D;;AA7LogE;EAAwB;IAAS,8BAAA;EAkMniE;EAlMikE;IAAqD,uBAAA;IAAuB,sBAAA;EAsM7oE;EAtMmqE;IAAiB,0BAAA;IAA0B,MAAA;EA0M9sE;AACF;AA3MutE;EAAwB;IAAiB,kBAAA;EA+M9vE;EA/MgxE;IAAS,SAAA;EAkNzxE;EAlNkyE;IAAW,aAAA;EAqN7yE;EArN0zE;IAAO,kBAAA;EAwNj0E;AACF;AAvNA;EAAe,kBAAA;EAAkB,mBAAA;EAAmB,yBAAA;EAAyB,mBAAA;EAAmB,cAAA;AA8NhG;;AA9N8G;EAAsB,eAAA;AAkOpI;;AAlOmJ;EAAuB,gBAAA;AAsO1K;;AAtO0L;EAAuB,eAAA;EAAe,gBAAA;AA2OhO","sourcesContent":[":host{display:block}.owner-dashboard{max-width:1200px;padding:36px 24px 60px;margin:auto;color:#103f68}.dashboard-heading,.section-heading,.reservation-row{display:flex;justify-content:space-between;align-items:center;gap:24px}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:2px;font-weight:700}h1{font:400 clamp(30px,4vw,48px)/1.2 Georgia,serif;margin:12px 0}h2{font-size:20px;margin:0 0 14px}h3{font-size:16px;margin:0}p{line-height:1.6;color:#526b80}.dashboard-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}a{color:#103f68}button,.button{display:inline-block;border:0;border-radius:9px;background:#103f68;color:white;padding:12px 16px;text-decoration:none;font:600 13px/1.4 Arial,sans-serif;cursor:pointer}.secondary{background:white;color:#103f68;border:1px solid #c9d8e5}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:28px 0}.metrics a{padding:24px;background:white;border:1px solid #dbe5ed;border-radius:14px;text-decoration:none}.metrics span{font-size:13px}.metrics strong{display:block;font-size:36px;margin-top:14px}.panel{background:white;border:1px solid #dbe5ed;border-radius:14px;padding:25px;margin-bottom:24px}.management-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.attention{padding:24px;background:#fff3e5;border:1px solid #edc295;border-radius:14px;margin-bottom:24px}.attention p{margin:8px 0}.attention h2{color:#854309}.panel small{display:block;margin:6px 0;color:#526b80}.panel .button{margin-top:15px}.needs-setup{color:#854309}.reservation-row{padding:18px 0;border-top:1px solid #dbe5ed}.reservation-row .button{margin-top:0}.table-scroll{overflow:auto}table{border-collapse:collapse;min-width:680px;width:100%;font-size:13px}td,th{text-align:left;padding:18px 12px;border-bottom:1px solid #dbe5ed;line-height:1.6}.error{background:#fff0ed;color:#862c20;padding:14px;border-radius:8px}button:disabled{opacity:.6;cursor:wait}a:focus-visible,button:focus-visible{outline:3px solid #c0641b;outline-offset:3px}#owner-reservations{scroll-margin-top:140px}@media(max-width:800px){.metrics{grid-template-columns:1fr 1fr}.dashboard-heading,.section-heading,.reservation-row{align-items:flex-start;flex-direction:column}.management-grid{grid-template-columns:1fr;gap:0}}@media(max-width:440px){.owner-dashboard{padding:24px 16px}.metrics{gap:10px}.metrics a{padding:16px}.panel{padding:20px 16px}}\n\n.offer-summary{padding:20px 24px;background:#fff3e5;border:1px solid #edc295;border-radius:14px;margin:24px 0}.offer-summary>strong{font-size:22px}.offer-summary details{margin-top:15px}.offer-summary summary{cursor:pointer;font-weight:700}\n"],"sourceRoot":""}]);
+}
+
+.assets-panel .section-heading p {
+  margin: 4px 0 0;
+}
+
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin: 20px 0 24px;
+}
+
+.asset-card {
+  border: 1px solid #dbe5ed;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fafdff;
+  box-shadow: 0 5px 18px rgba(16, 63, 104, 0.05);
+}
+
+.asset-main {
+  display: block;
+  padding: 22px;
+  text-decoration: none;
+  color: #103f68;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.asset-main:hover {
+  background: #f1f7fb;
+}
+
+.asset-card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.asset-card h3 {
+  font-size: 20px;
+  margin: 5px 0;
+}
+
+.asset-type {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #60788d;
+  font-weight: 700;
+}
+
+.edit-arrow {
+  font-size: 24px;
+}
+
+.asset-statuses {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.asset-statuses span {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #fff0df;
+  color: #84430a;
+}
+
+.asset-statuses span.ok {
+  background: #e4f5eb;
+  color: #17623b;
+}
+
+.expiry {
+  font-size: 12px;
+  margin: 12px 0 0;
+}
+
+.warning-text {
+  color: #854309;
+}
+
+.asset-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 22px;
+  border-top: 1px solid #dbe5ed;
+  background: #fff;
+}
+
+.asset-actions .button {
+  margin: 0;
+  padding: 9px 12px;
+}
+
+.asset-actions .subscription-button {
+  background: #c0641b;
+}
+
+.asset-actions > a:not(.button) {
+  font-size: 13px;
+}
+
+@media (max-width: 800px) {
+  .asset-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.asset-filters {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(220px, 2fr);
+  gap: 14px;
+  margin: 22px 0;
+  padding: 18px;
+  border: 1px solid #dbe5ed;
+  border-radius: 12px;
+  background: #f7fafc;
+}
+
+.asset-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.asset-filters select, .asset-filters input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #b8cad8;
+  border-radius: 8px;
+  background: white;
+  color: #103f68;
+  padding: 10px 11px;
+  font: 14px Arial, sans-serif;
+}
+
+.empty-filter {
+  padding: 20px;
+  border-radius: 10px;
+  background: #f7fafc;
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .asset-filters {
+    grid-template-columns: 1fr;
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/owner-dashboard/owner-dashboard.component.scss"],"names":[],"mappings":"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","sourcesContent":[":host{display:block}.owner-dashboard{max-width:1200px;padding:36px 24px 60px;margin:auto;color:#103f68}.dashboard-heading,.section-heading,.reservation-row{display:flex;justify-content:space-between;align-items:center;gap:24px}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:2px;font-weight:700}h1{font:400 clamp(30px,4vw,48px)/1.2 Georgia,serif;margin:12px 0}h2{font-size:20px;margin:0 0 14px}h3{font-size:16px;margin:0}p{line-height:1.6;color:#526b80}.dashboard-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}a{color:#103f68}button,.button{display:inline-block;border:0;border-radius:9px;background:#103f68;color:white;padding:12px 16px;text-decoration:none;font:600 13px/1.4 Arial,sans-serif;cursor:pointer}.secondary{background:white;color:#103f68;border:1px solid #c9d8e5}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:28px 0}.metrics a{padding:24px;background:white;border:1px solid #dbe5ed;border-radius:14px;text-decoration:none}.metrics span{font-size:13px}.metrics strong{display:block;font-size:36px;margin-top:14px}.panel{background:white;border:1px solid #dbe5ed;border-radius:14px;padding:25px;margin-bottom:24px}.management-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.attention{padding:24px;background:#fff3e5;border:1px solid #edc295;border-radius:14px;margin-bottom:24px}.attention p{margin:8px 0}.attention h2{color:#854309}.panel small{display:block;margin:6px 0;color:#526b80}.panel .button{margin-top:15px}.needs-setup{color:#854309}.reservation-row{padding:18px 0;border-top:1px solid #dbe5ed}.reservation-row .button{margin-top:0}.table-scroll{overflow:auto}table{border-collapse:collapse;min-width:680px;width:100%;font-size:13px}td,th{text-align:left;padding:18px 12px;border-bottom:1px solid #dbe5ed;line-height:1.6}.error{background:#fff0ed;color:#862c20;padding:14px;border-radius:8px}button:disabled{opacity:.6;cursor:wait}a:focus-visible,button:focus-visible{outline:3px solid #c0641b;outline-offset:3px}#owner-reservations{scroll-margin-top:140px}@media(max-width:800px){.metrics{grid-template-columns:1fr 1fr}.dashboard-heading,.section-heading,.reservation-row{align-items:flex-start;flex-direction:column}.management-grid{grid-template-columns:1fr;gap:0}}@media(max-width:440px){.owner-dashboard{padding:24px 16px}.metrics{gap:10px}.metrics a{padding:16px}.panel{padding:20px 16px}}\n\n.offer-summary{padding:20px 24px;background:#fff3e5;border:1px solid #edc295;border-radius:14px;margin:24px 0}.offer-summary>strong{font-size:22px}.offer-summary details{margin-top:15px}.offer-summary summary{cursor:pointer;font-weight:700}\n.assets-panel .section-heading p{margin:4px 0 0}.asset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:20px 0 24px}.asset-card{border:1px solid #dbe5ed;border-radius:14px;overflow:hidden;background:#fafdff;box-shadow:0 5px 18px rgba(16,63,104,.05)}.asset-main{display:block;padding:22px;text-decoration:none;color:#103f68;transition:background .15s ease,transform .15s ease}.asset-main:hover{background:#f1f7fb}.asset-card-heading{display:flex;justify-content:space-between;gap:18px}.asset-card h3{font-size:20px;margin:5px 0}.asset-type{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#60788d;font-weight:700}.edit-arrow{font-size:24px}.asset-statuses{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.asset-statuses span{font-size:12px;font-weight:700;padding:6px 9px;border-radius:999px;background:#fff0df;color:#84430a}.asset-statuses span.ok{background:#e4f5eb;color:#17623b}.expiry{font-size:12px;margin:12px 0 0}.warning-text{color:#854309}.asset-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 22px;border-top:1px solid #dbe5ed;background:#fff}.asset-actions .button{margin:0;padding:9px 12px}.asset-actions .subscription-button{background:#c0641b}.asset-actions>a:not(.button){font-size:13px}@media(max-width:800px){.asset-grid{grid-template-columns:1fr}}\n.asset-filters{display:grid;grid-template-columns:minmax(150px,1fr) minmax(150px,1fr) minmax(220px,2fr);gap:14px;margin:22px 0;padding:18px;border:1px solid #dbe5ed;border-radius:12px;background:#f7fafc}.asset-filters label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:700}.asset-filters select,.asset-filters input{width:100%;box-sizing:border-box;border:1px solid #b8cad8;border-radius:8px;background:white;color:#103f68;padding:10px 11px;font:14px Arial,sans-serif}.empty-filter{padding:20px;border-radius:10px;background:#f7fafc;text-align:center}@media(max-width:800px){.asset-filters{grid-template-columns:1fr}}\n"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
+/***/ 31389:
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/messaging/asset-contact-button.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTppbmxpbmUtZmxleH1he3Bvc2l0aW9uOnJlbGF0aXZlO2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo3cHg7cGFkZGluZzoxMHB4IDE0cHg7Ym9yZGVyOjFweCBzb2xpZCAjYjlkYmU1O2JvcmRlci1yYWRpdXM6MjRweDtiYWNrZ3JvdW5kOiNlNmYzZjc7Y29sb3I6IzEwM2I1MDtmb250LXdlaWdodDo3MDA7Zm9udC1zaXplOjE0cHg7d2hpdGUtc3BhY2U6bm93cmFwO3RleHQtZGVjb3JhdGlvbjpub25lfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH0%3D!./src/app/messaging/asset-contact-button.component.ts ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `:host{display:inline-flex}a{position:relative;display:inline-flex;align-items:center;gap:7px;padding:10px 14px;border:1px solid #b9dbe5;border-radius:24px;background:#e6f3f7;color:#103b50;font-weight:700;font-size:14px;white-space:nowrap;text-decoration:none}a:focus-visible{outline:3px solid #f88b20;outline-offset:3px}`, "",{"version":3,"sources":["webpack://./src/app/messaging/asset-contact-button.component.ts"],"names":[],"mappings":"AAAA,MAAM,mBAAmB,CAAC,EAAE,iBAAiB,CAAC,mBAAmB,CAAC,kBAAkB,CAAC,OAAO,CAAC,iBAAiB,CAAC,wBAAwB,CAAC,kBAAkB,CAAC,kBAAkB,CAAC,aAAa,CAAC,eAAe,CAAC,cAAc,CAAC,kBAAkB,CAAC,oBAAoB,CAAC,gBAAgB,yBAAyB,CAAC,kBAAkB","sourcesContent":[":host{display:inline-flex}a{position:relative;display:inline-flex;align-items:center;gap:7px;padding:10px 14px;border:1px solid #b9dbe5;border-radius:24px;background:#e6f3f7;color:#103b50;font-weight:700;font-size:14px;white-space:nowrap;text-decoration:none}a:focus-visible{outline:3px solid #f88b20;outline-offset:3px}"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
+/***/ 31447:
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/shared/listing-description-editor.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=CiA6aG9zdHtkaXNwbGF5OmJsb2NrO3dpZHRoOjEwMCU7bWluLXdpZHRoOjB9LmVkaXRvcntib3JkZXI6MXB4IHNvbGlkICNhYWMzY2Q7Ym9yZGVyLXJhZGl1czoxMnB4O2JhY2tncm91bmQ6d2hpdGU7b3ZlcmZsb3c6aGlkZGVufS50b29sYmFye2Rpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6N3B4O3BhZGRpbmc6MTBweDtiYWNrZ3JvdW5kOiNlZGY0ZjV9CiBidXR0b257Ym9yZGVyOjFweCBzb2xpZCAjYzZkOGRmO2JvcmRlci1yYWRpdXM6NnB4O3BhZGRpbmc6OHB4IDExcHg7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTUzYjQ2O2ZvbnQ6NjAwIDE0cHgvMS4zIEFyaWFsLHNhbnMtc2VyaWY7Y3Vyc29yOnBvaW50ZXJ9YnV0dG9uOmZvY3VzLXZpc2libGUsdGV4dGFyZWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0Oi0zcHh9YnV0dG9uW2FyaWEtcHJlc3NlZD10cnVlXXtiYWNrZ3JvdW5kOiMxNTNiNDY7Y29sb3I6d2hpdGV9YnV0dG9uOmRpc2FibGVke29wYWNpdHk6LjV9CiB0ZXh0YXJlYXtkaXNwbGF5OmJsb2NrO2JveC1zaXppbmc6Ym9yZGVyLWJveDt3aWR0aDoxMDAlO21pbi1oZWlnaHQ6MjYwcHg7cmVzaXplOnZlcnRpY2FsO2JvcmRlcjowO2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoxNnB4O2ZvbnQ6MTdweC8xLjcgQXJpYWwsc2Fucy1zZXJpZjtjb2xvcjojMTUzYjQ2O2JhY2tncm91bmQ6d2hpdGU7Ym9yZGVyLXJhZGl1czowfS5oaW50LC5jb3VudGVye2ZvbnQtc2l6ZToxM3B4O2xpbmUtaGVpZ2h0OjEuNTttYXJnaW46OHB4IDEycHg7Y29sb3I6IzUyNmI4MH0uY291bnRlcnt0ZXh0LWFsaWduOnJpZ2h0fS5wcmV2aWV3e2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoyMHB4fWg0e21hcmdpbjowIDAgMThweDtmb250LXNpemU6MTZweDtjb2xvcjojNTI2YjgwfQog!./src/app/shared/listing-description-editor.component.ts ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `
+ :host{display:block;width:100%;min-width:0}.editor{border:1px solid #aac3cd;border-radius:12px;background:white;overflow:hidden}.toolbar{display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:#edf4f5}
+ button{border:1px solid #c6d8df;border-radius:6px;padding:8px 11px;background:white;color:#153b46;font:600 14px/1.3 Arial,sans-serif;cursor:pointer}button:focus-visible,textarea:focus-visible{outline:3px solid #b47a22;outline-offset:-3px}button[aria-pressed=true]{background:#153b46;color:white}button:disabled{opacity:.5}
+ textarea{display:block;box-sizing:border-box;width:100%;min-height:260px;resize:vertical;border:0;border-top:1px solid #dbe5e9;padding:16px;font:17px/1.7 Arial,sans-serif;color:#153b46;background:white;border-radius:0}.hint,.counter{font-size:13px;line-height:1.5;margin:8px 12px;color:#526b80}.counter{text-align:right}.preview{border-top:1px solid #dbe5e9;padding:20px}h4{margin:0 0 18px;font-size:16px;color:#526b80}
+ `, "",{"version":3,"sources":["webpack://./src/app/shared/listing-description-editor.component.ts"],"names":[],"mappings":";CACC,MAAM,aAAa,CAAC,UAAU,CAAC,WAAW,CAAC,QAAQ,wBAAwB,CAAC,kBAAkB,CAAC,gBAAgB,CAAC,eAAe,CAAC,SAAS,YAAY,CAAC,cAAc,CAAC,OAAO,CAAC,YAAY,CAAC,kBAAkB;CAC5M,OAAO,wBAAwB,CAAC,iBAAiB,CAAC,gBAAgB,CAAC,gBAAgB,CAAC,aAAa,CAAC,kCAAkC,CAAC,cAAc,CAAC,4CAA4C,yBAAyB,CAAC,mBAAmB,CAAC,0BAA0B,kBAAkB,CAAC,WAAW,CAAC,gBAAgB,UAAU;CACjU,SAAS,aAAa,CAAC,qBAAqB,CAAC,UAAU,CAAC,gBAAgB,CAAC,eAAe,CAAC,QAAQ,CAAC,4BAA4B,CAAC,YAAY,CAAC,8BAA8B,CAAC,aAAa,CAAC,gBAAgB,CAAC,eAAe,CAAC,eAAe,cAAc,CAAC,eAAe,CAAC,eAAe,CAAC,aAAa,CAAC,SAAS,gBAAgB,CAAC,SAAS,4BAA4B,CAAC,YAAY,CAAC,GAAG,eAAe,CAAC,cAAc,CAAC,aAAa","sourcesContent":["\n :host{display:block;width:100%;min-width:0}.editor{border:1px solid #aac3cd;border-radius:12px;background:white;overflow:hidden}.toolbar{display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:#edf4f5}\n button{border:1px solid #c6d8df;border-radius:6px;padding:8px 11px;background:white;color:#153b46;font:600 14px/1.3 Arial,sans-serif;cursor:pointer}button:focus-visible,textarea:focus-visible{outline:3px solid #b47a22;outline-offset:-3px}button[aria-pressed=true]{background:#153b46;color:white}button:disabled{opacity:.5}\n textarea{display:block;box-sizing:border-box;width:100%;min-height:260px;resize:vertical;border:0;border-top:1px solid #dbe5e9;padding:16px;font:17px/1.7 Arial,sans-serif;color:#153b46;background:white;border-radius:0}.hint,.counter{font-size:13px;line-height:1.5;margin:8px 12px;color:#526b80}.counter{text-align:right}.preview{border-top:1px solid #dbe5e9;padding:20px}h4{margin:0 0 18px;font-size:16px;color:#526b80}\n "],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -56473,6 +58242,217 @@ const PLATFORM_HOME_TEXT = {
   nl: 'GoDirect-startpagina',
   ru: 'Главная GoDirect'
 };
+
+/***/ }),
+
+/***/ 31710:
+/*!****************************************************!*\
+  !*** ./src/app/workspace/push-button.component.ts ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PushButtonComponent: () => (/* binding */ PushButtonComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var firebase_messaging__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! firebase/messaging */ 91904);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! godigital-lib */ 22464);
+
+
+
+
+
+
+
+
+
+
+let PushButtonComponent = class PushButtonComponent {
+  access;
+  auth;
+  store;
+  http;
+  busy = false;
+  note = '';
+  get active() {
+    try {
+      return localStorage.getItem('gd.push.uid') === this.access.authenticatedUid;
+    } catch {
+      return false;
+    }
+  }
+  constructor(access, auth, store, http) {
+    this.access = access;
+    this.auth = auth;
+    this.store = store;
+    this.http = http;
+  }
+  change() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this.busy = true;
+      try {
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+          _this.note = 'Sur iPhone, installez GoDirect sur l’écran d’accueil puis ouvrez son icône.';
+          return;
+        }
+        const off = _this.active;
+        if (!off && (yield Notification.requestPermission()) !== 'granted') {
+          _this.note = 'Autorisez les notifications dans les réglages de votre appareil.';
+          return;
+        }
+        if (!(yield (0,firebase_messaging__WEBPACK_IMPORTED_MODULE_1__.isSupported)())) throw Error();
+        const {
+          key
+        } = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_4__.firstValueFrom)(_this.http.get('/api/push/config'));
+        if (!key) {
+          _this.note = 'Notifications non configurées sur le serveur.';
+          return;
+        }
+        const s = _this.store,
+          auth = s.firebaseauth || s.firebaseAuth || s.auth;
+        const messaging = (0,firebase_messaging__WEBPACK_IMPORTED_MODULE_1__.getMessaging)(auth.app?._delegate || auth.app);
+        yield navigator.serviceWorker.register('/godirect-sw.js', {
+          scope: '/'
+        });
+        const reg = yield navigator.serviceWorker.ready;
+        const token = yield (0,firebase_messaging__WEBPACK_IMPORTED_MODULE_1__.getToken)(messaging, {
+          vapidKey: key,
+          serviceWorkerRegistration: reg
+        });
+        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_4__.firstValueFrom)(_this.http.post('/api/push/device', {
+          token,
+          enabled: !off
+        }, {
+          headers: yield _this.auth.headers()
+        }));
+        if (off) {
+          yield (0,firebase_messaging__WEBPACK_IMPORTED_MODULE_1__.deleteToken)(messaging);
+          localStorage.removeItem('gd.push.uid');
+        } else localStorage.setItem('gd.push.uid', _this.access.authenticatedUid);
+        _this.note = off ? 'Notifications désactivées.' : 'Notifications activées sur cet appareil.';
+      } catch {
+        _this.note = 'Activation indisponible. Vérifiez votre session et les réglages du téléphone.';
+      } finally {
+        _this.busy = false;
+      }
+    })();
+  }
+  static ctorParameters = () => [{
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_3__.AssetAccessService
+  }, {
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_2__.ReservationAuthService
+  }, {
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_5__.StoreDbService
+  }, {
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_6__.HttpClient
+  }];
+};
+PushButtonComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_7__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Component)({
+  standalone: true,
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_9__.CommonModule],
+  selector: 'app-push-button',
+  template: `<aside *ngIf="access.authenticatedUid" class="gd-push"><button (click)="change()" [disabled]="busy">{{active?'Désactiver les notifications':'Activer les notifications'}}</button><small role="status">{{note}}</small></aside>`
+})], PushButtonComponent);
+
+
+/***/ }),
+
+/***/ 32356:
+/*!******************************************************!*\
+  !*** ./src/app/services/management-entry.service.ts ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ManagementEntryService: () => (/* binding */ ManagementEntryService),
+/* harmony export */   portfolioCover: () => (/* binding */ portfolioCover)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var _reservation_auth_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./reservation-auth.service */ 46709);
+/* harmony import */ var _portal_policy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./portal-policy */ 6636);
+/* harmony import */ var _media_routes__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./media-routes */ 79906);
+
+
+
+
+
+
+
+
+function portfolioCover(a) {
+  const raw = a?.media?.cover || a?.media?.hero || a?.media?.gallery?.[0] || a?.coverImage;
+  const s = typeof raw === 'string' ? raw : raw?.url || raw?.path || '';
+  return (0,_media_routes__WEBPACK_IMPORTED_MODULE_3__.mediaObjectUrl)(s) || (/^https:\/\//.test(s) || /^\/?assets\//.test(s) ? s : '');
+}
+let ManagementEntryService = class ManagementEntryService {
+  http;
+  auth;
+  constructor(http, auth) {
+    this.http = http;
+    this.auth = auth;
+  }
+  open(a, role) {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const tab = window.open('about:blank', '_blank');
+      if (!tab) throw Error('popup_blocked');
+      try {
+        tab.opener = null;
+        tab.document.title = 'GoDirect';
+        tab.document.body.textContent = 'Ouverture du site…';
+        const r = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_4__.firstValueFrom)(_this.http.post('/api/management-entry', {
+          type: a.assetType,
+          id: a.id,
+          role
+        }, {
+          headers: yield _this.auth.headers()
+        }));
+        const origin = new URL(r.origin);
+        if (origin.protocol !== 'https:' || (0,_portal_policy__WEBPACK_IMPORTED_MODULE_2__.portalFor)(origin.hostname) !== 'asset') throw Error('Site indisponible');
+        if (tab.closed) return;
+        const doc = tab.document;
+        const f = doc.createElement('form');
+        f.method = 'post';
+        f.action = window.location.origin + '/api/management-departure';
+        const i = doc.createElement('input');
+        i.type = 'hidden';
+        i.name = 'code';
+        i.value = r.code;
+        f.append(i);
+        doc.body.append(f);
+        f.submit();
+      } catch (e) {
+        tab.close();
+        throw e;
+      }
+    })();
+  }
+  static ctorParameters = () => [{
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_5__.HttpClient
+  }, {
+    type: _reservation_auth_service__WEBPACK_IMPORTED_MODULE_1__.ReservationAuthService
+  }];
+};
+ManagementEntryService = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.Injectable)({
+  providedIn: 'root'
+})], ManagementEntryService);
+
 
 /***/ }),
 
@@ -56654,6 +58634,330 @@ const OWNER_SITE_COPY = {
 function ownerSiteCopy(language) {
   return OWNER_SITE_COPY[language] || OWNER_SITE_COPY.en;
 }
+
+/***/ }),
+
+/***/ 34795:
+/*!***************************************************!*\
+  !*** ./src/app/messaging/message-presentation.ts ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   clientInConversation: () => (/* binding */ clientInConversation),
+/* harmony export */   conversationAudience: () => (/* binding */ conversationAudience),
+/* harmony export */   conversationLabel: () => (/* binding */ conversationLabel),
+/* harmony export */   presentationText: () => (/* binding */ presentationText)
+/* harmony export */ });
+/* harmony import */ var _prebooking_text__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./prebooking-text */ 20141);
+/* harmony import */ var _messaging_text__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./messaging-text */ 17289);
+
+
+const COPY = {
+  fr: ['Réservation', 'Échanges avec le propriétaire', 'Échanges avec le client', 'Échanges avec le concierge', 'Vous échangez avec le propriétaire et les concierges habilités pour cette réservation.', 'Vous échangez avec le client. Le propriétaire et les concierges habilités ont accès à cette conversation.', 'Vous échangez avec le propriétaire.', 'Vous échangez avec le concierge. Le propriétaire a également accès à cet échange.', 'Client, propriétaire et concierge sélectionné.', 'Rechercher un bien ou une conversation', 'Choisissez une conversation'],
+  en: ['Reservation', 'Conversation with the owner', 'Conversation with the customer', 'Conversation with the concierge', 'You are speaking with the owner and authorized concierges for this reservation.', 'You are speaking with the customer. The owner and authorized concierges can access this conversation.', 'You are speaking with the owner.', 'You are speaking with the concierge. The owner can also access this conversation.', 'Customer, owner and selected concierge.', 'Search an asset or conversation', 'Choose a conversation'],
+  es: ['Reserva', 'Conversación con el propietario', 'Conversación con el cliente', 'Conversación con el conserje', 'Habla con el propietario y los conserjes autorizados para esta reserva.', 'Habla con el cliente. El propietario y los conserjes autorizados tienen acceso a esta conversación.', 'Habla con el propietario.', 'Habla con el conserje. El propietario también tiene acceso a esta conversación.', 'Cliente, propietario y conserje seleccionado.', 'Buscar un bien o una conversación', 'Elija una conversación'],
+  it: ['Prenotazione', 'Conversazione con il proprietario', 'Conversazione con il cliente', 'Conversazione con il concierge', 'Parli con il proprietario e i concierge autorizzati per questa prenotazione.', 'Parli con il cliente. Il proprietario e i concierge autorizzati possono accedere alla conversazione.', 'Parli con il proprietario.', 'Parli con il concierge. Anche il proprietario può accedere alla conversazione.', 'Cliente, proprietario e concierge selezionato.', 'Cerca un bene o una conversazione', 'Scegli una conversazione'],
+  de: ['Buchung', 'Gespräch mit dem Eigentümer', 'Gespräch mit dem Kunden', 'Gespräch mit dem Concierge', 'Sie sprechen mit dem Eigentümer und den für diese Buchung autorisierten Betreuern.', 'Sie sprechen mit dem Kunden. Der Eigentümer und autorisierte Betreuer haben Zugriff.', 'Sie sprechen mit dem Eigentümer.', 'Sie sprechen mit dem Concierge. Der Eigentümer hat ebenfalls Zugriff.', 'Kunde, Eigentümer und ausgewählter Concierge.', 'Objekt oder Gespräch suchen', 'Gespräch auswählen'],
+  nl: ['Boeking', 'Gesprek met de eigenaar', 'Gesprek met de klant', 'Gesprek met de conciërge', 'U spreekt met de eigenaar en de bevoegde beheerders voor deze boeking.', 'U spreekt met de klant. De eigenaar en bevoegde beheerders hebben toegang.', 'U spreekt met de eigenaar.', 'U spreekt met de conciërge. De eigenaar heeft ook toegang tot dit gesprek.', 'Klant, eigenaar en geselecteerde conciërge.', 'Zoek een object of gesprek', 'Kies een gesprek'],
+  ru: ['Бронирование', 'Переписка с владельцем', 'Переписка с клиентом', 'Переписка с консьержем', 'Вы общаетесь с владельцем и уполномоченными консьержами по этому бронированию.', 'Вы общаетесь с клиентом. Владелец и уполномоченные консьержи имеют доступ к переписке.', 'Вы общаетесь с владельцем.', 'Вы общаетесь с консьержем. Владелец также имеет доступ к переписке.', 'Клиент, владелец и выбранный консьерж.', 'Поиск объекта или переписки', 'Выберите переписку']
+};
+function presentationText(language, index) {
+  return (COPY[language] || COPY.en)[index];
+}
+function clientInConversation(thread, uid) {
+  return !!uid && thread?.audience === 'rental' && thread.customerId === uid;
+}
+function conversationLabel(thread, uid, language) {
+  const client = clientInConversation(thread, uid),
+    text = i => presentationText(language, i);
+  let prefix = '';
+  if (thread.kind === 'subscription') prefix = (0,_messaging_text__WEBPACK_IMPORTED_MODULE_1__.messagingText)(language, 7);else if (thread.kind === 'asset') prefix = (thread.prebooking ? (0,_prebooking_text__WEBPACK_IMPORTED_MODULE_0__.prebookingText)(language, thread.linkedBookingId ? 16 : 1) + ' · ' : '') + (client ? text(thread.recipientRole === 'concierge' ? 3 : 1) : text(2));else if (thread.audience === 'rental') prefix = text(0) + ' · ' + text(client ? 1 : 2);else prefix = (0,_messaging_text__WEBPACK_IMPORTED_MODULE_1__.messagingText)(language, 6);
+  const parts = [prefix, String(thread.assetName || '')];
+  // The booking's title is the customer's name: never repeat it to that customer.
+  if (!client && thread.title) parts.push(String(thread.title));
+  if (client && thread.kind === 'asset' && thread.recipientName) parts.push(String(thread.recipientName));
+  const period = thread.bookingContext || thread.prebooking;
+  if (period?.startAt && period?.endAt) {
+    const a = new Date(period.startAt),
+      b = new Date(period.endAt);
+    if (Number.isFinite(a.getTime()) && Number.isFinite(b.getTime())) {
+      const languageCode = ['fr', 'en', 'es', 'it', 'de', 'nl', 'ru'].includes(language) ? language : 'en';
+      const format = new Intl.DateTimeFormat(languageCode, {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      parts.push(format.format(a) + ' → ' + format.format(b));
+    }
+  }
+  return parts.filter(Boolean).join(' — ');
+}
+function conversationAudience(thread, uid, language) {
+  const client = clientInConversation(thread, uid);
+  if (thread?.kind === 'asset') return presentationText(language, client ? thread.recipientRole === 'concierge' ? 7 : 6 : 8);
+  if (thread?.audience === 'rental') return presentationText(language, client ? 4 : 5);
+  return (0,_messaging_text__WEBPACK_IMPORTED_MODULE_1__.messagingText)(language, 21);
+}
+
+/***/ }),
+
+/***/ 37068:
+/*!********************************************************!*\
+  !*** ./src/app/workspace/site-management.component.ts ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SiteManagementComponent: () => (/* binding */ SiteManagementComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _site_management_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./site-management.component.html?ngResource */ 83644);
+/* harmony import */ var _site_management_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./site-management.component.scss?ngResource */ 37506);
+/* harmony import */ var _site_management_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_site_management_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _services_management_entry_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/management-entry.service */ 32356);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var firebase_auth__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! firebase/auth */ 92630);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
+/* harmony import */ var _services_asset_domain__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/asset-domain */ 94984);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let SiteManagementComponent = class SiteManagementComponent {
+  access;
+  http;
+  store;
+  auth;
+  scope = (0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_6__.dedicatedAsset)();
+  base = '';
+  ctx;
+  title = 'Mon espace';
+  name = '';
+  status = 'Connexion…';
+  failed = false;
+  cover = _services_management_entry_service__WEBPACK_IMPORTED_MODULE_3__.portfolioCover;
+  ready = false;
+  path(a, tail) {
+    return '/' + encodeURIComponent(a.assetType) + '/' + encodeURIComponent(a.id) + '/' + tail;
+  }
+  managed = [];
+  changeAsset(e) {
+    const [t, id] = e.target.value.split('/');
+    location.assign('/site-management?type=' + encodeURIComponent(t) + '&id=' + encodeURIComponent(id));
+  }
+  constructor(access, http, store, auth) {
+    this.access = access;
+    this.http = http;
+    this.store = store;
+    this.auth = auth;
+  }
+  ngOnInit() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        const a = _this.scope;
+        if (!a) throw Error();
+        _this.base = '/' + a.assetType + '/' + a.assetId;
+        let session;
+        try {
+          session = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this.http.post('/api/management-session', {}));
+        } catch (e) {
+          if (e.status !== 401) throw e;
+        }
+        if (session) {
+          const s = _this.store;
+          let auth = s.firebaseauth || s.firebaseAuth || s.auth;
+          for (let i = 0; !auth && i < 80; i++) {
+            yield new Promise(r => setTimeout(r, 100));
+            auth = s.firebaseauth || s.firebaseAuth || s.auth;
+          }
+          if (!auth) throw Error();
+          yield auth.signInWithCustomToken ? auth.signInWithCustomToken(session.token) : (0,firebase_auth__WEBPACK_IMPORTED_MODULE_4__.signInWithCustomToken)(auth, session.token);
+        }
+        const headers = yield _this.auth.headers(),
+          ctx = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this.http.get('/api/me/context', {
+            headers,
+            params: {
+              type: a.assetType,
+              id: a.assetId
+            }
+          }));
+        if (!ctx.ownsAsset && !(ctx.isConcierge && Object.values(ctx.managementPermissions || {}).some(Boolean))) throw Error();
+        _this.title = ctx.ownsAsset ? 'Espace propriétaire' : 'Espace concierge';
+        _this.name = location.hostname.split('.')[0];
+        _this.ctx = ctx;
+        _this.access.rememberSiteMode('owner');
+        _this.status = '';
+        if (ctx.ownsAsset) {
+          const list = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this.http.get('/api/owner/listings', {
+            headers
+          }));
+          _this.managed = list.filter(x => !x.deletedAt && x.ownerId === ctx.uid);
+          _this.ready = true;
+        }
+      } catch {
+        if (_this.ctx) {
+          _this.status = 'Impossible de charger les annonces. Rechargez la page pour réessayer.';
+          return;
+        }
+        _this.status = 'Session expirée ou accès indisponible pour ce bien.';
+        _this.failed = true;
+      }
+    })();
+  }
+  static ctorParameters = () => [{
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_5__.AssetAccessService
+  }, {
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_9__.HttpClient
+  }, {
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_10__.StoreDbService
+  }, {
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_7__.ReservationAuthService
+  }];
+};
+SiteManagementComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_12__.Component)({
+  selector: 'app-site-management-home',
+  standalone: true,
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_13__.CommonModule, _angular_router__WEBPACK_IMPORTED_MODULE_14__.RouterModule],
+  template: _site_management_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [(_site_management_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
+})], SiteManagementComponent);
+
+
+/***/ }),
+
+/***/ 37506:
+/*!*********************************************************************!*\
+  !*** ./src/app/workspace/site-management.component.scss?ngResource ***!
+  \*********************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `.portfolio {
+  max-width: 74rem;
+  margin: auto;
+  padding: clamp(12px, 3vw, 32px);
+  color: #163d37;
+}
+
+.portfolio header, .identity, .actions, .portfolio nav {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.portfolio header {
+  justify-content: space-between;
+}
+
+.portfolio h1, .portfolio h2 {
+  margin: 0.2rem 0;
+}
+
+.portfolio h2 {
+  font-size: 1.15rem;
+}
+
+.portfolio nav {
+  margin: 1rem 0;
+}
+
+.portfolio a, .portfolio summary {
+  color: #185449;
+}
+
+.portfolio article {
+  background: white;
+  border: 1px solid #cadbd5;
+  border-radius: 14px;
+  padding: 14px;
+  margin: 10px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.identity img {
+  width: 76px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.actions a, .portfolio nav a, .actions summary {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eef5f1;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.actions summary {
+  display: list-item;
+}
+
+.actions {
+  align-items: flex-start;
+}
+
+.options {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.options a {
+  background: #f5f8f6;
+}
+
+@media (max-width: 600px) {
+  .actions, .actions details {
+    width: 100%;
+  }
+  .portfolio article {
+    padding: 12px;
+  }
+  .actions a, .actions summary {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/workspace/site-management.component.scss"],"names":[],"mappings":"AAAA;EAAW,gBAAA;EAAgB,YAAA;EAAY,+BAAA;EAA6B,cAAA;AAKpE;;AALkF;EAAoD,aAAA;EAAa,mBAAA;EAAmB,YAAA;EAAW,eAAA;AAYjL;;AAZgM;EAAkB,8BAAA;AAgBlN;;AAhBgP;EAA4B,gBAAA;AAoB5Q;;AApB2R;EAAc,kBAAA;AAwBzS;;AAxB2T;EAAe,cAAA;AA4B1U;;AA5BwV;EAAgC,cAAA;AAgCxX;;AAhCsY;EAAmB,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;EAAmB,aAAA;EAAa,cAAA;EAAc,aAAA;EAAa,uBAAA;EAAuB,8BAAA;EAA8B,SAAA;EAAS,eAAA;AA6C5jB;;AA7C2kB;EAAc,WAAA;EAAW,YAAA;EAAY,iBAAA;EAAiB,kBAAA;AAoDjoB;;AApDmpB;EAA6C,cAAA;EAAc,kBAAA;EAAkB,kBAAA;EAAkB,mBAAA;EAAmB,qBAAA;EAAqB,eAAA;AA6D1xB;;AA7DyyB;EAAiB,kBAAA;AAiE1zB;;AAjE40B;EAAS,uBAAA;AAqEr1B;;AArE42B;EAAS,aAAA;EAAa,QAAA;EAAQ,eAAA;AA2E14B;;AA3Ey5B;EAAW,mBAAA;AA+Ep6B;;AA/Eu7B;EAAwB;IAA0B,WAAA;EAoFv+B;EApFk/B;IAAmB,aAAA;EAuFrgC;EAvFkhC;IAA4B,gBAAA;IAAgB,sBAAA;EA2F9jC;AACF","sourcesContent":[".portfolio{max-width:74rem;margin:auto;padding:clamp(12px,3vw,32px);color:#163d37}.portfolio header,.identity,.actions,.portfolio nav{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}.portfolio header{justify-content:space-between}.portfolio h1,.portfolio h2{margin:.2rem 0}.portfolio h2{font-size:1.15rem}.portfolio nav{margin:1rem 0}.portfolio a,.portfolio summary{color:#185449}.portfolio article{background:white;border:1px solid #cadbd5;border-radius:14px;padding:14px;margin:10px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.identity img{width:76px;height:56px;object-fit:cover;border-radius:8px}.actions a,.portfolio nav a,.actions summary{display:block;padding:10px 12px;border-radius:8px;background:#eef5f1;text-decoration:none;cursor:pointer}.actions summary{display:list-item}.actions{align-items:flex-start}.options{display:grid;gap:4px;margin-top:4px}.options a{background:#f5f8f6}@media(max-width:600px){.actions,.actions details{width:100%}.portfolio article{padding:12px}.actions a,.actions summary{min-height:44px;box-sizing:border-box}}"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
 
 /***/ }),
 
@@ -57404,7 +59708,183 @@ p, li, input, textarea, select, .card-body, .term-section {
   .menu-toggle {
     margin-left: auto;
   }
-}`, "",{"version":3,"sources":["webpack://./src/app/layout/home/homeheader/homeheader.component.scss"],"names":[],"mappings":"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","sourcesContent":["@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Raleway:wght@500;600;700&family=Lato:wght@300;400;700&display=swap');\n.site-header {\n  position: sticky;\n  top: 0;\n  z-index: 20;\n  background: rgba(255, 255, 255, 0.96);\n  backdrop-filter: blur(8px);\n  border-bottom: 1px solid rgba(15, 23, 42, 0.08);\n}\n\n.container {\n  width: min(1120px, calc(100% - 2rem));\n  margin: 0 auto;\n}\n\n.header-bar {\n  min-height: 70px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 0.9rem;\n}\n\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 0.75rem;\n  color: #08263a;\n  text-decoration: none;\n}\n\n.brand-mark {\n  width: 38px;\n  height: 38px;\n  border-radius: 50%;\n  display: grid;\n  place-items: center;\n  background: linear-gradient(135deg, #0b6e8f, #0b6e8f);\n  color: #fff;\n  font-size: 1rem;\n}\n\n.brand-text {\n  display: flex;\n  flex-direction: column;\n  line-height: 1.05;\n}\n\n.brand-text strong {\n  font-size: 1rem;\n  white-space: nowrap;\n}\n\n.brand-text small {\n  color: #475569;\n  font-size: 0.68rem;\n  white-space: nowrap;\n}\n\n.menu-toggle {\n  display: none;\n  border: none;\n  background: #e8f4f7;\n  color: #08263a;\n  font-size: 1.1rem;\n  padding: 0.45rem 0.75rem;\n  border-radius: 10px;\n}\n\n.main-nav {\n  display: flex;\n  align-items: center;\n  gap: 0.85rem;\n}\n\n.main-nav a {\n  text-decoration: none;\n  color: #334155;\n  font-weight: 500;\n  font-size: 0.88rem;\n  white-space: nowrap;\n}\n\n.main-nav a.active {\n  color: #08263a;\n}\n\n.language-switcher {\n  display: flex;\n  align-items: center;\n}\n\n.language-switcher select {\n  border: 1px solid #cbd5e1;\n  border-radius: 999px;\n  background: #fff;\n  color: #08263a;\n  font-size: 0.83rem;\n  padding: 0.45rem 0.8rem;\n}\n\n.cta-link {\n  padding: 0.72rem 0.95rem;\n  border-radius: 999px;\n  background: #08263a;\n  color: #fff !important;\n  font-size: 0.84rem;\n}\n\n@media (max-width: 960px) {\n  .menu-toggle {\n    display: inline-flex;\n  }\n\n  .main-nav {\n    position: absolute;\n    left: 1rem;\n    right: 1rem;\n    top: 78px;\n    display: none;\n    flex-direction: column;\n    align-items: stretch;\n    gap: 0.35rem;\n    padding: 0.8rem;\n    background: #ffffff;\n    border: 1px solid rgba(15, 23, 42, 0.08);\n    border-radius: 18px;\n    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);\n  }\n\n  .main-nav.open {\n    display: flex;\n  }\n\n  .main-nav a,\n  .language-switcher select {\n    padding: 0.9rem 1rem;\n    border-radius: 12px;\n  }\n\n  .cta-link {\n    text-align: center;\n  }\n}\n\n\n/* Charte graphique Alegria */\n:host {\n  --alegria-deep: #08263a;\n  --alegria-ocean: #0b6e8f;\n  --alegria-ocean-light: #e8f4f7;\n  --alegria-orange: #f28c28;\n  --alegria-sand: #fbf8f2;\n  --alegria-text: #2f3a45;\n  --alegria-muted: #667085;\n}\n\nh1, h2, h3, .brand-text strong, .title, .page-title {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: var(--alegria-deep);\n  letter-spacing: -0.015em;\n}\n\n.eyebrow, .main-nav a, .btn, button, label, .meta, .price-pill, .language-switcher select, .text-link {\n  font-family: 'Raleway', Arial, sans-serif;\n}\n\np, li, input, textarea, select, .card-body, .term-section {\n  font-family: 'Lato', Arial, sans-serif;\n  color: var(--alegria-text);\n}\n\n.eyebrow, .text-link, a:not(.btn):not(.brand):not(.cta-link) {\n  color: var(--alegria-ocean);\n}\n\n.btn-primary, .cta-link, .btn-book {\n  background: var(--alegria-orange) !important;\n  color: #fff !important;\n  box-shadow: 0 14px 28px rgba(242, 140, 40, 0.22);\n}\n\n.btn-secondary, .btn:not(.btn-primary):not(.btn-book) {\n  background: var(--alegria-ocean-light);\n  color: var(--alegria-deep);\n}\n\n.price-pill {\n  background: rgba(242, 140, 40, 0.13);\n  color: #9a4d08;\n  border: 1px solid rgba(242, 140, 40, 0.28);\n}\n\n.page-hero {\n  background: linear-gradient(180deg, #fbf8f2 0%, #ffffff 100%);\n}\n\n.section-light {\n  background: var(--alegria-sand);\n}\n\n\n/* Header charte override */\n.site-header {\n  background: rgba(8, 38, 58, 0.96) !important;\n  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;\n}\n.brand, .brand-text strong, .main-nav a, .main-nav a.active {\n  color: #fff !important;\n}\n.brand-text small { color: rgba(255,255,255,0.72) !important; }\n.brand-mark { background: var(--alegria-orange) !important; color:#fff !important; }\n.menu-toggle { background: rgba(255,255,255,0.12) !important; color:#fff !important; }\n.language-switcher select { background: rgba(255,255,255,0.1) !important; color:#fff !important; border-color: rgba(255,255,255,0.25) !important; }\n.language-switcher select option { color:#08263a; }\n@media (max-width: 960px) {\n  .main-nav { background: #08263a !important; border-color: rgba(255,255,255,.12) !important; }\n}\n.brand-logo {\n  height: 48px;\n  width: auto;\n  object-fit: contain;\n  display: block;\n  flex: 0 0 auto;\n}\n\n@media (max-width: 768px) {\n  .brand-logo {\n    height: 38px;\n  }\n}\n/* Organized dropdown header */\n.main-nav {\n  gap: 0.65rem;\n}\n\n.nav-dropdown {\n  position: relative;\n}\n\n.nav-dropdown summary {\n  list-style: none;\n  cursor: pointer;\n  color: #fff;\n  font-family: 'Raleway', Arial, sans-serif;\n  font-size: 0.88rem;\n  font-weight: 600;\n  white-space: nowrap;\n  padding: 0.55rem 0.35rem;\n  display: inline-flex;\n  align-items: center;\n  gap: 0.35rem;\n}\n\n.nav-dropdown summary::-webkit-details-marker {\n  display: none;\n}\n\n.nav-dropdown summary::after {\n  content: '▾';\n  font-size: 0.68rem;\n  opacity: 0.8;\n  transform: translateY(1px);\n}\n\n.dropdown-panel {\n  position: absolute;\n  top: calc(100% + 0.8rem);\n  left: 0;\n  min-width: 230px;\n  padding: 0.55rem;\n  border-radius: 16px;\n  background: #ffffff;\n  box-shadow: 0 20px 45px rgba(8, 38, 58, 0.22);\n  border: 1px solid rgba(8, 38, 58, 0.1);\n  display: grid;\n  gap: 0.15rem;\n  z-index: 50;\n}\n\n.dropdown-panel-right {\n  right: 0;\n  left: auto;\n}\n\n.dropdown-panel a {\n  color: #08263a !important;\n  padding: 0.78rem 0.9rem;\n  border-radius: 12px;\n  font-size: 0.88rem;\n  font-weight: 600;\n}\n\n.dropdown-panel a:hover,\n.dropdown-panel a.active {\n  background: #e8f4f7;\n  color: #0b6e8f !important;\n}\n\n.account-dropdown summary {\n  padding: 0.68rem 0.95rem;\n  border-radius: 999px;\n  background: #f28c28;\n  color: #fff;\n  box-shadow: 0 14px 28px rgba(242, 140, 40, 0.22);\n}\n\n.owner-view-switch {\n  display: inline-flex;\n  align-items: center;\n  gap: 0.45rem;\n  padding: 0.62rem 0.9rem;\n  border: 1px solid rgba(255, 255, 255, 0.45);\n  border-radius: 999px;\n  background: transparent;\n  color: #fff;\n  font-family: 'Raleway', Arial, sans-serif;\n  font-size: 0.82rem;\n  font-weight: 700;\n  white-space: nowrap;\n  cursor: pointer;\n}\n\n.owner-view-switch:hover,\n.owner-view-switch:focus-visible {\n  background: rgba(255, 255, 255, 0.12);\n}\n\n.admin-navigation-panel {\n  min-width: 260px;\n}\n\n@media (min-width: 961px) {\n  .nav-dropdown:not([open]) .dropdown-panel {\n    display: none;\n  }\n}\n\n@media (max-width: 960px) {\n  .main-nav {\n    gap: 0.35rem;\n    max-height: calc(100vh - 92px);\n    overflow-y: auto;\n  }\n\n  .nav-dropdown {\n    width: 100%;\n  }\n\n  .nav-dropdown summary,\n  .main-nav > a {\n    width: 100%;\n    padding: 0.9rem 1rem;\n    border-radius: 12px;\n    background: rgba(255,255,255,0.06);\n    justify-content: space-between;\n  }\n\n  .account-dropdown summary {\n    background: #f28c28;\n    justify-content: space-between;\n  }\n\n  .dropdown-panel,\n  .dropdown-panel-right {\n    position: static;\n    min-width: 0;\n    margin-top: 0.35rem;\n    margin-bottom: 0.45rem;\n    padding: 0.35rem;\n    border-radius: 14px;\n    box-shadow: none;\n    background: rgba(255,255,255,0.98);\n  }\n\n  .dropdown-panel a {\n    padding: 0.82rem 0.9rem;\n  }\n\n  .language-switcher select {\n    width: 100%;\n  }\n\n  .owner-view-switch {\n    width: 100%;\n    justify-content: center;\n    margin: 0.15rem 0;\n    padding: 0.9rem 1rem;\n  }\n}\n\n.dropdown-action {\n  appearance: none;\n  border: 0;\n  width: 100%;\n  text-align: left;\n  color: #08263a !important;\n  background: transparent;\n  padding: 0.78rem 0.9rem;\n  border-radius: 12px;\n  font-family: 'Raleway', Arial, sans-serif;\n  font-size: 0.88rem;\n  font-weight: 600;\n  cursor: pointer;\n}\n\n.dropdown-action:hover {\n  background: #e8f4f7;\n  color: #0b6e8f !important;\n}\n\n.account-admin-panel {\n  min-width: 280px;\n}\n\n.dropdown-section-title {\n  display: block;\n  padding: 0.65rem 0.9rem 0.3rem;\n  color: #8a652d;\n  font-family: 'Raleway', Arial, sans-serif;\n  font-size: 0.72rem;\n  font-weight: 800;\n  letter-spacing: 0.11em;\n  text-transform: uppercase;\n}\n\n.dropdown-section-title:not(:first-child) {\n  border-top: 1px solid rgba(8, 38, 58, 0.08);\n  margin-top: 0.35rem;\n}\n\n.account-customer-panel {\n  min-width: 260px;\n}\n\n.account-customer-panel .dropdown-section-title,\n.account-admin-panel .dropdown-section-title {\n  display: block;\n  margin: 0.55rem 0 0.25rem;\n  padding: 0.25rem 0.75rem;\n  color: #b58b4a;\n  font-size: 0.72rem;\n  font-weight: 800;\n  text-transform: uppercase;\n  letter-spacing: 0.12em;\n}\n\n.account-customer-panel .dropdown-section-title:first-child,\n.account-admin-panel .dropdown-section-title:first-child {\n  margin-top: 0;\n}\n\n.account-customer-panel a,\n.account-admin-panel a {\n  white-space: nowrap;\n}\n\n.platform-return{background:#f1f5f4;border-bottom:1px solid #dce5df;padding:7px 0;font:600 12px/1.5 Arial,sans-serif}.platform-return a{display:inline-flex;align-items:center;gap:7px;color:#173b36!important;text-decoration:none}.platform-return a:hover{text-decoration:underline}.platform-return a:focus-visible{outline:2px solid #173b36;outline-offset:3px}\n\n.account-identity{display:flex;flex-direction:column;text-align:right;max-width:220px;font-size:14px;overflow-wrap:anywhere}.account-identity small{font-size:12px;opacity:.8}.account-dropdown .dropdown-panel{max-height:75vh;overflow:auto}@media(max-width:600px){.account-identity{max-width:170px}}\n\n.main-nav .account-identity,.main-nav .account-identity strong,.main-nav .account-identity small{color:#fff!important;opacity:1}.workspace-view-switch{border:1px solid #b8cbd4;border-radius:999px;background:transparent;color:#fff;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer}.workspace-view-switch:disabled{opacity:.55}.main-nav .account-identity{display:flex!important;visibility:visible!important;flex-direction:column;gap:2px;overflow-wrap:anywhere}.main-nav .account-identity strong{font-weight:700}@media(max-width:900px){.main-nav.open .account-identity,.main-nav.open .account-identity strong,.main-nav.open .account-identity small,.main-nav.open .workspace-view-switch{color:#173b36!important}}\n\n.header-bar>.account-identity,.header-bar>.account-identity strong,.header-bar>.account-identity small{color:#fff!important;opacity:1}.header-bar>.account-identity{display:flex!important;flex-direction:column;gap:2px;margin-left:auto;max-width:180px;overflow-wrap:anywhere}.header-bar{flex-wrap:wrap;padding-top:10px;padding-bottom:10px}.header-bar>.workspace-view-switch{flex-shrink:0}@media(max-width:960px){.main-nav{top:100%}.header-bar>.brand{min-width:0}.brand-text strong,.brand-text small{white-space:normal}.header-bar>.account-identity{max-width:140px;font-size:12px}.header-bar>.workspace-view-switch{font-size:11px;padding:7px}.menu-toggle{margin-left:auto}}\n"],"sourceRoot":""}]);
+}
+.header-bar {
+  flex-wrap: nowrap;
+}
+
+.header-bar .main-nav {
+  white-space: nowrap;
+}
+
+@media (max-width: 1250px) {
+  .header-bar {
+    position: relative;
+    justify-content: space-between;
+  }
+  .header-bar .menu-toggle {
+    display: block;
+    min-height: 44px;
+  }
+  .header-bar .main-nav {
+    display: none;
+  }
+  .header-bar .main-nav.open {
+    display: flex;
+    position: absolute;
+    top: 100%;
+    left: auto;
+    right: 0;
+    width: min(340px, 96vw);
+    box-sizing: border-box;
+    max-height: 76vh;
+    overflow: auto;
+    background: #142f40;
+    color: white;
+    padding: 16px;
+    flex-flow: column nowrap;
+    align-items: stretch;
+    z-index: 60;
+    white-space: normal;
+  }
+  .main-nav.open .dropdown-panel {
+    position: static;
+  }
+}
+.header-bar .brand {
+  min-width: 0;
+  flex: 1;
+}
+
+.header-bar .brand-logo {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.header-bar .brand-text {
+  min-width: 0;
+}
+
+.header-bar .brand-text strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.main-nav .dropdown-panel .account-identity, .main-nav .dropdown-panel .account-identity strong, .main-nav .dropdown-panel .account-identity small {
+  color: #173b36 !important;
+  text-align: left;
+}
+
+.dropdown-panel .workspace-view-switch, .dropdown-panel .language-switcher select {
+  color: #173b36 !important;
+  background: white;
+}
+
+.dropdown-panel .account-identity, .dropdown-panel .language-switcher {
+  padding: 6px 12px;
+}
+
+.header-bar .dropdown-panel {
+  background: white;
+  color: #173b36;
+  white-space: normal;
+}
+
+.header-bar .account-dropdown > summary {
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+}
+
+.header-bar {
+  gap: 12px;
+}
+
+.booking-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.booking-nav summary {
+  min-width: 36px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+}
+
+.booking-nav summary::after {
+  display: none;
+}
+
+@media (max-width: 1250px) {
+  .booking-nav {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .booking-nav details[open] {
+    width: 100%;
+  }
+}
+.header-bar > .account-identity {
+  min-width: 0;
+  line-height: 1.2;
+  flex: 0 1 auto;
+}
+
+.header-bar > .account-identity strong {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.header-bar > .language-switcher {
+  flex: 0 0 auto;
+}
+
+.header-bar > .language-switcher select {
+  min-height: 44px;
+}
+
+.header-bar .booking-nav > a, .header-bar .booking-nav > .nav-dropdown > summary, .header-bar .account-dropdown > summary {
+  color: white !important;
+  background: transparent !important;
+  box-shadow: none;
+}
+
+.header-bar .booking-nav > a:hover, .header-bar .booking-nav > .nav-dropdown > summary:hover, .header-bar .account-dropdown > summary:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .header-bar {
+    gap: 8px;
+  }
+  .header-bar > .account-identity {
+    max-width: 28vw;
+  }
+  .header-bar > .language-switcher select {
+    width: 5.8rem;
+    padding-inline: 4px;
+  }
+  .header-bar .menu-toggle {
+    margin-left: 0;
+  }
+  .header-bar .brand-text {
+    overflow: hidden;
+  }
+}
+@media (max-width: 400px) {
+  .header-bar .brand-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/layout/home/homeheader/homeheader.component.scss"],"names":[],"mappings":"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","sourcesContent":["@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Raleway:wght@500;600;700&family=Lato:wght@300;400;700&display=swap');\n.site-header {\n  position: sticky;\n  top: 0;\n  z-index: 20;\n  background: rgba(255, 255, 255, 0.96);\n  backdrop-filter: blur(8px);\n  border-bottom: 1px solid rgba(15, 23, 42, 0.08);\n}\n\n.container {\n  width: min(1120px, calc(100% - 2rem));\n  margin: 0 auto;\n}\n\n.header-bar {\n  min-height: 70px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 0.9rem;\n}\n\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 0.75rem;\n  color: #08263a;\n  text-decoration: none;\n}\n\n.brand-mark {\n  width: 38px;\n  height: 38px;\n  border-radius: 50%;\n  display: grid;\n  place-items: center;\n  background: linear-gradient(135deg, #0b6e8f, #0b6e8f);\n  color: #fff;\n  font-size: 1rem;\n}\n\n.brand-text {\n  display: flex;\n  flex-direction: column;\n  line-height: 1.05;\n}\n\n.brand-text strong {\n  font-size: 1rem;\n  white-space: nowrap;\n}\n\n.brand-text small {\n  color: #475569;\n  font-size: 0.68rem;\n  white-space: nowrap;\n}\n\n.menu-toggle {\n  display: none;\n  border: none;\n  background: #e8f4f7;\n  color: #08263a;\n  font-size: 1.1rem;\n  padding: 0.45rem 0.75rem;\n  border-radius: 10px;\n}\n\n.main-nav {\n  display: flex;\n  align-items: center;\n  gap: 0.85rem;\n}\n\n.main-nav a {\n  text-decoration: none;\n  color: #334155;\n  font-weight: 500;\n  font-size: 0.88rem;\n  white-space: nowrap;\n}\n\n.main-nav a.active {\n  color: #08263a;\n}\n\n.language-switcher {\n  display: flex;\n  align-items: center;\n}\n\n.language-switcher select {\n  border: 1px solid #cbd5e1;\n  border-radius: 999px;\n  background: #fff;\n  color: #08263a;\n  font-size: 0.83rem;\n  padding: 0.45rem 0.8rem;\n}\n\n.cta-link {\n  padding: 0.72rem 0.95rem;\n  border-radius: 999px;\n  background: #08263a;\n  color: #fff !important;\n  font-size: 0.84rem;\n}\n\n@media (max-width: 960px) {\n  .menu-toggle {\n    display: inline-flex;\n  }\n\n  .main-nav {\n    position: absolute;\n    left: 1rem;\n    right: 1rem;\n    top: 78px;\n    display: none;\n    flex-direction: column;\n    align-items: stretch;\n    gap: 0.35rem;\n    padding: 0.8rem;\n    background: #ffffff;\n    border: 1px solid rgba(15, 23, 42, 0.08);\n    border-radius: 18px;\n    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);\n  }\n\n  .main-nav.open {\n    display: flex;\n  }\n\n  .main-nav a,\n  .language-switcher select {\n    padding: 0.9rem 1rem;\n    border-radius: 12px;\n  }\n\n  .cta-link {\n    text-align: center;\n  }\n}\n\n\n/* Charte graphique Alegria */\n:host {\n  --alegria-deep: #08263a;\n  --alegria-ocean: #0b6e8f;\n  --alegria-ocean-light: #e8f4f7;\n  --alegria-orange: #f28c28;\n  --alegria-sand: #fbf8f2;\n  --alegria-text: #2f3a45;\n  --alegria-muted: #667085;\n}\n\nh1, h2, h3, .brand-text strong, .title, .page-title {\n  font-family: 'Playfair Display', Georgia, serif;\n  color: var(--alegria-deep);\n  letter-spacing: -0.015em;\n}\n\n.eyebrow, .main-nav a, .btn, button, label, .meta, .price-pill, .language-switcher select, .text-link {\n  font-family: 'Raleway', Arial, sans-serif;\n}\n\np, li, input, textarea, select, .card-body, .term-section {\n  font-family: 'Lato', Arial, sans-serif;\n  color: var(--alegria-text);\n}\n\n.eyebrow, .text-link, a:not(.btn):not(.brand):not(.cta-link) {\n  color: var(--alegria-ocean);\n}\n\n.btn-primary, .cta-link, .btn-book {\n  background: var(--alegria-orange) !important;\n  color: #fff !important;\n  box-shadow: 0 14px 28px rgba(242, 140, 40, 0.22);\n}\n\n.btn-secondary, .btn:not(.btn-primary):not(.btn-book) {\n  background: var(--alegria-ocean-light);\n  color: var(--alegria-deep);\n}\n\n.price-pill {\n  background: rgba(242, 140, 40, 0.13);\n  color: #9a4d08;\n  border: 1px solid rgba(242, 140, 40, 0.28);\n}\n\n.page-hero {\n  background: linear-gradient(180deg, #fbf8f2 0%, #ffffff 100%);\n}\n\n.section-light {\n  background: var(--alegria-sand);\n}\n\n\n/* Header charte override */\n.site-header {\n  background: rgba(8, 38, 58, 0.96) !important;\n  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;\n}\n.brand, .brand-text strong, .main-nav a, .main-nav a.active {\n  color: #fff !important;\n}\n.brand-text small { color: rgba(255,255,255,0.72) !important; }\n.brand-mark { background: var(--alegria-orange) !important; color:#fff !important; }\n.menu-toggle { background: rgba(255,255,255,0.12) !important; color:#fff !important; }\n.language-switcher select { background: rgba(255,255,255,0.1) !important; color:#fff !important; border-color: rgba(255,255,255,0.25) !important; }\n.language-switcher select option { color:#08263a; }\n@media (max-width: 960px) {\n  .main-nav { background: #08263a !important; border-color: rgba(255,255,255,.12) !important; }\n}\n.brand-logo {\n  height: 48px;\n  width: auto;\n  object-fit: contain;\n  display: block;\n  flex: 0 0 auto;\n}\n\n@media (max-width: 768px) {\n  .brand-logo {\n    height: 38px;\n  }\n}\n/* Organized dropdown header */\n.main-nav {\n  gap: 0.65rem;\n}\n\n.nav-dropdown {\n  position: relative;\n}\n\n.nav-dropdown summary {\n  list-style: none;\n  cursor: pointer;\n  color: #fff;\n  font-family: 'Raleway', Arial, sans-serif;\n  font-size: 0.88rem;\n  font-weight: 600;\n  white-space: nowrap;\n  padding: 0.55rem 0.35rem;\n  display: inline-flex;\n  align-items: center;\n  gap: 0.35rem;\n}\n\n.nav-dropdown summary::-webkit-details-marker {\n  display: none;\n}\n\n.nav-dropdown summary::after {\n  content: '▾';\n  font-size: 0.68rem;\n  opacity: 0.8;\n  transform: translateY(1px);\n}\n\n.dropdown-panel {\n  position: absolute;\n  top: calc(100% + 0.8rem);\n  left: 0;\n  min-width: 230px;\n  padding: 0.55rem;\n  border-radius: 16px;\n  background: #ffffff;\n  box-shadow: 0 20px 45px rgba(8, 38, 58, 0.22);\n  border: 1px solid rgba(8, 38, 58, 0.1);\n  display: grid;\n  gap: 0.15rem;\n  z-index: 50;\n}\n\n.dropdown-panel-right {\n  right: 0;\n  left: auto;\n}\n\n.dropdown-panel a {\n  color: #08263a !important;\n  padding: 0.78rem 0.9rem;\n  border-radius: 12px;\n  font-size: 0.88rem;\n  font-weight: 600;\n}\n\n.dropdown-panel a:hover,\n.dropdown-panel a.active {\n  background: #e8f4f7;\n  color: #0b6e8f !important;\n}\n\n.account-dropdown summary {\n  padding: 0.68rem 0.95rem;\n  border-radius: 999px;\n  background: #f28c28;\n  color: #fff;\n  box-shadow: 0 14px 28px rgba(242, 140, 40, 0.22);\n}\n\n.owner-view-switch {\n  display: inline-flex;\n  align-items: center;\n  gap: 0.45rem;\n  padding: 0.62rem 0.9rem;\n  border: 1px solid rgba(255, 255, 255, 0.45);\n  border-radius: 999px;\n  background: transparent;\n  color: #fff;\n  font-family: 'Raleway', Arial, sans-serif;\n  font-size: 0.82rem;\n  font-weight: 700;\n  white-space: nowrap;\n  cursor: pointer;\n}\n\n.owner-view-switch:hover,\n.owner-view-switch:focus-visible {\n  background: rgba(255, 255, 255, 0.12);\n}\n\n.admin-navigation-panel {\n  min-width: 260px;\n}\n\n@media (min-width: 961px) {\n  .nav-dropdown:not([open]) .dropdown-panel {\n    display: none;\n  }\n}\n\n@media (max-width: 960px) {\n  .main-nav {\n    gap: 0.35rem;\n    max-height: calc(100vh - 92px);\n    overflow-y: auto;\n  }\n\n  .nav-dropdown {\n    width: 100%;\n  }\n\n  .nav-dropdown summary,\n  .main-nav > a {\n    width: 100%;\n    padding: 0.9rem 1rem;\n    border-radius: 12px;\n    background: rgba(255,255,255,0.06);\n    justify-content: space-between;\n  }\n\n  .account-dropdown summary {\n    background: #f28c28;\n    justify-content: space-between;\n  }\n\n  .dropdown-panel,\n  .dropdown-panel-right {\n    position: static;\n    min-width: 0;\n    margin-top: 0.35rem;\n    margin-bottom: 0.45rem;\n    padding: 0.35rem;\n    border-radius: 14px;\n    box-shadow: none;\n    background: rgba(255,255,255,0.98);\n  }\n\n  .dropdown-panel a {\n    padding: 0.82rem 0.9rem;\n  }\n\n  .language-switcher select {\n    width: 100%;\n  }\n\n  .owner-view-switch {\n    width: 100%;\n    justify-content: center;\n    margin: 0.15rem 0;\n    padding: 0.9rem 1rem;\n  }\n}\n\n.dropdown-action {\n  appearance: none;\n  border: 0;\n  width: 100%;\n  text-align: left;\n  color: #08263a !important;\n  background: transparent;\n  padding: 0.78rem 0.9rem;\n  border-radius: 12px;\n  font-family: 'Raleway', Arial, sans-serif;\n  font-size: 0.88rem;\n  font-weight: 600;\n  cursor: pointer;\n}\n\n.dropdown-action:hover {\n  background: #e8f4f7;\n  color: #0b6e8f !important;\n}\n\n.account-admin-panel {\n  min-width: 280px;\n}\n\n.dropdown-section-title {\n  display: block;\n  padding: 0.65rem 0.9rem 0.3rem;\n  color: #8a652d;\n  font-family: 'Raleway', Arial, sans-serif;\n  font-size: 0.72rem;\n  font-weight: 800;\n  letter-spacing: 0.11em;\n  text-transform: uppercase;\n}\n\n.dropdown-section-title:not(:first-child) {\n  border-top: 1px solid rgba(8, 38, 58, 0.08);\n  margin-top: 0.35rem;\n}\n\n.account-customer-panel {\n  min-width: 260px;\n}\n\n.account-customer-panel .dropdown-section-title,\n.account-admin-panel .dropdown-section-title {\n  display: block;\n  margin: 0.55rem 0 0.25rem;\n  padding: 0.25rem 0.75rem;\n  color: #b58b4a;\n  font-size: 0.72rem;\n  font-weight: 800;\n  text-transform: uppercase;\n  letter-spacing: 0.12em;\n}\n\n.account-customer-panel .dropdown-section-title:first-child,\n.account-admin-panel .dropdown-section-title:first-child {\n  margin-top: 0;\n}\n\n.account-customer-panel a,\n.account-admin-panel a {\n  white-space: nowrap;\n}\n\n.platform-return{background:#f1f5f4;border-bottom:1px solid #dce5df;padding:7px 0;font:600 12px/1.5 Arial,sans-serif}.platform-return a{display:inline-flex;align-items:center;gap:7px;color:#173b36!important;text-decoration:none}.platform-return a:hover{text-decoration:underline}.platform-return a:focus-visible{outline:2px solid #173b36;outline-offset:3px}\n\n.account-identity{display:flex;flex-direction:column;text-align:right;max-width:220px;font-size:14px;overflow-wrap:anywhere}.account-identity small{font-size:12px;opacity:.8}.account-dropdown .dropdown-panel{max-height:75vh;overflow:auto}@media(max-width:600px){.account-identity{max-width:170px}}\n\n.main-nav .account-identity,.main-nav .account-identity strong,.main-nav .account-identity small{color:#fff!important;opacity:1}.workspace-view-switch{border:1px solid #b8cbd4;border-radius:999px;background:transparent;color:#fff;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer}.workspace-view-switch:disabled{opacity:.55}.main-nav .account-identity{display:flex!important;visibility:visible!important;flex-direction:column;gap:2px;overflow-wrap:anywhere}.main-nav .account-identity strong{font-weight:700}@media(max-width:900px){.main-nav.open .account-identity,.main-nav.open .account-identity strong,.main-nav.open .account-identity small,.main-nav.open .workspace-view-switch{color:#173b36!important}}\n\n.header-bar>.account-identity,.header-bar>.account-identity strong,.header-bar>.account-identity small{color:#fff!important;opacity:1}.header-bar>.account-identity{display:flex!important;flex-direction:column;gap:2px;margin-left:auto;max-width:180px;overflow-wrap:anywhere}.header-bar{flex-wrap:wrap;padding-top:10px;padding-bottom:10px}.header-bar>.workspace-view-switch{flex-shrink:0}@media(max-width:960px){.main-nav{top:100%}.header-bar>.brand{min-width:0}.brand-text strong,.brand-text small{white-space:normal}.header-bar>.account-identity{max-width:140px;font-size:12px}.header-bar>.workspace-view-switch{font-size:11px;padding:7px}.menu-toggle{margin-left:auto}}\n\n.header-bar{flex-wrap:nowrap}.header-bar .main-nav{white-space:nowrap}\n@media(max-width:1250px){.header-bar{position:relative;justify-content:space-between}.header-bar .menu-toggle{display:block;min-height:44px}.header-bar .main-nav{display:none}.header-bar .main-nav.open{display:flex;position:absolute;top:100%;left:auto;right:0;width:min(340px,96vw);box-sizing:border-box;max-height:76vh;overflow:auto;background:#142f40;color:white;padding:16px;flex-flow:column nowrap;align-items:stretch;z-index:60;white-space:normal}.main-nav.open .dropdown-panel{position:static}}\n\n.header-bar .brand{min-width:0;flex:1}.header-bar .brand-logo{width:38px;height:38px;object-fit:contain}.header-bar .brand-text{min-width:0}.header-bar .brand-text strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}\n.main-nav .dropdown-panel .account-identity,.main-nav .dropdown-panel .account-identity strong,.main-nav .dropdown-panel .account-identity small{color:#173b36!important;text-align:left}.dropdown-panel .workspace-view-switch,.dropdown-panel .language-switcher select{color:#173b36!important;background:white}.dropdown-panel .account-identity,.dropdown-panel .language-switcher{padding:6px 12px}.header-bar .dropdown-panel{background:white;color:#173b36;white-space:normal}.header-bar .account-dropdown>summary{background:transparent;color:inherit;box-shadow:none}.header-bar{gap:12px}\n\n.booking-nav{display:flex;align-items:center;gap:2px}.booking-nav summary{min-width:36px;min-height:44px;display:grid;place-items:center}.booking-nav summary::after{display:none}@media(max-width:1250px){.booking-nav{display:flex;flex-wrap:wrap}.booking-nav details[open]{width:100%}}\n.header-bar>.account-identity{min-width:0;line-height:1.2;flex:0 1 auto}\n.header-bar>.account-identity strong{white-space:nowrap;text-overflow:ellipsis;overflow:hidden}\n.header-bar>.language-switcher{flex:0 0 auto}.header-bar>.language-switcher select{min-height:44px}\n.header-bar .booking-nav>a,.header-bar .booking-nav>.nav-dropdown>summary,.header-bar .account-dropdown>summary{color:white!important;background:transparent!important;box-shadow:none}\n.header-bar .booking-nav>a:hover,.header-bar .booking-nav>.nav-dropdown>summary:hover,.header-bar .account-dropdown>summary:hover{text-decoration:underline}\n@media(max-width:600px){.header-bar{gap:8px}.header-bar>.account-identity{max-width:28vw}.header-bar>.language-switcher select{width:5.8rem;padding-inline:4px}.header-bar .menu-toggle{margin-left:0}.header-bar .brand-text{overflow:hidden}}\n@media(max-width:400px){.header-bar .brand-text{position:absolute;width:1px;height:1px;clip-path:inset(50%)}}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -57851,6 +60331,296 @@ for (const [language, copy] of Object.entries(COMPLETE_DISCOVERY)) DISCOVERY_TEX
   ...DISCOVERY_TEXT[language],
   ...copy
 };
+// Direct rental campaign. Editable at uiTranslations/{lang}/ui/discovery.
+const DIRECT_RENTAL_COPY = {
+  "fr": {
+    "directEyebrow": "La location, directement entre vous",
+    "directTitle": "Vous connaissez le bien.",
+    "directAccent": "Passez GoDirect.",
+    "directIntro": "Une voiture déjà louée, un appartement où vous aimez revenir, un bateau et son propriétaire que vous connaissez : retrouvez son site GoDirect et réservez directement auprès de lui.",
+    "directTypes": "Voitures · Parkings · Appartements et maisons · Bateaux · Piscines",
+    "directBadge": "0 % de commission GoDirect sur les locations",
+    "directFees": "Le propriétaire paie un abonnement par annonce. Les frais de traitement Stripe restent distincts.",
+    "directArt": "Votre prochaine location. En direct.",
+    "directHeading": "Vous vous connaissez déjà ? Gardez le contact.",
+    "directText": "Quand vous connaissez déjà le bien et son propriétaire, GoDirect vous permet de réserver auprès de lui, sans repasser par une plateforme qui prélève une commission sur la réservation.",
+    "directStep1": "Retrouvez le bien",
+    "directStep1Text": "Ouvrez le lien GoDirect partagé par le propriétaire ou recherchez son annonce.",
+    "directStep2": "Réservez en direct",
+    "directStep2Text": "Consultez les photos, le prix et les disponibilités, puis envoyez votre demande au propriétaire.",
+    "directStep3": "Payez au propriétaire",
+    "directStep3Text": "Les paiements en ligne sont traités par Stripe sur le compte connecté du propriétaire. GoDirect ne prélève aucune commission sur la location."
+  },
+  "en": {
+    "directEyebrow": "Rent directly from the owner",
+    "directTitle": "Know the rental?",
+    "directAccent": "GoDirect.",
+    "directIntro": "A car you have rented before, an apartment you love returning to, a boat and an owner you know: find their GoDirect website and book directly with them.",
+    "directTypes": "Cars · Parking spaces · Apartments and houses · Boats · Pools",
+    "directBadge": "0% GoDirect commission on rentals",
+    "directFees": "Owners pay a subscription per listing. Stripe processing fees are separate.",
+    "directArt": "Your next rental. Direct.",
+    "directHeading": "Already know each other? Stay connected.",
+    "directText": "When you already know the rental and its owner, GoDirect lets you book directly without returning to a platform that charges a booking commission.",
+    "directStep1": "Find the rental",
+    "directStep1Text": "Open the GoDirect link shared by the owner or search for their listing.",
+    "directStep2": "Book directly",
+    "directStep2Text": "View photos, prices and availability, then send your request to the owner.",
+    "directStep3": "Pay the owner",
+    "directStep3Text": "Online payments are processed by Stripe on the owner’s connected account. GoDirect takes no rental commission."
+  },
+  "es": {
+    "directEyebrow": "Alquila directamente al propietario",
+    "directTitle": "¿Ya conoces el alojamiento o vehículo?",
+    "directAccent": "Pásate a GoDirect.",
+    "directIntro": "Un coche que ya has alquilado, una casa a la que te gusta volver, un barco y un propietario que conoces: encuentra su web GoDirect y reserva directamente.",
+    "directTypes": "Coches · Aparcamientos · Apartamentos y casas · Barcos · Piscinas",
+    "directBadge": "0 % de comisión GoDirect en alquileres",
+    "directFees": "El propietario paga una suscripción por anuncio. Los gastos de Stripe son independientes.",
+    "directArt": "Tu próximo alquiler. Directo.",
+    "directHeading": "¿Ya os conocéis? Seguid en contacto.",
+    "directText": "Si ya conoces el bien y su propietario, reserva directamente con GoDirect sin volver a una plataforma que cobre comisión por reserva.",
+    "directStep1": "Encuentra el bien",
+    "directStep1Text": "Abre el enlace GoDirect del propietario o busca su anuncio.",
+    "directStep2": "Reserva directamente",
+    "directStep2Text": "Consulta fotos, precios y disponibilidad y envía tu solicitud al propietario.",
+    "directStep3": "Paga al propietario",
+    "directStep3Text": "Stripe procesa los pagos en la cuenta conectada del propietario. GoDirect no cobra comisión por el alquiler."
+  },
+  "it": {
+    "directEyebrow": "Affitta direttamente dal proprietario",
+    "directTitle": "Conosci già il bene?",
+    "directAccent": "Passa a GoDirect.",
+    "directIntro": "Un’auto già noleggiata, una casa dove ami tornare, una barca e un proprietario che conosci: trova il suo sito GoDirect e prenota direttamente.",
+    "directTypes": "Auto · Parcheggi · Appartamenti e case · Barche · Piscine",
+    "directBadge": "0% di commissioni GoDirect sugli affitti",
+    "directFees": "Il proprietario paga un abbonamento per annuncio. Le spese Stripe restano separate.",
+    "directArt": "Il prossimo noleggio. Diretto.",
+    "directHeading": "Vi conoscete già? Restate in contatto.",
+    "directText": "Se conosci già il bene e il proprietario, prenota con GoDirect senza tornare su una piattaforma che applica commissioni sulla prenotazione.",
+    "directStep1": "Trova il bene",
+    "directStep1Text": "Apri il link GoDirect del proprietario o cerca il suo annuncio.",
+    "directStep2": "Prenota direttamente",
+    "directStep2Text": "Consulta foto, prezzi e disponibilità e invia una richiesta al proprietario.",
+    "directStep3": "Paga il proprietario",
+    "directStep3Text": "Stripe elabora i pagamenti sul conto connesso del proprietario. GoDirect non trattiene commissioni sull’affitto."
+  },
+  "de": {
+    "directEyebrow": "Direkt beim Eigentümer mieten",
+    "directTitle": "Sie kennen das Mietobjekt?",
+    "directAccent": "Dann GoDirect.",
+    "directIntro": "Ein bereits gemietetes Auto, eine vertraute Ferienwohnung, ein Boot und dessen Eigentümer: Finden Sie deren GoDirect-Website und buchen Sie direkt.",
+    "directTypes": "Autos · Parkplätze · Wohnungen und Häuser · Boote · Pools",
+    "directBadge": "0 % GoDirect-Provision auf Vermietungen",
+    "directFees": "Eigentümer zahlen ein Abonnement pro Anzeige. Stripe-Zahlungsgebühren fallen separat an.",
+    "directArt": "Ihre nächste Miete. Direkt.",
+    "directHeading": "Sie kennen sich schon? Bleiben Sie in Kontakt.",
+    "directText": "Wenn Sie das Mietobjekt und den Eigentümer bereits kennen, buchen Sie mit GoDirect direkt statt erneut über eine Plattform mit Buchungsprovision.",
+    "directStep1": "Mietobjekt finden",
+    "directStep1Text": "Öffnen Sie den GoDirect-Link des Eigentümers oder suchen Sie seine Anzeige.",
+    "directStep2": "Direkt buchen",
+    "directStep2Text": "Sehen Sie Fotos, Preise und Verfügbarkeit und senden Sie Ihre Anfrage an den Eigentümer.",
+    "directStep3": "Eigentümer bezahlen",
+    "directStep3Text": "Stripe verarbeitet Zahlungen auf dem verbundenen Konto des Eigentümers. GoDirect erhebt keine Mietprovision."
+  },
+  "nl": {
+    "directEyebrow": "Huur rechtstreeks van de eigenaar",
+    "directTitle": "Ken je het huurobject al?",
+    "directAccent": "Ga GoDirect.",
+    "directIntro": "Een eerder gehuurde auto, een vertrouwd vakantiehuis, een boot en een eigenaar die je kent: vind hun GoDirect-website en boek rechtstreeks.",
+    "directTypes": "Auto’s · Parkeerplaatsen · Appartementen en huizen · Boten · Zwembaden",
+    "directBadge": "0% GoDirect-commissie op verhuur",
+    "directFees": "Eigenaren betalen een abonnement per advertentie. Stripe-verwerkingskosten zijn apart.",
+    "directArt": "Je volgende huur. Rechtstreeks.",
+    "directHeading": "Kennen jullie elkaar al? Houd contact.",
+    "directText": "Ken je het huurobject en de eigenaar al? Boek rechtstreeks met GoDirect zonder opnieuw via een platform met boekingscommissie te gaan.",
+    "directStep1": "Vind het huurobject",
+    "directStep1Text": "Open de GoDirect-link van de eigenaar of zoek de advertentie.",
+    "directStep2": "Boek rechtstreeks",
+    "directStep2Text": "Bekijk foto’s, prijzen en beschikbaarheid en stuur je aanvraag naar de eigenaar.",
+    "directStep3": "Betaal de eigenaar",
+    "directStep3Text": "Stripe verwerkt betalingen op de gekoppelde rekening van de eigenaar. GoDirect rekent geen verhuurcommissie."
+  },
+  "ru": {
+    "directEyebrow": "Аренда напрямую у владельца",
+    "directTitle": "Уже знаете объект?",
+    "directAccent": "Выбирайте GoDirect.",
+    "directIntro": "Знакомый автомобиль, любимая квартира, лодка и её владелец: найдите их сайт GoDirect и бронируйте напрямую.",
+    "directTypes": "Автомобили · Парковки · Квартиры и дома · Лодки · Бассейны",
+    "directBadge": "0% комиссии GoDirect за аренду",
+    "directFees": "Владелец оплачивает подписку за объявление. Комиссии Stripe взимаются отдельно.",
+    "directArt": "Следующая аренда. Напрямую.",
+    "directHeading": "Уже знакомы? Оставайтесь на связи.",
+    "directText": "Если вы уже знаете объект и владельца, GoDirect позволяет бронировать напрямую, не возвращаясь на платформу с комиссией за бронирование.",
+    "directStep1": "Найдите объект",
+    "directStep1Text": "Откройте ссылку GoDirect от владельца или найдите объявление.",
+    "directStep2": "Бронируйте напрямую",
+    "directStep2Text": "Посмотрите фотографии, цены и доступность и отправьте заявку владельцу.",
+    "directStep3": "Платите владельцу",
+    "directStep3Text": "Stripe обрабатывает платежи на подключённом счёте владельца. GoDirect не берёт комиссию за аренду."
+  }
+};
+for (const [lang, copy] of Object.entries(DIRECT_RENTAL_COPY)) DISCOVERY_TEXT[lang] = {
+  ...(DISCOVERY_TEXT[lang] || DISCOVERY_TEXT.en),
+  ...copy
+};
+// Stripe payment reassurance. Editable at uiTranslations/{lang}/ui/discovery.
+const STRIPE_PAYMENT_COPY = {
+  "fr": {
+    "stripeBadge": "Paiements sécurisés par Stripe",
+    "stripeTitle": "Réservez en direct. Payez en toute confiance avec Stripe.",
+    "stripeIntro": "GoDirect utilise Stripe, l’un des leaders mondiaux du paiement en ligne, pour sécuriser les paiements entre locataires et propriétaires.",
+    "stripeDeposit": "Votre acompte en ligne",
+    "stripeDepositText": "Payez votre acompte en ligne sur la page sécurisée Stripe pour réserver votre bien auprès du propriétaire.",
+    "stripeWarranty": "Votre carte enregistrée pour la caution",
+    "stripeWarrantyText": "Votre carte est enregistrée de manière sécurisée pour la caution, sans débit ni blocage des fonds lors de l’enregistrement.",
+    "stripeBalance": "Votre solde en toute sécurité",
+    "stripeBalanceText": "Lorsque le paiement en ligne du solde est proposé, réglez-le avec Stripe depuis votre réservation.",
+    "stripeNote": "Vos données de carte sont traitées par Stripe. Le propriétaire ne reçoit pas votre numéro de carte complet. Tout débit ultérieur de caution reste soumis aux conditions acceptées. GoDirect ne prélève aucune commission sur la location."
+  },
+  "en": {
+    "stripeBadge": "Payments secured by Stripe",
+    "stripeTitle": "Book direct. Pay with confidence with Stripe.",
+    "stripeIntro": "GoDirect uses Stripe, one of the world’s leading payment platforms, to secure your online payments.",
+    "stripeDeposit": "Your deposit online",
+    "stripeDepositText": "Pay your deposit by card on Stripe’s secure checkout page.",
+    "stripeWarranty": "Your security card, no immediate charge",
+    "stripeWarrantyText": "Your card is securely saved for the security deposit, with no charge or funds blocked when saved.",
+    "stripeBalance": "Your balance, paid securely",
+    "stripeBalanceText": "When online balance payment is offered, pay securely with Stripe from your booking.",
+    "stripeNote": "The owner does not receive your full card number. Any later security-deposit charge remains subject to the rental terms you accept."
+  },
+  "es": {
+    "stripeBadge": "Pagos seguros con Stripe",
+    "stripeTitle": "Reserva directamente. Paga con confianza con Stripe.",
+    "stripeIntro": "GoDirect utiliza Stripe, una de las principales plataformas de pago del mundo, para proteger tus pagos online.",
+    "stripeDeposit": "Tu anticipo online",
+    "stripeDepositText": "Paga tu anticipo con tarjeta en la página segura de Stripe.",
+    "stripeWarranty": "Garantía sin cargo inmediato",
+    "stripeWarrantyText": "Tu tarjeta se guarda de forma segura para la garantía, sin cargo ni bloqueo de fondos al registrarla.",
+    "stripeBalance": "Tu saldo, con seguridad",
+    "stripeBalanceText": "Si se ofrece el pago online del saldo, págalo con Stripe desde tu reserva.",
+    "stripeNote": "El propietario no recibe el número completo de tu tarjeta. Cualquier cargo posterior por la garantía está sujeto a las condiciones de alquiler aceptadas."
+  },
+  "it": {
+    "stripeBadge": "Pagamenti sicuri con Stripe",
+    "stripeTitle": "Prenota direttamente. Paga con fiducia con Stripe.",
+    "stripeIntro": "GoDirect utilizza Stripe, una delle principali piattaforme di pagamento al mondo, per proteggere i pagamenti online.",
+    "stripeDeposit": "Il tuo acconto online",
+    "stripeDepositText": "Paga l’acconto con carta sulla pagina sicura di Stripe.",
+    "stripeWarranty": "Cauzione senza addebito immediato",
+    "stripeWarrantyText": "La carta viene salvata in modo sicuro per la cauzione, senza addebiti né blocco dei fondi al momento della registrazione.",
+    "stripeBalance": "Il saldo in sicurezza",
+    "stripeBalanceText": "Se è disponibile il pagamento online del saldo, paga con Stripe dalla prenotazione.",
+    "stripeNote": "Il proprietario non riceve il numero completo della carta. Eventuali addebiti successivi per la cauzione sono soggetti alle condizioni di noleggio accettate."
+  },
+  "de": {
+    "stripeBadge": "Sichere Zahlungen mit Stripe",
+    "stripeTitle": "Direkt buchen. Sicher mit Stripe bezahlen.",
+    "stripeIntro": "GoDirect nutzt Stripe, eine der weltweit führenden Zahlungsplattformen, für sichere Onlinezahlungen.",
+    "stripeDeposit": "Ihre Anzahlung online",
+    "stripeDepositText": "Bezahlen Sie Ihre Anzahlung per Karte auf der sicheren Stripe-Zahlungsseite.",
+    "stripeWarranty": "Kaution ohne sofortige Abbuchung",
+    "stripeWarrantyText": "Ihre Karte wird für die Kaution sicher gespeichert. Beim Speichern erfolgt weder eine Abbuchung noch eine Geldreservierung.",
+    "stripeBalance": "Restbetrag sicher bezahlen",
+    "stripeBalanceText": "Wenn eine Online-Restzahlung angeboten wird, bezahlen Sie diese über Stripe in Ihrer Buchung.",
+    "stripeNote": "Der Eigentümer erhält nicht Ihre vollständige Kartennummer. Spätere Kautionsabbuchungen unterliegen den akzeptierten Mietbedingungen."
+  },
+  "nl": {
+    "stripeBadge": "Veilig betalen met Stripe",
+    "stripeTitle": "Boek direct. Betaal met vertrouwen via Stripe.",
+    "stripeIntro": "GoDirect gebruikt Stripe, een van de toonaangevende betaalplatforms ter wereld, voor veilige online betalingen.",
+    "stripeDeposit": "Je aanbetaling online",
+    "stripeDepositText": "Betaal je aanbetaling per kaart op de beveiligde betaalpagina van Stripe.",
+    "stripeWarranty": "Borg zonder directe afschrijving",
+    "stripeWarrantyText": "Je kaart wordt veilig opgeslagen voor de borg, zonder afschrijving of blokkering van geld bij het opslaan.",
+    "stripeBalance": "Je saldo veilig betalen",
+    "stripeBalanceText": "Als online betaling van het saldo wordt aangeboden, betaal je dit via Stripe vanuit je boeking.",
+    "stripeNote": "De eigenaar ontvangt niet je volledige kaartnummer. Latere afschrijvingen voor de borg vallen onder de geaccepteerde huurvoorwaarden."
+  },
+  "ru": {
+    "stripeBadge": "Безопасные платежи через Stripe",
+    "stripeTitle": "Бронируйте напрямую. Платите уверенно со Stripe.",
+    "stripeIntro": "GoDirect использует Stripe, одну из ведущих платёжных платформ мира, для безопасных онлайн-платежей.",
+    "stripeDeposit": "Предоплата онлайн",
+    "stripeDepositText": "Оплатите аванс картой на защищённой платёжной странице Stripe.",
+    "stripeWarranty": "Залог без немедленного списания",
+    "stripeWarrantyText": "Карта безопасно сохраняется для залога без списания или блокировки средств при сохранении.",
+    "stripeBalance": "Безопасная оплата остатка",
+    "stripeBalanceText": "Если доступна онлайн-оплата остатка, оплатите его через Stripe в своём бронировании.",
+    "stripeNote": "Владелец не получает полный номер вашей карты. Последующие списания по залогу регулируются принятыми условиями аренды."
+  }
+};
+for (const [lang, copy] of Object.entries(STRIPE_PAYMENT_COPY)) DISCOVERY_TEXT[lang] = {
+  ...DISCOVERY_TEXT[lang],
+  ...copy
+};
+const CAROUSEL_COPY = {
+  "fr": {
+    "carouselLabel": "Des biens à louer en direct",
+    "carouselPrevious": "Photo précédente",
+    "carouselNext": "Photo suivante",
+    "carouselPause": "Mettre le défilement en pause",
+    "carouselPlay": "Démarrer le défilement"
+  },
+  "en": {
+    "carouselLabel": "Rent directly from owners",
+    "carouselPrevious": "Previous photo",
+    "carouselNext": "Next photo",
+    "carouselPause": "Pause slideshow",
+    "carouselPlay": "Play slideshow"
+  },
+  "es": {
+    "carouselLabel": "Alquileres directos",
+    "carouselPrevious": "Foto anterior",
+    "carouselNext": "Foto siguiente",
+    "carouselPause": "Pausar presentación",
+    "carouselPlay": "Iniciar presentación"
+  },
+  "it": {
+    "carouselLabel": "Affitti diretti",
+    "carouselPrevious": "Foto precedente",
+    "carouselNext": "Foto successiva",
+    "carouselPause": "Pausa presentazione",
+    "carouselPlay": "Avvia presentazione"
+  },
+  "de": {
+    "carouselLabel": "Direkt mieten",
+    "carouselPrevious": "Vorheriges Foto",
+    "carouselNext": "Nächstes Foto",
+    "carouselPause": "Diashow pausieren",
+    "carouselPlay": "Diashow starten"
+  },
+  "nl": {
+    "carouselLabel": "Rechtstreeks huren",
+    "carouselPrevious": "Vorige foto",
+    "carouselNext": "Volgende foto",
+    "carouselPause": "Diavoorstelling pauzeren",
+    "carouselPlay": "Diavoorstelling starten"
+  },
+  "ru": {
+    "carouselLabel": "Аренда напрямую",
+    "carouselPrevious": "Предыдущее фото",
+    "carouselNext": "Следующее фото",
+    "carouselPause": "Приостановить показ",
+    "carouselPlay": "Начать показ"
+  }
+};
+for (const [lang, copy] of Object.entries(CAROUSEL_COPY)) DISCOVERY_TEXT[lang] = {
+  ...DISCOVERY_TEXT[lang],
+  ...copy
+};
+
+/***/ }),
+
+/***/ 40863:
+/*!***************************************************************!*\
+  !*** ./src/app/portals/portal-home.component.html?ngResource ***!
+  \***************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<main class=\"store-home\" *ngIf=\"portal==='asset';else platform\">\n<app-site-management-home *ngIf=\"access.siteManagerMode;else publicStore\"></app-site-management-home><ng-template #publicStore><ng-container *ngIf=\"site;else waiting\"><h1>{{site.title}}</h1><p class=\"intro\">{{site.intro}}</p><h2>Nos biens en location</h2><p *ngIf=\"!site.cards.length\">Aucun bien disponible à la location pour le moment.</p>\n<div class=\"catalog\"><article *ngFor=\"let a of site.cards\"><a [href]=\"a.base+'/home?view=client'\"><img *ngIf=\"a.image\" [src]=\"a.image\" alt=\"\"><h3>{{a.name}}</h3></a><p>{{a.city}}</p><p>{{a.headline}}</p><nav><a [href]=\"a.base+'/home?view=client'\">Voir le bien et réserver</a><a routerLink=\"/messages\" [queryParams]=\"{contactType:a.type,contactAsset:a.id}\">Contacter l’hôte</a></nav></article></div><p><a href=\"/account/bookings\">Mes réservations</a> · <a href=\"/account/ratings\">Mes avis</a></p></ng-container><ng-template #waiting><p role=\"status\">{{failed?'Impossible de charger ce site.':'Chargement des biens…'}}</p></ng-template></ng-template></main><ng-template #platform><app-resource-dashboard *ngIf=\"portal==='client';else owners\"></app-resource-dashboard>\n<ng-template #owners><div class=\"portal-page owner-landing\" *ngIf=\"!concierge;else conciergeLanding\">\n<main>\n<section class=\"owner-hero\" aria-labelledby=\"owner-title\">\n<div><p class=\"eyebrow\">{{fr?'Pour les propriétaires':'For rental owners'}}</p>\n<h1 id=\"owner-title\">{{fr?'Louez en direct.':'Rent direct.'}}<br><span>{{fr?'Gardez le lien.':'Stay in touch.'}}</span></h1>\n<p class=\"owner-lead\">{{fr?'Vos clients échangent et réservent directement avec vous.':'Your customers talk and book directly with you.'}}</p>\n<p>{{fr?'Bateaux, voitures, places de parking, appartements et piscines.':'Boats, cars, parking spaces, apartments and pools.'}} <small>{{fr?'Motos : pas encore disponibles sur GoDirect.':'Motorcycles are not yet available on GoDirect.'}}</small></p>\n<div class=\"owner-points\">\n<div><strong>0 %</strong><span>{{fr?'de commission GoDirect':'GoDirect commission'}}</span></div>\n<div><strong>{{fr?'99 € TTC / an':'€99 / year incl. tax'}}</strong><span>{{fr?'par annonce':'per listing'}}</span></div>\n</div>\n<div class=\"actions\"><a class=\"button\" routerLink=\"/account/signup\" [queryParams]=\"{returnUrl:'/owner/listings'}\">{{fr?'Créer mon site de location':'Create my rental website'}} <span aria-hidden=\"true\">↗</span></a><a class=\"button secondary\" routerLink=\"/owner/listings\">{{fr?'Accéder à mon espace':'Open my workspace'}}</a></div>\n<p class=\"note\">{{fr?'Frais de traitement Stripe en sus.':'Stripe processing fees are separate.'}}</p>\n</div>\n<div class=\"owner-photos\"><img class=\"villa\" src=\"/assets/img/owner-landing/villa.webp\" alt=\"\" width=\"1200\" height=\"800\" fetchpriority=\"high\"><img src=\"/assets/img/owner-landing/boat.webp\" alt=\"\" width=\"600\" height=\"400\"><img src=\"/assets/img/owner-landing/car.webp\" alt=\"\" width=\"600\" height=\"400\"></div>\n</section>\n<section class=\"owner-tools\" aria-label=\"GoDirect\">\n<article><p class=\"eyebrow\">{{fr?'Pour vos clients':'For your customers'}}</p><h2>{{fr?'Votre site. Votre adresse.':'Your site. Your address.'}}</h2><p>{{fr?'Un seul lien pour découvrir vos biens, vous écrire, réserver et payer.':'One link to view your rentals, message you, book and pay.'}}</p><strong class=\"example-address\">monbateau.godirect.fr</strong></article>\n<article><p class=\"eyebrow\">{{fr?'Pour vous':'For you'}}</p><h2>{{fr?'Vos locations dans votre poche.':'Your rentals in your pocket.'}}</h2><p>{{fr?'Gérez vos calendriers, tarifs, réservations et messages sur le web ou depuis l’application GoDirect.':'Manage calendars, prices, bookings and messages on the web or in the GoDirect app.'}}</p><a href=\"/assets/pwa/install.html\">{{fr?'Installer l’application sur mon téléphone':'Install the app on my phone'}} →</a></article>\n</section>\n<section class=\"owner-delegate\" id=\"role-concierge\"><h2>{{fr?'Besoin d’un coup de main ?':'Need a hand?'}}</h2><p>{{fr?'Autorisez un concierge à gérer les biens de votre choix.':'Let a concierge manage the rentals you choose.'}}</p><a routerLink=\"/concierge-role\">{{fr?'Découvrir le rôle du concierge':'Learn what a concierge can do'}} →</a></section>\n</main>\n\n</div>\n<ng-template #conciergeLanding><div class=\"portal-page\">\n<main><section class=\"portal-hero\" [class.portal-hero--with-image]=\"!concierge\"><div class=\"portal-hero-copy\"><p class=\"eyebrow\">{{concierge?(fr?'L’espace des concierges':'The concierge workspace'):(fr?'Votre site de location, en direct':'Your own direct rental website')}}</p><h1 *ngIf=\"!concierge\">{{fr?'Vos clients vous connaissent déjà. Gardez le lien, de la première question à la prochaine réservation.':'Your customers already know you. Stay in touch, from their first question to their next booking.'}}</h1><h1 *ngIf=\"concierge\">{{fr?'Gérez les biens de vos propriétaires, dans un seul espace.':'Manage your owners’ rentals in one workspace.'}}</h1>\n<p class=\"intro\" *ngIf=\"!concierge\">{{fr?'Un client revient, ou un ami lui recommande votre bien ? Envoyez-lui votre lien personnel, par exemple monbateau.godirect.fr. Il peut vous poser une question, vérifier les disponibilités, réserver et payer en ligne sur votre site. Vous restez son interlocuteur, sans commission GoDirect sur la location.':'A customer comes back, or a friend recommends your rental? Send them your personal link, such as monbateau.godirect.fr. They can ask you a question, check availability, book and pay online on your site. You remain their point of contact, with no GoDirect commission on the rental.'}}</p>\n<p class=\"intro\" *ngIf=\"concierge\">{{fr?'Le propriétaire vous autorise à intervenir sur ses biens. Retrouvez les annonces, les réservations et les échanges clients selon les droits qu’il vous a confiés.':'Owners authorize you to manage their rentals. Access listings, bookings and customer conversations according to the permissions they grant.'}}</p>\n<p *ngIf=\"!concierge\">{{fr?'Appartements, voitures, bateaux, places de parking, piscines…':'Apartments, cars, boats, parking spaces, pools…'}}</p><div class=\"actions\"><a class=\"button\" routerLink=\"/account/signup\" [queryParams]=\"{returnUrl:concierge?'/concierge':'/owner/listings'}\">{{concierge?(fr?'Créer mon compte concierge':'Create my concierge account'):(fr?'Créer mon site de location':'Create my rental website')}}</a><a class=\"button secondary\" [routerLink]=\"concierge?'/concierge':'/owner/listings'\">{{fr?'Accéder à mon espace':'Open my workspace'}}</a></div><p><a href=\"/assets/pwa/install.html\">{{fr?\"Installer GoDirect sur mon téléphone\":\"Install GoDirect on my phone\"}}</a></p><p class=\"note\">{{fr?'99 € TTC par an et par annonce. 0 % de commission GoDirect. Les frais de traitement Stripe restent distincts.':'€99 per year per listing, tax included. 0% GoDirect commission. Stripe processing fees remain separate.'}}</p></div><img *ngIf=\"!concierge\" class=\"portal-hero-image\" src=\"assets/img/property/villa-azur/villa-5.jpg\" alt=\"\" width=\"1536\" height=\"1024\" fetchpriority=\"high\"></section>\n<section class=\"dedicated\"><div><p class=\"eyebrow\">{{fr?'Un lien qui vous ressemble':'A link that is yours'}}</p><h2>{{fr?'Votre site dédié : prefix.godirect.fr':'Your dedicated site: prefix.godirect.fr'}}</h2><p>{{fr?'Choisissez le préfixe de votre bien et partagez son adresse avec vos clients. Sur ce site, ils voient tous vos biens en ligne : titre et description, photos, prix, disponibilités et réservation.':'Choose your rental’s prefix and share its address with customers. On that site they see your published rentals: title and description, photos, price, availability and booking.'}}</p></div><div class=\"site-example\"><span>{{fr?'Par exemple':'For example'}}</span><strong>monbateau.godirect.fr</strong><p>{{fr?'Votre bien. Vos clients. Vos réservations en direct.':'Your rental. Your customers. Your direct bookings.'}}</p></div></section>\n<section><h2>{{fr?'Simple, du premier contact à la réservation':'Simple, from first contact to booking'}}</h2><div class=\"cards\"><article><span>01</span><h3>{{fr?'Présentez votre bien':'Show your rental'}}</h3><p>{{fr?'Un titre, une description, des photos et votre prix. Complétez les justificatifs puis demandez la validation de votre annonce.':'Add a title, description, photos and price. Complete the required documents and request listing approval.'}}</p></article><article><span>02</span><h3>{{fr?'Partagez votre lien':'Share your link'}}</h3><p>{{fr?'Envoyez votre adresse dédiée aux clients qui vous connaissent déjà. Ils consultent vos disponibilités, posent une question et réservent sur votre site.':'Send your dedicated address to customers who already know you. They check availability, ask a question and book on your site.'}}</p></article><article><span>03</span><h3>{{fr?'Recevez vos paiements':'Receive payments'}}</h3><p>{{fr?'Stripe sécurise les acomptes, les paiements du solde et l’enregistrement de carte pour la caution. L’enregistrement seul ne débite pas la caution.':'Stripe secures deposits, balance payments and card registration for a security deposit. Registering the card alone does not charge the security deposit.'}}</p></article></div></section>\n<section id=\"role-concierge\" class=\"delegation\"><p class=\"eyebrow\">{{fr?'Vous gardez la main':'You stay in control'}}</p><h2>{{fr?'Confiez la gestion à un concierge':'Delegate management to a concierge'}}</h2><p>{{fr?'Le concierge intervient uniquement sur les biens que vous lui confiez et avec les droits que vous activez : contenu de l’annonce, réservations, clients et paiements. Il peut gérer les demandes et échanger avec les clients selon ses autorisations. Vous pouvez modifier ou retirer ses droits.':'A concierge accesses only the rentals you delegate and the permissions you enable: listing content, bookings, customers and payments. They can manage requests and talk to customers according to those permissions. You can change or revoke their access.'}}</p><p>{{fr?'Le concierge ne devient pas propriétaire du bien. Les opérations financières réservées au propriétaire le restent.':'The concierge does not become the rental owner. Financial actions reserved for the owner remain reserved.'}}</p><div class=\"actions\"><a class=\"button secondary\" routerLink=\"/concierge-role\">{{fr?'Comprendre le rôle du concierge':'Understand the concierge role'}}</a><a class=\"button\" href=\"https://godirect.fr/concierge\">{{fr?'Espace concierge':'Concierge workspace'}}</a></div></section>\n</main></div></ng-template>\n</ng-template></ng-template>\n";
 
 /***/ }),
 
@@ -57998,6 +60768,58 @@ HomefooterComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,_an
   template: _homefooter_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_homefooter_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], HomefooterComponent);
+
+
+/***/ }),
+
+/***/ 41644:
+/*!*********************************************************!*\
+  !*** ./src/app/shared/listing-description.component.ts ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ListingDescriptionComponent: () => (/* binding */ ListingDescriptionComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiA6aG9zdHtkaXNwbGF5OmJsb2NrO21pbi13aWR0aDowfS5kZXNjcmlwdGlvbi1jb3B5e21heC13aWR0aDo3MmNoO2ZvbnQtc2l6ZToxOHB4O2xpbmUtaGVpZ2h0OjEuODtjb2xvcjppbmhlcml0O292ZXJmbG93LXdyYXA6YW55d2hlcmU7dGV4dC1hbGlnbjpsZWZ0fQogcHttYXJnaW46MCAwIDEuMmVtO3doaXRlLXNwYWNlOnByZS1saW5lfWgze2ZvbnQtc2l6ZToyM3B4O2xpbmUtaGVpZ2h0OjEuMzU7bWFyZ2luOjEuNmVtIDAgLjZlbTtmb250LXdlaWdodDo3MDB9aDM6Zmlyc3QtY2hpbGR7bWFyZ2luLXRvcDowfQogdWwsb2x7bWFyZ2luOi41ZW0gMCAxLjNlbTtwYWRkaW5nLWxlZnQ6MS41ZW19bGl7cGFkZGluZy1sZWZ0Oi4yZW07bWFyZ2luOi40NWVtIDA7d2hpdGUtc3BhY2U6cHJlLWxpbmV9c3Ryb25ne2ZvbnQtd2VpZ2h0OjgwMDtjb2xvcjppbmhlcml0fQogQG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmRlc2NyaXB0aW9uLWNvcHl7Zm9udC1zaXplOjE3cHg7bGluZS1oZWlnaHQ6MS43NX1oM3tmb250LXNpemU6MjFweH19CiA_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/shared/listing-description.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=CiA6aG9zdHtkaXNwbGF5OmJsb2NrO21pbi13aWR0aDowfS5kZXNjcmlwdGlvbi1jb3B5e21heC13aWR0aDo3MmNoO2ZvbnQtc2l6ZToxOHB4O2xpbmUtaGVpZ2h0OjEuODtjb2xvcjppbmhlcml0O292ZXJmbG93LXdyYXA6YW55d2hlcmU7dGV4dC1hbGlnbjpsZWZ0fQogcHttYXJnaW46MCAwIDEuMmVtO3doaXRlLXNwYWNlOnByZS1saW5lfWgze2ZvbnQtc2l6ZToyM3B4O2xpbmUtaGVpZ2h0OjEuMzU7bWFyZ2luOjEuNmVtIDAgLjZlbTtmb250LXdlaWdodDo3MDB9aDM6Zmlyc3QtY2hpbGR7bWFyZ2luLXRvcDowfQogdWwsb2x7bWFyZ2luOi41ZW0gMCAxLjNlbTtwYWRkaW5nLWxlZnQ6MS41ZW19bGl7cGFkZGluZy1sZWZ0Oi4yZW07bWFyZ2luOi40NWVtIDA7d2hpdGUtc3BhY2U6cHJlLWxpbmV9c3Ryb25ne2ZvbnQtd2VpZ2h0OjgwMDtjb2xvcjppbmhlcml0fQogQG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmRlc2NyaXB0aW9uLWNvcHl7Zm9udC1zaXplOjE3cHg7bGluZS1oZWlnaHQ6MS43NX1oM3tmb250LXNpemU6MjFweH19CiA%3D!./src/app/shared/listing-description.component.ts */ 57976);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiA6aG9zdHtkaXNwbGF5OmJsb2NrO21pbi13aWR0aDowfS5kZXNjcmlwdGlvbi1jb3B5e21heC13aWR0aDo3MmNoO2ZvbnQtc2l6ZToxOHB4O2xpbmUtaGVpZ2h0OjEuODtjb2xvcjppbmhlcml0O292ZXJmbG93LXdyYXA6YW55d2hlcmU7dGV4dC1hbGlnbjpsZWZ0fQogcHttYXJnaW46MCAwIDEuMmVtO3doaXRlLXNwYWNlOnByZS1saW5lfWgze2ZvbnQtc2l6ZToyM3B4O2xpbmUtaGVpZ2h0OjEuMzU7bWFyZ2luOjEuNmVtIDAgLjZlbTtmb250LXdlaWdodDo3MDB9aDM6Zmlyc3QtY2hpbGR7bWFyZ2luLXRvcDowfQogdWwsb2x7bWFyZ2luOi41ZW0gMCAxLjNlbTtwYWRkaW5nLWxlZnQ6MS41ZW19bGl7cGFkZGluZy1sZWZ0Oi4yZW07bWFyZ2luOi40NWVtIDA7d2hpdGUtc3BhY2U6cHJlLWxpbmV9c3Ryb25ne2ZvbnQtd2VpZ2h0OjgwMDtjb2xvcjppbmhlcml0fQogQG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmRlc2NyaXB0aW9uLWNvcHl7Zm9udC1zaXplOjE3cHg7bGluZS1oZWlnaHQ6MS43NX1oM3tmb250LXNpemU6MjFweH19CiA_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiA6aG9zdHtkaXNwbGF5OmJsb2NrO21pbi13aWR0aDowfS5kZXNjcmlwdGlvbi1jb3B5e21heC13aWR0aDo3MmNoO2ZvbnQtc2l6ZToxOHB4O2xpbmUtaGVpZ2h0OjEuODtjb2xvcjppbmhlcml0O292ZXJmbG93LXdyYXA6YW55d2hlcmU7dGV4dC1hbGlnbjpsZWZ0fQogcHttYXJnaW46MCAwIDEuMmVtO3doaXRlLXNwYWNlOnByZS1saW5lfWgze2ZvbnQtc2l6ZToyM3B4O2xpbmUtaGVpZ2h0OjEuMzU7bWFyZ2luOjEuNmVtIDAgLjZlbTtmb250LXdlaWdodDo3MDB9aDM6Zmlyc3QtY2hpbGR7bWFyZ2luLXRvcDowfQogdWwsb2x7bWFyZ2luOi41ZW0gMCAxLjNlbTtwYWRkaW5nLWxlZnQ6MS41ZW19bGl7cGFkZGluZy1sZWZ0Oi4yZW07bWFyZ2luOi40NWVtIDA7d2hpdGUtc3BhY2U6cHJlLWxpbmV9c3Ryb25ne2ZvbnQtd2VpZ2h0OjgwMDtjb2xvcjppbmhlcml0fQogQG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmRlc2NyaXB0aW9uLWNvcHl7Zm9udC1zaXplOjE3cHg7bGluZS1oZWlnaHQ6MS43NX1oM3tmb250LXNpemU6MjFweH19CiA_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_component_ts__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _services_listing_description__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/listing-description */ 11612);
+
+
+
+
+
+let ListingDescriptionComponent = class ListingDescriptionComponent {
+  text = '';
+  blocks = [];
+  ngOnChanges() {
+    this.blocks = (0,_services_listing_description__WEBPACK_IMPORTED_MODULE_1__.descriptionBlocks)(this.text);
+  }
+  static propDecorators = {
+    text: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input
+    }]
+  };
+};
+ListingDescriptionComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
+  selector: 'app-listing-description',
+  standalone: true,
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_4__.CommonModule],
+  template: `
+ <div class="description-copy"><ng-container *ngFor="let block of blocks" [ngSwitch]="block.kind">
+ <h3 *ngSwitchCase="'heading'"><ng-container *ngTemplateOutlet="inline;context:{$implicit:block.parts}"></ng-container></h3>
+ <ul *ngSwitchCase="'bullets'"><li *ngFor="let item of block.items"><ng-container *ngTemplateOutlet="inline;context:{$implicit:item}"></ng-container></li></ul>
+ <ol *ngSwitchCase="'numbers'"><li *ngFor="let item of block.items"><ng-container *ngTemplateOutlet="inline;context:{$implicit:item}"></ng-container></li></ol>
+ <p *ngSwitchDefault><ng-container *ngTemplateOutlet="inline;context:{$implicit:block.parts}"></ng-container></p>
+ </ng-container></div>
+ <ng-template #inline let-parts><ng-container *ngFor="let part of parts"><strong *ngIf="part.bold;else plain">{{part.text}}</strong><ng-template #plain>{{part.text}}</ng-template></ng-container></ng-template>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiA6aG9zdHtkaXNwbGF5OmJsb2NrO21pbi13aWR0aDowfS5kZXNjcmlwdGlvbi1jb3B5e21heC13aWR0aDo3MmNoO2ZvbnQtc2l6ZToxOHB4O2xpbmUtaGVpZ2h0OjEuODtjb2xvcjppbmhlcml0O292ZXJmbG93LXdyYXA6YW55d2hlcmU7dGV4dC1hbGlnbjpsZWZ0fQogcHttYXJnaW46MCAwIDEuMmVtO3doaXRlLXNwYWNlOnByZS1saW5lfWgze2ZvbnQtc2l6ZToyM3B4O2xpbmUtaGVpZ2h0OjEuMzU7bWFyZ2luOjEuNmVtIDAgLjZlbTtmb250LXdlaWdodDo3MDB9aDM6Zmlyc3QtY2hpbGR7bWFyZ2luLXRvcDowfQogdWwsb2x7bWFyZ2luOi41ZW0gMCAxLjNlbTtwYWRkaW5nLWxlZnQ6MS41ZW19bGl7cGFkZGluZy1sZWZ0Oi4yZW07bWFyZ2luOi40NWVtIDA7d2hpdGUtc3BhY2U6cHJlLWxpbmV9c3Ryb25ne2ZvbnQtd2VpZ2h0OjgwMDtjb2xvcjppbmhlcml0fQogQG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmRlc2NyaXB0aW9uLWNvcHl7Zm9udC1zaXplOjE3cHg7bGluZS1oZWlnaHQ6MS43NX1oM3tmb250LXNpemU6MjFweH19CiA_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
+})], ListingDescriptionComponent);
 
 
 /***/ }),
@@ -58738,6 +61560,45 @@ let ResourceDashboardComponent = class ResourceDashboardComponent {
   assetAccess;
   siteContent;
   route;
+  heroSlides = [{
+    type: 'boat',
+    image: '/api/media/object?path=assets%2Fboats%2Falegria%2Fboat%2Fbali-41-2.jpg'
+  }, {
+    type: 'car',
+    image: 'assets/img/car/riviera-ev/tesla-model-3-1.jpg'
+  }, {
+    type: 'parking',
+    image: 'assets/img/parking/port-antibes-parking/parking-1.jpg'
+  }, {
+    type: 'property',
+    image: 'assets/img/property/villa-azur/villa-5.jpg'
+  }, {
+    type: 'pool',
+    image: 'assets/img/pool/azure-pool/pool-1.jpg'
+  }];
+  heroIndex = 0;
+  heroPlaying = false;
+  heroHovered = false;
+  heroTimer;
+  get heroSlide() {
+    return this.heroSlides[this.heroIndex];
+  }
+  selectHero(index) {
+    this.heroIndex = (index + this.heroSlides.length) % this.heroSlides.length;
+  }
+  pauseHero() {
+    this.heroPlaying = false;
+  }
+  toggleHero() {
+    this.heroPlaying = !this.heroPlaying;
+  }
+  startHero() {
+    if (typeof window === 'undefined') return;
+    this.heroPlaying = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.heroTimer = setInterval(() => {
+      if (this.heroPlaying && !this.heroHovered && !document.hidden && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) this.selectHero(this.heroIndex + 1);
+    }, 6000);
+  }
   get listingOffline() {
     return typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('listing');
   }
@@ -58746,7 +61607,7 @@ let ResourceDashboardComponent = class ResourceDashboardComponent {
   }
   requestedClientView = false;
   get browseAsCustomer() {
-    return this.requestedClientView || this.assetAccess.isManager && this.assetAccess.viewMode === 'client';
+    return typeof window !== 'undefined' && window.location.pathname === '/locations' || this.requestedClientView || this.assetAccess.isManager && this.assetAccess.viewMode === 'client';
   }
   set browseAsCustomer(value) {
     this.requestedClientView = value;
@@ -58810,6 +61671,7 @@ let ResourceDashboardComponent = class ResourceDashboardComponent {
   ngOnInit() {
     var _this = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (typeof document !== 'undefined') document.title = 'GoDirect | Trouver une location';
       if (typeof document !== 'undefined' && !document.getElementById('godirect-discovery-style')) {
         const link = document.createElement('link');
         link.id = 'godirect-discovery-style';
@@ -58854,6 +61716,7 @@ let ResourceDashboardComponent = class ResourceDashboardComponent {
     })();
   }
   ngOnDestroy() {
+    if (this.heroTimer) clearInterval(this.heroTimer);
     this.closePublicationChoice();
     this.accountSub?.unsubscribe();
     this.querySub?.unsubscribe();
@@ -58892,7 +61755,8 @@ let ResourceDashboardComponent = class ResourceDashboardComponent {
           ...(_this2.isOwner && _this2.browseAsCustomer ? {
             view: 'rentals'
           } : {})
-        }
+        },
+        fragment: 'results'
       });
     })();
   }
@@ -58934,6 +61798,16 @@ let ResourceDashboardComponent = class ResourceDashboardComponent {
     return !!this.appliedFilters.startAt && !!this.appliedFilters.endAt;
   }
   openResult(item) {
+    if (item.siteUrl) {
+      const u = new URL(item.siteUrl);
+      if (u.protocol === 'https:' && u.hostname === 'godirect.fr') {
+        Object.entries(this.appliedFilters).forEach(([k, v]) => {
+          if (v) u.searchParams.set(k, String(v));
+        });
+        window.location.assign(u.href);
+        return;
+      }
+    }
     void this.router.navigate(['/', item.resourceType, item.resourceId, 'home'], {
       queryParams: this.appliedFilters
     });
@@ -59113,11 +61987,24 @@ let ReservationAuthService = class ReservationAuthService {
     var _this = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const a = _this.store;
-      const auth = a.firebaseauth || a.firebaseAuth || a.auth;
+      const getAuth = () => a.firebaseauth || a.firebaseAuth || a.auth;
+      const deadline = Date.now() + 12000;
+      let auth = getAuth();
+      while (!auth && Date.now() < deadline) {
+        yield new Promise(resolve => setTimeout(resolve, 100));
+        auth = getAuth();
+      }
       let u = auth?.currentUser;
       // On a fresh subdomain load, Firebase may still be restoring its persisted session.
       if (!u && typeof auth?.authStateReady === 'function') {
-        yield auth.authStateReady();
+        let timer;
+        try {
+          yield Promise.race([auth.authStateReady(), new Promise(resolve => {
+            timer = setTimeout(resolve, 8000);
+          })]);
+        } finally {
+          clearTimeout(timer);
+        }
         u = auth.currentUser;
       } else if (!u && typeof auth?.onAuthStateChanged === 'function') {
         yield new Promise(resolve => {
@@ -59248,21 +62135,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   LayoutModule: () => (/* binding */ LayoutModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @ionic/angular */ 21507);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var ngx_spinner__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ngx-spinner */ 61249);
-/* harmony import */ var _home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./home/homelayout/homelayout.component */ 14211);
-/* harmony import */ var _home_homeheader_homeheader_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./home/homeheader/homeheader.component */ 48917);
-/* harmony import */ var _home_homefooter_homefooter_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./home/homefooter/homefooter.component */ 41445);
-/* harmony import */ var _layoutnone_layoutnone_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./layoutnone/layoutnone.component */ 51629);
-/* harmony import */ var _layout_router_module__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./layout.router.module */ 4528);
-/* harmony import */ var _cookie_consent_cookie_consent_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./cookie-consent/cookie-consent.component */ 64759);
-/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
-/* harmony import */ var _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../services/resource-route.pipe */ 19337);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _messaging_message_badge_component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../messaging/message-badge.component */ 16101);
+/* harmony import */ var _messaging_asset_contact_button_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../messaging/asset-contact-button.component */ 78952);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @ionic/angular */ 21507);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var ngx_spinner__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ngx-spinner */ 61249);
+/* harmony import */ var _home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./home/homelayout/homelayout.component */ 14211);
+/* harmony import */ var _home_homeheader_homeheader_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./home/homeheader/homeheader.component */ 48917);
+/* harmony import */ var _home_homefooter_homefooter_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./home/homefooter/homefooter.component */ 41445);
+/* harmony import */ var _layoutnone_layoutnone_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./layoutnone/layoutnone.component */ 51629);
+/* harmony import */ var _layout_router_module__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./layout.router.module */ 4528);
+/* harmony import */ var _cookie_consent_cookie_consent_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./cookie-consent/cookie-consent.component */ 64759);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
+/* harmony import */ var _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../services/resource-route.pipe */ 19337);
+
+
 
 
 
@@ -59279,10 +62170,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let LayoutModule = class LayoutModule {};
-LayoutModule = (0,tslib__WEBPACK_IMPORTED_MODULE_8__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.NgModule)({
-  declarations: [_home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_0__.HomelayoutComponent, _home_homeheader_homeheader_component__WEBPACK_IMPORTED_MODULE_1__.HomeheaderComponent, _home_homefooter_homefooter_component__WEBPACK_IMPORTED_MODULE_2__.HomefooterComponent, _layoutnone_layoutnone_component__WEBPACK_IMPORTED_MODULE_3__.LayoutnoneComponent, _cookie_consent_cookie_consent_component__WEBPACK_IMPORTED_MODULE_5__.CookieConsentComponent],
-  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_10__.CommonModule, _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_7__.ResourceRoutePipe, _angular_router__WEBPACK_IMPORTED_MODULE_11__.RouterModule, _ionic_angular__WEBPACK_IMPORTED_MODULE_12__.IonicModule, _angular_forms__WEBPACK_IMPORTED_MODULE_13__.FormsModule, _angular_forms__WEBPACK_IMPORTED_MODULE_13__.ReactiveFormsModule, ngx_spinner__WEBPACK_IMPORTED_MODULE_14__.NgxSpinnerModule, _layout_router_module__WEBPACK_IMPORTED_MODULE_4__.LayoutRoutingModule, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_6__.SiteTextPipe],
-  exports: [_home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_0__.HomelayoutComponent]
+LayoutModule = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_11__.NgModule)({
+  declarations: [_home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_2__.HomelayoutComponent, _home_homeheader_homeheader_component__WEBPACK_IMPORTED_MODULE_3__.HomeheaderComponent, _home_homefooter_homefooter_component__WEBPACK_IMPORTED_MODULE_4__.HomefooterComponent, _layoutnone_layoutnone_component__WEBPACK_IMPORTED_MODULE_5__.LayoutnoneComponent, _cookie_consent_cookie_consent_component__WEBPACK_IMPORTED_MODULE_7__.CookieConsentComponent],
+  imports: [_messaging_message_badge_component__WEBPACK_IMPORTED_MODULE_0__.MessageBadgeComponent, _messaging_asset_contact_button_component__WEBPACK_IMPORTED_MODULE_1__.AssetContactButtonComponent, _angular_common__WEBPACK_IMPORTED_MODULE_12__.CommonModule, _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_9__.ResourceRoutePipe, _angular_router__WEBPACK_IMPORTED_MODULE_13__.RouterModule, _ionic_angular__WEBPACK_IMPORTED_MODULE_14__.IonicModule, _angular_forms__WEBPACK_IMPORTED_MODULE_15__.FormsModule, _angular_forms__WEBPACK_IMPORTED_MODULE_15__.ReactiveFormsModule, ngx_spinner__WEBPACK_IMPORTED_MODULE_16__.NgxSpinnerModule, _layout_router_module__WEBPACK_IMPORTED_MODULE_6__.LayoutRoutingModule, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_8__.SiteTextPipe],
+  exports: [_home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_2__.HomelayoutComponent]
 })], LayoutModule);
 
 
@@ -59295,7 +62186,7 @@ LayoutModule = (0,tslib__WEBPACK_IMPORTED_MODULE_8__.__decorate)([(0,_angular_co
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<div class=\"site-shell\">\n  <app-homeheader></app-homeheader>\n  <main class=\"site-main\">\n    <router-outlet></router-outlet>\n  </main>\n  <app-homefooter></app-homefooter>\n  <app-cookie-consent></app-cookie-consent>\n\n  <div\n    class=\"image-modal\"\n    *ngIf=\"zoomedImageSrc\"\n    role=\"dialog\"\n    aria-modal=\"true\"\n    [attr.aria-label]=\"zoomedImageAlt\"\n    (click)=\"closeImageZoom()\"\n  >\n    <button\n      class=\"image-modal__close\"\n      type=\"button\"\n      [attr.aria-label]=\"'ui.pages.tc4d5897cbd0c' | siteText\"\n      (click)=\"closeImageZoom(); $event.stopPropagation()\"\n    >\n      ×\n    </button>\n\n    <button\n      class=\"image-modal__nav image-modal__nav--previous\"\n      type=\"button\"\n      [attr.aria-label]=\"'ui.pages.t46edf0f8b4d6' | siteText\"\n      *ngIf=\"zoomGallery.length > 1\"\n      (click)=\"showPreviousImage(); $event.stopPropagation()\"\n    >\n      ‹\n    </button>\n\n    <div class=\"image-modal__content\" (click)=\"$event.stopPropagation()\">\n      <img [src]=\"zoomedImageSrc\" [alt]=\"zoomedImageAlt\" />\n      <p *ngIf=\"zoomedImageAlt\">{{ zoomedImageAlt }}</p>\n      <span class=\"image-modal__counter\" *ngIf=\"zoomGallery.length > 1\">\n        {{ zoomIndex + 1 }} / {{ zoomGallery.length }}\n      </span>\n    </div>\n\n    <button\n      class=\"image-modal__nav image-modal__nav--next\"\n      type=\"button\"\n      [attr.aria-label]=\"'ui.pages.teb89a789f147' | siteText\"\n      *ngIf=\"zoomGallery.length > 1\"\n      (click)=\"showNextImage(); $event.stopPropagation()\"\n    >\n      ›\n    </button>\n  </div>\n</div>\n";
+module.exports = "<div class=\"site-shell\">\n  \n  <main class=\"site-main\">\n    <router-outlet></router-outlet>\n  </main>\n\n  <app-cookie-consent></app-cookie-consent>\n\n  <div\n    class=\"image-modal\"\n    *ngIf=\"zoomedImageSrc\"\n    role=\"dialog\"\n    aria-modal=\"true\"\n    [attr.aria-label]=\"zoomedImageAlt\"\n    (click)=\"closeImageZoom()\"\n  >\n    <button\n      class=\"image-modal__close\"\n      type=\"button\"\n      [attr.aria-label]=\"'ui.pages.tc4d5897cbd0c' | siteText\"\n      (click)=\"closeImageZoom(); $event.stopPropagation()\"\n    >\n      ×\n    </button>\n\n    <button\n      class=\"image-modal__nav image-modal__nav--previous\"\n      type=\"button\"\n      [attr.aria-label]=\"'ui.pages.t46edf0f8b4d6' | siteText\"\n      *ngIf=\"zoomGallery.length > 1\"\n      (click)=\"showPreviousImage(); $event.stopPropagation()\"\n    >\n      ‹\n    </button>\n\n    <div class=\"image-modal__content\" (click)=\"$event.stopPropagation()\">\n      <img [src]=\"zoomedImageSrc\" [alt]=\"zoomedImageAlt\" />\n      <p *ngIf=\"zoomedImageAlt\">{{ zoomedImageAlt }}</p>\n      <span class=\"image-modal__counter\" *ngIf=\"zoomGallery.length > 1\">\n        {{ zoomIndex + 1 }} / {{ zoomGallery.length }}\n      </span>\n    </div>\n\n    <button\n      class=\"image-modal__nav image-modal__nav--next\"\n      type=\"button\"\n      [attr.aria-label]=\"'ui.pages.teb89a789f147' | siteText\"\n      *ngIf=\"zoomGallery.length > 1\"\n      (click)=\"showNextImage(); $event.stopPropagation()\"\n    >\n      ›\n    </button>\n  </div>\n</div>\n";
 
 /***/ }),
 
@@ -59367,23 +62258,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   HomeheaderComponent: () => (/* binding */ HomeheaderComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _homeheader_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./homeheader.component.html?ngResource */ 4527);
 /* harmony import */ var _homeheader_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./homeheader.component.scss?ngResource */ 39829);
 /* harmony import */ var _homeheader_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_homeheader_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _services_account_header__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../services/account-header */ 1768);
-/* harmony import */ var _services_asset_domain__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../services/asset-domain */ 94984);
-/* harmony import */ var _services_asset_navigation__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../services/asset-navigation */ 75162);
-/* harmony import */ var _services_platform_home_text__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../services/platform-home-text */ 31540);
-/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../services/asset-access.service */ 16379);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! godigital-lib */ 22464);
-/* harmony import */ var _home_site_content__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../home/site-content */ 14009);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../../services/language.service */ 48756);
-/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../../home/site-content-service/site-content.service */ 73196);
-/* harmony import */ var _services_private_media_service__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../../services/private-media.service */ 71260);
-/* harmony import */ var _services_resource_context_service__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../../services/resource-context.service */ 54560);
+/* harmony import */ var _messaging_message_notifications_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../messaging/message-notifications.service */ 54230);
+/* harmony import */ var _messaging_message_unread__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../messaging/message-unread */ 87516);
+/* harmony import */ var _messaging_messaging_text__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../messaging/messaging-text */ 17289);
+/* harmony import */ var _services_account_header__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../services/account-header */ 1768);
+/* harmony import */ var _services_asset_domain__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../services/asset-domain */ 94984);
+/* harmony import */ var _services_asset_navigation__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../services/asset-navigation */ 75162);
+/* harmony import */ var _services_platform_home_text__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../../services/platform-home-text */ 31540);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../../services/asset-access.service */ 16379);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var _home_site_content__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../../home/site-content */ 14009);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../../services/language.service */ 48756);
+/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../../../home/site-content-service/site-content.service */ 73196);
+/* harmony import */ var _services_private_media_service__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../../../services/private-media.service */ 71260);
+/* harmony import */ var _services_resource_context_service__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../../../services/resource-context.service */ 54560);
+
+
+
 
 
 
@@ -59409,17 +62306,31 @@ let HomeheaderComponent = class HomeheaderComponent {
   privateMedia;
   resourceContext;
   assetAccess;
-  isDedicatedAssetSite = !!(0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_4__.dedicatedAsset)();
+  messageNotifications;
+  messageQuery() {
+    const pending = (0,_messaging_message_unread__WEBPACK_IMPORTED_MODULE_4__.unreadConversation)(this.messageNotifications.summary.value);
+    if (pending) return {
+      threadId: pending.id
+    };
+    return this.assetAccess.canManageFor(this.bookingAssetType, this.bookingAssetId) ? {} : {
+      contactType: this.bookingAssetType,
+      contactAsset: this.bookingAssetId
+    };
+  }
+  messageLabel() {
+    return (0,_messaging_messaging_text__WEBPACK_IMPORTED_MODULE_5__.messagingText)(this.currentLanguage, 0);
+  }
+  isDedicatedAssetSite = !!(0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_7__.dedicatedAsset)();
   get goDirectHomeLabel() {
-    return this.siteContentService.tFromContent(this.allSiteContent, 'ui.platform.home', this.currentLanguage, _services_platform_home_text__WEBPACK_IMPORTED_MODULE_6__.PLATFORM_HOME_TEXT[this.currentLanguage] || _services_platform_home_text__WEBPACK_IMPORTED_MODULE_6__.PLATFORM_HOME_TEXT.en);
+    return this.siteContentService.tFromContent(this.allSiteContent, 'ui.platform.home', this.currentLanguage, _services_platform_home_text__WEBPACK_IMPORTED_MODULE_9__.PLATFORM_HOME_TEXT[this.currentLanguage] || _services_platform_home_text__WEBPACK_IMPORTED_MODULE_9__.PLATFORM_HOME_TEXT.en);
   }
   ownerViewStorageKey = 'alegria-owner-view';
   logoUrl;
   menuOpen = false;
   ownerView = 'admin';
   currentLanguage = 'fr';
-  content = _home_site_content__WEBPACK_IMPORTED_MODULE_8__.SITE_CONTENT.fr;
-  allSiteContent = _home_site_content__WEBPACK_IMPORTED_MODULE_8__.SITE_CONTENT;
+  content = _home_site_content__WEBPACK_IMPORTED_MODULE_11__.SITE_CONTENT.fr;
+  allSiteContent = _home_site_content__WEBPACK_IMPORTED_MODULE_11__.SITE_CONTENT;
   loggedUser = null;
   languageSub;
   accountSub;
@@ -59720,7 +62631,7 @@ let HomeheaderComponent = class HomeheaderComponent {
       'nav.logout': 'Выйти'
     }
   };
-  constructor(languageService, router, mainSvc, siteContentService, privateMedia, resourceContext, assetAccess) {
+  constructor(languageService, router, mainSvc, siteContentService, privateMedia, resourceContext, assetAccess, messageNotifications) {
     this.languageService = languageService;
     this.router = router;
     this.mainSvc = mainSvc;
@@ -59728,6 +62639,7 @@ let HomeheaderComponent = class HomeheaderComponent {
     this.privateMedia = privateMedia;
     this.resourceContext = resourceContext;
     this.assetAccess = assetAccess;
+    this.messageNotifications = messageNotifications;
     this.logoUrl = this.privateMedia.objectUrl('/api/media/object?path=assets%2Flogo-Alegria.png');
   }
   ngOnInit() {
@@ -59736,7 +62648,7 @@ let HomeheaderComponent = class HomeheaderComponent {
       yield _this.assetAccess.refresh();
       _this.restoreOwnerView();
       _this.routeSub = _this.router.events.subscribe(event => {
-        if (event instanceof _angular_router__WEBPACK_IMPORTED_MODULE_13__.NavigationEnd) {
+        if (event instanceof _angular_router__WEBPACK_IMPORTED_MODULE_16__.NavigationEnd) {
           _this.restoreOwnerView();
           _this.closeMenu();
         }
@@ -59745,7 +62657,7 @@ let HomeheaderComponent = class HomeheaderComponent {
       _this.loadSiteContent();
       _this.languageSub = _this.languageService.language$.subscribe(language => {
         _this.currentLanguage = language;
-        _this.content = _this.allSiteContent[language] || _home_site_content__WEBPACK_IMPORTED_MODULE_8__.SITE_CONTENT[language] || _home_site_content__WEBPACK_IMPORTED_MODULE_8__.SITE_CONTENT.fr;
+        _this.content = _this.allSiteContent[language] || _home_site_content__WEBPACK_IMPORTED_MODULE_11__.SITE_CONTENT[language] || _home_site_content__WEBPACK_IMPORTED_MODULE_11__.SITE_CONTENT.fr;
       });
       const svc = _this.mainSvc;
       const userObservable = typeof svc.getLoggedUser === 'function' ? svc.getLoggedUser() : typeof svc.getUser === 'function' ? svc.getUser() : svc.bnUserO;
@@ -59765,10 +62677,10 @@ let HomeheaderComponent = class HomeheaderComponent {
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
         _this2.allSiteContent = yield _this2.siteContentService.getContent();
-        _this2.content = _this2.allSiteContent[_this2.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_8__.SITE_CONTENT[_this2.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_8__.SITE_CONTENT.fr;
+        _this2.content = _this2.allSiteContent[_this2.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_11__.SITE_CONTENT[_this2.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_11__.SITE_CONTENT.fr;
       } catch {
-        _this2.allSiteContent = _home_site_content__WEBPACK_IMPORTED_MODULE_8__.SITE_CONTENT;
-        _this2.content = _home_site_content__WEBPACK_IMPORTED_MODULE_8__.SITE_CONTENT[_this2.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_8__.SITE_CONTENT.fr;
+        _this2.allSiteContent = _home_site_content__WEBPACK_IMPORTED_MODULE_11__.SITE_CONTENT;
+        _this2.content = _home_site_content__WEBPACK_IMPORTED_MODULE_11__.SITE_CONTENT[_this2.currentLanguage] || _home_site_content__WEBPACK_IMPORTED_MODULE_11__.SITE_CONTENT.fr;
       }
     })();
   }
@@ -59889,7 +62801,7 @@ let HomeheaderComponent = class HomeheaderComponent {
     try {
       preferred = localStorage.getItem(this.ownerViewStorageKey) === 'customer' ? 'customer' : 'admin';
     } catch {}
-    this.ownerView = (0,_services_asset_navigation__WEBPACK_IMPORTED_MODULE_5__.assetView)(this.router.url, this.isAdmin, preferred);
+    this.ownerView = (0,_services_asset_navigation__WEBPACK_IMPORTED_MODULE_8__.assetView)(this.router.url, this.isAdmin, preferred);
   }
   rememberView(view) {
     this.ownerView = view;
@@ -59948,10 +62860,10 @@ let HomeheaderComponent = class HomeheaderComponent {
     return this.isLoggedIn && !this.isAdmin;
   }
   get showCustomerNavigation() {
-    return (0,_services_asset_navigation__WEBPACK_IMPORTED_MODULE_5__.assetView)(this.router.url, this.isAdmin, this.ownerView) === 'customer';
+    return (0,_services_asset_navigation__WEBPACK_IMPORTED_MODULE_8__.assetView)(this.router.url, this.isAdmin, this.ownerView) === 'customer';
   }
   get showAdminNavigation() {
-    return (0,_services_asset_navigation__WEBPACK_IMPORTED_MODULE_5__.assetView)(this.router.url, this.isAdmin, this.ownerView) === 'admin';
+    return (0,_services_asset_navigation__WEBPACK_IMPORTED_MODULE_8__.assetView)(this.router.url, this.isAdmin, this.ownerView) === 'admin';
   }
   get firstName() {
     const user = this.loggedUser || {};
@@ -59965,7 +62877,7 @@ let HomeheaderComponent = class HomeheaderComponent {
     return this.resourceContext.resourceId;
   }
   accountText(key) {
-    return (0,_services_account_header__WEBPACK_IMPORTED_MODULE_3__.accountHeaderText)(this.currentLanguage, key);
+    return (0,_services_account_header__WEBPACK_IMPORTED_MODULE_6__.accountHeaderText)(this.currentLanguage, key);
   }
   get accountSummaryLabel() {
     return this.accountText('account');
@@ -60366,22 +63278,24 @@ let HomeheaderComponent = class HomeheaderComponent {
     return this.t('nav.operations');
   }
   static ctorParameters = () => [{
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_9__.LanguageService
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_12__.LanguageService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_13__.Router
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_16__.Router
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_14__.ServicesService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_17__.ServicesService
   }, {
-    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_10__.SiteContentService
+    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_13__.SiteContentService
   }, {
-    type: _services_private_media_service__WEBPACK_IMPORTED_MODULE_11__.PrivateMediaService
+    type: _services_private_media_service__WEBPACK_IMPORTED_MODULE_14__.PrivateMediaService
   }, {
-    type: _services_resource_context_service__WEBPACK_IMPORTED_MODULE_12__.ResourceContextService
+    type: _services_resource_context_service__WEBPACK_IMPORTED_MODULE_15__.ResourceContextService
   }, {
-    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_7__.AssetAccessService
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_10__.AssetAccessService
+  }, {
+    type: _messaging_message_notifications_service__WEBPACK_IMPORTED_MODULE_3__.MessageNotificationsService
   }];
 };
-HomeheaderComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_15__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_16__.Component)({
+HomeheaderComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_18__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_19__.Component)({
   standalone: false,
   selector: 'app-homeheader',
   template: _homeheader_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
@@ -60420,48 +63334,62 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AppModule: () => (/* binding */ AppModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _services_legal_interceptor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./services/legal.interceptor */ 163);
-/* harmony import */ var _owner_site_promo_owner_site_promo_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./owner-site-promo/owner-site-promo.component */ 64604);
-/* harmony import */ var _home_roles_home_roles_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./home-roles/home-roles.component */ 92108);
-/* harmony import */ var _workspace_concierge_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./workspace/concierge.component */ 866);
-/* harmony import */ var _layout_release_footer_release_footer_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./layout/release-footer/release-footer.component */ 63855);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var _services_asset_url_serializer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./services/asset-url-serializer */ 82060);
-/* harmony import */ var _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./services/resource-route.pipe */ 19337);
-/* harmony import */ var _platform_admin_platform_admin_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./platform-admin/platform-admin.component */ 25928);
-/* harmony import */ var _owner_dashboard_owner_dashboard_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./owner-dashboard/owner-dashboard.component */ 88504);
-/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./home/site-text.pipe */ 99343);
-/* harmony import */ var _owner_listings_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./owner-listings.component */ 22314);
-/* harmony import */ var _services_asset_owner_read_interceptor__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./services/asset-owner-read.interceptor */ 87691);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _awesome_cordova_plugins_geolocation_ngx__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @awesome-cordova-plugins/geolocation/ngx */ 86241);
-/* harmony import */ var _awesome_cordova_plugins_native_geocoder_ngx__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @awesome-cordova-plugins/native-geocoder/ngx */ 23915);
-/* harmony import */ var ng2_haversine__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ng2-haversine */ 83);
-/* harmony import */ var _angular_platform_browser__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! @angular/platform-browser */ 53563);
-/* harmony import */ var _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! @angular/platform-browser/animations */ 43835);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! @angular/common/http */ 93262);
-/* harmony import */ var _awesome_cordova_plugins_barcode_scanner_ngx__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @awesome-cordova-plugins/barcode-scanner/ngx */ 86948);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! @ionic/angular */ 21507);
-/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! @ionic/angular */ 4059);
-/* harmony import */ var _awesome_cordova_plugins_splash_screen_ngx__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @awesome-cordova-plugins/splash-screen/ngx */ 28293);
-/* harmony import */ var _awesome_cordova_plugins_status_bar_ngx__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @awesome-cordova-plugins/status-bar/ngx */ 61203);
-/* harmony import */ var ngx_logger__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! ngx-logger */ 66383);
-/* harmony import */ var _app_routing_module__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./app-routing.module */ 94114);
-/* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./app.component */ 20092);
-/* harmony import */ var _layout_layout_module__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./layout/layout.module */ 48177);
-/* harmony import */ var _environments_environment__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../environments/environment */ 45312);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! godigital-lib */ 22464);
-/* harmony import */ var _page404_page404_component__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./page404/page404.component */ 27044);
-/* harmony import */ var _services_firebase_media_interceptor__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./services/firebase-media.interceptor */ 52802);
-/* harmony import */ var ngx_echarts__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! ngx-echarts */ 15371);
-/* harmony import */ var ngx_spinner__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ngx-spinner */ 61249);
-/* harmony import */ var _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./legacy-route-redirect/legacy-route-redirect.component */ 19924);
-/* harmony import */ var _resource_dashboard_resource_dashboard_component__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./resource-dashboard/resource-dashboard.component */ 45792);
-/* harmony import */ var _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./resource-list/resource-list.component */ 65416);
-/* harmony import */ var _owner_payments_component__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./owner-payments.component */ 17620);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _layout_platform_layout_shared_header_component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./layout/platform-layout/shared-header.component */ 97390);
+/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./layout/platform-layout/platform-layout.component */ 86075);
+/* harmony import */ var _workspace_push_button_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./workspace/push-button.component */ 31710);
+/* harmony import */ var _workspace_rental_history_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./workspace/rental-history.component */ 98800);
+/* harmony import */ var _workspace_site_management_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./workspace/site-management.component */ 37068);
+/* harmony import */ var _portals_portal_home_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./portals/portal-home.component */ 51749);
+/* harmony import */ var _messaging_message_notifications_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./messaging/message-notifications.component */ 53426);
+/* harmony import */ var _services_legal_interceptor__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./services/legal.interceptor */ 163);
+/* harmony import */ var _owner_site_promo_owner_site_promo_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./owner-site-promo/owner-site-promo.component */ 64604);
+/* harmony import */ var _home_roles_home_roles_component__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./home-roles/home-roles.component */ 92108);
+/* harmony import */ var _workspace_concierge_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./workspace/concierge.component */ 866);
+/* harmony import */ var _layout_release_footer_release_footer_component__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./layout/release-footer/release-footer.component */ 63855);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _services_asset_url_serializer__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./services/asset-url-serializer */ 82060);
+/* harmony import */ var _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./services/resource-route.pipe */ 19337);
+/* harmony import */ var _platform_admin_platform_admin_component__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./platform-admin/platform-admin.component */ 25928);
+/* harmony import */ var _owner_dashboard_owner_dashboard_component__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./owner-dashboard/owner-dashboard.component */ 88504);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./home/site-text.pipe */ 99343);
+/* harmony import */ var _owner_listings_component__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./owner-listings.component */ 22314);
+/* harmony import */ var _services_asset_owner_read_interceptor__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./services/asset-owner-read.interceptor */ 87691);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _awesome_cordova_plugins_geolocation_ngx__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @awesome-cordova-plugins/geolocation/ngx */ 86241);
+/* harmony import */ var _awesome_cordova_plugins_native_geocoder_ngx__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @awesome-cordova-plugins/native-geocoder/ngx */ 23915);
+/* harmony import */ var ng2_haversine__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ng2-haversine */ 83);
+/* harmony import */ var _angular_platform_browser__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(/*! @angular/platform-browser */ 53563);
+/* harmony import */ var _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(/*! @angular/platform-browser/animations */ 43835);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var _awesome_cordova_plugins_barcode_scanner_ngx__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @awesome-cordova-plugins/barcode-scanner/ngx */ 86948);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(/*! @ionic/angular */ 21507);
+/* harmony import */ var _ionic_angular__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(/*! @ionic/angular */ 4059);
+/* harmony import */ var _awesome_cordova_plugins_splash_screen_ngx__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! @awesome-cordova-plugins/splash-screen/ngx */ 28293);
+/* harmony import */ var _awesome_cordova_plugins_status_bar_ngx__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! @awesome-cordova-plugins/status-bar/ngx */ 61203);
+/* harmony import */ var ngx_logger__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(/*! ngx-logger */ 66383);
+/* harmony import */ var _app_routing_module__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./app-routing.module */ 94114);
+/* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./app.component */ 20092);
+/* harmony import */ var _layout_layout_module__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./layout/layout.module */ 48177);
+/* harmony import */ var _environments_environment__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(/*! ../environments/environment */ 45312);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var _page404_page404_component__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(/*! ./page404/page404.component */ 27044);
+/* harmony import */ var _services_firebase_media_interceptor__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(/*! ./services/firebase-media.interceptor */ 52802);
+/* harmony import */ var ngx_echarts__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(/*! ngx-echarts */ 15371);
+/* harmony import */ var ngx_spinner__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(/*! ngx-spinner */ 61249);
+/* harmony import */ var _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(/*! ./legacy-route-redirect/legacy-route-redirect.component */ 19924);
+/* harmony import */ var _resource_dashboard_resource_dashboard_component__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(/*! ./resource-dashboard/resource-dashboard.component */ 45792);
+/* harmony import */ var _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(/*! ./resource-list/resource-list.component */ 65416);
+/* harmony import */ var _owner_payments_component__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(/*! ./owner-payments.component */ 17620);
+
+
+
+
+
+
+
 
 
 
@@ -60505,38 +63433,38 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let AppModule = class AppModule {};
-AppModule = (0,tslib__WEBPACK_IMPORTED_MODULE_28__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_29__.NgModule)({
-  declarations: [_legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_24__.LegacyRouteRedirectComponent, _resource_dashboard_resource_dashboard_component__WEBPACK_IMPORTED_MODULE_25__.ResourceDashboardComponent, _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_26__.ResourceListComponent, _owner_payments_component__WEBPACK_IMPORTED_MODULE_27__.OwnerPaymentsComponent, _app_component__WEBPACK_IMPORTED_MODULE_19__.AppComponent, _page404_page404_component__WEBPACK_IMPORTED_MODULE_22__.Page404Component],
-  imports: [_owner_listings_component__WEBPACK_IMPORTED_MODULE_10__.OwnerListingsComponent, _layout_release_footer_release_footer_component__WEBPACK_IMPORTED_MODULE_4__.ReleaseFooterComponent, _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_6__.ResourceRoutePipe, _platform_admin_platform_admin_component__WEBPACK_IMPORTED_MODULE_7__.PlatformAdminComponent, _owner_dashboard_owner_dashboard_component__WEBPACK_IMPORTED_MODULE_8__.OwnerDashboardComponent, _workspace_concierge_component__WEBPACK_IMPORTED_MODULE_3__.ConciergeComponent, _home_roles_home_roles_component__WEBPACK_IMPORTED_MODULE_2__.HomeRolesComponent, _owner_site_promo_owner_site_promo_component__WEBPACK_IMPORTED_MODULE_1__.OwnerSitePromoComponent, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_9__.SiteTextPipe, _angular_platform_browser__WEBPACK_IMPORTED_MODULE_30__.BrowserModule, _angular_forms__WEBPACK_IMPORTED_MODULE_31__.FormsModule, _app_routing_module__WEBPACK_IMPORTED_MODULE_18__.AppRoutingModule, _angular_common_http__WEBPACK_IMPORTED_MODULE_32__.HttpClientModule, godigital_lib__WEBPACK_IMPORTED_MODULE_33__.GodigitalbModule, _layout_layout_module__WEBPACK_IMPORTED_MODULE_20__.LayoutModule, ngx_spinner__WEBPACK_IMPORTED_MODULE_34__.NgxSpinnerModule, _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_35__.BrowserAnimationsModule, _ionic_angular__WEBPACK_IMPORTED_MODULE_36__.IonicModule, ngx_logger__WEBPACK_IMPORTED_MODULE_37__.LoggerModule.forRoot({
-    serverLoggingUrl: _environments_environment__WEBPACK_IMPORTED_MODULE_21__.environment.apiUrl,
-    level: _environments_environment__WEBPACK_IMPORTED_MODULE_21__.environment.logLevel,
-    serverLogLevel: _environments_environment__WEBPACK_IMPORTED_MODULE_21__.environment.serverLogLevel,
+AppModule = (0,tslib__WEBPACK_IMPORTED_MODULE_35__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_36__.NgModule)({
+  declarations: [_portals_portal_home_component__WEBPACK_IMPORTED_MODULE_5__.PortalHomeComponent, _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_31__.LegacyRouteRedirectComponent, _resource_dashboard_resource_dashboard_component__WEBPACK_IMPORTED_MODULE_32__.ResourceDashboardComponent, _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_33__.ResourceListComponent, _owner_payments_component__WEBPACK_IMPORTED_MODULE_34__.OwnerPaymentsComponent, _app_component__WEBPACK_IMPORTED_MODULE_26__.AppComponent, _page404_page404_component__WEBPACK_IMPORTED_MODULE_29__.Page404Component],
+  imports: [_workspace_site_management_component__WEBPACK_IMPORTED_MODULE_4__.SiteManagementComponent, _layout_platform_layout_shared_header_component__WEBPACK_IMPORTED_MODULE_0__.SharedHeaderComponent, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_1__.PlatformLayoutComponent, _workspace_push_button_component__WEBPACK_IMPORTED_MODULE_2__.PushButtonComponent, _workspace_rental_history_component__WEBPACK_IMPORTED_MODULE_3__.RentalHistoryComponent, _messaging_message_notifications_component__WEBPACK_IMPORTED_MODULE_6__.MessageNotificationsComponent, _owner_listings_component__WEBPACK_IMPORTED_MODULE_17__.OwnerListingsComponent, _layout_release_footer_release_footer_component__WEBPACK_IMPORTED_MODULE_11__.ReleaseFooterComponent, _services_resource_route_pipe__WEBPACK_IMPORTED_MODULE_13__.ResourceRoutePipe, _platform_admin_platform_admin_component__WEBPACK_IMPORTED_MODULE_14__.PlatformAdminComponent, _owner_dashboard_owner_dashboard_component__WEBPACK_IMPORTED_MODULE_15__.OwnerDashboardComponent, _workspace_concierge_component__WEBPACK_IMPORTED_MODULE_10__.ConciergeComponent, _home_roles_home_roles_component__WEBPACK_IMPORTED_MODULE_9__.HomeRolesComponent, _owner_site_promo_owner_site_promo_component__WEBPACK_IMPORTED_MODULE_8__.OwnerSitePromoComponent, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_16__.SiteTextPipe, _angular_platform_browser__WEBPACK_IMPORTED_MODULE_37__.BrowserModule, _angular_forms__WEBPACK_IMPORTED_MODULE_38__.FormsModule, _app_routing_module__WEBPACK_IMPORTED_MODULE_25__.AppRoutingModule, _angular_common_http__WEBPACK_IMPORTED_MODULE_39__.HttpClientModule, godigital_lib__WEBPACK_IMPORTED_MODULE_40__.GodigitalbModule, _layout_layout_module__WEBPACK_IMPORTED_MODULE_27__.LayoutModule, ngx_spinner__WEBPACK_IMPORTED_MODULE_41__.NgxSpinnerModule, _angular_platform_browser_animations__WEBPACK_IMPORTED_MODULE_42__.BrowserAnimationsModule, _ionic_angular__WEBPACK_IMPORTED_MODULE_43__.IonicModule, ngx_logger__WEBPACK_IMPORTED_MODULE_44__.LoggerModule.forRoot({
+    serverLoggingUrl: _environments_environment__WEBPACK_IMPORTED_MODULE_28__.environment.apiUrl,
+    level: _environments_environment__WEBPACK_IMPORTED_MODULE_28__.environment.logLevel,
+    serverLogLevel: _environments_environment__WEBPACK_IMPORTED_MODULE_28__.environment.serverLogLevel,
     disableConsoleLogging: false
   }),
   //    FormsModule, ReactiveFormsModule,
-  ngx_echarts__WEBPACK_IMPORTED_MODULE_38__.NgxEchartsModule.forRoot({
+  ngx_echarts__WEBPACK_IMPORTED_MODULE_45__.NgxEchartsModule.forRoot({
     echarts: () => __webpack_require__.e(/*! import() */ "node_modules_echarts_index_js").then(__webpack_require__.bind(__webpack_require__, /*! echarts */ 8408))
   })],
   providers: [{
-    provide: _angular_common_http__WEBPACK_IMPORTED_MODULE_32__.HTTP_INTERCEPTORS,
-    useClass: _services_legal_interceptor__WEBPACK_IMPORTED_MODULE_0__.LegalInterceptor,
+    provide: _angular_common_http__WEBPACK_IMPORTED_MODULE_39__.HTTP_INTERCEPTORS,
+    useClass: _services_legal_interceptor__WEBPACK_IMPORTED_MODULE_7__.LegalInterceptor,
     multi: true
   }, {
-    provide: _angular_router__WEBPACK_IMPORTED_MODULE_39__.UrlSerializer,
-    useClass: _services_asset_url_serializer__WEBPACK_IMPORTED_MODULE_5__.AssetUrlSerializer
+    provide: _angular_router__WEBPACK_IMPORTED_MODULE_46__.UrlSerializer,
+    useClass: _services_asset_url_serializer__WEBPACK_IMPORTED_MODULE_12__.AssetUrlSerializer
   }, {
-    provide: _angular_common_http__WEBPACK_IMPORTED_MODULE_32__.HTTP_INTERCEPTORS,
-    useClass: _services_asset_owner_read_interceptor__WEBPACK_IMPORTED_MODULE_11__.AssetOwnerReadInterceptor,
+    provide: _angular_common_http__WEBPACK_IMPORTED_MODULE_39__.HTTP_INTERCEPTORS,
+    useClass: _services_asset_owner_read_interceptor__WEBPACK_IMPORTED_MODULE_18__.AssetOwnerReadInterceptor,
     multi: true
-  }, _awesome_cordova_plugins_status_bar_ngx__WEBPACK_IMPORTED_MODULE_17__.StatusBar, _awesome_cordova_plugins_splash_screen_ngx__WEBPACK_IMPORTED_MODULE_16__.SplashScreen, {
-    provide: _angular_router__WEBPACK_IMPORTED_MODULE_39__.RouteReuseStrategy,
-    useClass: _ionic_angular__WEBPACK_IMPORTED_MODULE_40__.IonicRouteStrategy
-  }, godigital_lib__WEBPACK_IMPORTED_MODULE_33__.UtilsService, _awesome_cordova_plugins_barcode_scanner_ngx__WEBPACK_IMPORTED_MODULE_15__.BarcodeScanner, _angular_common__WEBPACK_IMPORTED_MODULE_41__.DatePipe, _awesome_cordova_plugins_geolocation_ngx__WEBPACK_IMPORTED_MODULE_12__.Geolocation, _awesome_cordova_plugins_native_geocoder_ngx__WEBPACK_IMPORTED_MODULE_13__.NativeGeocoder, ng2_haversine__WEBPACK_IMPORTED_MODULE_14__.HaversineService, {
-    provide: _angular_common_http__WEBPACK_IMPORTED_MODULE_32__.HTTP_INTERCEPTORS,
-    useClass: _services_firebase_media_interceptor__WEBPACK_IMPORTED_MODULE_23__.FirebaseMediaInterceptor,
+  }, _awesome_cordova_plugins_status_bar_ngx__WEBPACK_IMPORTED_MODULE_24__.StatusBar, _awesome_cordova_plugins_splash_screen_ngx__WEBPACK_IMPORTED_MODULE_23__.SplashScreen, {
+    provide: _angular_router__WEBPACK_IMPORTED_MODULE_46__.RouteReuseStrategy,
+    useClass: _ionic_angular__WEBPACK_IMPORTED_MODULE_47__.IonicRouteStrategy
+  }, godigital_lib__WEBPACK_IMPORTED_MODULE_40__.UtilsService, _awesome_cordova_plugins_barcode_scanner_ngx__WEBPACK_IMPORTED_MODULE_22__.BarcodeScanner, _angular_common__WEBPACK_IMPORTED_MODULE_48__.DatePipe, _awesome_cordova_plugins_geolocation_ngx__WEBPACK_IMPORTED_MODULE_19__.Geolocation, _awesome_cordova_plugins_native_geocoder_ngx__WEBPACK_IMPORTED_MODULE_20__.NativeGeocoder, ng2_haversine__WEBPACK_IMPORTED_MODULE_21__.HaversineService, {
+    provide: _angular_common_http__WEBPACK_IMPORTED_MODULE_39__.HTTP_INTERCEPTORS,
+    useClass: _services_firebase_media_interceptor__WEBPACK_IMPORTED_MODULE_30__.FirebaseMediaInterceptor,
     multi: true
   }],
-  bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_19__.AppComponent]
+  bootstrap: [_app_component__WEBPACK_IMPORTED_MODULE_26__.AppComponent]
 })], AppModule);
 
 
@@ -60740,7 +63668,7 @@ form button + button {
 
 .steps {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   margin: 24px 0;
   gap: 8px;
 }
@@ -60971,7 +63899,275 @@ form button + button {
 .prefix-error {
   color: #b42318;
   font-weight: 600;
-}`, "",{"version":3,"sources":["webpack://./src/app/owner-listings.component.scss"],"names":[],"mappings":"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","sourcesContent":[":host{display:block;background:#f8f6f1;color:#17313e}.listings-shell{max-width:1120px;margin:auto;padding:28px 20px}header{display:flex;align-items:center;justify-content:space-between;gap:20px}header p{max-width:780px;line-height:1.5}section,article{background:white;border:1px solid #dce3e6;border-radius:14px;padding:24px;margin:20px 0}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}label{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}input,textarea,select{padding:12px;border:1px solid #b6c7cf;border-radius:8px;font:inherit}textarea{min-height:100px}button,.actions a{padding:10px 14px;background:#12506a;color:white;border:0;border-radius:8px;text-decoration:none;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.actions,nav{display:flex;flex-wrap:wrap;align-items:center;gap:10px}fieldset{border:0;padding:0;min-width:0}.error{background:#fff0ed;color:#862c20;padding:15px;border-radius:8px}@media(max-width:600px){header{align-items:start;flex-direction:column}section,article{padding:16px}}\n\n.reservation-warning{background:#fff6dd;border:1px solid #d5b257;border-radius:8px;padding:16px;margin:16px 0;color:#513b14}.acknowledgement{display:flex;flex-direction:row;align-items:flex-start;gap:10px}.acknowledgement input{margin-top:4px}button.danger{background:#9a3027}form button+button{margin-left:8px}\n\n#listing-editor{scroll-margin-top:150px}\n\n.onboarding{padding:20px;margin:20px 0;background:#edf6f5;border:1px solid #bcd7d4;border-radius:16px}.onboarding li{margin:8px 0;list-style:none}.onboarding ul{padding:0}\n\n.wizard{max-width:900px;margin:28px auto;scroll-margin-top:150px;outline-offset:5px}.wizard .fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.wizard h3{margin:28px 0 16px}.wizard textarea{min-height:140px}.wizard small,.muted{color:#526976;line-height:1.5}.steps{display:grid;grid-template-columns:repeat(3,1fr);margin:24px 0;gap:8px}.steps button{background:#edf2f3;color:#36515e;display:flex;align-items:center;justify-content:center;gap:10px}.steps button.current{background:#12506a;color:white}.steps span{font-weight:bold}.steps button:disabled{cursor:default;opacity:.65}.quiet,.actions .secondary{background:#edf2f3;color:#17313e}.optional{padding:14px 0;border-bottom:1px solid #e0e7e9}.optional summary,.more-actions summary{cursor:pointer;font-weight:600}.optional label{margin-top:14px}.checkbox{display:flex;flex-direction:row;align-items:center;gap:10px}.checkbox input{width:auto}.upload-zone{padding:26px;border:2px dashed #a1bec9;border-radius:14px;background:#f5fafb;cursor:pointer}.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}.photo-grid figure{margin:0;border:1px solid #dce3e6;border-radius:12px;overflow:hidden}.photo-grid img{width:100%;height:150px;object-fit:cover}.photo-grid figcaption{padding:8px 12px;font-weight:600}.photo-actions{display:flex;gap:4px;padding:8px}.photo-actions button{padding:7px}.danger-text{color:#9a3027!important}.wizard-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #dce3e6;margin-top:28px;padding-top:20px}.subscription-note,.subscription-panel{background:#f1f7f7;border-radius:12px;padding:18px;margin-top:18px}.list-toolbar{justify-content:space-between;margin:24px 0}.status{background:#eef4f5;padding:8px 12px;border-radius:20px}.more-actions{position:relative}.more-actions summary{padding:10px 14px}.more-actions>div{position:absolute;z-index:10;right:0;min-width:230px;padding:10px;display:grid;gap:4px;background:white;border:1px solid #dce3e6;box-shadow:0 8px 24px #17313e20;border-radius:12px}.more-actions a,.more-actions button{background:white;color:#17313e;text-align:left;display:block}.more-actions a:hover,.more-actions button:hover{background:#edf2f3}.listings-shell>article{position:relative}.page-header h1{margin-top:0}.wizard label input,.wizard label select{min-width:0;max-width:100%;box-sizing:border-box}@media(max-width:650px){.wizard .fields{grid-template-columns:1fr}.steps button{font-size:13px;padding:10px 5px;gap:5px}.wizard header{flex-direction:row}.more-actions>div{right:auto;left:0}.actions{gap:8px}}\n\n.prefix-picker{margin:1.5rem 0;padding:1rem;border:1px solid #c7d8db;border-radius:12px}.prefix-option{display:flex;align-items:center;gap:.6rem;margin:.5rem 0}.prefix-option input{width:auto}\n\n.prefix-picker input.prefix-invalid{border:2px solid #b42318!important;background:#fff5f5;color:#8a1c13}.prefix-picker input.prefix-invalid:focus{outline:2px solid #b42318;outline-offset:2px}.prefix-error{color:#b42318;font-weight:600}\n"],"sourceRoot":""}]);
+}
+
+@media (max-width: 650px) {
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.listing-import label {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+  align-items: center;
+}
+
+.listing-import input[type=url], .listing-import textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #b8ccd3;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.listing-import fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.listing-import .import-review {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f0f5f5;
+  border-radius: 12px;
+}
+
+.import-description {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.listing-import details {
+  margin: 20px 0;
+}
+
+.listing-import summary {
+  cursor: pointer;
+}
+
+.wizard-stripe {
+  padding: 20px;
+  background: #f0f6f5;
+  border-radius: 16px;
+}
+
+.wizard-stripe p {
+  line-height: 1.7;
+}
+
+.wizard-stripe > a, .wizard-stripe > button {
+  display: inline-block;
+  margin: 12px 12px 12px 0;
+}
+
+.import-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.import-photo-card {
+  border: 2px solid #dce3e6;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  margin: 0;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.import-photo-card.selected {
+  border-color: #12506a;
+}
+
+.import-photo-card img {
+  display: block;
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.import-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 160px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: #edf2f3;
+  color: #526976;
+}
+
+.import-photo-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+}
+
+.import-photo-choice input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.import-photo-card:focus-within {
+  outline: 2px solid #12506a;
+  outline-offset: 3px;
+}
+
+@media (max-width: 450px) {
+  .import-photo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.description-field {
+  grid-column: 1/-1;
+  min-width: 0;
+}
+
+.description-field > label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 700px) {
+  header, .actions {
+    flex-wrap: wrap;
+  }
+  .actions > * {
+    min-height: 44px;
+  }
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  input, select, textarea {
+    min-width: 0;
+    max-width: 100%;
+    font-size: 16px;
+  }
+  article {
+    overflow-wrap: anywhere;
+  }
+}
+.listings-shell {
+  max-width: 1480px;
+  padding-inline: clamp(12px, 3vw, 48px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .listings-shell {
+    padding-block: 14px;
+  }
+  .listings-shell article, .listings-shell section {
+    padding: 14px;
+    margin-block: 10px;
+  }
+  .listings-shell header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .listings-shell input, .listings-shell select {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+@media (max-width: 640px) {
+  .actions .more-actions[open] {
+    flex-basis: 100%;
+  }
+  .actions .more-actions > div {
+    position: static;
+    min-width: 0;
+  }
+  .actions .more-actions a, .actions .more-actions button {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+}
+.listings-shell article > img.gd-cover {
+  width: 76px;
+  height: 54px;
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: 7px;
+  vertical-align: middle;
+  margin: 0 10px 4px 0;
+}
+
+.listings-shell article .listing-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 6px 0;
+}
+
+.listings-shell .listing-checks > * {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  font: 600 12px/1.25 inherit;
+  font-family: inherit;
+  font-size: 12px;
+  border: 1px solid #b8c2c6;
+  border-radius: 16px;
+  background: #eef0f1;
+  color: #47535a;
+  text-decoration: none;
+}
+
+.listings-shell .listing-checks > .ready {
+  background: #e3f2e9;
+  border-color: #a0c9b0;
+  color: #20563a;
+}
+
+.listing-checks a:hover, .listing-checks button:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .listings-shell article > img.gd-cover {
+    width: 60px;
+    height: 44px;
+  }
+  .listings-shell .listing-checks > * {
+    min-height: 34px;
+  }
+}
+.listings-shell > article {
+  padding: 12px 14px;
+  margin: 8px 0;
+}
+
+.listings-shell > article header h2 {
+  font-size: 1.14rem;
+  margin: 4px 0;
+}
+
+.listings-shell > article header p, .listings-shell > article > p {
+  margin: 3px 0;
+  line-height: 1.35;
+  font-size: 0.88rem;
+}
+
+.listings-shell > article .actions {
+  gap: 6px;
+}
+
+.listings-shell > article img.gd-cover {
+  width: 58px;
+  height: 42px;
+}`, "",{"version":3,"sources":["webpack://./src/app/owner-listings.component.scss"],"names":[],"mappings":"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","sourcesContent":[":host{display:block;background:#f8f6f1;color:#17313e}.listings-shell{max-width:1120px;margin:auto;padding:28px 20px}header{display:flex;align-items:center;justify-content:space-between;gap:20px}header p{max-width:780px;line-height:1.5}section,article{background:white;border:1px solid #dce3e6;border-radius:14px;padding:24px;margin:20px 0}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}label{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}input,textarea,select{padding:12px;border:1px solid #b6c7cf;border-radius:8px;font:inherit}textarea{min-height:100px}button,.actions a{padding:10px 14px;background:#12506a;color:white;border:0;border-radius:8px;text-decoration:none;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.actions,nav{display:flex;flex-wrap:wrap;align-items:center;gap:10px}fieldset{border:0;padding:0;min-width:0}.error{background:#fff0ed;color:#862c20;padding:15px;border-radius:8px}@media(max-width:600px){header{align-items:start;flex-direction:column}section,article{padding:16px}}\n\n.reservation-warning{background:#fff6dd;border:1px solid #d5b257;border-radius:8px;padding:16px;margin:16px 0;color:#513b14}.acknowledgement{display:flex;flex-direction:row;align-items:flex-start;gap:10px}.acknowledgement input{margin-top:4px}button.danger{background:#9a3027}form button+button{margin-left:8px}\n\n#listing-editor{scroll-margin-top:150px}\n\n.onboarding{padding:20px;margin:20px 0;background:#edf6f5;border:1px solid #bcd7d4;border-radius:16px}.onboarding li{margin:8px 0;list-style:none}.onboarding ul{padding:0}\n\n.wizard{max-width:900px;margin:28px auto;scroll-margin-top:150px;outline-offset:5px}.wizard .fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.wizard h3{margin:28px 0 16px}.wizard textarea{min-height:140px}.wizard small,.muted{color:#526976;line-height:1.5}.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin:24px 0;gap:8px}.steps button{background:#edf2f3;color:#36515e;display:flex;align-items:center;justify-content:center;gap:10px}.steps button.current{background:#12506a;color:white}.steps span{font-weight:bold}.steps button:disabled{cursor:default;opacity:.65}.quiet,.actions .secondary{background:#edf2f3;color:#17313e}.optional{padding:14px 0;border-bottom:1px solid #e0e7e9}.optional summary,.more-actions summary{cursor:pointer;font-weight:600}.optional label{margin-top:14px}.checkbox{display:flex;flex-direction:row;align-items:center;gap:10px}.checkbox input{width:auto}.upload-zone{padding:26px;border:2px dashed #a1bec9;border-radius:14px;background:#f5fafb;cursor:pointer}.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}.photo-grid figure{margin:0;border:1px solid #dce3e6;border-radius:12px;overflow:hidden}.photo-grid img{width:100%;height:150px;object-fit:cover}.photo-grid figcaption{padding:8px 12px;font-weight:600}.photo-actions{display:flex;gap:4px;padding:8px}.photo-actions button{padding:7px}.danger-text{color:#9a3027!important}.wizard-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #dce3e6;margin-top:28px;padding-top:20px}.subscription-note,.subscription-panel{background:#f1f7f7;border-radius:12px;padding:18px;margin-top:18px}.list-toolbar{justify-content:space-between;margin:24px 0}.status{background:#eef4f5;padding:8px 12px;border-radius:20px}.more-actions{position:relative}.more-actions summary{padding:10px 14px}.more-actions>div{position:absolute;z-index:10;right:0;min-width:230px;padding:10px;display:grid;gap:4px;background:white;border:1px solid #dce3e6;box-shadow:0 8px 24px #17313e20;border-radius:12px}.more-actions a,.more-actions button{background:white;color:#17313e;text-align:left;display:block}.more-actions a:hover,.more-actions button:hover{background:#edf2f3}.listings-shell>article{position:relative}.page-header h1{margin-top:0}.wizard label input,.wizard label select{min-width:0;max-width:100%;box-sizing:border-box}@media(max-width:650px){.wizard .fields{grid-template-columns:1fr}.steps button{font-size:13px;padding:10px 5px;gap:5px}.wizard header{flex-direction:row}.more-actions>div{right:auto;left:0}.actions{gap:8px}}\n\n.prefix-picker{margin:1.5rem 0;padding:1rem;border:1px solid #c7d8db;border-radius:12px}.prefix-option{display:flex;align-items:center;gap:.6rem;margin:.5rem 0}.prefix-option input{width:auto}\n\n.prefix-picker input.prefix-invalid{border:2px solid #b42318!important;background:#fff5f5;color:#8a1c13}.prefix-picker input.prefix-invalid:focus{outline:2px solid #b42318;outline-offset:2px}.prefix-error{color:#b42318;font-weight:600}\n\n@media(max-width:650px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}\n\n.listing-import label{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;align-items:center}.listing-import input[type=url],.listing-import textarea{width:100%;padding:12px;border:1px solid #b8ccd3;border-radius:8px;font:inherit}.listing-import fieldset{border:0;padding:0;min-width:0}.listing-import .import-review{margin-top:24px;padding:20px;background:#f0f5f5;border-radius:12px}.import-description{white-space:pre-line;overflow-wrap:anywhere}.listing-import details{margin:20px 0}.listing-import summary{cursor:pointer}\n\n.wizard-stripe{padding:20px;background:#f0f6f5;border-radius:16px}.wizard-stripe p{line-height:1.7}.wizard-stripe>a,.wizard-stripe>button{display:inline-block;margin:12px 12px 12px 0}\n\n.import-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;margin:20px 0}.import-photo-card{border:2px solid #dce3e6;border-radius:12px;overflow:hidden;background:white;margin:0;cursor:pointer;min-width:0}.import-photo-card.selected{border-color:#12506a}.import-photo-card img{display:block;width:100%;height:160px;object-fit:cover}.import-photo-placeholder{display:flex;align-items:center;justify-content:center;text-align:center;height:160px;padding:12px;box-sizing:border-box;background:#edf2f3;color:#526976}.import-photo-choice{display:flex;align-items:center;gap:10px;padding:12px}.import-photo-choice input{width:18px;height:18px;margin:0;flex-shrink:0}.import-photo-card:focus-within{outline:2px solid #12506a;outline-offset:3px}@media(max-width:450px){.import-photo-grid{grid-template-columns:1fr}}\n\n.description-field{grid-column:1/-1;min-width:0}.description-field>label{display:block;margin-bottom:8px}\n@media(max-width:700px){header,.actions{flex-wrap:wrap}.actions>*{min-height:44px}.fields{grid-template-columns:minmax(0,1fr)}input,select,textarea{min-width:0;max-width:100%;font-size:16px}article{overflow-wrap:anywhere}}\n\n.listings-shell{max-width:1480px;padding-inline:clamp(12px,3vw,48px);box-sizing:border-box}@media(max-width:600px){.listings-shell{padding-block:14px}.listings-shell article,.listings-shell section{padding:14px;margin-block:10px}.listings-shell header{flex-wrap:wrap;gap:8px}.listings-shell input,.listings-shell select{max-width:100%;box-sizing:border-box}}\n@media(max-width:640px){.actions .more-actions[open]{flex-basis:100%}.actions .more-actions>div{position:static;min-width:0}.actions .more-actions a,.actions .more-actions button{min-height:44px;box-sizing:border-box}}\n\n.listings-shell article>img.gd-cover{width:76px;height:54px;max-width:100%;object-fit:cover;border-radius:7px;vertical-align:middle;margin:0 10px 4px 0}\n.listings-shell article .listing-checks{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}\n.listings-shell .listing-checks>*{box-sizing:border-box;display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;font:600 12px/1.25 inherit;font-family:inherit;font-size:12px;border:1px solid #b8c2c6;border-radius:16px;background:#eef0f1;color:#47535a;text-decoration:none}\n.listings-shell .listing-checks>.ready{background:#e3f2e9;border-color:#a0c9b0;color:#20563a}\n.listing-checks a:hover,.listing-checks button:hover{text-decoration:underline}\n@media(max-width:600px){.listings-shell article>img.gd-cover{width:60px;height:44px}.listings-shell .listing-checks>*{min-height:34px}}\n\n.listings-shell>article{padding:12px 14px;margin:8px 0}.listings-shell>article header h2{font-size:1.14rem;margin:4px 0}.listings-shell>article header p,.listings-shell>article>p{margin:3px 0;line-height:1.35;font-size:.88rem}.listings-shell>article .actions{gap:6px}.listings-shell>article img.gd-cover{width:58px;height:42px}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -61034,6 +64230,104 @@ LayoutnoneComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_ang
   template: _layoutnone_component_html_ngResource__WEBPACK_IMPORTED_MODULE_0__,
   styles: [(_layoutnone_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_1___default())]
 })], LayoutnoneComponent);
+
+
+/***/ }),
+
+/***/ 51749:
+/*!**************************************************!*\
+  !*** ./src/app/portals/portal-home.component.ts ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PortalHomeComponent: () => (/* binding */ PortalHomeComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _portal_home_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./portal-home.component.html?ngResource */ 40863);
+/* harmony import */ var _portal_home_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./portal-home.component.scss?ngResource */ 8969);
+/* harmony import */ var _portal_home_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_portal_home_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
+/* harmony import */ var _services_portal_policy__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/portal-policy */ 6636);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/language.service */ 48756);
+
+
+
+
+
+
+
+
+
+
+let PortalHomeComponent = class PortalHomeComponent {
+  language;
+  access;
+  router;
+  auth;
+  portal = typeof window === 'undefined' ? 'owner' : (0,_services_portal_policy__WEBPACK_IMPORTED_MODULE_4__.portalFor)(window.location.hostname);
+  constructor(language, access, router, auth) {
+    this.language = language;
+    this.access = access;
+    this.router = router;
+    this.auth = auth;
+  }
+  site;
+  failed = false;
+  ngOnInit() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this.portal === 'asset') {
+        try {
+          const r = yield fetch('/api/site-home', {
+            cache: 'no-store'
+          });
+          if (!r.ok) throw Error();
+          _this.site = yield r.json();
+          document.title = _this.site.title;
+        } catch {
+          _this.failed = true;
+        }
+        return;
+      }
+      if (typeof document !== 'undefined') document.title = _this.concierge ? 'GoDirect | Espace concierge' : 'GoDirect | Votre site de location en direct';
+      if (_this.portal === 'concierge') {
+        try {
+          yield _this.auth.user();
+          yield _this.access.refresh();
+          if (_this.access.isAuthenticated) void _this.router.navigateByUrl('/concierge');
+        } catch {}
+      }
+    })();
+  }
+  get fr() {
+    return this.language.currentLanguage === 'fr';
+  }
+  get concierge() {
+    return this.portal === 'concierge';
+  }
+  static ctorParameters = () => [{
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_6__.LanguageService
+  }, {
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_5__.AssetAccessService
+  }, {
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_7__.Router
+  }, {
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_3__.ReservationAuthService
+  }];
+};
+PortalHomeComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_8__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Component)({
+  standalone: false,
+  selector: 'app-portal-home',
+  template: _portal_home_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [(_portal_home_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
+})], PortalHomeComponent);
 
 
 /***/ }),
@@ -61281,6 +64575,17 @@ SeoService = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_core
 
 /***/ }),
 
+/***/ 52278:
+/*!*********************************************************************!*\
+  !*** ./src/app/workspace/asset-documents.component.html?ngResource ***!
+  \*********************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<ng-template #documentContent><main class=\"document-shell\" [class.embedded]=\"embedded\"><a *ngIf=\"!embedded\" [routerLink]=\"data?.canReview?'/platform/admin/documents':'/owner/listings'\">← {{t('back')}}</a><h1>{{t('title')}} <span *ngIf=\"data\">— {{data.assetName}}</span></h1><p *ngIf=\"error\" role=\"alert\">{{error}}</p><ng-container *ngIf=\"data\"><p>{{t('intro')}}</p><p class=\"notice\">{{t('privateNotice')}}</p><p>{{t('formats')}}</p><p><strong>{{t('status_'+data.summary.status)}}</strong> · {{data.summary.validated}} / {{data.summary.total}}</p><p class=\"notice\">{{t('blocked')}}</p><p *ngIf=\"data.summary.reason\">{{data.summary.reason}}</p><button *ngIf=\"data.canUpload && !data.readOnly\" [disabled]=\"busy||!data.summary.provided\" (click)=\"submit()\">{{t('submit')}}</button><p>{{t('policyNote')}}</p><section *ngIf=\"data.summary.exempted\" class=\"notice\"><h2>{{t('adminExemptionActive')}}</h2><p class=\"waiver-reason\">{{data.summary.adminExemption.reason}}</p><p *ngIf=\"data.summary.adminExemption.expiresOn\">{{t('expires')}} : {{data.summary.adminExemption.expiresOn}}</p></section><section *ngIf=\"data.canReview && !data.readOnly\"><h2>{{t('adminExemptionTitle')}}</h2><p>{{t('adminExemptionIntro')}}</p><label>{{t('reason')}}<textarea [(ngModel)]=\"exemptionReason\" maxlength=\"2000\" [disabled]=\"busy\"></textarea></label><label>{{t('expires')}}<input type=\"date\" [(ngModel)]=\"exemptionExpires\" [disabled]=\"busy\"></label><div class=\"actions\"><button [disabled]=\"busy||exemptionReason.trim().length<10\" (click)=\"exempt(true)\">{{t('adminExemptionGrant')}}</button><button *ngIf=\"data.summary.exempted\" [disabled]=\"busy||exemptionReason.trim().length<10\" (click)=\"exempt(false)\">{{t('adminExemptionRevoke')}}</button></div></section><section *ngFor=\"let r of data.requirements\"><h2>{{r.title}}</h2><p>{{t(r.policy==='required'?'mandatory':r.policy)}} · {{t('status_'+r.status)}}</p><article *ngFor=\"let d of r.files\"><strong>{{d.filename}}</strong><p>{{t('status_'+d.status)}} <span *ngIf=\"d.expiresOn\">· {{t('expires')}} : {{d.expiresOn}}</span></p><p *ngIf=\"d.reviewReason\">{{d.reviewReason}}</p><div class=\"actions\"><button type=\"button\" [disabled]=\"busy\" (click)=\"download(d)\" *ngIf=\"d.status!=='removed'\">{{t('download')}}</button><button type=\"button\" *ngIf=\"!data.readOnly\" [disabled]=\"busy\" (click)=\"remove(d)\">{{t('remove')}}</button></div><p *ngIf=\"data.canReview && !d.readForReview\">{{t('readFirst')}}</p><div *ngIf=\"data.canReview && !data.readOnly\"><label><input type=\"checkbox\" [(ngModel)]=\"readChecks[d.id]\" [disabled]=\"busy||!d.readForReview\">{{t('reviewConfirmed')}}</label><label>{{t('reason')}}<textarea [(ngModel)]=\"reasons['files'+d.id]\" maxlength=\"2000\"></textarea></label><div class=\"actions\"><button [disabled]=\"busy||!d.readForReview||!readChecks[d.id]\" (click)=\"review('files',d.id,d,'approved')\">{{t('approve')}}</button><button [disabled]=\"busy\" (click)=\"review('files',d.id,d,'rejected')\">{{t('reject')}}</button></div></div></article><fieldset [disabled]=\"busy\" *ngIf=\"data.canUpload && !data.readOnly\"><legend>{{t('upload')}}</legend><label>{{t('file')}}<input type=\"file\" accept=\"application/pdf,image/jpeg,image/png\" (change)=\"select(r.id,$event)\"></label><p *ngIf=\"files[r.id]\">{{files[r.id].name}}</p><label>{{t('expires')}} <span *ngIf=\"r.expiryRequired\">*</span><input type=\"date\" [(ngModel)]=\"expires[r.id]\" [required]=\"r.expiryRequired\"></label><button type=\"button\" [disabled]=\"!files[r.id] || (r.expiryRequired && !expires[r.id])\" (click)=\"upload(r)\">{{t('upload')}}</button></fieldset><details *ngIf=\"r.policy==='conditional' && (r.waiver || data.canUpload)\" [open]=\"!!r.waiver\"><summary>{{t('waiver')}}</summary><p>{{t('waiverIntro')}}</p><article *ngIf=\"r.waiver\"><p><strong>{{t('reason')}}</strong></p><p class=\"waiver-reason\">{{r.waiver.reason}}</p><p>{{t('status_'+r.waiver.status)}} · {{r.waiver.reviewReason}}</p><div *ngIf=\"data.canReview && !data.readOnly\"><label>{{t('reason')}}<textarea [(ngModel)]=\"reasons['waivers'+r.id]\" maxlength=\"2000\"></textarea></label><label>{{t('expires')}}<input type=\"date\" [(ngModel)]=\"expires['waivers'+r.id]\"></label><div class=\"actions\"><button [disabled]=\"busy\" (click)=\"review('waivers',r.id,r.waiver,'approved')\">{{t('approve')}}</button><button [disabled]=\"busy\" (click)=\"review('waivers',r.id,r.waiver,'rejected')\">{{t('reject')}}</button></div></div></article><label *ngIf=\"data.canUpload && !data.readOnly\">{{t('reason')}}<textarea [(ngModel)]=\"reasons[r.id]\" maxlength=\"2000\"></textarea></label><button *ngIf=\"data.canUpload && !data.readOnly\" [disabled]=\"busy\" (click)=\"waiver(r)\">{{t('submitWaiver')}}</button></details></section><section *ngIf=\"data.canReview && !data.readOnly\"><h2>{{t('adminTitle')}}</h2><p>{{t('reviewIntro')}}</p><label>{{t('dossierReason')}}<textarea [(ngModel)]=\"dossierReason\" maxlength=\"2000\"></textarea></label><div class=\"actions\"><button [disabled]=\"busy||!data.summary.submittedAt||!data.summary.complete||data.summary.pendingFiles>0||data.summary.pendingWaivers>0\" (click)=\"decision('approved')\">{{t('approveDossier')}}</button><button [disabled]=\"busy||!data.summary.submittedAt\" (click)=\"decision('rejected')\">{{t('rejectDossier')}}</button></div></section></ng-container></main></ng-template><ng-container *ngIf=\"embedded; else standalonePage\"><ng-container *ngTemplateOutlet=\"documentContent\"></ng-container></ng-container><ng-template #standalonePage><app-platform-layout><ng-container *ngTemplateOutlet=\"documentContent\"></ng-container></app-platform-layout></ng-template>\n\n<app-admin-success (dismissed)=\"success=''\" *ngIf=\"success\" [message]=\"success\"></app-admin-success>\n";
+
+/***/ }),
+
 /***/ 52488:
 /*!***********************************************************************!*\
   !*** ./src/app/resource-list/resource-list.component.html?ngResource ***!
@@ -61348,6 +64653,116 @@ FirebaseMediaInterceptor = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0
 
 /***/ }),
 
+/***/ 53426:
+/*!**************************************************************!*\
+  !*** ./src/app/messaging/message-notifications.component.ts ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MessageNotificationsComponent: () => (/* binding */ MessageNotificationsComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_notifications_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7cG9zaXRpb246cmVsYXRpdmU7ei1pbmRleDoxMDUwfS5tZXNzYWdlcy1sYXVuY2hlcntwb3NpdGlvbjpmaXhlZDtib3R0b206Y2FsYygxOHB4ICsgZW52KHNhZmUtYXJlYS1pbnNldC1ib3R0b20pKTtyaWdodDoxOHB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweDtiYWNrZ3JvdW5kOiMxNjRmNjI7Y29sb3I6I2ZmZjtwYWRkaW5nOjEycHggMTZweDtib3JkZXItcmFkaXVzOjI4cHg7Ym94LXNoYWRvdzowIDRweCAxOHB4ICMwMDAzO3RleHQtZGVjb3JhdGlvbjpub25lO2ZvbnQ6NjAwIDE1cHgvMS40IHNhbnMtc2VyaWZ9Lm1lc3NhZ2VzLWxhdW5jaGVyIHN0cm9uZ3ttaW4td2lkdGg6MjRweDtwYWRkaW5nOjJweCA2cHg7dGV4dC1hbGlnbjpjZW50ZXI7Ym9yZGVyLXJhZGl1czoyMHB4O2JhY2tncm91bmQ6I2Y4OGIyMDtjb2xvcjojMTAyZjNkfS5tZXNzYWdlLXRvYXN0e3Bvc2l0aW9uOmZpeGVkO3JpZ2h0OjE4cHg7Ym90dG9tOmNhbGMoODJweCArIGVudihzYWZlLWFyZWEtaW5zZXQtYm90dG9tKSk7bWF4LXdpZHRoOm1pbigzNDBweCxjYWxjKDEwMHZ3IC0gMzZweCkpO2Rpc3BsYXk6ZmxleDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxNDNkNGQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkY2UxO2JvcmRlci1yYWRpdXM6MTRweDtib3gtc2hhZG93OjAgNXB4IDI0cHggIzAwMDN9Lm1lc3NhZ2UtdG9hc3QgYXtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2dhcDo1cHg7cGFkZGluZzoxNnB4O2NvbG9yOmluaGVyaXQ7dGV4dC1kZWNvcmF0aW9uOm5vbmU7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZX0ubWVzc2FnZS10b2FzdCBidXR0b257YWxpZ24tc2VsZjpmbGV4LXN0YXJ0O2JvcmRlcjowO2JhY2tncm91bmQ6bm9uZTtwYWRkaW5nOjEwcHggMTRweDtjb2xvcjppbmhlcml0O2ZvbnQtc2l6ZToyNHB4O2N1cnNvcjpwb2ludGVyfWE6Zm9jdXMtdmlzaWJsZSxidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH1AbWVkaWEgcHJpbnR7Omhvc3R7ZGlzcGxheTpub25lfX0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_notifications_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/messaging/message-notifications.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7cG9zaXRpb246cmVsYXRpdmU7ei1pbmRleDoxMDUwfS5tZXNzYWdlcy1sYXVuY2hlcntwb3NpdGlvbjpmaXhlZDtib3R0b206Y2FsYygxOHB4ICsgZW52KHNhZmUtYXJlYS1pbnNldC1ib3R0b20pKTtyaWdodDoxOHB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweDtiYWNrZ3JvdW5kOiMxNjRmNjI7Y29sb3I6I2ZmZjtwYWRkaW5nOjEycHggMTZweDtib3JkZXItcmFkaXVzOjI4cHg7Ym94LXNoYWRvdzowIDRweCAxOHB4ICMwMDAzO3RleHQtZGVjb3JhdGlvbjpub25lO2ZvbnQ6NjAwIDE1cHgvMS40IHNhbnMtc2VyaWZ9Lm1lc3NhZ2VzLWxhdW5jaGVyIHN0cm9uZ3ttaW4td2lkdGg6MjRweDtwYWRkaW5nOjJweCA2cHg7dGV4dC1hbGlnbjpjZW50ZXI7Ym9yZGVyLXJhZGl1czoyMHB4O2JhY2tncm91bmQ6I2Y4OGIyMDtjb2xvcjojMTAyZjNkfS5tZXNzYWdlLXRvYXN0e3Bvc2l0aW9uOmZpeGVkO3JpZ2h0OjE4cHg7Ym90dG9tOmNhbGMoODJweCArIGVudihzYWZlLWFyZWEtaW5zZXQtYm90dG9tKSk7bWF4LXdpZHRoOm1pbigzNDBweCxjYWxjKDEwMHZ3IC0gMzZweCkpO2Rpc3BsYXk6ZmxleDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxNDNkNGQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkY2UxO2JvcmRlci1yYWRpdXM6MTRweDtib3gtc2hhZG93OjAgNXB4IDI0cHggIzAwMDN9Lm1lc3NhZ2UtdG9hc3QgYXtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2dhcDo1cHg7cGFkZGluZzoxNnB4O2NvbG9yOmluaGVyaXQ7dGV4dC1kZWNvcmF0aW9uOm5vbmU7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZX0ubWVzc2FnZS10b2FzdCBidXR0b257YWxpZ24tc2VsZjpmbGV4LXN0YXJ0O2JvcmRlcjowO2JhY2tncm91bmQ6bm9uZTtwYWRkaW5nOjEwcHggMTRweDtjb2xvcjppbmhlcml0O2ZvbnQtc2l6ZToyNHB4O2N1cnNvcjpwb2ludGVyfWE6Zm9jdXMtdmlzaWJsZSxidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH1AbWVkaWEgcHJpbnR7Omhvc3R7ZGlzcGxheTpub25lfX0%3D!./src/app/messaging/message-notifications.component.ts */ 60531);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_notifications_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7cG9zaXRpb246cmVsYXRpdmU7ei1pbmRleDoxMDUwfS5tZXNzYWdlcy1sYXVuY2hlcntwb3NpdGlvbjpmaXhlZDtib3R0b206Y2FsYygxOHB4ICsgZW52KHNhZmUtYXJlYS1pbnNldC1ib3R0b20pKTtyaWdodDoxOHB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweDtiYWNrZ3JvdW5kOiMxNjRmNjI7Y29sb3I6I2ZmZjtwYWRkaW5nOjEycHggMTZweDtib3JkZXItcmFkaXVzOjI4cHg7Ym94LXNoYWRvdzowIDRweCAxOHB4ICMwMDAzO3RleHQtZGVjb3JhdGlvbjpub25lO2ZvbnQ6NjAwIDE1cHgvMS40IHNhbnMtc2VyaWZ9Lm1lc3NhZ2VzLWxhdW5jaGVyIHN0cm9uZ3ttaW4td2lkdGg6MjRweDtwYWRkaW5nOjJweCA2cHg7dGV4dC1hbGlnbjpjZW50ZXI7Ym9yZGVyLXJhZGl1czoyMHB4O2JhY2tncm91bmQ6I2Y4OGIyMDtjb2xvcjojMTAyZjNkfS5tZXNzYWdlLXRvYXN0e3Bvc2l0aW9uOmZpeGVkO3JpZ2h0OjE4cHg7Ym90dG9tOmNhbGMoODJweCArIGVudihzYWZlLWFyZWEtaW5zZXQtYm90dG9tKSk7bWF4LXdpZHRoOm1pbigzNDBweCxjYWxjKDEwMHZ3IC0gMzZweCkpO2Rpc3BsYXk6ZmxleDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxNDNkNGQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkY2UxO2JvcmRlci1yYWRpdXM6MTRweDtib3gtc2hhZG93OjAgNXB4IDI0cHggIzAwMDN9Lm1lc3NhZ2UtdG9hc3QgYXtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2dhcDo1cHg7cGFkZGluZzoxNnB4O2NvbG9yOmluaGVyaXQ7dGV4dC1kZWNvcmF0aW9uOm5vbmU7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZX0ubWVzc2FnZS10b2FzdCBidXR0b257YWxpZ24tc2VsZjpmbGV4LXN0YXJ0O2JvcmRlcjowO2JhY2tncm91bmQ6bm9uZTtwYWRkaW5nOjEwcHggMTRweDtjb2xvcjppbmhlcml0O2ZvbnQtc2l6ZToyNHB4O2N1cnNvcjpwb2ludGVyfWE6Zm9jdXMtdmlzaWJsZSxidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH1AbWVkaWEgcHJpbnR7Omhvc3R7ZGlzcGxheTpub25lfX0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_notifications_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_notifications_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7cG9zaXRpb246cmVsYXRpdmU7ei1pbmRleDoxMDUwfS5tZXNzYWdlcy1sYXVuY2hlcntwb3NpdGlvbjpmaXhlZDtib3R0b206Y2FsYygxOHB4ICsgZW52KHNhZmUtYXJlYS1pbnNldC1ib3R0b20pKTtyaWdodDoxOHB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweDtiYWNrZ3JvdW5kOiMxNjRmNjI7Y29sb3I6I2ZmZjtwYWRkaW5nOjEycHggMTZweDtib3JkZXItcmFkaXVzOjI4cHg7Ym94LXNoYWRvdzowIDRweCAxOHB4ICMwMDAzO3RleHQtZGVjb3JhdGlvbjpub25lO2ZvbnQ6NjAwIDE1cHgvMS40IHNhbnMtc2VyaWZ9Lm1lc3NhZ2VzLWxhdW5jaGVyIHN0cm9uZ3ttaW4td2lkdGg6MjRweDtwYWRkaW5nOjJweCA2cHg7dGV4dC1hbGlnbjpjZW50ZXI7Ym9yZGVyLXJhZGl1czoyMHB4O2JhY2tncm91bmQ6I2Y4OGIyMDtjb2xvcjojMTAyZjNkfS5tZXNzYWdlLXRvYXN0e3Bvc2l0aW9uOmZpeGVkO3JpZ2h0OjE4cHg7Ym90dG9tOmNhbGMoODJweCArIGVudihzYWZlLWFyZWEtaW5zZXQtYm90dG9tKSk7bWF4LXdpZHRoOm1pbigzNDBweCxjYWxjKDEwMHZ3IC0gMzZweCkpO2Rpc3BsYXk6ZmxleDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxNDNkNGQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkY2UxO2JvcmRlci1yYWRpdXM6MTRweDtib3gtc2hhZG93OjAgNXB4IDI0cHggIzAwMDN9Lm1lc3NhZ2UtdG9hc3QgYXtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2dhcDo1cHg7cGFkZGluZzoxNnB4O2NvbG9yOmluaGVyaXQ7dGV4dC1kZWNvcmF0aW9uOm5vbmU7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZX0ubWVzc2FnZS10b2FzdCBidXR0b257YWxpZ24tc2VsZjpmbGV4LXN0YXJ0O2JvcmRlcjowO2JhY2tncm91bmQ6bm9uZTtwYWRkaW5nOjEwcHggMTRweDtjb2xvcjppbmhlcml0O2ZvbnQtc2l6ZToyNHB4O2N1cnNvcjpwb2ludGVyfWE6Zm9jdXMtdmlzaWJsZSxidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH1AbWVkaWEgcHJpbnR7Omhvc3R7ZGlzcGxheTpub25lfX0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_notifications_component_ts__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _message_badge_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./message-badge.component */ 16101);
+/* harmony import */ var _message_unread__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./message-unread */ 87516);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
+/* harmony import */ var _services_asset_domain__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/asset-domain */ 94984);
+/* harmony import */ var _asset_contact_text__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./asset-contact-text */ 78194);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/language.service */ 48756);
+/* harmony import */ var _messaging_text__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./messaging-text */ 17289);
+/* harmony import */ var _message_notifications_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./message-notifications.service */ 54230);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const COPY = {
+  fr: ['Nouveau message', 'messages non lus', 'Fermer la notification'],
+  en: ['New message', 'unread messages', 'Dismiss notification'],
+  es: ['Nuevo mensaje', 'mensajes sin leer', 'Cerrar notificación'],
+  it: ['Nuovo messaggio', 'messaggi non letti', 'Chiudi notifica'],
+  de: ['Neue Nachricht', 'ungelesene Nachrichten', 'Benachrichtigung schließen'],
+  nl: ['Nieuw bericht', 'ongelezen berichten', 'Melding sluiten'],
+  ru: ['Новое сообщение', 'непрочитанных сообщений', 'Закрыть уведомление']
+};
+let MessageNotificationsComponent = class MessageNotificationsComponent {
+  notifications;
+  language;
+  router;
+  access;
+  constructor(notifications, language, router, access) {
+    this.notifications = notifications;
+    this.language = language;
+    this.router = router;
+    this.access = access;
+  }
+  ngOnInit() {
+    this.notifications.start();
+  }
+  ngOnDestroy() {
+    this.notifications.stop();
+  }
+  t(i) {
+    return (COPY[this.language.currentLanguage] || COPY.en)[i];
+  }
+  contactQuery() {
+    const scope = (0,_asset_contact_text__WEBPACK_IMPORTED_MODULE_5__.assetContactScope)(this.router.url, (0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_4__.dedicatedAsset)());
+    return scope && !this.access.canManageFor(scope.assetType, scope.assetId) ? {
+      contactType: scope.assetType,
+      contactAsset: scope.assetId
+    } : {};
+  }
+  destination() {
+    const notice = (0,_message_unread__WEBPACK_IMPORTED_MODULE_2__.unreadConversation)(this.notifications.summary.value);
+    return notice ? {
+      threadId: notice.id
+    } : this.contactQuery();
+  }
+  messageLabel() {
+    return !this.notifications.summary.value.unreadMessages && this.contactQuery().contactAsset ? (0,_asset_contact_text__WEBPACK_IMPORTED_MODULE_5__.assetContactText)(this.language.currentLanguage, 0) : (0,_messaging_text__WEBPACK_IMPORTED_MODULE_7__.messagingText)(this.language.currentLanguage, 0);
+  }
+  label() {
+    const count = this.notifications.summary.value.unreadMessages;
+    return this.messageLabel() + (count ? ' — ' + count + ' ' + this.t(1) : '');
+  }
+  static ctorParameters = () => [{
+    type: _message_notifications_service__WEBPACK_IMPORTED_MODULE_8__.MessageNotificationsService
+  }, {
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_6__.LanguageService
+  }, {
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_9__.Router
+  }, {
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_3__.AssetAccessService
+  }];
+};
+MessageNotificationsComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_10__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_11__.Component)({
+  selector: 'app-message-notifications',
+  standalone: true,
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_12__.CommonModule, _angular_router__WEBPACK_IMPORTED_MODULE_13__.RouterModule, _message_badge_component__WEBPACK_IMPORTED_MODULE_1__.MessageBadgeComponent],
+  template: `<ng-container *ngIf="notifications.uid"><a class="messages-launcher" routerLink="/messages" [queryParams]="destination()" [attr.aria-label]="label()"><span aria-hidden="true">✉</span> {{messageLabel()}} <app-message-badge></app-message-badge></a><section class="message-toast" *ngIf="notifications.notice|async as notice" role="status" aria-live="polite"><a routerLink="/messages" [queryParams]="{threadId:notice.id}" (click)="notifications.dismiss()"><b>{{t(0)}}</b><span>{{notice.assetName}}</span></a><button type="button" (click)="notifications.dismiss()" [attr.aria-label]="t(2)">×</button></section></ng-container>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_notifications_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7cG9zaXRpb246cmVsYXRpdmU7ei1pbmRleDoxMDUwfS5tZXNzYWdlcy1sYXVuY2hlcntwb3NpdGlvbjpmaXhlZDtib3R0b206Y2FsYygxOHB4ICsgZW52KHNhZmUtYXJlYS1pbnNldC1ib3R0b20pKTtyaWdodDoxOHB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweDtiYWNrZ3JvdW5kOiMxNjRmNjI7Y29sb3I6I2ZmZjtwYWRkaW5nOjEycHggMTZweDtib3JkZXItcmFkaXVzOjI4cHg7Ym94LXNoYWRvdzowIDRweCAxOHB4ICMwMDAzO3RleHQtZGVjb3JhdGlvbjpub25lO2ZvbnQ6NjAwIDE1cHgvMS40IHNhbnMtc2VyaWZ9Lm1lc3NhZ2VzLWxhdW5jaGVyIHN0cm9uZ3ttaW4td2lkdGg6MjRweDtwYWRkaW5nOjJweCA2cHg7dGV4dC1hbGlnbjpjZW50ZXI7Ym9yZGVyLXJhZGl1czoyMHB4O2JhY2tncm91bmQ6I2Y4OGIyMDtjb2xvcjojMTAyZjNkfS5tZXNzYWdlLXRvYXN0e3Bvc2l0aW9uOmZpeGVkO3JpZ2h0OjE4cHg7Ym90dG9tOmNhbGMoODJweCArIGVudihzYWZlLWFyZWEtaW5zZXQtYm90dG9tKSk7bWF4LXdpZHRoOm1pbigzNDBweCxjYWxjKDEwMHZ3IC0gMzZweCkpO2Rpc3BsYXk6ZmxleDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxNDNkNGQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkY2UxO2JvcmRlci1yYWRpdXM6MTRweDtib3gtc2hhZG93OjAgNXB4IDI0cHggIzAwMDN9Lm1lc3NhZ2UtdG9hc3QgYXtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2dhcDo1cHg7cGFkZGluZzoxNnB4O2NvbG9yOmluaGVyaXQ7dGV4dC1kZWNvcmF0aW9uOm5vbmU7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZX0ubWVzc2FnZS10b2FzdCBidXR0b257YWxpZ24tc2VsZjpmbGV4LXN0YXJ0O2JvcmRlcjowO2JhY2tncm91bmQ6bm9uZTtwYWRkaW5nOjEwcHggMTRweDtjb2xvcjppbmhlcml0O2ZvbnQtc2l6ZToyNHB4O2N1cnNvcjpwb2ludGVyfWE6Zm9jdXMtdmlzaWJsZSxidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH1AbWVkaWEgcHJpbnR7Omhvc3R7ZGlzcGxheTpub25lfX0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_message_notifications_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
+})], MessageNotificationsComponent);
+
+
+/***/ }),
+
 /***/ 54140:
 /*!************************************************************************************************************************************************************!*\
   !*** ./node_modules/@stencil/core/internal/client/ lazy ^\.\/.*\.entry\.js.*$ include: \.entry\.js$ exclude: \.system\.entry\.js$ strict namespace object ***!
@@ -61367,6 +64782,263 @@ webpackEmptyAsyncContext.keys = () => ([]);
 webpackEmptyAsyncContext.resolve = webpackEmptyAsyncContext;
 webpackEmptyAsyncContext.id = 54140;
 module.exports = webpackEmptyAsyncContext;
+
+/***/ }),
+
+/***/ 54230:
+/*!************************************************************!*\
+  !*** ./src/app/messaging/message-notifications.service.ts ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MessageNotificationsService: () => (/* binding */ MessageNotificationsService)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! rxjs */ 75797);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs */ 10819);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! rxjs */ 72354);
+/* harmony import */ var _message_notification_state__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./message-notification-state */ 67276);
+
+
+
+
+
+
+
+let MessageNotificationsService = class MessageNotificationsService {
+  http;
+  store;
+  zone;
+  summary = new rxjs__WEBPACK_IMPORTED_MODULE_2__.BehaviorSubject({
+    unreadMessages: 0,
+    unreadThreads: 0,
+    latest: []
+  });
+  notice = new rxjs__WEBPACK_IMPORTED_MODULE_2__.BehaviorSubject(null);
+  changes = new rxjs__WEBPACK_IMPORTED_MODULE_3__.Subject();
+  connection = new rxjs__WEBPACK_IMPORTED_MODULE_2__.BehaviorSubject('offline');
+  uid = '';
+  state = new _message_notification_state__WEBPACK_IMPORTED_MODULE_1__.MessageNotificationState();
+  socket;
+  running = false;
+  generation = 0;
+  authInstance;
+  unsubscribe;
+  watcher;
+  poll;
+  retry;
+  debounce;
+  toastTimer;
+  pending = false;
+  queued = false;
+  delay = 1000;
+  inFlight = 0;
+  constructor(http, store, zone) {
+    this.http = http;
+    this.store = store;
+    this.zone = zone;
+  }
+  auth() {
+    const s = this.store;
+    return s.firebaseauth || s.firebaseAuth || s.auth;
+  }
+  user() {
+    return this.auth()?.currentUser;
+  }
+  onForeground = () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'visible') void this.refresh();
+  };
+  start() {
+    if (this.running) return;
+    this.running = true;
+    if (typeof window !== 'undefined') window.addEventListener('focus', this.onForeground);
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', this.onForeground);
+    this.reconcile();
+    this.watcher = setInterval(() => this.reconcile(), 1000);
+    this.poll = setInterval(() => {
+      if (this.uid) void this.refresh();
+    }, 15000);
+  }
+  stop() {
+    this.running = false;
+    if (typeof window !== 'undefined') window.removeEventListener('focus', this.onForeground);
+    if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', this.onForeground);
+    clearInterval(this.watcher);
+    clearInterval(this.poll);
+    this.unsubscribe?.();
+    this.authInstance = null;
+    this.switchUser('');
+  }
+  reconcile() {
+    const auth = this.auth();
+    if (auth && auth !== this.authInstance) {
+      this.unsubscribe?.();
+      this.authInstance = auth;
+      if (typeof auth.onAuthStateChanged === 'function') this.unsubscribe = auth.onAuthStateChanged(() => this.zone.run(() => this.switchUser(this.user()?.uid || '')));
+    }
+    this.switchUser(this.user()?.uid || '');
+  }
+  switchUser(uid) {
+    if (uid === this.uid) return;
+    this.generation++;
+    this.uid = uid;
+    this.socket?.close();
+    this.socket = undefined;
+    clearTimeout(this.retry);
+    clearTimeout(this.debounce);
+    clearTimeout(this.toastTimer);
+    this.state.reset();
+    this.pending = false;
+    this.queued = false;
+    this.summary.next({
+      unreadMessages: 0,
+      unreadThreads: 0,
+      latest: []
+    });
+    this.notice.next(null);
+    this.connection.next('offline');
+    this.delay = 1000;
+    if (uid && this.running) {
+      void this.refresh();
+      void this.connect();
+    }
+  }
+  refresh() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (!_this.uid || !_this.running) return;
+      if (_this.pending) {
+        _this.queued = true;
+        return;
+      }
+      const generation = _this.generation,
+        uid = _this.uid,
+        user = _this.user(),
+        request = ++_this.inFlight;
+      if (user?.uid !== uid) {
+        _this.reconcile();
+        return;
+      }
+      _this.pending = true;
+      try {
+        const token = yield user.getIdToken();
+        if (generation !== _this.generation) return;
+        const result = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_4__.firstValueFrom)(_this.http.get('/api/messaging/unread', {
+          headers: {
+            Authorization: 'Bearer ' + token
+          }
+        }).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_5__.timeout)(10000)));
+        if (generation !== _this.generation || _this.user()?.uid !== uid) return;
+        const notice = _this.state.accept(result);
+        _this.summary.next(result);
+        if (notice) {
+          _this.notice.next(notice);
+          clearTimeout(_this.toastTimer);
+          _this.toastTimer = setTimeout(() => _this.notice.next(null), 8000);
+        }
+        _this.changes.next();
+      } catch (e) {
+        if (generation === _this.generation && [401, 403, 503].includes(e.status)) {
+          _this.state.reset();
+          _this.summary.next({
+            unreadMessages: 0,
+            unreadThreads: 0,
+            latest: []
+          });
+          _this.notice.next(null);
+        }
+      } finally {
+        if (generation === _this.generation && request === _this.inFlight) {
+          _this.pending = false;
+          if (_this.queued) {
+            _this.queued = false;
+            void _this.refresh();
+          }
+        }
+      }
+    })();
+  }
+  dismiss() {
+    clearTimeout(this.toastTimer);
+    this.notice.next(null);
+  }
+  connect() {
+    var _this2 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const generation = _this2.generation,
+        uid = _this2.uid;
+      _this2.connection.next('connecting');
+      try {
+        const user = _this2.user();
+        if (user?.uid !== uid) throw Error('session');
+        const token = yield user.getIdToken();
+        if (generation !== _this2.generation || !_this2.running) return;
+        const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/api/messaging/ws`);
+        _this2.socket = ws;
+        const current = () => generation === _this2.generation && _this2.socket === ws && _this2.running;
+        ws.onopen = () => {
+          if (current()) ws.send(JSON.stringify({
+            type: 'auth',
+            token
+          }));else ws.close();
+        };
+        ws.onmessage = e => _this2.zone.run(() => {
+          if (!current()) return;
+          let m;
+          try {
+            m = JSON.parse(e.data);
+          } catch {
+            return;
+          }
+          if (m.type === 'ready') {
+            _this2.connection.next('live');
+            _this2.delay = 1000;
+          }
+          if (m.type === 'ready' || m.type === 'changed') {
+            clearTimeout(_this2.debounce);
+            _this2.debounce = setTimeout(() => void _this2.refresh(), 200);
+          }
+        });
+        ws.onerror = () => _this2.zone.run(() => {
+          if (current()) _this2.connection.next('offline');
+        });
+        ws.onclose = () => _this2.zone.run(() => {
+          if (current()) _this2.scheduleReconnect(generation);
+        });
+      } catch {
+        if (generation === _this2.generation) _this2.scheduleReconnect(generation);
+      }
+    })();
+  }
+  scheduleReconnect(generation) {
+    this.connection.next('offline');
+    if (!this.running || !this.uid) return;
+    clearTimeout(this.retry);
+    this.retry = setTimeout(() => {
+      if (generation === this.generation) void this.connect();
+    }, this.delay);
+    this.delay = Math.min(30000, this.delay * 2);
+  }
+  static ctorParameters = () => [{
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_6__.HttpClient
+  }, {
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_7__.StoreDbService
+  }, {
+    type: _angular_core__WEBPACK_IMPORTED_MODULE_8__.NgZone
+  }];
+};
+MessageNotificationsService = (0,tslib__WEBPACK_IMPORTED_MODULE_9__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Injectable)({
+  providedIn: 'root'
+})], MessageNotificationsService);
+
 
 /***/ }),
 
@@ -61948,7 +65620,161 @@ th, td {
   .concierge-shell {
     padding: 1rem;
   }
-}`, "",{"version":3,"sources":["webpack://./src/app/workspace/concierge.component.scss"],"names":[],"mappings":"AAAA;EAAiB,iBAAA;EAAiB,YAAA;EAAY,kBAAA;EAAkB,cAAA;AAKhE;;AAL8E;EAAO,aAAA;EAAa,8BAAA;EAA8B,SAAA;AAWhI;;AAXyI;EAAS,gBAAA;AAelJ;;AAfkK;EAAO,gBAAA;EAAgB,yBAAA;EAAyB,mBAAA;EAAmB,eAAA;EAAe,gBAAA;AAuBpP;;AAvBoQ;EAAQ,mBAAA;EAAmB,aAAA;EAAa,kBAAA;AA6B5S;;AA7B8T;EAAO,cAAA;AAiCrU;;AAjCmV;EAAM,cAAA;EAAc,cAAA;AAsCvW;;AAtCqX;EAAkC,cAAA;EAAc,WAAA;EAAW,sBAAA;EAAsB,gBAAA;EAAe,yBAAA;EAAyB,kBAAA;EAAkB,kBAAA;AAgDhgB;;AAhDihB;EAAO,oBAAA;EAAoB,WAAA;EAAU,4BAAA;AAsDtjB;;AAtDglB;EAAS,yBAAA;EAAyB,kBAAA;AA2DlnB;;AA3DooB;EAAO,oBAAA;EAAmB,SAAA;EAAS,kBAAA;EAAkB,mBAAA;EAAmB,YAAA;EAAY,8BAAA;EAA2B,eAAA;AAqEnvB;;AArEkwB;EAAgB,YAAA;EAAW,eAAA;AA0E7xB;;AA1E4yB;EAAQ,mBAAA;AA8EpzB;;AA9Eu0B;EAAE,qBAAA;EAAqB,4BAAA;AAmF91B;;AAnFw3B;EAAM,cAAA;EAAc,cAAA;AAwF54B;;AAxF05B;EAAO,6BAAA;EAA6B,eAAA;EAAe,gBAAA;AA8F78B;;AA9F69B;EAAc,cAAA;AAkG3+B;;AAlGy/B;EAAM,WAAA;EAAW,yBAAA;EAAyB,gBAAA;AAwGniC;;AAxGmjC;EAAM,eAAA;EAAc,gCAAA;EAAgC,mBAAA;AA8GvmC;;AA9G0nC;EAAwB;IAAO,sBAAA;EAmHvpC;EAnH6qC;IAAO,aAAA;EAsHprC;EAtHisC;IAAiB,aAAA;EAyHltC;AACF","sourcesContent":[".concierge-shell{max-width:1200px;margin:auto;padding:2rem 1rem;color:#153b46}header{display:flex;justify-content:space-between;gap:1rem}header p{max-width:48rem}.panel{background:#fff;border:1px solid #cbdde1;border-radius:16px;padding:1.5rem;margin:1.5rem 0}.notice{background:#edf5f6;padding:1rem;border-radius:8px}.error{color:#b42318}label{display:block;margin:1rem 0}input:not([type=checkbox]),select{display:block;width:100%;box-sizing:border-box;padding:.75rem;border:1px solid #b8cdd3;border-radius:8px;margin-top:.5rem}.check{display:inline-flex;gap:.5rem;margin:.5rem 1rem .5rem 0}fieldset{border:1px solid #cbdde1;border-radius:8px}button{padding:.7rem 1rem;border:0;border-radius:8px;background:#12566a;color:white;margin:.5rem .5rem .5rem 0;cursor:pointer}button:disabled{opacity:.5;cursor:default}.danger{background:#a73026}a{display:inline-block;margin:.5rem 1rem .5rem 0}small{display:block;color:#567078}.grant{border-top:1px solid #cbdde1;padding:1rem 0;margin-top:1rem}.table-scroll{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:.8rem;border-bottom:1px solid #d9e3e6;vertical-align:top}@media(max-width:650px){header{flex-direction:column}.panel{padding:1rem}.concierge-shell{padding:1rem}}\n"],"sourceRoot":""}]);
+}
+@media (max-width: 700px) {
+  .table-scroll:not(.panel .table-scroll) table, .table-scroll:not(.panel .table-scroll) tbody, .table-scroll:not(.panel .table-scroll) td {
+    display: block;
+  }
+  .table-scroll:not(.panel .table-scroll) thead {
+    position: absolute;
+    clip-path: inset(50%);
+  }
+  .table-scroll:not(.panel .table-scroll) tr {
+    display: block;
+    background: white;
+    border: 1px solid #cbdde1;
+    border-radius: 0.8rem;
+    margin: 0.75rem 0;
+    padding: 0.75rem;
+  }
+  .table-scroll:not(.panel .table-scroll) td {
+    padding: 0.25rem;
+    border: 0;
+  }
+  .concierge-shell small {
+    overflow-wrap: anywhere;
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/workspace/concierge.component.scss"],"names":[],"mappings":"AAAA;EAAiB,iBAAA;EAAiB,YAAA;EAAY,kBAAA;EAAkB,cAAA;AAKhE;;AAL8E;EAAO,aAAA;EAAa,8BAAA;EAA8B,SAAA;AAWhI;;AAXyI;EAAS,gBAAA;AAelJ;;AAfkK;EAAO,gBAAA;EAAgB,yBAAA;EAAyB,mBAAA;EAAmB,eAAA;EAAe,gBAAA;AAuBpP;;AAvBoQ;EAAQ,mBAAA;EAAmB,aAAA;EAAa,kBAAA;AA6B5S;;AA7B8T;EAAO,cAAA;AAiCrU;;AAjCmV;EAAM,cAAA;EAAc,cAAA;AAsCvW;;AAtCqX;EAAkC,cAAA;EAAc,WAAA;EAAW,sBAAA;EAAsB,gBAAA;EAAe,yBAAA;EAAyB,kBAAA;EAAkB,kBAAA;AAgDhgB;;AAhDihB;EAAO,oBAAA;EAAoB,WAAA;EAAU,4BAAA;AAsDtjB;;AAtDglB;EAAS,yBAAA;EAAyB,kBAAA;AA2DlnB;;AA3DooB;EAAO,oBAAA;EAAmB,SAAA;EAAS,kBAAA;EAAkB,mBAAA;EAAmB,YAAA;EAAY,8BAAA;EAA2B,eAAA;AAqEnvB;;AArEkwB;EAAgB,YAAA;EAAW,eAAA;AA0E7xB;;AA1E4yB;EAAQ,mBAAA;AA8EpzB;;AA9Eu0B;EAAE,qBAAA;EAAqB,4BAAA;AAmF91B;;AAnFw3B;EAAM,cAAA;EAAc,cAAA;AAwF54B;;AAxF05B;EAAO,6BAAA;EAA6B,eAAA;EAAe,gBAAA;AA8F78B;;AA9F69B;EAAc,cAAA;AAkG3+B;;AAlGy/B;EAAM,WAAA;EAAW,yBAAA;EAAyB,gBAAA;AAwGniC;;AAxGmjC;EAAM,eAAA;EAAc,gCAAA;EAAgC,mBAAA;AA8GvmC;;AA9G0nC;EAAwB;IAAO,sBAAA;EAmHvpC;EAnH6qC;IAAO,aAAA;EAsHprC;EAtHisC;IAAiB,aAAA;EAyHltC;AACF;AAzHA;EAAwB;IAAuI,cAAA;EA6H7J;EA7H2K;IAA8C,kBAAA;IAAkB,qBAAA;EAiI3O;EAjIgQ;IAA2C,cAAA;IAAc,iBAAA;IAAiB,yBAAA;IAAyB,qBAAA;IAAoB,iBAAA;IAAgB,gBAAA;EAyIvY;EAzIsZ;IAA2C,gBAAA;IAAe,SAAA;EA6Ihd;EA7Iyd;IAAuB,uBAAA;EAgJhf;AACF","sourcesContent":[".concierge-shell{max-width:1200px;margin:auto;padding:2rem 1rem;color:#153b46}header{display:flex;justify-content:space-between;gap:1rem}header p{max-width:48rem}.panel{background:#fff;border:1px solid #cbdde1;border-radius:16px;padding:1.5rem;margin:1.5rem 0}.notice{background:#edf5f6;padding:1rem;border-radius:8px}.error{color:#b42318}label{display:block;margin:1rem 0}input:not([type=checkbox]),select{display:block;width:100%;box-sizing:border-box;padding:.75rem;border:1px solid #b8cdd3;border-radius:8px;margin-top:.5rem}.check{display:inline-flex;gap:.5rem;margin:.5rem 1rem .5rem 0}fieldset{border:1px solid #cbdde1;border-radius:8px}button{padding:.7rem 1rem;border:0;border-radius:8px;background:#12566a;color:white;margin:.5rem .5rem .5rem 0;cursor:pointer}button:disabled{opacity:.5;cursor:default}.danger{background:#a73026}a{display:inline-block;margin:.5rem 1rem .5rem 0}small{display:block;color:#567078}.grant{border-top:1px solid #cbdde1;padding:1rem 0;margin-top:1rem}.table-scroll{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:.8rem;border-bottom:1px solid #d9e3e6;vertical-align:top}@media(max-width:650px){header{flex-direction:column}.panel{padding:1rem}.concierge-shell{padding:1rem}}\n@media(max-width:700px){.table-scroll:not(.panel .table-scroll) table,.table-scroll:not(.panel .table-scroll) tbody,.table-scroll:not(.panel .table-scroll) td{display:block}.table-scroll:not(.panel .table-scroll) thead{position:absolute;clip-path:inset(50%)}.table-scroll:not(.panel .table-scroll) tr{display:block;background:white;border:1px solid #cbdde1;border-radius:.8rem;margin:.75rem 0;padding:.75rem}.table-scroll:not(.panel .table-scroll) td{padding:.25rem;border:0}.concierge-shell small{overflow-wrap:anywhere}}\n"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
+/***/ 56132:
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/shared/admin-success.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=ZGlhbG9ne21heC13aWR0aDptaW4oMjZyZW0sODV2dyk7Ym9yZGVyOjFweCBzb2xpZCAjYzlkY2Q2O2JvcmRlci1yYWRpdXM6MTZweDtwYWRkaW5nOjEuNnJlbTtjb2xvcjojMTczZTM5O2JveC1zaGFkb3c6MCAxNnB4IDYwcHggIzE3M2UzOTMzfWRpYWxvZzo6YmFja2Ryb3B7YmFja2dyb3VuZDojMGUyOTI4ODB9aDJ7bWFyZ2luOjAgMCAxLjJyZW07Zm9udC1zaXplOjEuM3JlbX1idXR0b257YmFja2dyb3VuZDojMTc1MzQ4O2NvbG9yOndoaXRlO2JvcmRlcjowO2JvcmRlci1yYWRpdXM6OXB4O3BhZGRpbmc6LjhyZW0gMXJlbTtmb250OmluaGVyaXQ7Y3Vyc29yOnBvaW50ZXJ9!./src/app/shared/admin-success.component.ts ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `dialog{max-width:min(26rem,85vw);border:1px solid #c9dcd6;border-radius:16px;padding:1.6rem;color:#173e39;box-shadow:0 16px 60px #173e3933}dialog::backdrop{background:#0e292880}h2{margin:0 0 1.2rem;font-size:1.3rem}button{background:#175348;color:white;border:0;border-radius:9px;padding:.8rem 1rem;font:inherit;cursor:pointer}`, "",{"version":3,"sources":["webpack://./src/app/shared/admin-success.component.ts"],"names":[],"mappings":"AAAA,OAAO,yBAAyB,CAAC,wBAAwB,CAAC,kBAAkB,CAAC,cAAc,CAAC,aAAa,CAAC,gCAAgC,CAAC,iBAAiB,oBAAoB,CAAC,GAAG,iBAAiB,CAAC,gBAAgB,CAAC,OAAO,kBAAkB,CAAC,WAAW,CAAC,QAAQ,CAAC,iBAAiB,CAAC,kBAAkB,CAAC,YAAY,CAAC,cAAc","sourcesContent":["dialog{max-width:min(26rem,85vw);border:1px solid #c9dcd6;border-radius:16px;padding:1.6rem;color:#173e39;box-shadow:0 16px 60px #173e3933}dialog::backdrop{background:#0e292880}h2{margin:0 0 1.2rem;font-size:1.3rem}button{background:#175348;color:white;border:0;border-radius:9px;padding:.8rem 1rem;font:inherit;cursor:pointer}"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
+/***/ 56244:
+/*!********************************************************!*\
+  !*** ./src/app/shared/asset-list-filters.component.ts ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AssetListFiltersComponent: () => (/* binding */ AssetListFiltersComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_shared_asset_list_filters_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazttYXJnaW46MThweCAwfS5hc3NldC1maWx0ZXJze2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDMsbWlubWF4KDE2MHB4LDFmcikpIGF1dG87Z2FwOjE0cHg7YWxpZ24taXRlbXM6ZW5kO3BhZGRpbmc6MThweDtiYWNrZ3JvdW5kOiNmMGY1ZjY7Ym9yZGVyLXJhZGl1czoxNHB4fS5hc3NldC1maWx0ZXJzIGxhYmVse2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjdweDtmb250LXNpemU6MTRweDtmb250LXdlaWdodDo2MDA7bWluLXdpZHRoOjB9LmFzc2V0LWZpbHRlcnMgaW5wdXQsLmFzc2V0LWZpbHRlcnMgc2VsZWN0LC5hc3NldC1maWx0ZXJzIGJ1dHRvbntib3gtc2l6aW5nOmJvcmRlci1ib3g7d2lkdGg6MTAwJTttaW4taGVpZ2h0OjQ0cHg7cGFkZGluZzoxMHB4O2JvcmRlcjoxcHggc29saWQgI2JjY2RkNTtib3JkZXItcmFkaXVzOjhweDtmb250OmluaGVyaXQ7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTIzZTU5fS5hc3NldC1maWx0ZXJzIGJ1dHRvbntjdXJzb3I6cG9pbnRlcjtmb250LXdlaWdodDo3MDA7d2hpdGUtc3BhY2U6bm93cmFwfUBtZWRpYShtYXgtd2lkdGg6NzYwcHgpey5hc3NldC1maWx0ZXJze2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnIgMWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjoxLy0xfX1AbWVkaWEobWF4LXdpZHRoOjUwMHB4KXsuYXNzZXQtZmlsdGVyc3tncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjphdXRvfX0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_asset_list_filters_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/shared/asset-list-filters.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTpibG9jazttYXJnaW46MThweCAwfS5hc3NldC1maWx0ZXJze2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDMsbWlubWF4KDE2MHB4LDFmcikpIGF1dG87Z2FwOjE0cHg7YWxpZ24taXRlbXM6ZW5kO3BhZGRpbmc6MThweDtiYWNrZ3JvdW5kOiNmMGY1ZjY7Ym9yZGVyLXJhZGl1czoxNHB4fS5hc3NldC1maWx0ZXJzIGxhYmVse2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjdweDtmb250LXNpemU6MTRweDtmb250LXdlaWdodDo2MDA7bWluLXdpZHRoOjB9LmFzc2V0LWZpbHRlcnMgaW5wdXQsLmFzc2V0LWZpbHRlcnMgc2VsZWN0LC5hc3NldC1maWx0ZXJzIGJ1dHRvbntib3gtc2l6aW5nOmJvcmRlci1ib3g7d2lkdGg6MTAwJTttaW4taGVpZ2h0OjQ0cHg7cGFkZGluZzoxMHB4O2JvcmRlcjoxcHggc29saWQgI2JjY2RkNTtib3JkZXItcmFkaXVzOjhweDtmb250OmluaGVyaXQ7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTIzZTU5fS5hc3NldC1maWx0ZXJzIGJ1dHRvbntjdXJzb3I6cG9pbnRlcjtmb250LXdlaWdodDo3MDA7d2hpdGUtc3BhY2U6bm93cmFwfUBtZWRpYShtYXgtd2lkdGg6NzYwcHgpey5hc3NldC1maWx0ZXJze2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnIgMWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjoxLy0xfX1AbWVkaWEobWF4LXdpZHRoOjUwMHB4KXsuYXNzZXQtZmlsdGVyc3tncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjphdXRvfX0%3D!./src/app/shared/asset-list-filters.component.ts */ 93842);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_shared_asset_list_filters_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazttYXJnaW46MThweCAwfS5hc3NldC1maWx0ZXJze2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDMsbWlubWF4KDE2MHB4LDFmcikpIGF1dG87Z2FwOjE0cHg7YWxpZ24taXRlbXM6ZW5kO3BhZGRpbmc6MThweDtiYWNrZ3JvdW5kOiNmMGY1ZjY7Ym9yZGVyLXJhZGl1czoxNHB4fS5hc3NldC1maWx0ZXJzIGxhYmVse2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjdweDtmb250LXNpemU6MTRweDtmb250LXdlaWdodDo2MDA7bWluLXdpZHRoOjB9LmFzc2V0LWZpbHRlcnMgaW5wdXQsLmFzc2V0LWZpbHRlcnMgc2VsZWN0LC5hc3NldC1maWx0ZXJzIGJ1dHRvbntib3gtc2l6aW5nOmJvcmRlci1ib3g7d2lkdGg6MTAwJTttaW4taGVpZ2h0OjQ0cHg7cGFkZGluZzoxMHB4O2JvcmRlcjoxcHggc29saWQgI2JjY2RkNTtib3JkZXItcmFkaXVzOjhweDtmb250OmluaGVyaXQ7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTIzZTU5fS5hc3NldC1maWx0ZXJzIGJ1dHRvbntjdXJzb3I6cG9pbnRlcjtmb250LXdlaWdodDo3MDA7d2hpdGUtc3BhY2U6bm93cmFwfUBtZWRpYShtYXgtd2lkdGg6NzYwcHgpey5hc3NldC1maWx0ZXJze2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnIgMWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjoxLy0xfX1AbWVkaWEobWF4LXdpZHRoOjUwMHB4KXsuYXNzZXQtZmlsdGVyc3tncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjphdXRvfX0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_asset_list_filters_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_asset_list_filters_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazttYXJnaW46MThweCAwfS5hc3NldC1maWx0ZXJze2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDMsbWlubWF4KDE2MHB4LDFmcikpIGF1dG87Z2FwOjE0cHg7YWxpZ24taXRlbXM6ZW5kO3BhZGRpbmc6MThweDtiYWNrZ3JvdW5kOiNmMGY1ZjY7Ym9yZGVyLXJhZGl1czoxNHB4fS5hc3NldC1maWx0ZXJzIGxhYmVse2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjdweDtmb250LXNpemU6MTRweDtmb250LXdlaWdodDo2MDA7bWluLXdpZHRoOjB9LmFzc2V0LWZpbHRlcnMgaW5wdXQsLmFzc2V0LWZpbHRlcnMgc2VsZWN0LC5hc3NldC1maWx0ZXJzIGJ1dHRvbntib3gtc2l6aW5nOmJvcmRlci1ib3g7d2lkdGg6MTAwJTttaW4taGVpZ2h0OjQ0cHg7cGFkZGluZzoxMHB4O2JvcmRlcjoxcHggc29saWQgI2JjY2RkNTtib3JkZXItcmFkaXVzOjhweDtmb250OmluaGVyaXQ7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTIzZTU5fS5hc3NldC1maWx0ZXJzIGJ1dHRvbntjdXJzb3I6cG9pbnRlcjtmb250LXdlaWdodDo3MDA7d2hpdGUtc3BhY2U6bm93cmFwfUBtZWRpYShtYXgtd2lkdGg6NzYwcHgpey5hc3NldC1maWx0ZXJze2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnIgMWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjoxLy0xfX1AbWVkaWEobWF4LXdpZHRoOjUwMHB4KXsuYXNzZXQtZmlsdGVyc3tncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjphdXRvfX0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_asset_list_filters_component_ts__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _asset_list_filters__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./asset-list-filters */ 87461);
+
+
+
+
+
+
+const COPY = {
+  fr: ['Type de bien', 'Tous les types', 'État', 'Tous les états', 'En ligne', 'Hors ligne', 'Modération en attente', 'Archivé', 'Localisation', 'Ville, secteur ou pays', 'Réinitialiser', 'Bateaux', 'Voitures', 'Logements', 'Parkings', 'Piscines'],
+  en: ['Asset type', 'All types', 'Status', 'All statuses', 'Online', 'Offline', 'Pending moderation', 'Archived', 'Location', 'City, area or country', 'Reset', 'Boats', 'Cars', 'Homes', 'Parking', 'Pools'],
+  es: ['Tipo de bien', 'Todos los tipos', 'Estado', 'Todos los estados', 'En línea', 'Fuera de línea', 'Moderación pendiente', 'Archivado', 'Ubicación', 'Ciudad, zona o país', 'Restablecer', 'Barcos', 'Coches', 'Viviendas', 'Aparcamientos', 'Piscinas'],
+  it: ['Tipo di bene', 'Tutti i tipi', 'Stato', 'Tutti gli stati', 'Online', 'Offline', 'Moderazione in attesa', 'Archiviato', 'Località', 'Città, zona o paese', 'Reimposta', 'Barche', 'Auto', 'Alloggi', 'Parcheggi', 'Piscine'],
+  de: ['Objekttyp', 'Alle Typen', 'Status', 'Alle Status', 'Online', 'Offline', 'Moderation ausstehend', 'Archiviert', 'Ort', 'Stadt, Gebiet oder Land', 'Zurücksetzen', 'Boote', 'Autos', 'Unterkünfte', 'Parkplätze', 'Pools'],
+  nl: ['Type object', 'Alle typen', 'Status', 'Alle statussen', 'Online', 'Offline', 'Moderatie in behandeling', 'Gearchiveerd', 'Locatie', 'Stad, gebied of land', 'Wissen', 'Boten', 'Auto’s', 'Woningen', 'Parkeerplaatsen', 'Zwembaden'],
+  ru: ['Тип объекта', 'Все типы', 'Статус', 'Все статусы', 'Онлайн', 'Офлайн', 'Ожидает модерации', 'В архиве', 'Местоположение', 'Город, район или страна', 'Сбросить', 'Лодки', 'Автомобили', 'Жильё', 'Парковки', 'Бассейны']
+};
+let AssetListFiltersComponent = class AssetListFiltersComponent {
+  value = (0,_asset_list_filters__WEBPACK_IMPORTED_MODULE_1__.emptyAssetFilters)();
+  language = 'fr';
+  valueChange = new _angular_core__WEBPACK_IMPORTED_MODULE_2__.EventEmitter();
+  types = ['boat', 'car', 'property', 'parking', 'pool'];
+  empty = _asset_list_filters__WEBPACK_IMPORTED_MODULE_1__.emptyAssetFilters;
+  t(i) {
+    return (COPY[this.language] || COPY.en)[i];
+  }
+  update(key, value) {
+    this.valueChange.emit({
+      ...this.value,
+      [key]: value
+    });
+  }
+  static propDecorators = {
+    value: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input
+    }],
+    language: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input
+    }],
+    valueChange: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Output
+    }]
+  };
+};
+AssetListFiltersComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
+  selector: 'app-asset-list-filters',
+  standalone: true,
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_4__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_5__.FormsModule],
+  template: `<div class="asset-filters"><label>{{t(0)}}<select [ngModel]="value.type" (ngModelChange)="update('type',$event)"><option value="">{{t(1)}}</option><option *ngFor="let type of types;let i=index" [value]="type">{{t(11+i)}}</option></select></label><label>{{t(2)}}<select [ngModel]="value.state" (ngModelChange)="update('state',$event)"><option value="">{{t(3)}}</option><option value="online">{{t(4)}}</option><option value="offline">{{t(5)}}</option><option value="pending">{{t(6)}}</option><option value="archived">{{t(7)}}</option></select></label><label>{{t(8)}}<input type="search" [placeholder]="t(9)" [ngModel]="value.location" (ngModelChange)="update('location',$event)"></label><button type="button" (click)="valueChange.emit(empty())">{{t(10)}}</button></div>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_asset_list_filters_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazttYXJnaW46MThweCAwfS5hc3NldC1maWx0ZXJze2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDMsbWlubWF4KDE2MHB4LDFmcikpIGF1dG87Z2FwOjE0cHg7YWxpZ24taXRlbXM6ZW5kO3BhZGRpbmc6MThweDtiYWNrZ3JvdW5kOiNmMGY1ZjY7Ym9yZGVyLXJhZGl1czoxNHB4fS5hc3NldC1maWx0ZXJzIGxhYmVse2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjdweDtmb250LXNpemU6MTRweDtmb250LXdlaWdodDo2MDA7bWluLXdpZHRoOjB9LmFzc2V0LWZpbHRlcnMgaW5wdXQsLmFzc2V0LWZpbHRlcnMgc2VsZWN0LC5hc3NldC1maWx0ZXJzIGJ1dHRvbntib3gtc2l6aW5nOmJvcmRlci1ib3g7d2lkdGg6MTAwJTttaW4taGVpZ2h0OjQ0cHg7cGFkZGluZzoxMHB4O2JvcmRlcjoxcHggc29saWQgI2JjY2RkNTtib3JkZXItcmFkaXVzOjhweDtmb250OmluaGVyaXQ7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTIzZTU5fS5hc3NldC1maWx0ZXJzIGJ1dHRvbntjdXJzb3I6cG9pbnRlcjtmb250LXdlaWdodDo3MDA7d2hpdGUtc3BhY2U6bm93cmFwfUBtZWRpYShtYXgtd2lkdGg6NzYwcHgpey5hc3NldC1maWx0ZXJze2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnIgMWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjoxLy0xfX1AbWVkaWEobWF4LXdpZHRoOjUwMHB4KXsuYXNzZXQtZmlsdGVyc3tncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjphdXRvfX0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_asset_list_filters_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
+})], AssetListFiltersComponent);
+
+
+/***/ }),
+
+/***/ 57976:
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/shared/listing-description.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=CiA6aG9zdHtkaXNwbGF5OmJsb2NrO21pbi13aWR0aDowfS5kZXNjcmlwdGlvbi1jb3B5e21heC13aWR0aDo3MmNoO2ZvbnQtc2l6ZToxOHB4O2xpbmUtaGVpZ2h0OjEuODtjb2xvcjppbmhlcml0O292ZXJmbG93LXdyYXA6YW55d2hlcmU7dGV4dC1hbGlnbjpsZWZ0fQogcHttYXJnaW46MCAwIDEuMmVtO3doaXRlLXNwYWNlOnByZS1saW5lfWgze2ZvbnQtc2l6ZToyM3B4O2xpbmUtaGVpZ2h0OjEuMzU7bWFyZ2luOjEuNmVtIDAgLjZlbTtmb250LXdlaWdodDo3MDB9aDM6Zmlyc3QtY2hpbGR7bWFyZ2luLXRvcDowfQogdWwsb2x7bWFyZ2luOi41ZW0gMCAxLjNlbTtwYWRkaW5nLWxlZnQ6MS41ZW19bGl7cGFkZGluZy1sZWZ0Oi4yZW07bWFyZ2luOi40NWVtIDA7d2hpdGUtc3BhY2U6cHJlLWxpbmV9c3Ryb25ne2ZvbnQtd2VpZ2h0OjgwMDtjb2xvcjppbmhlcml0fQogQG1lZGlhKG1heC13aWR0aDo2MDBweCl7LmRlc2NyaXB0aW9uLWNvcHl7Zm9udC1zaXplOjE3cHg7bGluZS1oZWlnaHQ6MS43NX1oM3tmb250LXNpemU6MjFweH19CiA%3D!./src/app/shared/listing-description.component.ts ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `
+ :host{display:block;min-width:0}.description-copy{max-width:72ch;font-size:18px;line-height:1.8;color:inherit;overflow-wrap:anywhere;text-align:left}
+ p{margin:0 0 1.2em;white-space:pre-line}h3{font-size:23px;line-height:1.35;margin:1.6em 0 .6em;font-weight:700}h3:first-child{margin-top:0}
+ ul,ol{margin:.5em 0 1.3em;padding-left:1.5em}li{padding-left:.2em;margin:.45em 0;white-space:pre-line}strong{font-weight:800;color:inherit}
+ @media(max-width:600px){.description-copy{font-size:17px;line-height:1.75}h3{font-size:21px}}
+ `, "",{"version":3,"sources":["webpack://./src/app/shared/listing-description.component.ts"],"names":[],"mappings":";CACC,MAAM,aAAa,CAAC,WAAW,CAAC,kBAAkB,cAAc,CAAC,cAAc,CAAC,eAAe,CAAC,aAAa,CAAC,sBAAsB,CAAC,eAAe;CACpJ,EAAE,gBAAgB,CAAC,oBAAoB,CAAC,GAAG,cAAc,CAAC,gBAAgB,CAAC,mBAAmB,CAAC,eAAe,CAAC,eAAe,YAAY;CAC1I,MAAM,mBAAmB,CAAC,kBAAkB,CAAC,GAAG,iBAAiB,CAAC,cAAc,CAAC,oBAAoB,CAAC,OAAO,eAAe,CAAC,aAAa;CAC1I,wBAAwB,kBAAkB,cAAc,CAAC,gBAAgB,CAAC,GAAG,cAAc,CAAC","sourcesContent":["\n :host{display:block;min-width:0}.description-copy{max-width:72ch;font-size:18px;line-height:1.8;color:inherit;overflow-wrap:anywhere;text-align:left}\n p{margin:0 0 1.2em;white-space:pre-line}h3{font-size:23px;line-height:1.35;margin:1.6em 0 .6em;font-weight:700}h3:first-child{margin-top:0}\n ul,ol{margin:.5em 0 1.3em;padding-left:1.5em}li{padding-left:.2em;margin:.45em 0;white-space:pre-line}strong{font-weight:800;color:inherit}\n @media(max-width:600px){.description-copy{font-size:17px;line-height:1.75}h3{font-size:21px}}\n "],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
+/***/ 58735:
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/messaging/message-link.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2t9YXtkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjttaW4taGVpZ2h0OjQwcHg7cGFkZGluZzo4cHggMTJweDttYXJnaW46NHB4IDhweCA0cHggMDtib3JkZXI6MXB4IHNvbGlkICNiYmQwZDg7Ym9yZGVyLXJhZGl1czo4cHg7dGV4dC1kZWNvcmF0aW9uOm5vbmU7Y29sb3I6IzE2NGY2MjtiYWNrZ3JvdW5kOiNmM2Y4Zjg7Zm9udC1zaXplOjE0cHg7Zm9udC13ZWlnaHQ6NjAwO2JveC1zaXppbmc6Ym9yZGVyLWJveH1hOmZvY3VzLXZpc2libGV7b3V0bGluZTozcHggc29saWQgIzQzOGJhMztvdXRsaW5lLW9mZnNldDoycHh9!./src/app/messaging/message-link.component.ts ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `:host{display:inline-block}a{display:inline-flex;align-items:center;min-height:40px;padding:8px 12px;margin:4px 8px 4px 0;border:1px solid #bbd0d8;border-radius:8px;text-decoration:none;color:#164f62;background:#f3f8f8;font-size:14px;font-weight:600;box-sizing:border-box}a:focus-visible{outline:3px solid #438ba3;outline-offset:2px}`, "",{"version":3,"sources":["webpack://./src/app/messaging/message-link.component.ts"],"names":[],"mappings":"AAAA,MAAM,oBAAoB,CAAC,EAAE,mBAAmB,CAAC,kBAAkB,CAAC,eAAe,CAAC,gBAAgB,CAAC,oBAAoB,CAAC,wBAAwB,CAAC,iBAAiB,CAAC,oBAAoB,CAAC,aAAa,CAAC,kBAAkB,CAAC,cAAc,CAAC,eAAe,CAAC,qBAAqB,CAAC,gBAAgB,yBAAyB,CAAC,kBAAkB","sourcesContent":[":host{display:inline-block}a{display:inline-flex;align-items:center;min-height:40px;padding:8px 12px;margin:4px 8px 4px 0;border:1px solid #bbd0d8;border-radius:8px;text-decoration:none;color:#164f62;background:#f3f8f8;font-size:14px;font-weight:600;box-sizing:border-box}a:focus-visible{outline:3px solid #438ba3;outline-offset:2px}"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -61998,9 +65824,23 @@ let ListingPublicationGuard = class ListingPublicationGuard {
   canActivateChild(_route, state) {
     var _this = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const parts = (0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.internalAssetUrl)(state.url).split('?')[0].split('/').filter(Boolean);
+      const parts = (0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.internalAssetUrl)(state.url).split(/[?#]/)[0].split('/').filter(Boolean);
       const [type, id, section] = parts;
       if (!['boat', 'car', 'property', 'parking', 'pool'].includes(type) || !id) return true;
+      const site = (0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.dedicatedAsset)();
+      if (site && (site.assetType !== type || site.assetId !== id)) return _this.router.parseUrl('/__asset_unavailable');
+      // The public landing page needs no Firebase login, including on a fresh dedicated hostname.
+      const landing = !section || section === 'home';
+      const visibility = '/api/listings/' + encodeURIComponent(type) + '/' + encodeURIComponent(id) + '/visibility';
+      let publicLookupFailed = false;
+      if (landing) {
+        try {
+          const v = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_4__.firstValueFrom)(_this.http.get(visibility));
+          if (v?.public === true) return true;
+        } catch {
+          publicLookupFailed = true;
+        }
+      }
       let headers;
       try {
         headers = yield _this.auth.headers();
@@ -62015,12 +65855,21 @@ let ListingPublicationGuard = class ListingPublicationGuard {
         const tail = parts[3] || '';
         const delegatedRoute = parts.length === 4 && (['site-content', 'content'].includes(tail) ? _this.access.canManageFor(type, id, 'content') : tail === 'reservations' ? _this.access.canManageFor(type, id, 'bookings') : false);
         const allowed = _this.access.isPlatformAdmin ? delegatedRoute : _this.access.isOwnerOf(type, id) || delegatedRoute;
-        return allowed ? true : _this.router.parseUrl((0,_asset_domain__WEBPACK_IMPORTED_MODULE_1__.dedicatedAsset)() ? '/__asset_unavailable' : '/');
+        return allowed ? true : _this.router.createUrlTree(['/__asset_unavailable'], {
+          queryParams: {
+            reason: 'management'
+          }
+        });
       }
       // Authorized private preview never changes public listing eligibility.
       if (manager) return true;
       // Existing customer and owner reservations, payments and account pages remain available.
       if (section && /^(my-|login|signup|forgotpwd|bookings|booking-detail|payment|deposit|offer|proposal|owner)/.test(section)) return true;
+      if (landing) return _this.router.createUrlTree(['/__asset_unavailable'], {
+        queryParams: publicLookupFailed ? {
+          reason: 'lookup'
+        } : {}
+      });
       try {
         const v = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_4__.firstValueFrom)(_this.http.get(`/api/listings/${encodeURIComponent(type)}/${encodeURIComponent(id)}/visibility`, {
           headers
@@ -62044,6 +65893,24 @@ let ListingPublicationGuard = class ListingPublicationGuard {
 ListingPublicationGuard = (0,tslib__WEBPACK_IMPORTED_MODULE_7__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Injectable)({
   providedIn: 'root'
 })], ListingPublicationGuard);
+
+
+/***/ }),
+
+/***/ 60531:
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/messaging/message-notifications.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7cG9zaXRpb246cmVsYXRpdmU7ei1pbmRleDoxMDUwfS5tZXNzYWdlcy1sYXVuY2hlcntwb3NpdGlvbjpmaXhlZDtib3R0b206Y2FsYygxOHB4ICsgZW52KHNhZmUtYXJlYS1pbnNldC1ib3R0b20pKTtyaWdodDoxOHB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweDtiYWNrZ3JvdW5kOiMxNjRmNjI7Y29sb3I6I2ZmZjtwYWRkaW5nOjEycHggMTZweDtib3JkZXItcmFkaXVzOjI4cHg7Ym94LXNoYWRvdzowIDRweCAxOHB4ICMwMDAzO3RleHQtZGVjb3JhdGlvbjpub25lO2ZvbnQ6NjAwIDE1cHgvMS40IHNhbnMtc2VyaWZ9Lm1lc3NhZ2VzLWxhdW5jaGVyIHN0cm9uZ3ttaW4td2lkdGg6MjRweDtwYWRkaW5nOjJweCA2cHg7dGV4dC1hbGlnbjpjZW50ZXI7Ym9yZGVyLXJhZGl1czoyMHB4O2JhY2tncm91bmQ6I2Y4OGIyMDtjb2xvcjojMTAyZjNkfS5tZXNzYWdlLXRvYXN0e3Bvc2l0aW9uOmZpeGVkO3JpZ2h0OjE4cHg7Ym90dG9tOmNhbGMoODJweCArIGVudihzYWZlLWFyZWEtaW5zZXQtYm90dG9tKSk7bWF4LXdpZHRoOm1pbigzNDBweCxjYWxjKDEwMHZ3IC0gMzZweCkpO2Rpc3BsYXk6ZmxleDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxNDNkNGQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkY2UxO2JvcmRlci1yYWRpdXM6MTRweDtib3gtc2hhZG93OjAgNXB4IDI0cHggIzAwMDN9Lm1lc3NhZ2UtdG9hc3QgYXtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2dhcDo1cHg7cGFkZGluZzoxNnB4O2NvbG9yOmluaGVyaXQ7dGV4dC1kZWNvcmF0aW9uOm5vbmU7b3ZlcmZsb3ctd3JhcDphbnl3aGVyZX0ubWVzc2FnZS10b2FzdCBidXR0b257YWxpZ24tc2VsZjpmbGV4LXN0YXJ0O2JvcmRlcjowO2JhY2tncm91bmQ6bm9uZTtwYWRkaW5nOjEwcHggMTRweDtjb2xvcjppbmhlcml0O2ZvbnQtc2l6ZToyNHB4O2N1cnNvcjpwb2ludGVyfWE6Zm9jdXMtdmlzaWJsZSxidXR0b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH1AbWVkaWEgcHJpbnR7Omhvc3R7ZGlzcGxheTpub25lfX0%3D!./src/app/messaging/message-notifications.component.ts ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `:host{position:relative;z-index:1050}.messages-launcher{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));right:18px;display:flex;align-items:center;gap:8px;background:#164f62;color:#fff;padding:12px 16px;border-radius:28px;box-shadow:0 4px 18px #0003;text-decoration:none;font:600 15px/1.4 sans-serif}.messages-launcher strong{min-width:24px;padding:2px 6px;text-align:center;border-radius:20px;background:#f88b20;color:#102f3d}.message-toast{position:fixed;right:18px;bottom:calc(82px + env(safe-area-inset-bottom));max-width:min(340px,calc(100vw - 36px));display:flex;background:white;color:#143d4d;border:1px solid #ccdce1;border-radius:14px;box-shadow:0 5px 24px #0003}.message-toast a{display:flex;flex-direction:column;gap:5px;padding:16px;color:inherit;text-decoration:none;overflow-wrap:anywhere}.message-toast button{align-self:flex-start;border:0;background:none;padding:10px 14px;color:inherit;font-size:24px;cursor:pointer}a:focus-visible,button:focus-visible{outline:3px solid #f88b20;outline-offset:3px}@media print{:host{display:none}}`, "",{"version":3,"sources":["webpack://./src/app/messaging/message-notifications.component.ts"],"names":[],"mappings":"AAAA,MAAM,iBAAiB,CAAC,YAAY,CAAC,mBAAmB,cAAc,CAAC,+CAA+C,CAAC,UAAU,CAAC,YAAY,CAAC,kBAAkB,CAAC,OAAO,CAAC,kBAAkB,CAAC,UAAU,CAAC,iBAAiB,CAAC,kBAAkB,CAAC,2BAA2B,CAAC,oBAAoB,CAAC,4BAA4B,CAAC,0BAA0B,cAAc,CAAC,eAAe,CAAC,iBAAiB,CAAC,kBAAkB,CAAC,kBAAkB,CAAC,aAAa,CAAC,eAAe,cAAc,CAAC,UAAU,CAAC,+CAA+C,CAAC,uCAAuC,CAAC,YAAY,CAAC,gBAAgB,CAAC,aAAa,CAAC,wBAAwB,CAAC,kBAAkB,CAAC,2BAA2B,CAAC,iBAAiB,YAAY,CAAC,qBAAqB,CAAC,OAAO,CAAC,YAAY,CAAC,aAAa,CAAC,oBAAoB,CAAC,sBAAsB,CAAC,sBAAsB,qBAAqB,CAAC,QAAQ,CAAC,eAAe,CAAC,iBAAiB,CAAC,aAAa,CAAC,cAAc,CAAC,cAAc,CAAC,qCAAqC,yBAAyB,CAAC,kBAAkB,CAAC,aAAa,MAAM,YAAY,CAAC","sourcesContent":[":host{position:relative;z-index:1050}.messages-launcher{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));right:18px;display:flex;align-items:center;gap:8px;background:#164f62;color:#fff;padding:12px 16px;border-radius:28px;box-shadow:0 4px 18px #0003;text-decoration:none;font:600 15px/1.4 sans-serif}.messages-launcher strong{min-width:24px;padding:2px 6px;text-align:center;border-radius:20px;background:#f88b20;color:#102f3d}.message-toast{position:fixed;right:18px;bottom:calc(82px + env(safe-area-inset-bottom));max-width:min(340px,calc(100vw - 36px));display:flex;background:white;color:#143d4d;border:1px solid #ccdce1;border-radius:14px;box-shadow:0 5px 24px #0003}.message-toast a{display:flex;flex-direction:column;gap:5px;padding:16px;color:inherit;text-decoration:none;overflow-wrap:anywhere}.message-toast button{align-self:flex-start;border:0;background:none;padding:10px 14px;color:inherit;font-size:24px;cursor:pointer}a:focus-visible,button:focus-visible{outline:3px solid #f88b20;outline-offset:3px}@media print{:host{display:none}}"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
 
 
 /***/ }),
@@ -62268,7 +66135,80 @@ const OWNER_OFFER_TEXT = {
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<router-outlet></router-outlet>\n\n<app-release-footer></app-release-footer>\n";
+module.exports = "<app-shared-header></app-shared-header>\n<router-outlet></router-outlet>\n\n<app-push-button></app-push-button>\n<app-release-footer></app-release-footer>\n\n<app-message-notifications *ngIf=\"!router.url.startsWith('/owner/client-view')\"></app-message-notifications>\n";
+
+/***/ }),
+
+/***/ 62834:
+/*!***************************************************!*\
+  !*** ./src/app/shared/admin-success.component.ts ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AdminSuccessComponent: () => (/* binding */ AdminSuccessComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_shared_admin_success_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_ZGlhbG9ne21heC13aWR0aDptaW4oMjZyZW0sODV2dyk7Ym9yZGVyOjFweCBzb2xpZCAjYzlkY2Q2O2JvcmRlci1yYWRpdXM6MTZweDtwYWRkaW5nOjEuNnJlbTtjb2xvcjojMTczZTM5O2JveC1zaGFkb3c6MCAxNnB4IDYwcHggIzE3M2UzOTMzfWRpYWxvZzo6YmFja2Ryb3B7YmFja2dyb3VuZDojMGUyOTI4ODB9aDJ7bWFyZ2luOjAgMCAxLjJyZW07Zm9udC1zaXplOjEuM3JlbX1idXR0b257YmFja2dyb3VuZDojMTc1MzQ4O2NvbG9yOndoaXRlO2JvcmRlcjowO2JvcmRlci1yYWRpdXM6OXB4O3BhZGRpbmc6LjhyZW0gMXJlbTtmb250OmluaGVyaXQ7Y3Vyc29yOnBvaW50ZXJ9_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_admin_success_component_ts__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./src/app/shared/admin-success.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=ZGlhbG9ne21heC13aWR0aDptaW4oMjZyZW0sODV2dyk7Ym9yZGVyOjFweCBzb2xpZCAjYzlkY2Q2O2JvcmRlci1yYWRpdXM6MTZweDtwYWRkaW5nOjEuNnJlbTtjb2xvcjojMTczZTM5O2JveC1zaGFkb3c6MCAxNnB4IDYwcHggIzE3M2UzOTMzfWRpYWxvZzo6YmFja2Ryb3B7YmFja2dyb3VuZDojMGUyOTI4ODB9aDJ7bWFyZ2luOjAgMCAxLjJyZW07Zm9udC1zaXplOjEuM3JlbX1idXR0b257YmFja2dyb3VuZDojMTc1MzQ4O2NvbG9yOndoaXRlO2JvcmRlcjowO2JvcmRlci1yYWRpdXM6OXB4O3BhZGRpbmc6LjhyZW0gMXJlbTtmb250OmluaGVyaXQ7Y3Vyc29yOnBvaW50ZXJ9!./src/app/shared/admin-success.component.ts */ 56132);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_shared_admin_success_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_ZGlhbG9ne21heC13aWR0aDptaW4oMjZyZW0sODV2dyk7Ym9yZGVyOjFweCBzb2xpZCAjYzlkY2Q2O2JvcmRlci1yYWRpdXM6MTZweDtwYWRkaW5nOjEuNnJlbTtjb2xvcjojMTczZTM5O2JveC1zaGFkb3c6MCAxNnB4IDYwcHggIzE3M2UzOTMzfWRpYWxvZzo6YmFja2Ryb3B7YmFja2dyb3VuZDojMGUyOTI4ODB9aDJ7bWFyZ2luOjAgMCAxLjJyZW07Zm9udC1zaXplOjEuM3JlbX1idXR0b257YmFja2dyb3VuZDojMTc1MzQ4O2NvbG9yOndoaXRlO2JvcmRlcjowO2JvcmRlci1yYWRpdXM6OXB4O3BhZGRpbmc6LjhyZW0gMXJlbTtmb250OmluaGVyaXQ7Y3Vyc29yOnBvaW50ZXJ9_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_admin_success_component_ts__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_admin_success_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_ZGlhbG9ne21heC13aWR0aDptaW4oMjZyZW0sODV2dyk7Ym9yZGVyOjFweCBzb2xpZCAjYzlkY2Q2O2JvcmRlci1yYWRpdXM6MTZweDtwYWRkaW5nOjEuNnJlbTtjb2xvcjojMTczZTM5O2JveC1zaGFkb3c6MCAxNnB4IDYwcHggIzE3M2UzOTMzfWRpYWxvZzo6YmFja2Ryb3B7YmFja2dyb3VuZDojMGUyOTI4ODB9aDJ7bWFyZ2luOjAgMCAxLjJyZW07Zm9udC1zaXplOjEuM3JlbX1idXR0b257YmFja2dyb3VuZDojMTc1MzQ4O2NvbG9yOndoaXRlO2JvcmRlcjowO2JvcmRlci1yYWRpdXM6OXB4O3BhZGRpbmc6LjhyZW0gMXJlbTtmb250OmluaGVyaXQ7Y3Vyc29yOnBvaW50ZXJ9_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_admin_success_component_ts__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/router */ 50085);
+
+
+
+
+
+let AdminSuccessComponent = class AdminSuccessComponent {
+  router;
+  dismissed = new _angular_core__WEBPACK_IMPORTED_MODULE_2__.EventEmitter();
+  message = '';
+  box;
+  constructor(router) {
+    this.router = router;
+  }
+  ngAfterViewInit() {
+    this.box.nativeElement.showModal();
+  }
+  back() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this.box.nativeElement.close();
+      _this.dismissed.emit();
+      yield _this.router.navigate(['/platform/admin'], {
+        queryParams: {
+          tab: 'assets'
+        }
+      });
+    })();
+  }
+  static ctorParameters = () => [{
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_3__.Router
+  }];
+  static propDecorators = {
+    dismissed: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Output
+    }],
+    message: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input
+    }],
+    box: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.ViewChild,
+      args: ['box', {
+        static: true
+      }]
+    }]
+  };
+};
+AdminSuccessComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
+  standalone: true,
+  selector: 'app-admin-success',
+  template: `<dialog #box aria-labelledby="approval-title" (cancel)="$event.preventDefault();back()"><h2 id="approval-title">{{message}}</h2><button type="button" autofocus (click)="back()">Retour à la liste des biens</button></dialog>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_admin_success_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_ZGlhbG9ne21heC13aWR0aDptaW4oMjZyZW0sODV2dyk7Ym9yZGVyOjFweCBzb2xpZCAjYzlkY2Q2O2JvcmRlci1yYWRpdXM6MTZweDtwYWRkaW5nOjEuNnJlbTtjb2xvcjojMTczZTM5O2JveC1zaGFkb3c6MCAxNnB4IDYwcHggIzE3M2UzOTMzfWRpYWxvZzo6YmFja2Ryb3B7YmFja2dyb3VuZDojMGUyOTI4ODB9aDJ7bWFyZ2luOjAgMCAxLjJyZW07Zm9udC1zaXplOjEuM3JlbX1idXR0b257YmFja2dyb3VuZDojMTc1MzQ4O2NvbG9yOndoaXRlO2JvcmRlcjowO2JvcmRlci1yYWRpdXM6OXB4O3BhZGRpbmc6LjhyZW0gMXJlbTtmb250OmluaGVyaXQ7Y3Vyc29yOnBvaW50ZXJ9_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_admin_success_component_ts__WEBPACK_IMPORTED_MODULE_1___default())]
+})], AdminSuccessComponent);
+
 
 /***/ }),
 
@@ -62283,13 +66223,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ReleaseFooterComponent: () => (/* binding */ ReleaseFooterComponent)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiMwYzJmNDA7Y29sb3I6I2ZmZjtmb250LXNpemU6MTNweDtib3gtc2l6aW5nOmJvcmRlci1ib3h9LnJlbGVhc2UtZm9vdGVyIGF7Y29sb3I6aW5oZXJpdH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/layout/release-footer/release-footer.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiMwYzJmNDA7Y29sb3I6I2ZmZjtmb250LXNpemU6MTNweDtib3gtc2l6aW5nOmJvcmRlci1ib3h9LnJlbGVhc2UtZm9vdGVyIGF7Y29sb3I6aW5oZXJpdH0%3D!./src/app/layout/release-footer/release-footer.component.ts */ 69977);
-/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiMwYzJmNDA7Y29sb3I6I2ZmZjtmb250LXNpemU6MTNweDtib3gtc2l6aW5nOmJvcmRlci1ib3h9LnJlbGVhc2UtZm9vdGVyIGF7Y29sb3I6aW5oZXJpdH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiMwYzJmNDA7Y29sb3I6I2ZmZjtmb250LXNpemU6MTNweDtib3gtc2l6aW5nOmJvcmRlci1ib3h9LnJlbGVhc2UtZm9vdGVyIGF7Y29sb3I6aW5oZXJpdH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../home/site-text.pipe */ 99343);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _services_app_release__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../services/app-release */ 70748);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiNmOGY2ZjE7Y29sb3I6IzE3M2IzNjtib3JkZXItdG9wOjFweCBzb2xpZCAjZDJkY2Q0O2ZvbnQtc2l6ZToxM3B4O2JveC1zaXppbmc6Ym9yZGVyLWJveH0ucmVsZWFzZS1mb290ZXIgYXtjb2xvcjppbmhlcml0fQ_3D_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/layout/release-footer/release-footer.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiNmOGY2ZjE7Y29sb3I6IzE3M2IzNjtib3JkZXItdG9wOjFweCBzb2xpZCAjZDJkY2Q0O2ZvbnQtc2l6ZToxM3B4O2JveC1zaXppbmc6Ym9yZGVyLWJveH0ucmVsZWFzZS1mb290ZXIgYXtjb2xvcjppbmhlcml0fQ%3D%3D!./src/app/layout/release-footer/release-footer.component.ts */ 28180);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiNmOGY2ZjE7Y29sb3I6IzE3M2IzNjtib3JkZXItdG9wOjFweCBzb2xpZCAjZDJkY2Q0O2ZvbnQtc2l6ZToxM3B4O2JveC1zaXppbmc6Ym9yZGVyLWJveH0ucmVsZWFzZS1mb290ZXIgYXtjb2xvcjppbmhlcml0fQ_3D_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiNmOGY2ZjE7Y29sb3I6IzE3M2IzNjtib3JkZXItdG9wOjFweCBzb2xpZCAjZDJkY2Q0O2ZvbnQtc2l6ZToxM3B4O2JveC1zaXppbmc6Ym9yZGVyLWJveH0ucmVsZWFzZS1mb290ZXIgYXtjb2xvcjppbmhlcml0fQ_3D_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../services/asset-access.service */ 16379);
+/* harmony import */ var _services_asset_domain__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../services/asset-domain */ 94984);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../home/site-text.pipe */ 99343);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _services_app_release__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/app-release */ 70748);
+
+
+
 
 
 
@@ -62297,15 +66243,30 @@ __webpack_require__.r(__webpack_exports__);
 
 
 let ReleaseFooterComponent = class ReleaseFooterComponent {
-  version = _services_app_release__WEBPACK_IMPORTED_MODULE_2__.APP_RELEASE;
-  copyright = _services_app_release__WEBPACK_IMPORTED_MODULE_2__.COPYRIGHT;
+  access;
+  version = _services_app_release__WEBPACK_IMPORTED_MODULE_4__.APP_RELEASE;
+  slug = (0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_2__.assetDomainSlug)(typeof location === 'undefined' ? '' : location.hostname);
+  constructor(access) {
+    this.access = access;
+  }
+  host = typeof location === 'undefined' ? '' : location.hostname;
+  get offersInstall() {
+    return ['godirect.fr', 'owner.godirect.fr', 'admin.godirect.fr', 'concierge.godirect.fr'].includes(this.host);
+  }
+  get ownerName() {
+    return this.host === 'owner.godirect.fr' && this.access.isOwner && this.access.isAuthenticated ? this.access.displayName : '';
+  }
+  copyright = '© ' + new Date().getFullYear() + ' ' + (this.slug ? this.slug + '.godirect.fr powered by GoDirect.fr' : 'godirect.fr powered by All Digital Network');
+  static ctorParameters = () => [{
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_1__.AssetAccessService
+  }];
 };
-ReleaseFooterComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_4__.Component)({
+ReleaseFooterComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_6__.Component)({
   selector: 'app-release-footer',
   standalone: true,
-  imports: [_angular_router__WEBPACK_IMPORTED_MODULE_5__.RouterModule, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_1__.SiteTextPipe],
-  template: `<footer class="release-footer"><span>{{copyright}}</span><nav aria-label="Informations légales"><a routerLink="/legal">{{'ui.legal.conditions' | siteText}}</a> · <a routerLink="/faq">{{'ui.legal.faq' | siteText}}</a></nav><span>Version {{version}}</span> </footer>`,
-  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiMwYzJmNDA7Y29sb3I6I2ZmZjtmb250LXNpemU6MTNweDtib3gtc2l6aW5nOmJvcmRlci1ib3h9LnJlbGVhc2UtZm9vdGVyIGF7Y29sb3I6aW5oZXJpdH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_7__.NgIf, _angular_router__WEBPACK_IMPORTED_MODULE_8__.RouterModule, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_3__.SiteTextPipe],
+  template: `<footer class="release-footer"><span><strong *ngIf="ownerName as name">{{name}} · </strong>{{copyright}}</span><nav aria-label="Informations légales"><a routerLink="/legal">{{'ui.legal.conditions' | siteText}}</a> · <a routerLink="/faq">{{'ui.legal.faq' | siteText}}</a> · <a href="/contact">{{'ui.legal.contact' | siteText:'Contact'}}</a><ng-container *ngIf="offersInstall"> · <a href="/assets/pwa/install.html">Installer GoDirect</a></ng-container></nav><span>Version {{version}}</span> </footer>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiNmOGY2ZjE7Y29sb3I6IzE3M2IzNjtib3JkZXItdG9wOjFweCBzb2xpZCAjZDJkY2Q0O2ZvbnQtc2l6ZToxM3B4O2JveC1zaXppbmc6Ym9yZGVyLWJveH0ucmVsZWFzZS1mb290ZXIgYXtjb2xvcjppbmhlcml0fQ_3D_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_layout_release_footer_release_footer_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
 })], ReleaseFooterComponent);
 
 
@@ -62508,7 +66469,7 @@ ResourceListComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_a
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<app-platform-layout><main class=\"admin-shell\"><header><div><p class=\"eyebrow\">GoDirect / Admin</p><h1>{{t('title')}}</h1><p>{{t('intro')}}</p></div><button (click)=\"refresh()\" [disabled]=\"loading\">{{t('refresh')}}</button></header><p class=\"notice\">{{t('readOnly')}}</p><p *ngIf=\"loading\" role=\"status\">{{t('loading')}}</p><p *ngIf=\"error\" class=\"error\" role=\"alert\">{{ error | siteText }}</p><ng-container *ngIf=\"data\"><section class=\"metrics\"><div>{{t('owners')}}<strong>{{data.owners.length}}</strong></div><div>{{t('assets')}}<strong>{{assetCount}}</strong></div><div>{{t('online')}}<strong>{{online}}</strong></div><div>{{t('active')}}<strong>{{activeSubscriptions}}</strong></div></section><p><strong>{{t('requests')}} : {{requestCount}}</strong></p><nav class=\"tabs\"><a routerLink=\"/platform/admin/documents\">{{ 'ui.documents.adminTitle' | siteText }}</a><button *ngFor=\"let kind of ['requests','owners','subscriptions','assets']\" (click)=\"select(kind)\" [attr.aria-pressed]=\"tab===kind\">{{t(kind)}}</button></nav><div class=\"filters\"><input [attr.aria-label]=\"t('search')\" [placeholder]=\"t('search')\" [(ngModel)]=\"query\" (ngModelChange)=\"page=0\"><select [attr.aria-label]=\"t('owner')\" [(ngModel)]=\"ownerId\" (ngModelChange)=\"page=0\"><option value=\"\">{{t('all')}}</option><option *ngFor=\"let o of data.owners\" [value]=\"o.uid\">{{o.name}}</option></select><button (click)=\"reset()\">{{t('clear')}}</button></div><section class=\"panel\" *ngIf=\"selected\"><h2>{{t('review')}} — {{selected.name}}</h2><p>{{ownerName(selected.ownerId)}} · {{ selected.assetType | siteText }} · {{selected.location?.city}} {{selected.location?.country}}</p><h3>{{selected.headline}}</h3><p class=\"review-description\">{{selected.description}}</p><p>{{selected.pricing?.basePrice}} {{selected.pricing?.currency}} / {{selected.pricing?.pricingUnit}} · {{selected.subscriptionStatus}}</p><dl><ng-container *ngFor=\"let property of selected.properties|keyvalue\"><dt>{{property.key}}</dt><dd>{{property.value}}</dd></ng-container></dl><div class=\"review-photos\"><img *ngFor=\"let photo of photos\" [src]=\"image(photo)\" [alt]=\"selected.name\" loading=\"lazy\"></div><p>{{t('reviewNote')}}</p><label>{{t('reason')}}<textarea [(ngModel)]=\"reason\" maxlength=\"2000\" [disabled]=\"working\"></textarea></label><div class=\"tabs\"><button (click)=\"decide('approved')\" [disabled]=\"working||loading\">{{t('approve')}}</button><button class=\"reject\" (click)=\"decide('rejected')\" [disabled]=\"working||loading||!reason.trim()\">{{t('reject')}}</button><button (click)=\"selected=null\" [disabled]=\"working\">{{t('cancel')}}</button></div></section><label *ngIf=\"tab==='assets'\" class=\"archive-toggle\"><input type=\"checkbox\" [(ngModel)]=\"showArchived\" (ngModelChange)=\"page=0\">{{t('showArchived')}}</label><section class=\"table-scroll\"><table *ngIf=\"tab==='requests'\"><thead><tr><th>{{t('assets')}}</th><th>{{t('owner')}}</th><th>{{t('subscriptions')}}</th><th>{{t('status')}}</th><th></th></tr></thead><tbody><tr *ngFor=\"let a of visible\"><td>{{a.name}}<small>{{ a.assetType | siteText }} / {{a.id}}</small></td><td>{{ownerName(a.ownerId)}}</td><td>{{a.subscriptionStatus}}</td><td>{{t('moderationPending')}}</td><td><button (click)=\"review(a)\" [disabled]=\"working\">{{t('review')}}</button></td></tr></tbody></table><table *ngIf=\"tab==='owners'\"><thead><tr><th>{{t('name')}}</th><th>{{t('email')}}</th><th>{{t('assets')}}</th><th>{{t('online')}}</th><th>{{t('pending')}}</th><th>{{t('active')}}</th><th></th></tr></thead><tbody><tr *ngFor=\"let o of visible\"><td><strong>{{o.name}}</strong><small>{{o.uid}}</small></td><td>{{o.email||'—'}}</td><td>{{o.assetCount}}</td><td>{{o.online}}</td><td>{{o.pending}}</td><td>{{o.subscriptions}}</td><td><button (click)=\"inspect(o.uid)\">{{t('inspect')}}</button></td></tr></tbody></table><table *ngIf=\"tab==='assets'\"><thead><tr><th>{{t('name')}}</th><th>{{t('type')}}</th><th>{{t('owner')}}</th><th>{{t('status')}}</th><th>{{t('subscriptions')}}</th><th>{{t('pending')}}</th></tr></thead><tbody><tr *ngFor=\"let a of visible\"><td><strong>{{a.name}}</strong><small>{{a.id}}</small><div class=\"asset-links\"><a *ngIf=\"!a.archived\" [routerLink]=\"['/platform/admin/documents',a.assetType,a.id]\">{{ 'ui.documents.title' | siteText }}</a><a [routerLink]=\"['/platform/admin/assets',a.assetType,a.id]\">{{t('reviewAsset')}}</a><a *ngIf=\"!a.archived\" [routerLink]=\"['/platform/admin/assets',a.assetType,a.id]\" [queryParams]=\"{action:'edit'}\">{{t('editAsset')}}</a><a *ngIf=\"!a.archived\" [routerLink]=\"['/',a.assetType,a.id,'home']\">{{t('open')}}</a></div></td><td>{{ a.assetType | siteText }}</td><td>{{ownerName(a.ownerId)}}</td><td>{{t(a.archived?'archived':a.public?'public':'offline')}}<small>{{t(a.moderation?.status==='pending'?'moderationPending':a.moderation?.status||'draft')}}</small></td><td>{{a.subscriptionStatus}}</td><td>{{a.pending}}</td></tr></tbody></table><table *ngIf=\"tab==='subscriptions'\"><thead><tr><th>{{t('assets')}}</th><th>{{t('owner')}}</th><th>{{t('status')}}</th><th>{{t('mode')}}</th><th>{{t('entitled')}}</th><th>{{t('expiry')}}</th><th>{{t('renewal')}}</th></tr></thead><tbody><tr *ngFor=\"let b of visible\"><td>{{b.assetName}}<small>{{ b.assetType | siteText }} / {{b.assetId}}</small><small *ngIf=\"b.archived\">{{t('archived')}}</small><small *ngIf=\"b.missingAsset\">{{t('missing')}}</small></td><td>{{ownerName(b.ownerId)}}</td><td>{{b.status}}</td><td>{{b.mode}}</td><td>{{t(b.entitled?'yes':'no')}}</td><td>{{b.paidUntil?(b.paidUntil*1000|date:'dd/MM/yyyy'):'—'}}</td><td>{{b.renewalState==='none'?'—':t(b.renewalState)}}</td></tr></tbody></table><p *ngIf=\"!rows.length\">{{t('empty')}}</p></section><nav class=\"pagination\"><button [disabled]=\"page===0\" (click)=\"page=page-1\">{{t('previous')}}</button><span>{{page+1}} / {{pages}} · {{rows.length}}</span><button [disabled]=\"page+1>=pages\" (click)=\"page=page+1\">{{t('next')}}</button></nav><small>{{t('updated')}} {{data.generatedAt|date:'dd/MM/yyyy HH:mm'}}</small></ng-container></main></app-platform-layout>\n";
+module.exports = "<app-platform-layout [showFooter]=\"false\"><main class=\"admin-shell\"><header><div><p class=\"eyebrow\">GoDirect / Admin</p><h1>{{t('title')}}</h1><p>{{t('intro')}}</p></div><button (click)=\"refresh()\" [disabled]=\"loading\">{{t('refresh')}}</button></header><p class=\"notice\">{{t('readOnly')}}</p><p *ngIf=\"loading\" role=\"status\">{{t('loading')}}</p><p *ngIf=\"error\" class=\"error\" role=\"alert\">{{ error | siteText }}</p><ng-container *ngIf=\"data\"><section class=\"metrics\"><div>{{t('owners')}}<strong>{{data.owners.length}}</strong></div><div>{{t('assets')}}<strong>{{assetCount}}</strong></div><div>{{t('online')}}<strong>{{online}}</strong></div><div>{{t('active')}}<strong>{{activeSubscriptions}}</strong></div></section><p><strong>{{t('requests')}} : {{requestCount}}</strong></p><nav class=\"tabs\"><a routerLink=\"/platform/admin/notifications\">{{language.currentLanguage==='fr'?'Notifications email':'Email notifications'}}</a><a routerLink=\"/platform/admin/documents\">{{ 'ui.documents.adminTitle' | siteText }}</a><button *ngFor=\"let kind of ['requests','owners','subscriptions','assets']\" (click)=\"select(kind)\" [attr.aria-pressed]=\"tab===kind\">{{t(kind)}}</button></nav><div class=\"filters\"><input [attr.aria-label]=\"t('search')\" [placeholder]=\"t('search')\" [(ngModel)]=\"query\" (ngModelChange)=\"page=0\"><select [attr.aria-label]=\"t('owner')\" [(ngModel)]=\"ownerId\" (ngModelChange)=\"page=0\"><option value=\"\">{{t('all')}}</option><option *ngFor=\"let o of data.owners\" [value]=\"o.uid\">{{o.name}}{{o.email?' — '+o.email:''}}</option></select><button (click)=\"reset()\">{{t('clear')}}</button></div><app-asset-list-filters [(value)]=\"filters\" [language]=\"language.currentLanguage\" (valueChange)=\"page=0\"></app-asset-list-filters><section class=\"panel\" *ngIf=\"selected\"><h2>{{t('review')}} — {{selected.name}}</h2><p>{{ownerName(selected.ownerId)}}<br>{{ownerEmail(selected.ownerId)||'—'}} · {{ selected.assetType | siteText }} · {{selected.location?.city}} {{selected.location?.country}}</p><h3>{{selected.headline}}</h3><app-listing-description [text]=\"selected.description\"></app-listing-description><p>{{selected.pricing?.basePrice}} {{selected.pricing?.currency}} / {{selected.pricing?.pricingUnit}} · {{selected.subscriptionStatus}}</p><dl><ng-container *ngFor=\"let property of selected.properties|keyvalue\"><dt>{{property.key}}</dt><dd>{{property.value}}</dd></ng-container></dl><div class=\"review-photos\"><img *ngFor=\"let photo of photos\" [src]=\"image(photo)\" [alt]=\"selected.name\" loading=\"lazy\"></div><p>{{t('reviewNote')}}</p><label>{{t('reason')}}<textarea [(ngModel)]=\"reason\" maxlength=\"2000\" [disabled]=\"working\"></textarea></label><div class=\"tabs\"><button (click)=\"decide('approved')\" [disabled]=\"working||loading\">{{t('approve')}}</button><button class=\"reject\" (click)=\"decide('rejected')\" [disabled]=\"working||loading||!reason.trim()\">{{t('reject')}}</button><button (click)=\"selected=null\" [disabled]=\"working\">{{t('cancel')}}</button></div></section><label *ngIf=\"tab==='assets'\" class=\"archive-toggle\"><input type=\"checkbox\" [(ngModel)]=\"showArchived\" (ngModelChange)=\"page=0\">{{t('showArchived')}}</label><ng-template #assetActions let-a let-id=\"assetId\"><app-message-link *ngIf=\"!a.missingAsset&&!a.archived\" kind=\"subscription\" audience=\"management\" [type]=\"a.assetType\" [assetId]=\"id\"></app-message-link><app-asset-calendar-link *ngIf=\"!a.missingAsset&&!a.archived\" [type]=\"a.assetType\" [assetId]=\"id\"></app-asset-calendar-link><div class=\"asset-links\" *ngIf=\"!a.missingAsset\"><a *ngIf=\"!a.archived\" [routerLink]=\"['/platform/admin/documents',a.assetType,id]\">{{ 'ui.documents.title' | siteText }}</a><a [routerLink]=\"['/platform/admin/assets',a.assetType,id]\">{{t('reviewAsset')}}</a><a *ngIf=\"!a.archived\" [routerLink]=\"['/platform/admin/assets',a.assetType,id]\" [queryParams]=\"{action:'edit'}\">{{t('editAsset')}}</a><a *ngIf=\"!a.archived\" [routerLink]=\"['/',a.assetType,id,'home']\">{{t('open')}}</a></div></ng-template><section class=\"table-scroll\"><table role=\"table\" *ngIf=\"tab==='requests'\"><thead><tr><th>{{t('assets')}}</th><th>{{t('owner')}}</th><th>{{t('subscriptions')}}</th><th>{{t('status')}}</th><th></th></tr></thead><tbody role=\"rowgroup\"><tr role=\"row\" *ngFor=\"let a of visible\"><td role=\"cell\" [attr.data-label]=\"t('assets')\"><a [routerLink]=\"['/platform/admin/assets',a.assetType,a.id]\">{{a.name}}</a><small>{{ a.assetType | siteText }} / {{a.id}}</small><div class=\"desktop-actions\"><ng-container *ngTemplateOutlet=\"assetActions;context:{$implicit:a,assetId:a.id}\"></ng-container></div><details class=\"mobile-actions\"><summary>{{language.currentLanguage==='fr'?'Actions du bien':'Listing actions'}}</summary><ng-container *ngTemplateOutlet=\"assetActions;context:{$implicit:a,assetId:a.id}\"></ng-container></details></td><td role=\"cell\" [attr.data-label]=\"t('owner')\"><strong>{{ownerName(a.ownerId)}}</strong><small>{{ownerEmail(a.ownerId)||'—'}}</small></td><td role=\"cell\" [attr.data-label]=\"t('subscriptions')\">{{a.subscriptionStatus}}</td><td role=\"cell\" [attr.data-label]=\"t('status')\">{{t('moderationPending')}}</td><td role=\"cell\" class=\"row-action\"><button (click)=\"review(a)\" [disabled]=\"working\">{{t('review')}}</button></td></tr></tbody></table><table role=\"table\" *ngIf=\"tab==='owners'\"><thead><tr><th>{{t('name')}}</th><th>{{t('email')}}</th><th>{{t('assets')}}</th><th>{{t('online')}}</th><th>{{t('pending')}}</th><th>{{t('active')}}</th><th></th></tr></thead><tbody role=\"rowgroup\"><tr role=\"row\" *ngFor=\"let o of visible\"><td role=\"cell\" [attr.data-label]=\"t('name')\"><button type=\"button\" class=\"owner-link\" (click)=\"inspect(o.uid)\">{{o.name}}</button><small>{{o.uid}}</small></td><td role=\"cell\" [attr.data-label]=\"t('email')\">{{o.email||'—'}}</td><td role=\"cell\" [attr.data-label]=\"t('assets')\">{{o.assetCount}}</td><td role=\"cell\" [attr.data-label]=\"t('online')\">{{o.online}}</td><td role=\"cell\" [attr.data-label]=\"t('pending')\">{{o.pending}}</td><td role=\"cell\" [attr.data-label]=\"t('active')\">{{o.subscriptions}}</td><td role=\"cell\" class=\"row-action\"><button (click)=\"inspect(o.uid)\">{{t('inspect')}}</button></td></tr></tbody></table><table role=\"table\" *ngIf=\"tab==='assets'\"><thead><tr><th>{{t('name')}}</th><th>{{t('type')}}</th><th>{{t('owner')}}</th><th>{{t('status')}}</th><th>{{t('subscriptions')}}</th><th>{{t('pending')}}</th></tr></thead><tbody role=\"rowgroup\"><tr role=\"row\" *ngFor=\"let a of visible\"><td role=\"cell\" [attr.data-label]=\"t('name')\"><strong><a [routerLink]=\"['/platform/admin/assets',a.assetType,a.id]\">{{a.name}}</a></strong><small>{{a.id}}</small><div class=\"desktop-actions\"><ng-container *ngTemplateOutlet=\"assetActions;context:{$implicit:a,assetId:a.id}\"></ng-container></div><details class=\"mobile-actions\"><summary>{{language.currentLanguage==='fr'?'Actions du bien':'Listing actions'}}</summary><ng-container *ngTemplateOutlet=\"assetActions;context:{$implicit:a,assetId:a.id}\"></ng-container></details></td><td role=\"cell\" [attr.data-label]=\"t('type')\">{{ a.assetType | siteText }}</td><td role=\"cell\" [attr.data-label]=\"t('owner')\"><strong>{{ownerName(a.ownerId)}}</strong><small>{{ownerEmail(a.ownerId)||'—'}}</small></td><td role=\"cell\" [attr.data-label]=\"t('status')\">{{t(a.archived?'archived':a.public?'public':'offline')}}<small>{{t(a.moderation?.status==='pending'?'moderationPending':a.moderation?.status||'draft')}}</small></td><td role=\"cell\" [attr.data-label]=\"t('subscriptions')\">{{a.subscriptionStatus}}</td><td role=\"cell\" [attr.data-label]=\"t('pending')\">{{a.pending}}</td></tr></tbody></table><table role=\"table\" *ngIf=\"tab==='subscriptions'\"><thead><tr><th>{{t('assets')}}</th><th>{{t('owner')}}</th><th>{{t('status')}}</th><th>{{t('mode')}}</th><th>{{t('entitled')}}</th><th>{{t('expiry')}}</th><th>{{t('renewal')}}</th></tr></thead><tbody role=\"rowgroup\"><tr role=\"row\" *ngFor=\"let b of visible\"><td role=\"cell\" [attr.data-label]=\"t('assets')\"><a *ngIf=\"!b.missingAsset;else missingAssetName\" [routerLink]=\"['/platform/admin/assets',b.assetType,b.assetId]\">{{b.assetName}}</a><ng-template #missingAssetName>{{b.assetName}}</ng-template><small>{{ b.assetType | siteText }} / {{b.assetId}}</small><small *ngIf=\"b.archived\">{{t('archived')}}</small><small *ngIf=\"b.missingAsset\">{{t('missing')}}</small><div class=\"desktop-actions\"><ng-container *ngTemplateOutlet=\"assetActions;context:{$implicit:b,assetId:b.assetId}\"></ng-container></div><details class=\"mobile-actions\"><summary>{{language.currentLanguage==='fr'?'Actions du bien':'Listing actions'}}</summary><ng-container *ngTemplateOutlet=\"assetActions;context:{$implicit:b,assetId:b.assetId}\"></ng-container></details></td><td role=\"cell\" [attr.data-label]=\"t('owner')\"><strong>{{ownerName(b.ownerId)}}</strong><small>{{ownerEmail(b.ownerId)||'—'}}</small></td><td role=\"cell\" [attr.data-label]=\"t('status')\">{{b.status}}</td><td role=\"cell\" [attr.data-label]=\"t('mode')\">{{b.mode}}</td><td role=\"cell\" [attr.data-label]=\"t('entitled')\">{{t(b.entitled?'yes':'no')}}</td><td role=\"cell\" [attr.data-label]=\"t('expiry')\">{{b.paidUntil?(b.paidUntil*1000|date:'dd/MM/yyyy'):'—'}}</td><td role=\"cell\" [attr.data-label]=\"t('renewal')\">{{b.renewalState==='none'?'—':t(b.renewalState)}}</td></tr></tbody></table><p *ngIf=\"!rows.length\">{{t('empty')}}</p></section><nav class=\"pagination\"><button [disabled]=\"page===0\" (click)=\"page=page-1\">{{t('previous')}}</button><span>{{page+1}} / {{pages}} · {{rows.length}}</span><button [disabled]=\"page+1>=pages\" (click)=\"page=page+1\">{{t('next')}}</button></nav><small>{{t('updated')}} {{data.generatedAt|date:'dd/MM/yyyy HH:mm'}}</small></ng-container></main></app-platform-layout>\n\n<app-admin-success (dismissed)=\"success=''\" *ngIf=\"success\" [message]=\"success\"></app-admin-success>\n";
 
 /***/ }),
 
@@ -62523,20 +66484,140 @@ module.exports = "<div class=\"cookie-banner\" *ngIf=\"visible\" role=\"dialog\"
 
 /***/ }),
 
-/***/ 69977:
-/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ./src/app/layout/release-footer/release-footer.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTpibG9jazt3aWR0aDoxMDAlO21hcmdpbi10b3A6YXV0b30ucmVsZWFzZS1mb290ZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcDtwYWRkaW5nOjE4cHggbWF4KDIwcHgsNXZ3KTtiYWNrZ3JvdW5kOiMwYzJmNDA7Y29sb3I6I2ZmZjtmb250LXNpemU6MTNweDtib3gtc2l6aW5nOmJvcmRlci1ib3h9LnJlbGVhc2UtZm9vdGVyIGF7Y29sb3I6aW5oZXJpdH0%3D!./src/app/layout/release-footer/release-footer.component.ts ***!
-  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ 67276:
+/*!*********************************************************!*\
+  !*** ./src/app/messaging/message-notification-state.ts ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-// Imports
-var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
-var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
-var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
-// Module
-___CSS_LOADER_EXPORT___.push([module.id, `:host{display:block;width:100%;margin-top:auto}.release-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px max(20px,5vw);background:#0c2f40;color:#fff;font-size:13px;box-sizing:border-box}.release-footer a{color:inherit}`, "",{"version":3,"sources":["webpack://./src/app/layout/release-footer/release-footer.component.ts"],"names":[],"mappings":"AAAA,MAAM,aAAa,CAAC,UAAU,CAAC,eAAe,CAAC,gBAAgB,YAAY,CAAC,kBAAkB,CAAC,6BAA6B,CAAC,QAAQ,CAAC,cAAc,CAAC,0BAA0B,CAAC,kBAAkB,CAAC,UAAU,CAAC,cAAc,CAAC,qBAAqB,CAAC,kBAAkB,aAAa","sourcesContent":[":host{display:block;width:100%;margin-top:auto}.release-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px max(20px,5vw);background:#0c2f40;color:#fff;font-size:13px;box-sizing:border-box}.release-footer a{color:inherit}"],"sourceRoot":""}]);
-// Exports
-module.exports = ___CSS_LOADER_EXPORT___.toString();
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MessageNotificationState: () => (/* binding */ MessageNotificationState)
+/* harmony export */ });
+/** Tracks message IDs, not totals: another conversation can be read while a new one arrives. */
+class MessageNotificationState {
+  seen = new Map();
+  initialized = false;
+  reset() {
+    this.seen.clear();
+    this.initialized = false;
+  }
+  accept(summary) {
+    let notice = null;
+    for (const item of summary.latest || []) {
+      const previous = this.seen.get(item.id);
+      if (this.initialized && (previous === undefined || item.lastMessageId > previous) && !notice) notice = item;
+      this.seen.set(item.id, item.lastMessageId);
+    }
+    const current = new Set((summary.latest || []).map(x => x.id));
+    for (const id of this.seen.keys()) if (!current.has(id)) this.seen.delete(id);
+    this.initialized = true;
+    return notice;
+  }
+}
+
+/***/ }),
+
+/***/ 67918:
+/*!****************************************************************!*\
+  !*** ./src/app/shared/listing-description-editor.component.ts ***!
+  \****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ListingDescriptionEditorComponent: () => (/* binding */ ListingDescriptionEditorComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_editor_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiA6aG9zdHtkaXNwbGF5OmJsb2NrO3dpZHRoOjEwMCU7bWluLXdpZHRoOjB9LmVkaXRvcntib3JkZXI6MXB4IHNvbGlkICNhYWMzY2Q7Ym9yZGVyLXJhZGl1czoxMnB4O2JhY2tncm91bmQ6d2hpdGU7b3ZlcmZsb3c6aGlkZGVufS50b29sYmFye2Rpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6N3B4O3BhZGRpbmc6MTBweDtiYWNrZ3JvdW5kOiNlZGY0ZjV9CiBidXR0b257Ym9yZGVyOjFweCBzb2xpZCAjYzZkOGRmO2JvcmRlci1yYWRpdXM6NnB4O3BhZGRpbmc6OHB4IDExcHg7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTUzYjQ2O2ZvbnQ6NjAwIDE0cHgvMS4zIEFyaWFsLHNhbnMtc2VyaWY7Y3Vyc29yOnBvaW50ZXJ9YnV0dG9uOmZvY3VzLXZpc2libGUsdGV4dGFyZWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0Oi0zcHh9YnV0dG9uW2FyaWEtcHJlc3NlZD10cnVlXXtiYWNrZ3JvdW5kOiMxNTNiNDY7Y29sb3I6d2hpdGV9YnV0dG9uOmRpc2FibGVke29wYWNpdHk6LjV9CiB0ZXh0YXJlYXtkaXNwbGF5OmJsb2NrO2JveC1zaXppbmc6Ym9yZGVyLWJveDt3aWR0aDoxMDAlO21pbi1oZWlnaHQ6MjYwcHg7cmVzaXplOnZlcnRpY2FsO2JvcmRlcjowO2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoxNnB4O2ZvbnQ6MTdweC8xLjcgQXJpYWwsc2Fucy1zZXJpZjtjb2xvcjojMTUzYjQ2O2JhY2tncm91bmQ6d2hpdGU7Ym9yZGVyLXJhZGl1czowfS5oaW50LC5jb3VudGVye2ZvbnQtc2l6ZToxM3B4O2xpbmUtaGVpZ2h0OjEuNTttYXJnaW46OHB4IDEycHg7Y29sb3I6IzUyNmI4MH0uY291bnRlcnt0ZXh0LWFsaWduOnJpZ2h0fS5wcmV2aWV3e2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoyMHB4fWg0e21hcmdpbjowIDAgMThweDtmb250LXNpemU6MTZweDtjb2xvcjojNTI2YjgwfQog_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_editor_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/shared/listing-description-editor.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=CiA6aG9zdHtkaXNwbGF5OmJsb2NrO3dpZHRoOjEwMCU7bWluLXdpZHRoOjB9LmVkaXRvcntib3JkZXI6MXB4IHNvbGlkICNhYWMzY2Q7Ym9yZGVyLXJhZGl1czoxMnB4O2JhY2tncm91bmQ6d2hpdGU7b3ZlcmZsb3c6aGlkZGVufS50b29sYmFye2Rpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6N3B4O3BhZGRpbmc6MTBweDtiYWNrZ3JvdW5kOiNlZGY0ZjV9CiBidXR0b257Ym9yZGVyOjFweCBzb2xpZCAjYzZkOGRmO2JvcmRlci1yYWRpdXM6NnB4O3BhZGRpbmc6OHB4IDExcHg7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTUzYjQ2O2ZvbnQ6NjAwIDE0cHgvMS4zIEFyaWFsLHNhbnMtc2VyaWY7Y3Vyc29yOnBvaW50ZXJ9YnV0dG9uOmZvY3VzLXZpc2libGUsdGV4dGFyZWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0Oi0zcHh9YnV0dG9uW2FyaWEtcHJlc3NlZD10cnVlXXtiYWNrZ3JvdW5kOiMxNTNiNDY7Y29sb3I6d2hpdGV9YnV0dG9uOmRpc2FibGVke29wYWNpdHk6LjV9CiB0ZXh0YXJlYXtkaXNwbGF5OmJsb2NrO2JveC1zaXppbmc6Ym9yZGVyLWJveDt3aWR0aDoxMDAlO21pbi1oZWlnaHQ6MjYwcHg7cmVzaXplOnZlcnRpY2FsO2JvcmRlcjowO2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoxNnB4O2ZvbnQ6MTdweC8xLjcgQXJpYWwsc2Fucy1zZXJpZjtjb2xvcjojMTUzYjQ2O2JhY2tncm91bmQ6d2hpdGU7Ym9yZGVyLXJhZGl1czowfS5oaW50LC5jb3VudGVye2ZvbnQtc2l6ZToxM3B4O2xpbmUtaGVpZ2h0OjEuNTttYXJnaW46OHB4IDEycHg7Y29sb3I6IzUyNmI4MH0uY291bnRlcnt0ZXh0LWFsaWduOnJpZ2h0fS5wcmV2aWV3e2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoyMHB4fWg0e21hcmdpbjowIDAgMThweDtmb250LXNpemU6MTZweDtjb2xvcjojNTI2YjgwfQog!./src/app/shared/listing-description-editor.component.ts */ 31447);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_editor_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiA6aG9zdHtkaXNwbGF5OmJsb2NrO3dpZHRoOjEwMCU7bWluLXdpZHRoOjB9LmVkaXRvcntib3JkZXI6MXB4IHNvbGlkICNhYWMzY2Q7Ym9yZGVyLXJhZGl1czoxMnB4O2JhY2tncm91bmQ6d2hpdGU7b3ZlcmZsb3c6aGlkZGVufS50b29sYmFye2Rpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6N3B4O3BhZGRpbmc6MTBweDtiYWNrZ3JvdW5kOiNlZGY0ZjV9CiBidXR0b257Ym9yZGVyOjFweCBzb2xpZCAjYzZkOGRmO2JvcmRlci1yYWRpdXM6NnB4O3BhZGRpbmc6OHB4IDExcHg7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTUzYjQ2O2ZvbnQ6NjAwIDE0cHgvMS4zIEFyaWFsLHNhbnMtc2VyaWY7Y3Vyc29yOnBvaW50ZXJ9YnV0dG9uOmZvY3VzLXZpc2libGUsdGV4dGFyZWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0Oi0zcHh9YnV0dG9uW2FyaWEtcHJlc3NlZD10cnVlXXtiYWNrZ3JvdW5kOiMxNTNiNDY7Y29sb3I6d2hpdGV9YnV0dG9uOmRpc2FibGVke29wYWNpdHk6LjV9CiB0ZXh0YXJlYXtkaXNwbGF5OmJsb2NrO2JveC1zaXppbmc6Ym9yZGVyLWJveDt3aWR0aDoxMDAlO21pbi1oZWlnaHQ6MjYwcHg7cmVzaXplOnZlcnRpY2FsO2JvcmRlcjowO2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoxNnB4O2ZvbnQ6MTdweC8xLjcgQXJpYWwsc2Fucy1zZXJpZjtjb2xvcjojMTUzYjQ2O2JhY2tncm91bmQ6d2hpdGU7Ym9yZGVyLXJhZGl1czowfS5oaW50LC5jb3VudGVye2ZvbnQtc2l6ZToxM3B4O2xpbmUtaGVpZ2h0OjEuNTttYXJnaW46OHB4IDEycHg7Y29sb3I6IzUyNmI4MH0uY291bnRlcnt0ZXh0LWFsaWduOnJpZ2h0fS5wcmV2aWV3e2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoyMHB4fWg0e21hcmdpbjowIDAgMThweDtmb250LXNpemU6MTZweDtjb2xvcjojNTI2YjgwfQog_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_editor_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_editor_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiA6aG9zdHtkaXNwbGF5OmJsb2NrO3dpZHRoOjEwMCU7bWluLXdpZHRoOjB9LmVkaXRvcntib3JkZXI6MXB4IHNvbGlkICNhYWMzY2Q7Ym9yZGVyLXJhZGl1czoxMnB4O2JhY2tncm91bmQ6d2hpdGU7b3ZlcmZsb3c6aGlkZGVufS50b29sYmFye2Rpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6N3B4O3BhZGRpbmc6MTBweDtiYWNrZ3JvdW5kOiNlZGY0ZjV9CiBidXR0b257Ym9yZGVyOjFweCBzb2xpZCAjYzZkOGRmO2JvcmRlci1yYWRpdXM6NnB4O3BhZGRpbmc6OHB4IDExcHg7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTUzYjQ2O2ZvbnQ6NjAwIDE0cHgvMS4zIEFyaWFsLHNhbnMtc2VyaWY7Y3Vyc29yOnBvaW50ZXJ9YnV0dG9uOmZvY3VzLXZpc2libGUsdGV4dGFyZWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0Oi0zcHh9YnV0dG9uW2FyaWEtcHJlc3NlZD10cnVlXXtiYWNrZ3JvdW5kOiMxNTNiNDY7Y29sb3I6d2hpdGV9YnV0dG9uOmRpc2FibGVke29wYWNpdHk6LjV9CiB0ZXh0YXJlYXtkaXNwbGF5OmJsb2NrO2JveC1zaXppbmc6Ym9yZGVyLWJveDt3aWR0aDoxMDAlO21pbi1oZWlnaHQ6MjYwcHg7cmVzaXplOnZlcnRpY2FsO2JvcmRlcjowO2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoxNnB4O2ZvbnQ6MTdweC8xLjcgQXJpYWwsc2Fucy1zZXJpZjtjb2xvcjojMTUzYjQ2O2JhY2tncm91bmQ6d2hpdGU7Ym9yZGVyLXJhZGl1czowfS5oaW50LC5jb3VudGVye2ZvbnQtc2l6ZToxM3B4O2xpbmUtaGVpZ2h0OjEuNTttYXJnaW46OHB4IDEycHg7Y29sb3I6IzUyNmI4MH0uY291bnRlcnt0ZXh0LWFsaWduOnJpZ2h0fS5wcmV2aWV3e2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoyMHB4fWg0e21hcmdpbjowIDAgMThweDtmb250LXNpemU6MTZweDtjb2xvcjojNTI2YjgwfQog_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_editor_component_ts__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _listing_description_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./listing-description.component */ 41644);
+/* harmony import */ var _services_listing_description__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/listing-description */ 11612);
+
+
+
+
+
+
+const COPY = {
+  fr: ['Titre', 'Gras', 'Liste à puces', 'Liste numérotée', 'Paragraphe', 'Aperçu', 'Description', 'Votre texte', 'Sélectionnez du texte, puis utilisez les boutons pour le mettre en forme.', 'La description ne peut pas dépasser 10 000 caractères.'],
+  en: ['Heading', 'Bold', 'Bullet list', 'Numbered list', 'Paragraph', 'Preview', 'Description', 'Your text', 'Select text, then use the buttons to format it.', 'The description cannot exceed 10,000 characters.'],
+  es: ['Título', 'Negrita', 'Lista con viñetas', 'Lista numerada', 'Párrafo', 'Vista previa', 'Descripción', 'Su texto', 'Seleccione texto y utilice los botones para darle formato.', 'La descripción no puede superar los 10 000 caracteres.'],
+  it: ['Titolo', 'Grassetto', 'Elenco puntato', 'Elenco numerato', 'Paragrafo', 'Anteprima', 'Descrizione', 'Il tuo testo', 'Seleziona il testo e usa i pulsanti per formattarlo.', 'La descrizione non può superare 10.000 caratteri.'],
+  de: ['Überschrift', 'Fett', 'Aufzählung', 'Nummerierte Liste', 'Absatz', 'Vorschau', 'Beschreibung', 'Ihr Text', 'Text auswählen und mit den Schaltflächen formatieren.', 'Die Beschreibung darf 10.000 Zeichen nicht überschreiten.'],
+  nl: ['Kop', 'Vet', 'Opsomming', 'Genummerde lijst', 'Alinea', 'Voorbeeld', 'Beschrijving', 'Uw tekst', 'Selecteer tekst en gebruik de knoppen om deze op te maken.', 'De beschrijving mag niet langer zijn dan 10.000 tekens.'],
+  ru: ['Заголовок', 'Жирный', 'Маркированный список', 'Нумерованный список', 'Абзац', 'Предпросмотр', 'Описание', 'Ваш текст', 'Выделите текст и используйте кнопки форматирования.', 'Описание не может превышать 10 000 символов.']
+};
+let ListingDescriptionEditorComponent = class ListingDescriptionEditorComponent {
+  value = '';
+  lang = 'fr';
+  placeholder = '';
+  inputId = 'listing-description';
+  disabled = false;
+  valueChange = new _angular_core__WEBPACK_IMPORTED_MODULE_3__.EventEmitter();
+  preview = true;
+  error = false;
+  formats = ['heading', 'bold', 'bullets', 'numbers', 'paragraph'];
+  t(i) {
+    return (COPY[this.lang] || COPY.en)[i];
+  }
+  changed(value) {
+    this.error = value.length > 10000;
+    if (!this.error) {
+      this.value = value;
+      this.valueChange.emit(value);
+    }
+  }
+  format(input, kind) {
+    const result = (0,_services_listing_description__WEBPACK_IMPORTED_MODULE_2__.formatDescription)(this.value, input.selectionStart, input.selectionEnd, kind, this.t(7));
+    if (result.value.length > 10000) {
+      this.error = true;
+      return;
+    }
+    this.changed(result.value);
+    input.value = result.value;
+    input.focus();
+    input.setSelectionRange(result.start, result.end);
+  }
+  static propDecorators = {
+    value: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_3__.Input
+    }],
+    lang: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_3__.Input
+    }],
+    placeholder: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_3__.Input
+    }],
+    inputId: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_3__.Input
+    }],
+    disabled: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_3__.Input
+    }],
+    valueChange: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_3__.Output
+    }]
+  };
+};
+ListingDescriptionEditorComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_4__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_3__.Component)({
+  selector: 'app-listing-description-editor',
+  standalone: true,
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_5__.CommonModule, _listing_description_component__WEBPACK_IMPORTED_MODULE_1__.ListingDescriptionComponent],
+  template: `
+ <div class="editor"><div class="toolbar" role="group" [attr.aria-label]="t(6)">
+ <button type="button" *ngFor="let kind of formats;let i=index" (mousedown)="$event.preventDefault()" (click)="format(input,kind)" [disabled]="disabled">{{t(i)}}</button>
+ <button type="button" (click)="preview=!preview" [attr.aria-pressed]="preview">{{t(5)}}</button></div>
+ <p class="hint">{{t(8)}}</p>
+ <textarea #input [id]="inputId" [value]="value" (input)="changed(input.value)" [placeholder]="placeholder" [disabled]="disabled" [attr.aria-label]="t(6)" maxlength="10000" rows="12"></textarea>
+ <p class="counter">{{value.length}} / 10 000</p><p *ngIf="error" role="alert">{{t(9)}}</p>
+ <section *ngIf="preview" class="preview"><h4>{{t(5)}}</h4><app-listing-description [text]="value"></app-listing-description></section></div>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_editor_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_CiA6aG9zdHtkaXNwbGF5OmJsb2NrO3dpZHRoOjEwMCU7bWluLXdpZHRoOjB9LmVkaXRvcntib3JkZXI6MXB4IHNvbGlkICNhYWMzY2Q7Ym9yZGVyLXJhZGl1czoxMnB4O2JhY2tncm91bmQ6d2hpdGU7b3ZlcmZsb3c6aGlkZGVufS50b29sYmFye2Rpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6N3B4O3BhZGRpbmc6MTBweDtiYWNrZ3JvdW5kOiNlZGY0ZjV9CiBidXR0b257Ym9yZGVyOjFweCBzb2xpZCAjYzZkOGRmO2JvcmRlci1yYWRpdXM6NnB4O3BhZGRpbmc6OHB4IDExcHg7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTUzYjQ2O2ZvbnQ6NjAwIDE0cHgvMS4zIEFyaWFsLHNhbnMtc2VyaWY7Y3Vyc29yOnBvaW50ZXJ9YnV0dG9uOmZvY3VzLXZpc2libGUsdGV4dGFyZWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0Oi0zcHh9YnV0dG9uW2FyaWEtcHJlc3NlZD10cnVlXXtiYWNrZ3JvdW5kOiMxNTNiNDY7Y29sb3I6d2hpdGV9YnV0dG9uOmRpc2FibGVke29wYWNpdHk6LjV9CiB0ZXh0YXJlYXtkaXNwbGF5OmJsb2NrO2JveC1zaXppbmc6Ym9yZGVyLWJveDt3aWR0aDoxMDAlO21pbi1oZWlnaHQ6MjYwcHg7cmVzaXplOnZlcnRpY2FsO2JvcmRlcjowO2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoxNnB4O2ZvbnQ6MTdweC8xLjcgQXJpYWwsc2Fucy1zZXJpZjtjb2xvcjojMTUzYjQ2O2JhY2tncm91bmQ6d2hpdGU7Ym9yZGVyLXJhZGl1czowfS5oaW50LC5jb3VudGVye2ZvbnQtc2l6ZToxM3B4O2xpbmUtaGVpZ2h0OjEuNTttYXJnaW46OHB4IDEycHg7Y29sb3I6IzUyNmI4MH0uY291bnRlcnt0ZXh0LWFsaWduOnJpZ2h0fS5wcmV2aWV3e2JvcmRlci10b3A6MXB4IHNvbGlkICNkYmU1ZTk7cGFkZGluZzoyMHB4fWg0e21hcmdpbjowIDAgMThweDtmb250LXNpemU6MTZweDtjb2xvcjojNTI2YjgwfQog_Users_faycalamrani_data_ADN_boatify_app_src_app_shared_listing_description_editor_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
+})], ListingDescriptionEditorComponent);
 
 
 /***/ }),
@@ -62553,7 +66634,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   APP_RELEASE: () => (/* binding */ APP_RELEASE),
 /* harmony export */   COPYRIGHT: () => (/* binding */ COPYRIGHT)
 /* harmony export */ });
-const APP_RELEASE = '22.15.46';
+const APP_RELEASE = '22.16.28';
 const COPYRIGHT = '© 2026 All Digital Network';
 
 /***/ }),
@@ -62714,15 +66795,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SiteContentService: () => (/* binding */ SiteContentService)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _services_page_translations__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../services/page-translations */ 27513);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/common/http */ 93262);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! rxjs */ 56196);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! rxjs */ 72354);
-/* harmony import */ var _site_content__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../site-content */ 14009);
-/* harmony import */ var _services_resource_context_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/resource-context.service */ 54560);
-/* harmony import */ var _services_private_media_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/private-media.service */ 71260);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _services_portal_policy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../services/portal-policy */ 6636);
+/* harmony import */ var _services_page_translations__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../services/page-translations */ 27513);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! rxjs */ 72354);
+/* harmony import */ var _site_content__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../site-content */ 14009);
+/* harmony import */ var _services_resource_context_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/resource-context.service */ 54560);
+/* harmony import */ var _services_private_media_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../services/private-media.service */ 71260);
+
 
 
 
@@ -62736,7 +66819,9 @@ let SiteContentService = class SiteContentService {
   http;
   resourceContext;
   privateMedia;
-  restDatabaseUrls = ['https://ailla-poc-default-rtdb.firebaseio.com'];
+  contentUrl(scope) {
+    return "/api/listing-content/" + scope.split("/").filter(Boolean).slice(-2).map(encodeURIComponent).join("/");
+  }
   languages = ['fr', 'en', 'es', 'it', 'de', 'nl', 'ru'];
   defaultTenantId = 'alegria';
   cacheGeneration = 0;
@@ -62770,7 +66855,21 @@ let SiteContentService = class SiteContentService {
    *
    * The service no longer reads /alegria_v2 for translations.
    */
+  platformOnly() {
+    if (typeof window === 'undefined') return false;
+    return ['owner', 'client', 'concierge', 'admin'].includes((0,_services_portal_policy__WEBPACK_IMPORTED_MODULE_1__.portalFor)(window.location.hostname)) && !/^\/(boat|car|property|pool|parking)\//.test(window.location.pathname);
+  }
+  sharedContent(refresh) {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (refresh) _this.globalContent = undefined;
+      if (_this.globalContent) return _this.globalContent;
+      _this.globalPromise ||= (0,rxjs__WEBPACK_IMPORTED_MODULE_6__.firstValueFrom)(_this.http.get('/api/ui-content').pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_7__.timeout)(5000))).then(content => _this.globalContent = content || {}).catch(() => ({})).finally(() => _this.globalPromise = undefined);
+      return _this.globalPromise;
+    })();
+  }
   getContent(forceRefresh = false) {
+    if (this.platformOnly()) return this.sharedContent(forceRefresh);
     const scope = this.resourceContext.scopedPath('siteContent');
     const current = this.scopeLoads.get(scope);
     if (current && !forceRefresh) return current;
@@ -62782,93 +66881,88 @@ let SiteContentService = class SiteContentService {
     return task;
   }
   loadContent(forceRefresh = false) {
-    var _this = this;
+    var _this2 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const scope = _this.resourceContext.scopedPath('siteContent');
-      if (_this.cached && _this.cacheScope === scope && !forceRefresh) return _this.cached;
-      _this.cacheScope = scope;
-      const generation = _this.cacheGeneration;
+      const scope = _this2.resourceContext.scopedPath('siteContent');
+      if (_this2.cached && _this2.cacheScope === scope && !forceRefresh) return _this2.cached;
+      _this2.cacheScope = scope;
+      const generation = _this2.cacheGeneration;
       try {
-        if (forceRefresh) _this.globalPromise = undefined;
-        if (!_this.globalContent || forceRefresh) {
-          try {
-            _this.globalPromise ||= (0,rxjs__WEBPACK_IMPORTED_MODULE_5__.firstValueFrom)(_this.http.get('/api/ui-content').pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_6__.timeout)(5000))).finally(() => _this.globalPromise = undefined);
-            _this.globalContent = yield _this.globalPromise;
-          } catch {}
-        }
+        yield _this2.sharedContent(forceRefresh);
         let scoped = {};
         try {
-          scoped = (yield (0,rxjs__WEBPACK_IMPORTED_MODULE_5__.firstValueFrom)(_this.http.get(`${_this.restDatabaseUrls[0]}/${scope}.json`).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_6__.timeout)(5000)))) || {};
+          scoped = (yield (0,rxjs__WEBPACK_IMPORTED_MODULE_6__.firstValueFrom)(_this2.http.get(_this2.contentUrl(scope)).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_7__.timeout)(5000)))) || {};
         } catch {}
         const value = {};
-        for (const language of _this.languages) {
-          const fallback = _site_content__WEBPACK_IMPORTED_MODULE_2__.SITE_CONTENT[language] || _site_content__WEBPACK_IMPORTED_MODULE_2__.SITE_CONTENT.en || {};
-          value[language] = _this.deepMerge(_this.deepMerge(fallback, _this.globalContent?.[language] || {}), scoped?.[language] || {});
+        for (const language of _this2.languages) {
+          const fallback = _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT[language] || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT.en || {};
+          value[language] = _this2.deepMerge(_this2.deepMerge(fallback, _this2.globalContent?.[language] || {}), scoped?.[language] || {});
           // RTDB drops empty arrays; an explicit photo selection must not revive sample images.
           if (scoped?.[language]?.boatPhotosConfigured === true) {
             value[language].boatHeroImage = String(scoped[language].boatHeroImage || '');
             value[language].galleryImages = Array.isArray(scoped[language].galleryImages) ? scoped[language].galleryImages : [];
           }
           // Generic role labels and new shared UI belong to the platform, not boat CMS overrides.
-          if (_this.globalContent?.[language]?.roles) value[language].roles = _this.globalContent[language].roles;
-          if (_this.globalContent?.[language]?.ui) value[language].ui = _this.globalContent[language].ui;
-          value[language] = _this.applyLegacyContentAliases(value[language]);
+          if (_this2.globalContent?.[language]?.roles) value[language].roles = _this2.globalContent[language].roles;
+          if (_this2.globalContent?.[language]?.ui) value[language].ui = _this2.globalContent[language].ui;
+          value[language] = _this2.applyLegacyContentAliases(value[language]);
         }
-        const resolved = yield _this.privateMedia.resolveFirebaseTree(value).catch(() => value);
-        if (_this.cacheScope === scope && _this.cacheGeneration === generation) {
-          _this.rawSiteContent = scoped;
-          _this.rawScope = scope;
-          _this.cached = resolved;
+        const resolved = yield _this2.privateMedia.resolveFirebaseTree(value).catch(() => value);
+        if (_this2.cacheScope === scope && _this2.cacheGeneration === generation) {
+          _this2.rawSiteContent = scoped;
+          _this2.rawScope = scope;
+          _this2.cached = resolved;
         }
         return resolved;
       } catch {
-        const fallback = _this.mergeAll(_site_content__WEBPACK_IMPORTED_MODULE_2__.SITE_CONTENT);
-        if (_this.cacheScope === scope && _this.cacheGeneration === generation) _this.cached = fallback;
+        const fallback = _this2.mergeAll(_site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT);
+        if (_this2.cacheScope === scope && _this2.cacheGeneration === generation) _this2.cached = fallback;
         return fallback;
       }
     })();
   }
   getLanguageContent(language) {
-    var _this2 = this;
+    var _this3 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const all = yield _this2.getContent();
+      const all = yield _this3.getContent();
       return all[language] || all.en || all.fr || {};
     })();
   }
   getRawContent(forceRefresh = false) {
-    var _this3 = this;
+    var _this4 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const scope = _this3.resourceContext.scopedPath('siteContent');
-      if (!forceRefresh && _this3.rawSiteContent && _this3.rawScope === scope) return _this3.rawSiteContent;
-      for (const baseUrl of _this3.restDatabaseUrls) {
+      if (_this4.platformOnly()) return {};
+      const scope = _this4.resourceContext.scopedPath('siteContent');
+      if (!forceRefresh && _this4.rawSiteContent && _this4.rawScope === scope) return _this4.rawSiteContent;
+      {
         try {
-          _this3.rawSiteContent = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_5__.firstValueFrom)(_this3.http.get(`${baseUrl}/${_this3.resourceContext.scopedPath('siteContent')}.json`).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_6__.timeout)(5000)));
-          if (!_this3.rawSiteContent) {
-            _this3.rawSiteContent = {};
+          _this4.rawSiteContent = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_6__.firstValueFrom)(_this4.http.get(_this4.contentUrl(scope)).pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_7__.timeout)(5000)));
+          if (!_this4.rawSiteContent) {
+            _this4.rawSiteContent = {};
           }
-          _this3.rawScope = scope;
-          return _this3.rawSiteContent;
+          _this4.rawScope = scope;
+          return _this4.rawSiteContent;
         } catch {}
       }
       return {};
     })();
   }
   translate(path, language = 'fr', fallback = '') {
-    var _this4 = this;
+    var _this5 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const all = yield _this4.getContent();
-      return _this4.tFromContent(all, path, language, fallback);
+      const all = yield _this5.getContent();
+      return _this5.tFromContent(all, path, language, fallback);
     })();
   }
   /** Synchronous lookup for components/pipes that already hold a content object. */
   tFromContent(all, path, language = 'fr', fallback = '') {
-    path = _services_page_translations__WEBPACK_IMPORTED_MODULE_1__.LITERAL_KEYS[path] || path;
+    path = _services_page_translations__WEBPACK_IMPORTED_MODULE_2__.LITERAL_KEYS[path] || path;
     const current = all?.[language];
     const english = all?.en;
     const french = all?.fr;
     const value = this.getByPath(current, path);
     if (typeof value === 'string' && value.trim()) return value;
-    const bundled = _services_page_translations__WEBPACK_IMPORTED_MODULE_1__.PAGE_TRANSLATIONS[language]?.[path];
+    const bundled = _services_page_translations__WEBPACK_IMPORTED_MODULE_2__.PAGE_TRANSLATIONS[language]?.[path];
     if (typeof bundled === 'string' && bundled.trim()) return bundled;
     const englishValue = this.getByPath(english, path);
     if (typeof englishValue === 'string') return englishValue;
@@ -62899,9 +66993,9 @@ let SiteContentService = class SiteContentService {
     })();
   }
   getTenantMarinas(_tenantId = this.defaultTenantId) {
-    var _this5 = this;
+    var _this6 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const all = yield _this5.getContent();
+      const all = yield _this6.getContent();
       const marinas = all?.fr?.settings?.marinas || all?.en?.settings?.marinas;
       return Array.isArray(marinas) ? marinas : [];
     })();
@@ -62923,7 +67017,7 @@ let SiteContentService = class SiteContentService {
   }
   mergeAll(value) {
     return this.languages.reduce((acc, language) => {
-      const fallback = _site_content__WEBPACK_IMPORTED_MODULE_2__.SITE_CONTENT[language] || _site_content__WEBPACK_IMPORTED_MODULE_2__.SITE_CONTENT.en || _site_content__WEBPACK_IMPORTED_MODULE_2__.SITE_CONTENT.fr;
+      const fallback = _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT[language] || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT.en || _site_content__WEBPACK_IMPORTED_MODULE_3__.SITE_CONTENT.fr;
       acc[language] = this.deepMerge(fallback, value[language] || {});
       return acc;
     }, {});
@@ -62991,14 +67085,14 @@ let SiteContentService = class SiteContentService {
     return String(path || '').split('.').filter(Boolean).reduce((acc, key) => acc && typeof acc === 'object' ? acc[key] : undefined, obj);
   }
   static ctorParameters = () => [{
-    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_7__.HttpClient
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_8__.HttpClient
   }, {
-    type: _services_resource_context_service__WEBPACK_IMPORTED_MODULE_3__.ResourceContextService
+    type: _services_resource_context_service__WEBPACK_IMPORTED_MODULE_4__.ResourceContextService
   }, {
-    type: _services_private_media_service__WEBPACK_IMPORTED_MODULE_4__.PrivateMediaService
+    type: _services_private_media_service__WEBPACK_IMPORTED_MODULE_5__.PrivateMediaService
   }];
 };
-SiteContentService = (0,tslib__WEBPACK_IMPORTED_MODULE_8__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Injectable)({
+SiteContentService = (0,tslib__WEBPACK_IMPORTED_MODULE_9__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_10__.Injectable)({
   providedIn: 'root'
 })], SiteContentService);
 
@@ -63109,6 +67203,42 @@ const OWNER_ONBOARDING_TEXT = {
     "billingError": "Для тестового процесса нужны тестовые ключи Stripe для подписок."
   }
 };
+const STRIPE_COMPLETION_COPY = {
+  "fr": ["Compte Stripe connecté, mais paiements non activés. Complétez les informations demandées sur Stripe ; la création du compte seule ne suffit pas.", "Terminer la configuration Stripe", "Gérer ce compte Stripe", "Connecter un autre compte Stripe", "Adresse", "Identité et date de naissance", "Téléphone", "Acceptation des conditions Stripe", "Autres informations demandées par Stripe", "Stripe vérifie certaines informations. Actualisez le statut après leur validation."],
+  "en": ["Stripe account connected, but payments are not enabled. Complete the information requested by Stripe; creating an account alone is not sufficient.", "Finish Stripe setup", "Manage this Stripe account", "Connect another Stripe account", "Address", "Identity and date of birth", "Phone", "Accept Stripe terms", "Other information requested by Stripe", "Stripe is verifying some information. Refresh the status after verification."],
+  "es": ["Cuenta Stripe conectada, pero pagos no activados. Complete los datos solicitados por Stripe; crear la cuenta no basta.", "Completar configuración Stripe", "Gestionar esta cuenta Stripe", "Conectar otra cuenta Stripe", "Dirección", "Identidad y fecha de nacimiento", "Teléfono", "Aceptar las condiciones de Stripe", "Otros datos solicitados por Stripe", "Stripe está verificando datos. Actualice el estado después de la verificación."],
+  "it": ["Conto Stripe collegato, ma pagamenti non attivi. Completa i dati richiesti da Stripe; creare il conto non basta.", "Completa configurazione Stripe", "Gestisci questo conto Stripe", "Collega un altro conto Stripe", "Indirizzo", "Identità e data di nascita", "Telefono", "Accetta le condizioni Stripe", "Altre informazioni richieste da Stripe", "Stripe sta verificando alcuni dati. Aggiorna lo stato dopo la verifica."],
+  "de": ["Stripe-Konto verbunden, aber Zahlungen sind nicht aktiviert. Ergänzen Sie die von Stripe angeforderten Angaben; die Kontoerstellung allein reicht nicht.", "Stripe-Einrichtung abschließen", "Dieses Stripe-Konto verwalten", "Anderes Stripe-Konto verbinden", "Adresse", "Identität und Geburtsdatum", "Telefon", "Stripe-Bedingungen akzeptieren", "Weitere von Stripe angeforderte Angaben", "Stripe prüft einige Angaben. Aktualisieren Sie den Status nach der Prüfung."],
+  "nl": ["Stripe-account gekoppeld, maar betalingen zijn niet geactiveerd. Vul de door Stripe gevraagde gegevens aan; alleen een account aanmaken is niet voldoende.", "Stripe-configuratie afronden", "Dit Stripe-account beheren", "Ander Stripe-account koppelen", "Adres", "Identiteit en geboortedatum", "Telefoon", "Stripe-voorwaarden accepteren", "Andere door Stripe gevraagde gegevens", "Stripe controleert enkele gegevens. Vernieuw de status na de controle."],
+  "ru": ["Аккаунт Stripe подключён, но платежи не активированы. Заполните сведения, запрошенные Stripe; одного создания аккаунта недостаточно.", "Завершить настройку Stripe", "Управлять этим аккаунтом Stripe", "Подключить другой аккаунт Stripe", "Адрес", "Личность и дата рождения", "Телефон", "Принятие условий Stripe", "Другие сведения, запрошенные Stripe", "Stripe проверяет некоторые сведения. Обновите статус после проверки."]
+};
+for (const [lang, copy] of Object.entries(STRIPE_COMPLETION_COPY)) for (const [i, key] of ["incompleteAccount", "finishSetup", "manageAccount", "replaceAccount", "missingAddress", "missingIdentity", "missingPhone", "missingTerms", "missingOther", "pendingVerification"].entries()) OWNER_ONBOARDING_TEXT[lang][key] = copy[i];
+const STRIPE_REPLACEMENT_COPY = {
+  "fr": ["Stripe a renvoyé le même compte. Aucun remplacement effectué. Dans Stripe, sélectionnez un autre compte ou connectez-vous avec son adresse email.", "Pour remplacer le compte, sélectionnez un autre compte dans Stripe. Le compte actuel reste lié tant que le remplacement n’a pas réussi."],
+  "en": ["Stripe returned the same account. No replacement was made. In Stripe, select another account or sign in with its email address.", "To replace the account, select another account in Stripe. The current account stays linked until replacement succeeds."],
+  "es": ["Stripe devolvió la misma cuenta. No se realizó ningún cambio. Seleccione otra cuenta en Stripe.", "Seleccione otra cuenta en Stripe. La actual permanece vinculada hasta completar el cambio."],
+  "it": ["Stripe ha restituito lo stesso conto. Nessuna sostituzione. Seleziona un altro conto su Stripe.", "Seleziona un altro conto su Stripe. Quello attuale resta collegato fino alla sostituzione."],
+  "de": ["Stripe hat dasselbe Konto zurückgegeben. Kein Wechsel erfolgt. Wählen Sie bei Stripe ein anderes Konto.", "Wählen Sie bei Stripe ein anderes Konto. Das aktuelle bleibt bis zum erfolgreichen Wechsel verbunden."],
+  "nl": ["Stripe gaf hetzelfde account terug. Geen vervanging uitgevoerd. Kies een ander account bij Stripe.", "Kies een ander account bij Stripe. Het huidige blijft gekoppeld totdat de vervanging is voltooid."],
+  "ru": ["Stripe вернул тот же аккаунт. Замена не выполнена. Выберите другой аккаунт в Stripe.", "Выберите другой аккаунт в Stripe. Текущий останется подключённым до успешной замены."]
+};
+for (const [lang, copy] of Object.entries(STRIPE_REPLACEMENT_COPY)) {
+  OWNER_ONBOARDING_TEXT[lang].sameAccount = copy[0];
+  OWNER_ONBOARDING_TEXT[lang].replacementHelp = copy[1];
+}
+const STRIPE_NEW_ACCOUNT_COPY = {
+  "fr": ["Créer et connecter un nouveau compte Stripe de test", "Ce bouton crée un nouveau compte Stripe de test et remplace le compte lié pour les prochains paiements. Vous devrez terminer sa configuration sur Stripe."],
+  "en": ["Create and connect a new Stripe test account", "This creates a new Stripe test account and replaces the linked account for future payments. You must finish its Stripe setup."],
+  "es": ["Crear y conectar una nueva cuenta Stripe de prueba", "Se creará una nueva cuenta Stripe de prueba para los próximos pagos. Complete su configuración en Stripe."],
+  "it": ["Crea e collega un nuovo conto Stripe di test", "Verrà creato un nuovo conto Stripe di test per i prossimi pagamenti. Completa la configurazione su Stripe."],
+  "de": ["Neues Stripe-Testkonto erstellen und verbinden", "Ein neues Stripe-Testkonto wird für künftige Zahlungen verbunden. Schließen Sie dessen Einrichtung bei Stripe ab."],
+  "nl": ["Nieuw Stripe-testaccount aanmaken en koppelen", "Er wordt een nieuw Stripe-testaccount gekoppeld voor toekomstige betalingen. Rond de configuratie bij Stripe af."],
+  "ru": ["Создать и подключить новый тестовый аккаунт Stripe", "Будет создан новый тестовый аккаунт Stripe для будущих платежей. Завершите его настройку в Stripe."]
+};
+for (const [lang, copy] of Object.entries(STRIPE_NEW_ACCOUNT_COPY)) {
+  OWNER_ONBOARDING_TEXT[lang].replaceAccount = copy[0];
+  OWNER_ONBOARDING_TEXT[lang].replacementHelp = copy[1];
+}
 
 /***/ }),
 
@@ -63224,6 +67354,202 @@ module.exports = ___CSS_LOADER_EXPORT___.toString();
 
 /***/ }),
 
+/***/ 74742:
+/*!************************************************!*\
+  !*** ./src/app/services/wizard-stripe-text.ts ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   WIZARD_STRIPE_TEXT: () => (/* binding */ WIZARD_STRIPE_TEXT)
+/* harmony export */ });
+const WIZARD_STRIPE_TEXT = {
+  "fr": {
+    "step": "Stripe (facultatif)",
+    "next": "Continuer vers Stripe",
+    "title": "Recevez vos paiements avec Stripe",
+    "intro": "Connectez votre compte Stripe ou créez-en un via le parcours sécurisé Stripe pour recevoir les paiements des locations.",
+    "saved": "Votre annonce et vos justificatifs sont enregistrés avant cette étape.",
+    "checking": "Vérification du compte Stripe…",
+    "ready": "Votre compte Stripe est connecté et les paiements sont activés.",
+    "connected": "Votre compte Stripe est déjà connecté. Sa configuration peut encore être à compléter.",
+    "connect": "Créer ou connecter mon compte Stripe",
+    "manage": "Gérer mon compte Stripe",
+    "refresh": "Actualiser le statut",
+    "optional": "Cette étape est facultative. Vous pourrez configurer Stripe dans Compte → Paiements propriétaire. Les paiements en ligne nécessitent un compte Stripe opérationnel.",
+    "finish": "Terminer",
+    "skip": "Plus tard — terminer",
+    "statusError": "Impossible de vérifier Stripe. Vous pouvez réessayer ou terminer plus tard. Aucun compte ne sera créé automatiquement.",
+    "legalUnavailable": "Conditions générales indisponibles. Réessayez plus tard. Aucun nouveau compte Stripe n’est créé.",
+    "connectError": "La connexion Stripe n’a pas abouti. Votre annonce est conservée. Réessayez ou choisissez Plus tard.",
+    "wizardIntro": "Créez votre annonce : présentation, photos, tarifs, justificatifs, puis configuration Stripe facultative.",
+    "skipPhotos": "Ajouter les photos plus tard",
+    "skipDocuments": "Ajouter les justificatifs plus tard",
+    "documentsOptional": "Vous pouvez continuer sans justificatifs. Le dossier restera à compléter avant la publication, sauf dispense administrateur.",
+    "savedForLater": "Annonce enregistrée. Vous pouvez reprendre les étapes plus tard depuis Mes annonces. Les étapes ignorées ne sont pas validées."
+  },
+  "en": {
+    "step": "Stripe (optional)",
+    "next": "Continue to Stripe",
+    "title": "Receive payments with Stripe",
+    "intro": "Connect an existing Stripe account or create one through Stripe’s secure onboarding to receive rental payments.",
+    "saved": "Your listing and documents are saved before this step.",
+    "checking": "Checking Stripe account…",
+    "ready": "Your Stripe account is connected and payments are enabled.",
+    "connected": "Your Stripe account is already connected. Further setup may be required.",
+    "connect": "Create or connect my Stripe account",
+    "manage": "Manage Stripe account",
+    "refresh": "Refresh status",
+    "optional": "This step is optional. Set up Stripe later in Account → Owner payments. Online payments require a ready Stripe account.",
+    "finish": "Finish",
+    "skip": "Later — finish",
+    "statusError": "Unable to check Stripe. Retry or finish for now. No account is created automatically.",
+    "legalUnavailable": "Terms and conditions unavailable. Retry later. No new Stripe account is created.",
+    "connectError": "Stripe connection failed. Your listing is saved. Retry or choose Later.",
+    "wizardIntro": "Create your listing: description, photos, pricing, documents, then optional Stripe setup.",
+    "skipPhotos": "Add photos later",
+    "skipDocuments": "Add documents later",
+    "documentsOptional": "You can continue without documents. Complete the dossier before publication unless an administrator grants an exemption.",
+    "savedForLater": "Listing saved. Resume later from My listings. Skipped steps are not marked as approved."
+  },
+  "es": {
+    "step": "Stripe (opcional)",
+    "next": "Continuar a Stripe",
+    "title": "Recibe pagos con Stripe",
+    "intro": "Conecta o crea una cuenta mediante el proceso seguro de Stripe para recibir pagos de alquiler.",
+    "saved": "El anuncio y los documentos ya están guardados.",
+    "checking": "Comprobando Stripe…",
+    "ready": "Cuenta conectada y pagos activados.",
+    "connected": "La cuenta ya está conectada. Puede necesitar completar la configuración.",
+    "connect": "Crear o conectar Stripe",
+    "manage": "Gestionar Stripe",
+    "refresh": "Actualizar estado",
+    "optional": "Paso opcional. Configura Stripe más tarde en Cuenta → Pagos propietario. Los pagos online requieren una cuenta operativa.",
+    "finish": "Terminar",
+    "skip": "Más tarde — terminar",
+    "statusError": "No se pudo comprobar Stripe. Reintenta o termina. No se creará una cuenta automáticamente.",
+    "legalUnavailable": "Condiciones no disponibles. Reintenta más tarde. No se crea una cuenta Stripe.",
+    "connectError": "Conexión fallida. El anuncio está guardado. Reintenta o elige Más tarde.",
+    "wizardIntro": "Crea tu anuncio: presentación, fotos, tarifas, documentos y configuración opcional de Stripe.",
+    "skipPhotos": "Añadir fotos más tarde",
+    "skipDocuments": "Añadir documentos más tarde",
+    "documentsOptional": "Puedes continuar sin documentos. Completa el expediente antes de publicar, salvo exención del administrador.",
+    "savedForLater": "Anuncio guardado. Continúa más tarde desde Mis anuncios. Los pasos omitidos no se validan."
+  },
+  "it": {
+    "step": "Stripe (facoltativo)",
+    "next": "Continua su Stripe",
+    "title": "Ricevi pagamenti con Stripe",
+    "intro": "Collega o crea un conto tramite la procedura sicura Stripe per ricevere pagamenti.",
+    "saved": "Annuncio e documenti sono già salvati.",
+    "checking": "Verifica Stripe…",
+    "ready": "Conto collegato e pagamenti attivi.",
+    "connected": "Conto già collegato. Potrebbe essere necessario completare la configurazione.",
+    "connect": "Crea o collega Stripe",
+    "manage": "Gestisci Stripe",
+    "refresh": "Aggiorna stato",
+    "optional": "Passaggio facoltativo. Configura Stripe in seguito da Account → Pagamenti proprietario. I pagamenti online richiedono un conto operativo.",
+    "finish": "Termina",
+    "skip": "Più tardi — termina",
+    "statusError": "Impossibile verificare Stripe. Riprova o termina. Nessun conto creato automaticamente.",
+    "legalUnavailable": "Condizioni non disponibili. Riprova in seguito. Nessun nuovo conto creato.",
+    "connectError": "Collegamento non riuscito. Annuncio salvato. Riprova o scegli Più tardi.",
+    "wizardIntro": "Crea l’annuncio: presentazione, foto, tariffe, documenti e configurazione Stripe facoltativa.",
+    "skipPhotos": "Aggiungi foto più tardi",
+    "skipDocuments": "Aggiungi documenti più tardi",
+    "documentsOptional": "Puoi continuare senza documenti. Completa il dossier prima della pubblicazione, salvo esenzione amministrativa.",
+    "savedForLater": "Annuncio salvato. Riprendi da I miei annunci. I passaggi saltati non risultano approvati."
+  },
+  "de": {
+    "step": "Stripe (optional)",
+    "next": "Weiter zu Stripe",
+    "title": "Zahlungen mit Stripe empfangen",
+    "intro": "Verbinden oder erstellen Sie ein Konto über das sichere Stripe-Onboarding für Mietzahlungen.",
+    "saved": "Anzeige und Nachweise sind bereits gespeichert.",
+    "checking": "Stripe-Konto wird geprüft…",
+    "ready": "Konto verbunden und Zahlungen aktiviert.",
+    "connected": "Konto bereits verbunden. Weitere Einrichtung kann erforderlich sein.",
+    "connect": "Stripe-Konto erstellen oder verbinden",
+    "manage": "Stripe verwalten",
+    "refresh": "Status aktualisieren",
+    "optional": "Optionaler Schritt. Später unter Konto → Eigentümerzahlungen einrichten. Onlinezahlungen erfordern ein betriebsbereites Stripe-Konto.",
+    "finish": "Fertig",
+    "skip": "Später — abschließen",
+    "statusError": "Stripe-Status nicht verfügbar. Erneut versuchen oder abschließen. Kein Konto wird automatisch erstellt.",
+    "legalUnavailable": "Bedingungen nicht verfügbar. Später versuchen. Kein neues Konto wird erstellt.",
+    "connectError": "Verbindung fehlgeschlagen. Anzeige gespeichert. Erneut versuchen oder Später wählen.",
+    "wizardIntro": "Anzeige erstellen: Beschreibung, Fotos, Preise, Nachweise und optionale Stripe-Einrichtung.",
+    "skipPhotos": "Fotos später hinzufügen",
+    "skipDocuments": "Nachweise später hinzufügen",
+    "documentsOptional": "Ohne Nachweise fortfahren. Vor Veröffentlichung vervollständigen, sofern keine administrative Ausnahme gilt.",
+    "savedForLater": "Anzeige gespeichert. Später unter Meine Anzeigen fortsetzen. Übersprungene Schritte werden nicht genehmigt."
+  },
+  "nl": {
+    "step": "Stripe (optioneel)",
+    "next": "Verder naar Stripe",
+    "title": "Ontvang betalingen met Stripe",
+    "intro": "Koppel of maak een account via de beveiligde Stripe-procedure voor huurbetalingen.",
+    "saved": "Je advertentie en documenten zijn al opgeslagen.",
+    "checking": "Stripe controleren…",
+    "ready": "Account gekoppeld en betalingen ingeschakeld.",
+    "connected": "Account al gekoppeld. Verdere configuratie kan nodig zijn.",
+    "connect": "Stripe-account maken of koppelen",
+    "manage": "Stripe beheren",
+    "refresh": "Status vernieuwen",
+    "optional": "Optioneel. Configureer later via Account → Eigenaarbetalingen. Onlinebetalingen vereisen een werkend Stripe-account.",
+    "finish": "Afronden",
+    "skip": "Later — afronden",
+    "statusError": "Stripe-status niet beschikbaar. Probeer opnieuw of rond af. Geen automatische accountaanmaak.",
+    "legalUnavailable": "Voorwaarden niet beschikbaar. Probeer later. Geen nieuw account aangemaakt.",
+    "connectError": "Koppelen mislukt. Advertentie opgeslagen. Probeer opnieuw of kies Later.",
+    "wizardIntro": "Maak je advertentie: beschrijving, foto’s, tarieven, documenten en optionele Stripe-configuratie.",
+    "skipPhotos": "Foto’s later toevoegen",
+    "skipDocuments": "Documenten later toevoegen",
+    "documentsOptional": "Je kunt zonder documenten doorgaan. Vul het dossier aan vóór publicatie, tenzij een beheerder vrijstelling geeft.",
+    "savedForLater": "Advertentie opgeslagen. Hervat later via Mijn advertenties. Overgeslagen stappen zijn niet goedgekeurd."
+  },
+  "ru": {
+    "step": "Stripe (необязательно)",
+    "next": "Перейти к Stripe",
+    "title": "Получайте платежи через Stripe",
+    "intro": "Подключите или создайте счёт через защищённую процедуру Stripe для получения арендных платежей.",
+    "saved": "Объявление и документы уже сохранены.",
+    "checking": "Проверка Stripe…",
+    "ready": "Счёт подключён, платежи включены.",
+    "connected": "Счёт уже подключён. Может потребоваться дополнительная настройка.",
+    "connect": "Создать или подключить Stripe",
+    "manage": "Управление Stripe",
+    "refresh": "Обновить статус",
+    "optional": "Необязательно. Настройте позже в Аккаунт → Платежи владельца. Для онлайн-платежей нужен рабочий счёт Stripe.",
+    "finish": "Завершить",
+    "skip": "Позже — завершить",
+    "statusError": "Не удалось проверить Stripe. Повторите или завершите. Счёт не создаётся автоматически.",
+    "legalUnavailable": "Условия недоступны. Повторите позже. Новый счёт не создаётся.",
+    "connectError": "Не удалось подключить. Объявление сохранено. Повторите или выберите Позже.",
+    "wizardIntro": "Создайте объявление: описание, фото, тарифы, документы и необязательная настройка Stripe.",
+    "skipPhotos": "Добавить фото позже",
+    "skipDocuments": "Добавить документы позже",
+    "documentsOptional": "Можно продолжить без документов. До публикации заполните досье, если администратор не предоставил освобождение.",
+    "savedForLater": "Объявление сохранено. Продолжите позже в Моих объявлениях. Пропущенные этапы не считаются одобренными."
+  }
+};
+const EXISTING_STRIPE_TEXT = {
+  "fr": ["Votre compte Stripe est déjà configuré ✓", "Votre compte Stripe est déjà connecté", "Les paiements de ce bien seront reçus sur votre compte Stripe existant. Aucune configuration supplémentaire n’est nécessaire pour activer les paiements.", "Ce bien utilisera votre compte Stripe existant. Complétez sa configuration depuis « Gérer mon compte Stripe » pour activer les paiements.", "Votre annonce est enregistrée. Vous pourrez compléter ses justificatifs depuis votre espace propriétaire."],
+  "en": ["Your Stripe account is already configured ✓", "Your Stripe account is already connected", "Payments for this property will go to your existing Stripe account. No additional setup is required to enable payments.", "This property will use your existing Stripe account. Complete its setup through Manage my Stripe account to enable payments.", "Your listing is saved. You can complete its supporting documents from your owner area."],
+  "es": ["Tu cuenta Stripe ya está configurada ✓", "Tu cuenta Stripe ya está conectada", "Los pagos de este bien se recibirán en tu cuenta Stripe existente. No es necesaria ninguna configuración adicional para activar los pagos.", "Este bien utilizará tu cuenta Stripe existente. Completa su configuración desde Gestionar mi cuenta Stripe para activar los pagos.", "Tu anuncio está guardado. Puedes completar los justificantes desde tu espacio de propietario."],
+  "it": ["Il tuo account Stripe è già configurato ✓", "Il tuo account Stripe è già collegato", "I pagamenti di questo bene saranno ricevuti sul tuo account Stripe esistente. Non serve altra configurazione per attivare i pagamenti.", "Questo bene utilizzerà il tuo account Stripe esistente. Completa la configurazione da Gestisci il mio account Stripe per attivare i pagamenti.", "Annuncio salvato. Puoi completare i documenti dalla tua area proprietario."],
+  "de": ["Dein Stripe-Konto ist bereits eingerichtet ✓", "Dein Stripe-Konto ist bereits verbunden", "Zahlungen für dieses Objekt gehen auf dein bestehendes Stripe-Konto. Zur Aktivierung der Zahlungen ist keine weitere Einrichtung erforderlich.", "Dieses Objekt nutzt dein bestehendes Stripe-Konto. Vervollständige die Einrichtung unter Mein Stripe-Konto verwalten, um Zahlungen zu aktivieren.", "Deine Anzeige ist gespeichert. Nachweise kannst du im Eigentümerbereich ergänzen."],
+  "nl": ["Je Stripe-account is al ingesteld ✓", "Je Stripe-account is al gekoppeld", "Betalingen voor dit object gaan naar je bestaande Stripe-account. Er is geen verdere configuratie nodig om betalingen te activeren.", "Dit object gebruikt je bestaande Stripe-account. Voltooi de instellingen via Mijn Stripe-account beheren om betalingen te activeren.", "Je advertentie is opgeslagen. Je kunt de bewijsstukken aanvullen in je eigenaarsomgeving."],
+  "ru": ["Ваш аккаунт Stripe уже настроен ✓", "Ваш аккаунт Stripe уже подключён", "Платежи за этот объект будут поступать на ваш существующий аккаунт Stripe. Дополнительная настройка для приёма платежей не требуется.", "Для объекта будет использован ваш существующий аккаунт Stripe. Завершите настройку через управление аккаунтом Stripe, чтобы принимать платежи.", "Объявление сохранено. Документы можно дополнить в кабинете владельца."]
+};
+for (const [language, labels] of Object.entries(EXISTING_STRIPE_TEXT)) {
+  ['alreadyConfigured', 'alreadyConnected', 'reuseReady', 'reuseIncomplete', 'listingSaved'].forEach((key, index) => WIZARD_STRIPE_TEXT[language][key] = labels[index]);
+}
+
+/***/ }),
+
 /***/ 74918:
 /*!**********************************************!*\
   !*** ./src/app/services/discovery-search.ts ***!
@@ -63264,6 +67590,200 @@ function discoveryFilters(type, location, start, end) {
 
 /***/ }),
 
+/***/ 75017:
+/*!*************************************************!*\
+  !*** ./src/app/services/listing-import-text.ts ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LISTING_IMPORT_TEXT: () => (/* binding */ LISTING_IMPORT_TEXT)
+/* harmony export */ });
+const LISTING_IMPORT_TEXT = {
+  "fr": {
+    "title": "Votre annonce existe déjà ?",
+    "intro": "Importez une annonce Click&Boat, Airbnb ou Booking.com, puis vérifiez votre brouillon GoDirect.",
+    "url": "Lien de votre annonce",
+    "rights": "Je suis autorisé à réutiliser les textes et photos de cette annonce.",
+    "paste": "Importer par copier-coller",
+    "pasteHint": "Si le lien est bloqué, collez le titre sur la première ligne, puis la description. Vous ajouterez vos photos dans le wizard.",
+    "analyze": "Préparer le brouillon",
+    "manual": "Créer manuellement",
+    "loading": "Import en cours…",
+    "failed": "Import impossible. Vérifiez le lien et réessayez, ou utilisez le copier-coller.",
+    "preview": "Informations récupérées",
+    "incomplete": "La page est bloquée ou incomplète. Utilisez le copier-coller ci-dessus, ou complétez le brouillon dans le wizard.",
+    "referencePrice": "Prix affiché sur la source, à titre indicatif",
+    "priceNotice": "Le tarif n’est pas repris automatiquement : confirmez votre prix GoDirect à l’étape Tarifs.",
+    "photos": "Photos disponibles",
+    "photosHint": "Sélectionnez uniquement les photos de votre bien que vous avez le droit de réutiliser. Les fichiers sélectionnés seront copiés lors de la préparation du brouillon.",
+    "photo": "Photo",
+    "useDraft": "Utiliser ce brouillon",
+    "reviewNotice": "Vérifiez le titre, la description, les caractéristiques et le prix. Ajoutez vos justificatifs. Rien n’est publié par cet import.",
+    "partialPhotos": "Certaines photos n’ont pas pu être copiées. Ajoutez-les dans Photos ; le reste du brouillon est conservé."
+  },
+  "en": {
+    "title": "Already have a listing?",
+    "intro": "Import a Click&Boat, Airbnb or Booking.com listing, then review your GoDirect draft.",
+    "url": "Your listing URL",
+    "rights": "I am authorized to reuse this listing’s text and photos.",
+    "paste": "Import by pasting text",
+    "pasteHint": "If access is blocked, paste the title on the first line followed by the description. Add photos in the wizard.",
+    "analyze": "Prepare draft",
+    "manual": "Create manually",
+    "loading": "Importing…",
+    "failed": "Import failed. Check the URL, retry or paste your text.",
+    "preview": "Imported information",
+    "incomplete": "The page is blocked or incomplete. Paste the text above or complete the draft in the wizard.",
+    "referencePrice": "Source price, for reference only",
+    "priceNotice": "Prices are not applied automatically. Confirm your GoDirect price in Pricing.",
+    "photos": "Available photos",
+    "photosHint": "Select only photos of your asset that you have permission to reuse. Selected files will be copied when preparing the draft.",
+    "photo": "Photo",
+    "useDraft": "Use this draft",
+    "reviewNotice": "Review title, description, features and pricing. Add required documents. Importing never publishes the listing.",
+    "partialPhotos": "Some photos could not be copied. Add them in Photos; the rest of your draft is preserved."
+  },
+  "es": {
+    "title": "¿Ya tienes un anuncio?",
+    "intro": "Importa tu anuncio de Click&Boat, Airbnb o Booking.com y revisa el borrador GoDirect.",
+    "url": "Enlace del anuncio",
+    "rights": "Tengo autorización para reutilizar los textos y las fotos.",
+    "paste": "Pegar el texto",
+    "pasteHint": "Pega el título en la primera línea y después la descripción. Añade las fotos en el asistente.",
+    "analyze": "Preparar borrador",
+    "manual": "Crear manualmente",
+    "loading": "Importando…",
+    "failed": "No se pudo importar. Revisa el enlace o pega el texto.",
+    "preview": "Información recuperada",
+    "incomplete": "La página está bloqueada o incompleta. Pega el texto o completa el borrador.",
+    "referencePrice": "Precio de referencia",
+    "priceNotice": "Confirma tu precio GoDirect en Tarifas. El precio no se aplica automáticamente.",
+    "photos": "Fotos disponibles",
+    "photosHint": "Selecciona solo fotos de tu bien que tengas derecho a reutilizar. Se copiarán al preparar el borrador.",
+    "photo": "Foto",
+    "useDraft": "Usar este borrador",
+    "reviewNotice": "Revisa los datos y añade los documentos. La importación no publica el anuncio.",
+    "partialPhotos": "Algunas fotos no se copiaron. Añádelas en Fotos; el borrador se conserva."
+  },
+  "it": {
+    "title": "Hai già un annuncio?",
+    "intro": "Importa da Click&Boat, Airbnb o Booking.com e verifica la bozza GoDirect.",
+    "url": "Link dell’annuncio",
+    "rights": "Sono autorizzato a riutilizzare testi e foto.",
+    "paste": "Incolla il testo",
+    "pasteHint": "Incolla il titolo sulla prima riga, poi la descrizione. Aggiungi le foto nella procedura guidata.",
+    "analyze": "Prepara bozza",
+    "manual": "Crea manualmente",
+    "loading": "Importazione…",
+    "failed": "Importazione non riuscita. Controlla il link o incolla il testo.",
+    "preview": "Informazioni recuperate",
+    "incomplete": "Pagina bloccata o incompleta. Incolla il testo o completa la bozza.",
+    "referencePrice": "Prezzo indicativo",
+    "priceNotice": "Conferma il prezzo GoDirect in Tariffe. Il prezzo non viene applicato automaticamente.",
+    "photos": "Foto disponibili",
+    "photosHint": "Seleziona solo foto del tuo bene che puoi riutilizzare. Verranno copiate preparando la bozza.",
+    "photo": "Foto",
+    "useDraft": "Usa questa bozza",
+    "reviewNotice": "Controlla i dati e aggiungi i documenti. L’importazione non pubblica l’annuncio.",
+    "partialPhotos": "Alcune foto non sono state copiate. Aggiungile in Foto; la bozza è conservata."
+  },
+  "de": {
+    "title": "Sie haben bereits eine Anzeige?",
+    "intro": "Importieren Sie von Click&Boat, Airbnb oder Booking.com und prüfen Sie den GoDirect-Entwurf.",
+    "url": "Link zur Anzeige",
+    "rights": "Ich darf Texte und Fotos dieser Anzeige wiederverwenden.",
+    "paste": "Text einfügen",
+    "pasteHint": "Titel in die erste Zeile, danach die Beschreibung. Fotos im Assistenten hinzufügen.",
+    "analyze": "Entwurf vorbereiten",
+    "manual": "Manuell erstellen",
+    "loading": "Import läuft…",
+    "failed": "Import fehlgeschlagen. Link prüfen oder Text einfügen.",
+    "preview": "Übernommene Informationen",
+    "incomplete": "Seite gesperrt oder unvollständig. Text einfügen oder Entwurf vervollständigen.",
+    "referencePrice": "Unverbindlicher Quellpreis",
+    "priceNotice": "GoDirect-Preis unter Preise bestätigen. Keine automatische Preisübernahme.",
+    "photos": "Verfügbare Fotos",
+    "photosHint": "Nur eigene Fotos mit Nutzungsrechten auswählen. Die Dateien werden beim Vorbereiten kopiert.",
+    "photo": "Foto",
+    "useDraft": "Entwurf verwenden",
+    "reviewNotice": "Daten prüfen und Nachweise hinzufügen. Der Import veröffentlicht keine Anzeige.",
+    "partialPhotos": "Einige Fotos wurden nicht kopiert. Unter Fotos hinzufügen; der Entwurf bleibt erhalten."
+  },
+  "nl": {
+    "title": "Heb je al een advertentie?",
+    "intro": "Importeer van Click&Boat, Airbnb of Booking.com en controleer je GoDirect-concept.",
+    "url": "Link naar de advertentie",
+    "rights": "Ik mag deze teksten en foto’s hergebruiken.",
+    "paste": "Tekst plakken",
+    "pasteHint": "Plak de titel op de eerste regel en daarna de beschrijving. Voeg foto’s toe in de wizard.",
+    "analyze": "Concept voorbereiden",
+    "manual": "Handmatig maken",
+    "loading": "Importeren…",
+    "failed": "Import mislukt. Controleer de link of plak de tekst.",
+    "preview": "Opgehaalde informatie",
+    "incomplete": "Pagina geblokkeerd of onvolledig. Plak de tekst of vul het concept aan.",
+    "referencePrice": "Bronprijs ter indicatie",
+    "priceNotice": "Bevestig je GoDirect-prijs bij Tarieven. De prijs wordt niet automatisch toegepast.",
+    "photos": "Beschikbare foto’s",
+    "photosHint": "Selecteer alleen foto’s van je object die je mag hergebruiken. Ze worden gekopieerd bij het voorbereiden.",
+    "photo": "Foto",
+    "useDraft": "Dit concept gebruiken",
+    "reviewNotice": "Controleer de gegevens en voeg documenten toe. Importeren publiceert geen advertentie.",
+    "partialPhotos": "Sommige foto’s zijn niet gekopieerd. Voeg ze toe bij Foto’s; het concept blijft behouden."
+  },
+  "ru": {
+    "title": "Уже есть объявление?",
+    "intro": "Импортируйте из Click&Boat, Airbnb или Booking.com и проверьте черновик GoDirect.",
+    "url": "Ссылка на объявление",
+    "rights": "У меня есть права на повторное использование текстов и фотографий.",
+    "paste": "Вставить текст",
+    "pasteHint": "Первая строка — заголовок, затем описание. Добавьте фото в мастере.",
+    "analyze": "Подготовить черновик",
+    "manual": "Создать вручную",
+    "loading": "Импорт…",
+    "failed": "Не удалось импортировать. Проверьте ссылку или вставьте текст.",
+    "preview": "Полученные данные",
+    "incomplete": "Страница заблокирована или неполная. Вставьте текст или дополните черновик.",
+    "referencePrice": "Справочная цена",
+    "priceNotice": "Подтвердите цену GoDirect на этапе тарифов. Цена не применяется автоматически.",
+    "photos": "Доступные фото",
+    "photosHint": "Выбирайте только фото вашего объекта, на которые у вас есть права. Файлы будут скопированы при подготовке.",
+    "photo": "Фото",
+    "useDraft": "Использовать черновик",
+    "reviewNotice": "Проверьте данные и добавьте документы. Импорт не публикует объявление.",
+    "partialPhotos": "Некоторые фото не скопированы. Добавьте их на этапе фото; черновик сохранён."
+  }
+};
+const IMPORT_PREVIEW_TEXT = {
+  "fr": ["Chargement de la photo…", "Photo indisponible. Réessayez ou ajoutez-la à l’étape Photos.", "Réessayer les photos indisponibles", "Aucune photo récupérée. Ajoutez vos images à l’étape Photos."],
+  "en": ["Loading photo…", "Photo unavailable. Retry or add it in the Photos step.", "Retry unavailable photos", "No photos retrieved. Add your images in the Photos step."],
+  "es": ["Cargando foto…", "Foto no disponible. Reinténtalo o añádela en Fotos.", "Reintentar fotos no disponibles", "No se recuperaron fotos. Añádelas en Fotos."],
+  "it": ["Caricamento foto…", "Foto non disponibile. Riprova o aggiungila in Foto.", "Riprova le foto non disponibili", "Nessuna foto recuperata. Aggiungile in Foto."],
+  "de": ["Foto wird geladen…", "Foto nicht verfügbar. Erneut versuchen oder unter Fotos hinzufügen.", "Nicht verfügbare Fotos erneut laden", "Keine Fotos gefunden. Unter Fotos hinzufügen."],
+  "nl": ["Foto laden…", "Foto niet beschikbaar. Probeer opnieuw of voeg deze toe bij Foto’s.", "Niet beschikbare foto’s opnieuw laden", "Geen foto’s opgehaald. Voeg ze toe bij Foto’s."],
+  "ru": ["Загрузка фото…", "Фото недоступно. Повторите попытку или добавьте его на этапе фото.", "Загрузить недоступные фото повторно", "Фото не получены. Добавьте их на этапе фото."]
+};
+for (const [language, labels] of Object.entries(IMPORT_PREVIEW_TEXT)) {
+  ['photoLoading', 'photoUnavailable', 'retryPhotos', 'noPhotos'].forEach((key, index) => LISTING_IMPORT_TEXT[language][key] = labels[index]);
+}
+const EXTRA_IMPORT_TEXT = {
+  "fr": ["Importez une annonce Click&Boat, Airbnb, Booking.com, La Centrale, Leboncoin ou SeLoger, puis vérifiez votre brouillon GoDirect.", "Le prix source peut être un prix de vente ou un loyer mensuel. Il n’est jamais appliqué automatiquement : confirmez votre prix de location GoDirect à l’étape Tarifs.", "Type de bien à importer", "Détection automatique", "Pour Leboncoin, vous pouvez préciser le type de bien. Vérifiez ensuite les informations et adaptez le texte à la location."],
+  "en": ["Import a listing from Click&Boat, Airbnb, Booking.com, La Centrale, Leboncoin or SeLoger, then review your GoDirect draft.", "The source price may be a sale price or monthly rent. It is never applied automatically: confirm your GoDirect rental price in Pricing.", "Asset type to import", "Automatic detection", "For Leboncoin you can specify the asset type. Review the information and adapt the text for rental."],
+  "es": ["Importa desde Click&Boat, Airbnb, Booking.com, La Centrale, Leboncoin o SeLoger y revisa el borrador GoDirect.", "El precio puede ser de venta o un alquiler mensual. No se aplica automáticamente: confirma la tarifa de alquiler GoDirect.", "Tipo de bien", "Detección automática", "En Leboncoin puedes indicar el tipo. Revisa los datos y adapta el texto al alquiler."],
+  "it": ["Importa da Click&Boat, Airbnb, Booking.com, La Centrale, Leboncoin o SeLoger e verifica la bozza GoDirect.", "Il prezzo può essere di vendita o un canone mensile. Non viene applicato automaticamente: conferma la tariffa di noleggio GoDirect.", "Tipo di bene", "Rilevamento automatico", "Per Leboncoin puoi indicare il tipo. Verifica i dati e adatta il testo alla locazione."],
+  "de": ["Importiere von Click&Boat, Airbnb, Booking.com, La Centrale, Leboncoin oder SeLoger und prüfe den GoDirect-Entwurf.", "Der Quellpreis kann ein Kaufpreis oder eine Monatsmiete sein. Er wird nie automatisch übernommen: bestätige deinen GoDirect-Mietpreis.", "Objekttyp", "Automatische Erkennung", "Für Leboncoin kannst du den Typ angeben. Prüfe die Angaben und passe den Text zur Vermietung an."],
+  "nl": ["Importeer van Click&Boat, Airbnb, Booking.com, La Centrale, Leboncoin of SeLoger en controleer je GoDirect-concept.", "De bronprijs kan een verkoopprijs of maandhuur zijn. Deze wordt nooit automatisch toegepast: bevestig je GoDirect-huurprijs.", "Type object", "Automatische detectie", "Voor Leboncoin kun je het type kiezen. Controleer de gegevens en pas de tekst aan voor verhuur."],
+  "ru": ["Импортируйте из Click&Boat, Airbnb, Booking.com, La Centrale, Leboncoin или SeLoger и проверьте черновик GoDirect.", "Цена может быть продажной или месячной арендной платой. Она не применяется автоматически: укажите цену аренды GoDirect.", "Тип объекта", "Автоматическое определение", "Для Leboncoin можно указать тип объекта. Проверьте данные и адаптируйте текст для аренды."]
+};
+for (const [lang, labels] of Object.entries(EXTRA_IMPORT_TEXT)) {
+  ['introExpanded', 'priceNoticeExpanded', 'assetType', 'automaticType', 'typeHint'].forEach((key, i) => LISTING_IMPORT_TEXT[lang][key] = labels[i]);
+}
+
+/***/ }),
+
 /***/ 75162:
 /*!**********************************************!*\
   !*** ./src/app/services/asset-navigation.ts ***!
@@ -63284,6 +67804,261 @@ function assetView(url, canManage, preferred) {
   if (!section || section === 'home') return preferred;
   return 'customer';
 }
+
+/***/ }),
+
+/***/ 75663:
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/calendar/asset-calendar-link.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2s7bWFyZ2luOjRweCA4cHggNHB4IDB9YXtkaXNwbGF5OmlubGluZS1ibG9jaztjb2xvcjojMTI1NjZhO3RleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7dGV4dC11bmRlcmxpbmUtb2Zmc2V0OjNweDtwYWRkaW5nOjVweCAwfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0OjJweH0%3D!./src/app/calendar/asset-calendar-link.component.ts ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `:host{display:inline-block;margin:4px 8px 4px 0}a{display:inline-block;color:#12566a;text-decoration:underline;text-underline-offset:3px;padding:5px 0}a:focus-visible{outline:3px solid #b47a22;outline-offset:2px}`, "",{"version":3,"sources":["webpack://./src/app/calendar/asset-calendar-link.component.ts"],"names":[],"mappings":"AAAA,MAAM,oBAAoB,CAAC,oBAAoB,CAAC,EAAE,oBAAoB,CAAC,aAAa,CAAC,yBAAyB,CAAC,yBAAyB,CAAC,aAAa,CAAC,gBAAgB,yBAAyB,CAAC,kBAAkB","sourcesContent":[":host{display:inline-block;margin:4px 8px 4px 0}a{display:inline-block;color:#12566a;text-decoration:underline;text-underline-offset:3px;padding:5px 0}a:focus-visible{outline:3px solid #b47a22;outline-offset:2px}"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
+/***/ 78194:
+/*!*************************************************!*\
+  !*** ./src/app/messaging/asset-contact-text.ts ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   assetContactScope: () => (/* binding */ assetContactScope),
+/* harmony export */   assetContactText: () => (/* binding */ assetContactText)
+/* harmony export */ });
+const COPY = {
+  fr: ['Contacter l’hôte', 'Votre interlocuteur', 'Propriétaire', 'Concierge', 'Tous mes messages', 'Échange au sujet de ce bien', 'Ouverture de la conversation…'],
+  en: ['Contact your host', 'Your contact', 'Owner', 'Concierge', 'All my messages', 'Conversation about this asset', 'Opening conversation…'],
+  es: ['Contactar al anfitrión', 'Tu contacto', 'Propietario', 'Conserje', 'Todos mis mensajes', 'Conversación sobre este bien', 'Abriendo conversación…'],
+  it: ['Contatta il tuo host', 'Il tuo contatto', 'Proprietario', 'Concierge', 'Tutti i miei messaggi', 'Conversazione su questo bene', 'Apertura conversazione…'],
+  de: ['Gastgeber kontaktieren', 'Ihre Kontaktperson', 'Eigentümer', 'Concierge', 'Alle Nachrichten', 'Gespräch zu diesem Objekt', 'Gespräch wird geöffnet…'],
+  nl: ['Contact met de verhuurder', 'Uw contactpersoon', 'Eigenaar', 'Conciërge', 'Al mijn berichten', 'Gesprek over dit object', 'Gesprek openen…'],
+  ru: ['Связаться с хозяином', 'Ваш собеседник', 'Владелец', 'Консьерж', 'Все сообщения', 'Переписка об этом объекте', 'Открытие переписки…']
+};
+function assetContactText(language, i) {
+  return (COPY[language] || COPY.en)[i];
+}
+/** No remembered/default asset: a platform page must not accidentally contact Alegria. */
+function assetContactScope(url, dedicated) {
+  const path = url.split(/[?#]/)[0];
+  const m = /^\/(boat|car|property|parking|pool)\/([a-z0-9][a-z0-9_-]*)(?:\/|$)/i.exec(path);
+  if (m) return {
+    assetType: m[1].toLowerCase(),
+    assetId: m[2]
+  };
+  if (/^\/(messages|account|owner|platform|concierge|legal|faq|contact|asset-calendar|admin-access|__asset_unavailable)(?:\/|$)/.test(path)) return null;
+  return dedicated;
+}
+
+/***/ }),
+
+/***/ 78534:
+/*!******************************************!*\
+  !*** ./src/app/services/portal.guard.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PortalGuard: () => (/* binding */ PortalGuard)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var _portal_policy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./portal-policy */ 6636);
+/* harmony import */ var _reservation_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./reservation-auth.service */ 46709);
+
+
+
+
+
+
+
+let PortalGuard = class PortalGuard {
+  router;
+  http;
+  auth;
+  constructor(router, http, auth) {
+    this.router = router;
+    this.http = http;
+    this.auth = auth;
+  }
+  canActivate(_route, state) {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (typeof window === 'undefined') return true;
+      const host = window.location.hostname,
+        portal = (0,_portal_policy__WEBPACK_IMPORTED_MODULE_1__.portalFor)(host),
+        url = state.url,
+        path = url.split(/[?#]/)[0];
+      if (portal === 'local') return true;
+      const wanted = (0,_portal_policy__WEBPACK_IMPORTED_MODULE_1__.workspacePortal)(path);
+      if (wanted === 'admin' && portal !== 'admin') {
+        window.location.assign((0,_portal_policy__WEBPACK_IMPORTED_MODULE_1__.portalOrigin)(wanted) + url);
+        return false;
+      }
+      const home = (0,_portal_policy__WEBPACK_IMPORTED_MODULE_1__.dedicatedPortalHome)(host);
+      if (portal === 'owner' && /^\/account\/login\/?$/.test(path)) {
+        const target = new URL(url, window.location.origin).searchParams.get('returnUrl');
+        if (target && /^\/owner\/listings\/?(?:[?#]|$)/.test(target) && !/[\\\x00-\x1f]/.test(target)) {
+          try {
+            yield _this.auth.user();
+          } catch {
+            return true;
+          }
+          return _this.router.parseUrl(target);
+        }
+      }
+      if (path === '/' && home) {
+        try {
+          yield _this.auth.user();
+        } catch {
+          return _this.router.createUrlTree(['/account/login'], {
+            queryParams: {
+              returnUrl: home
+            }
+          });
+        }
+        return _this.router.parseUrl(home);
+      }
+      if (portal === 'admin') {
+        if (path.startsWith('/platform/admin')) {
+          try {
+            yield _this.auth.user();
+          } catch {
+            return _this.router.createUrlTree(['/account/login'], {
+              queryParams: {
+                returnUrl: url
+              }
+            });
+          }
+        }
+        if (!/^\/(platform\/admin|admin-access|account\/(login|forgotpwd|profile|accept-terms)|messages|legal|faq|contact)(\/|$)/.test(path)) return _this.router.parseUrl('/platform/admin');
+      }
+      if (/^\/(owner|concierge)(\/|$)/.test(path)) {
+        try {
+          yield _this.auth.user();
+        } catch {
+          return _this.router.createUrlTree(['/account/login'], {
+            queryParams: {
+              returnUrl: url
+            }
+          });
+        }
+      }
+      return true;
+    })();
+  }
+  static ctorParameters = () => [{
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_3__.Router
+  }, {
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_4__.HttpClient
+  }, {
+    type: _reservation_auth_service__WEBPACK_IMPORTED_MODULE_2__.ReservationAuthService
+  }];
+};
+PortalGuard = (0,tslib__WEBPACK_IMPORTED_MODULE_5__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_6__.Injectable)({
+  providedIn: 'root'
+})], PortalGuard);
+
+
+/***/ }),
+
+/***/ 78952:
+/*!*************************************************************!*\
+  !*** ./src/app/messaging/asset-contact-button.component.ts ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AssetContactButtonComponent: () => (/* binding */ AssetContactButtonComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_asset_contact_button_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtZmxleH1he3Bvc2l0aW9uOnJlbGF0aXZlO2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo3cHg7cGFkZGluZzoxMHB4IDE0cHg7Ym9yZGVyOjFweCBzb2xpZCAjYjlkYmU1O2JvcmRlci1yYWRpdXM6MjRweDtiYWNrZ3JvdW5kOiNlNmYzZjc7Y29sb3I6IzEwM2I1MDtmb250LXdlaWdodDo3MDA7Zm9udC1zaXplOjE0cHg7d2hpdGUtc3BhY2U6bm93cmFwO3RleHQtZGVjb3JhdGlvbjpub25lfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_asset_contact_button_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/messaging/asset-contact-button.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTppbmxpbmUtZmxleH1he3Bvc2l0aW9uOnJlbGF0aXZlO2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo3cHg7cGFkZGluZzoxMHB4IDE0cHg7Ym9yZGVyOjFweCBzb2xpZCAjYjlkYmU1O2JvcmRlci1yYWRpdXM6MjRweDtiYWNrZ3JvdW5kOiNlNmYzZjc7Y29sb3I6IzEwM2I1MDtmb250LXdlaWdodDo3MDA7Zm9udC1zaXplOjE0cHg7d2hpdGUtc3BhY2U6bm93cmFwO3RleHQtZGVjb3JhdGlvbjpub25lfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH0%3D!./src/app/messaging/asset-contact-button.component.ts */ 31389);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_asset_contact_button_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtZmxleH1he3Bvc2l0aW9uOnJlbGF0aXZlO2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo3cHg7cGFkZGluZzoxMHB4IDE0cHg7Ym9yZGVyOjFweCBzb2xpZCAjYjlkYmU1O2JvcmRlci1yYWRpdXM6MjRweDtiYWNrZ3JvdW5kOiNlNmYzZjc7Y29sb3I6IzEwM2I1MDtmb250LXdlaWdodDo3MDA7Zm9udC1zaXplOjE0cHg7d2hpdGUtc3BhY2U6bm93cmFwO3RleHQtZGVjb3JhdGlvbjpub25lfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_asset_contact_button_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_asset_contact_button_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtZmxleH1he3Bvc2l0aW9uOnJlbGF0aXZlO2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo3cHg7cGFkZGluZzoxMHB4IDE0cHg7Ym9yZGVyOjFweCBzb2xpZCAjYjlkYmU1O2JvcmRlci1yYWRpdXM6MjRweDtiYWNrZ3JvdW5kOiNlNmYzZjc7Y29sb3I6IzEwM2I1MDtmb250LXdlaWdodDo3MDA7Zm9udC1zaXplOjE0cHg7d2hpdGUtc3BhY2U6bm93cmFwO3RleHQtZGVjb3JhdGlvbjpub25lfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_asset_contact_button_component_ts__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _message_badge_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./message-badge.component */ 16101);
+/* harmony import */ var _message_notifications_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./message-notifications.service */ 54230);
+/* harmony import */ var _message_unread__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./message-unread */ 87516);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/language.service */ 48756);
+/* harmony import */ var _asset_contact_text__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./asset-contact-text */ 78194);
+
+
+
+
+
+
+
+
+
+
+
+let AssetContactButtonComponent = class AssetContactButtonComponent {
+  access;
+  language;
+  notifications;
+  type = '';
+  assetId = '';
+  constructor(access, language, notifications) {
+    this.access = access;
+    this.language = language;
+    this.notifications = notifications;
+  }
+  destination() {
+    const notice = (0,_message_unread__WEBPACK_IMPORTED_MODULE_3__.unreadConversation)(this.notifications.summary.value, this.type, this.assetId);
+    return notice ? {
+      threadId: notice.id
+    } : {
+      contactType: this.type,
+      contactAsset: this.assetId
+    };
+  }
+  label() {
+    return (0,_asset_contact_text__WEBPACK_IMPORTED_MODULE_6__.assetContactText)(this.language.currentLanguage, 0);
+  }
+  static ctorParameters = () => [{
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_4__.AssetAccessService
+  }, {
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_5__.LanguageService
+  }, {
+    type: _message_notifications_service__WEBPACK_IMPORTED_MODULE_2__.MessageNotificationsService
+  }];
+  static propDecorators = {
+    type: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_7__.Input
+    }],
+    assetId: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_7__.Input
+    }]
+  };
+};
+AssetContactButtonComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_8__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.Component)({
+  selector: 'app-asset-contact-button',
+  standalone: true,
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_9__.CommonModule, _angular_router__WEBPACK_IMPORTED_MODULE_10__.RouterModule, _message_badge_component__WEBPACK_IMPORTED_MODULE_1__.MessageBadgeComponent],
+  template: `<a *ngIf="access.isAuthenticated&&!access.canManageFor(type,assetId)" routerLink="/messages" [queryParams]="destination()"><span aria-hidden="true">✉</span> {{label()}}<app-message-badge [type]="type" [assetId]="assetId"></app-message-badge></a>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_asset_contact_button_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtZmxleH1he3Bvc2l0aW9uOnJlbGF0aXZlO2Rpc3BsYXk6aW5saW5lLWZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo3cHg7cGFkZGluZzoxMHB4IDE0cHg7Ym9yZGVyOjFweCBzb2xpZCAjYjlkYmU1O2JvcmRlci1yYWRpdXM6MjRweDtiYWNrZ3JvdW5kOiNlNmYzZjc7Y29sb3I6IzEwM2I1MDtmb250LXdlaWdodDo3MDA7Zm9udC1zaXplOjE0cHg7d2hpdGUtc3BhY2U6bm93cmFwO3RleHQtZGVjb3JhdGlvbjpub25lfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjZjg4YjIwO291dGxpbmUtb2Zmc2V0OjNweH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_messaging_asset_contact_button_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
+})], AssetContactButtonComponent);
+
 
 /***/ }),
 
@@ -63512,7 +68287,448 @@ ___CSS_LOADER_EXPORT___.push([module.id, `:host {
     padding: 8px;
     font-size: 11px;
   }
-}`, "",{"version":3,"sources":["webpack://./src/app/resource-dashboard/resource-dashboard.component.scss"],"names":[],"mappings":"AAAA;EAAM,cAAA;EAAc,mBAAA;EAAmB,iBAAA;AAIvC;;AAFA;EAAoB,+BAAA;EAAoC,+BAAA;EAA+B,cAAA;EAAc,yBAAA;EAAyB,mBAAA;EAAmB,aAAA;EAAa,cAAA;EAAc,mBAAA;EAAmB,iDAAA;EAA8C,6CAAA;AAe7O;;AAf8Q;EAA8B,0CAAA;AAmB5S;;AAnBiU;EAAmB,kBAAA;EAAkB,WAAA;EAAW,SAAA;EAAS,SAAA;EAAS,uBAAA;EAAuB,cAAA;EAAc,eAAA;EAAe,eAAA;AA8Bvb;;AA9Bsc;EAAmB,eAAA;EAAe,gBAAA;AAmCxe;;AAnCwf;EAAuB,iCAAA;EAAgC,mBAAA;AAwC/iB;;AAxCkkB;EAAsB,eAAA;EAAe,gBAAA;EAAgB,cAAA;AA8CvnB;;AA9CqoB;EAAqB,aAAA;EAAa,SAAA;EAAS,mBAAA;AAoDhrB;;AApDmsB;EAA4B,kBAAA;EAAkB,yBAAA;EAAyB,oBAAA;EAAoB,mBAAA;EAAmB,YAAA;EAAY,uCAAA;EAAqC,eAAA;AA8Dl2B;;AA9Di3B;EAAmC,uBAAA;EAAuB,cAAA;AAmE36B;;AAnEy7B;EAAoB,cAAA;EAAc,YAAA;EAAY,SAAA;EAAS,uBAAA;EAAuB,cAAA;EAAc,mCAAA;EAAiC,eAAA;AA6EtjC;;AA7EqkC;EAAyC,0BAAA;EAA0B,mBAAA;AAkFxoC;;AAlF2pC;EAAwB;IAAoB,kBAAA;EAuFrsC;EAvFutC;IAAuB,eAAA;EA0F9uC;AACF;AAzFA;EAAkB,aAAA;EAAa,sBAAA;EAAsB,iBAAA;EAAiB,gBAAA;EAAgB,eAAA;EAAe,uBAAA;EAAuB,iBAAA;AAkG5H;;AAlG6I;EAAwB,eAAA;EAAe,cAAA;AAuGpL;;AAvGkM;EAAc,gBAAA;AA2GhN;;AA3GgO;EAAe,gBAAA;EAAgB,cAAA;AAgH/P;;AAhH6Q;EAAkC,cAAA;EAAc,aAAA;AAqH7T;;AArH0U;EAAwB;IAAkB,gBAAA;IAAgB,eAAA;EA2HlY;AACF;AA1HA;EAA6B,eAAA;AA6H7B;;AA7H4C;EAAgC,iBAAA;AAiI5E;;AAjI6F;EAAiC,cAAA;AAqI9H;;AArI4I;EAAwB;IAA4B,YAAA;IAAY,gBAAA;IAAgB,eAAA;IAAe,iBAAA;IAAiB,oBAAA;EA8I1P;AACF;AA7IA;EAA4B,YAAA;EAAY,gBAAA;EAAgB,eAAA;EAAe,iBAAA;EAAiB,oBAAA;AAoJxF;;AApJ4G;EAAsB,cAAA;EAAc,aAAA;EAAa,eAAA;EAAe,0BAAA;AA2J5K;;AA3JsM;EAAsB,mBAAA;AA+J5N;;AA/J+O;EAAwB;IAAiC,eAAA;IAAe,gBAAA;EAqKrT;AACF;AApKA;EAAuB,yBAAA;EAAyB,oBAAA;EAAoB,iBAAA;EAAiB,cAAA;EAAc,iBAAA;EAAiB,aAAA;EAAa,eAAA;EAAe,eAAA;AA8KhJ;;AA9K+J;EAAgC,aAAA;AAkL/L;;AAlL2M;EAAyB,cAAA;EAAc,cAAA;EAAc,eAAA;EAAe,gBAAA;AAyL/Q;;AAzL+R;EAAkB,wBAAA;EAAuB,8BAAA;EAA6B,sBAAA;EAAsB,QAAA;EAAQ,uBAAA;AAiMnY;;AAjM0Z;EAAwB,eAAA;AAqMlb;;AArMic;EAAwB;IAAuB,YAAA;IAAY,eAAA;EA2M1f;AACF","sourcesContent":[":host{display:block;background:#f6f7f1;min-height:100vh}\n\n.publication-dialog{width:min(480px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid #dce5df;border-radius:22px;padding:36px;color:#173b36;background:#fffdf8;font-family:Inter,'Segoe UI',Arial,sans-serif;box-shadow:0 22px 75px #173b3633}.publication-dialog::backdrop{background:#102d28a6}.publication-close{position:absolute;right:16px;top:12px;border:0;background:transparent;color:#173b36;font-size:27px;cursor:pointer}.publication-brand{font-size:18px;font-weight:750}.publication-dialog h2{font:400 31px/1.2 Georgia,serif;margin:24px 0 14px}.publication-dialog p{font-size:14px;line-height:1.7;color:#64776f}.publication-actions{display:grid;gap:12px;margin:26px 0 18px}.publication-actions button{padding:14px 18px;border:1px solid #173b36;border-radius:100px;background:#173b36;color:white;font:600 14px Inter,Arial,sans-serif;cursor:pointer}.publication-actions button+button{background:transparent;color:#173b36}.publication-cancel{display:block;margin:auto;border:0;background:transparent;color:#64776f;font:13px Inter,Arial,sans-serif;cursor:pointer}.publication-dialog button:focus-visible{outline:3px solid #7fac61;outline-offset:4px}@media(max-width:480px){.publication-dialog{padding:28px 23px}.publication-dialog h2{font-size:28px}}\n\n.account-identity{display:flex;flex-direction:column;text-align:right;max-width:230px;font-size:13px;overflow-wrap:anywhere;margin-left:auto}.account-identity small{font-size:12px;color:#64776f}.account-menu{margin-left:8px}.account-panel{max-height:75vh;overflow:auto}.account-panel a[href=\"#rentals\"]{display:block;padding:12px}@media(max-width:600px){.account-identity{max-width:140px;font-size:12px}}\n\n.registry-page .account-text{display:inline}.registry-page .language-switch{margin-left:auto}.registry-page .account-identity{margin-left:0}@media(max-width:440px){.registry-page .site-header{height:auto;min-height:76px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}}\n\n.registry-page .site-header{height:auto;min-height:90px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}.account-panel strong{display:block;padding:10px;font-size:12px;border-top:1px solid #ddd}.account-menu summary{white-space:nowrap}@media(max-width:600px){.registry-page .account-identity{max-width:none;flex-basis:100%}}\n\n.workspace-view-switch{border:1px solid #94aaa0;border-radius:999px;background:white;color:#173b36;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer}.workspace-view-switch:disabled{opacity:.55}.account-identity strong{display:block;color:#173b36;font-size:14px;font-weight:700}.account-identity{display:flex!important;visibility:visible!important;flex-direction:column;gap:2px;overflow-wrap:anywhere}.account-identity small{font-size:11px}@media(max-width:600px){.workspace-view-switch{padding:8px;font-size:11px}}\n"],"sourceRoot":""}]);
+}
+.direct-types {
+  font-weight: 700;
+  line-height: 1.8;
+  color: #123e57;
+}
+
+.direct-rental-story {
+  margin: 32px auto 60px;
+  padding: 36px clamp(20px, 4vw, 56px);
+  max-width: 1440px;
+  background: #eef4ef;
+  border-radius: 24px;
+  color: #123e57;
+}
+
+.direct-rental-story > p {
+  max-width: 850px;
+  line-height: 1.7;
+}
+
+.direct-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.direct-steps article {
+  padding: 24px;
+  background: #fff;
+  border-radius: 16px;
+}
+
+.direct-steps article > span {
+  font-weight: 700;
+  color: #637b69;
+}
+
+.direct-steps p {
+  line-height: 1.65;
+}
+
+.direct-rental-story h2 {
+  font-size: clamp(26px, 3vw, 40px);
+}
+
+@media (max-width: 760px) {
+  .direct-steps {
+    grid-template-columns: 1fr;
+  }
+  .direct-rental-story {
+    margin: 24px 16px;
+    padding: 24px;
+  }
+}
+.stripe-trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #5142a1;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.stripe-payment-story {
+  margin: 32px auto 60px;
+  max-width: 1440px;
+  padding: 36px clamp(20px, 4vw, 56px);
+  border: 1px solid #dedaf2;
+  border-radius: 24px;
+  background: #f6f5fc;
+  color: #173b36;
+}
+
+.stripe-payment-label {
+  display: inline-block;
+  color: #635bff;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.stripe-payment-story h2 {
+  font-size: clamp(26px, 3vw, 40px);
+  line-height: 1.2;
+  margin: 14px 0;
+}
+
+.stripe-payment-intro {
+  max-width: 850px;
+  line-height: 1.7;
+}
+
+.stripe-payment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.stripe-payment-grid article {
+  padding: 24px;
+  background: #fff;
+  border-radius: 16px;
+  min-width: 0;
+}
+
+.stripe-payment-grid h3 {
+  font-size: 19px;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+
+.stripe-payment-grid p {
+  line-height: 1.65;
+  margin: 0;
+}
+
+.stripe-payment-note {
+  font-size: 13px;
+  line-height: 1.65;
+  margin-top: 24px;
+  max-width: 1000px;
+}
+
+@media (max-width: 760px) {
+  .stripe-payment-grid {
+    grid-template-columns: 1fr;
+  }
+  .stripe-payment-story {
+    margin: 24px 16px;
+    padding: 24px;
+  }
+}
+.registry-page .hero-art.rental-carousel {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: #e9f3fb;
+  isolation: isolate;
+}
+
+.rental-carousel .hero-photo {
+  transform: none;
+}
+
+.carousel-caption {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 75px;
+  z-index: 1;
+  color: white;
+  text-shadow: 0 1px 8px #000;
+}
+
+.carousel-caption span {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.carousel-caption strong {
+  font: 600 clamp(20px, 2vw, 28px)/1.3 Georgia, serif;
+}
+
+.rental-carousel:after {
+  content: "";
+  position: absolute;
+  inset: 40% 0 0;
+  background: linear-gradient(transparent, rgba(7, 30, 50, 0.7333333333));
+  pointer-events: none;
+}
+
+.carousel-controls {
+  position: absolute;
+  z-index: 2;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.registry-page .carousel-controls button {
+  border: 1px solid rgba(255, 255, 255, 0.5333333333);
+  background: rgba(20, 61, 80, 0.9019607843);
+  color: white;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 23px;
+  padding: 0;
+}
+
+.carousel-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.registry-page .carousel-dots button {
+  width: 30px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+}
+
+.carousel-dots button:after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5333333333);
+}
+
+.carousel-dots button.active:after {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2509803922);
+}
+
+@media (max-width: 760px) {
+  .registry-page .hero-art.rental-carousel {
+    display: block;
+    min-height: 300px;
+    aspect-ratio: 4/3;
+    margin-top: 12px;
+  }
+  .carousel-caption {
+    bottom: 80px;
+  }
+}
+.registry-page .client-intro {
+  box-sizing: border-box;
+  max-width: 1440px;
+  margin: auto;
+  padding: clamp(24px, 4vw, 54px) 5vw 24px;
+}
+
+.client-intro h1 {
+  margin: 0 0 0.45em;
+  line-height: 1.15;
+}
+
+.client-intro p {
+  max-width: 70ch;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.registry-page #rentals .search-panel {
+  margin-top: 0;
+  transform: none;
+}
+
+.registry-page .site-header {
+  height: auto;
+  min-height: 76px;
+  flex-wrap: wrap;
+  padding-block: 12px;
+}
+
+.client-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-inline-start: auto;
+}
+
+.registry-page .client-actions .client-login {
+  display: inline-flex;
+  align-items: center;
+  background: #103f64;
+  color: white;
+  padding: 0.65em 1.2em;
+  border-radius: 0.6em;
+}
+
+.client-account {
+  position: relative;
+}
+
+.client-account summary {
+  cursor: pointer;
+}
+
+.client-account > div {
+  position: absolute;
+  right: 0;
+  z-index: 10;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #ccd9de;
+  border-radius: 0.6rem;
+  min-width: 10rem;
+}
+
+@media (max-width: 640px) {
+  .client-actions {
+    order: 1;
+    width: 100%;
+    margin: 0;
+  }
+  .client-account > div {
+    right: auto;
+    left: 0;
+  }
+}
+.registry-page .site-header select, .client-account summary {
+  background: #fff;
+  color: #103f64;
+  border: 1px solid #c9dbe3;
+  border-radius: 12px;
+  padding: 9px 12px;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.client-account summary {
+  cursor: pointer;
+}
+
+.catalog-wide {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+}
+
+.catalog-menu {
+  display: none;
+}
+
+.registry-page .site-header {
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 800px) {
+  .catalog-wide {
+    display: none;
+  }
+  .catalog-menu {
+    display: block;
+    margin-left: auto;
+    position: relative;
+  }
+  .catalog-menu > summary {
+    padding: 12px;
+    cursor: pointer;
+    list-style: none;
+  }
+  .catalog-menu > div {
+    position: absolute;
+    z-index: 20;
+    right: 0;
+    top: 100%;
+    width: min(270px, 85vw);
+    background: white;
+    padding: 16px;
+    border: 1px solid #cadbe2;
+    border-radius: 14px;
+    display: grid;
+    gap: 12px;
+  }
+  .catalog-menu .client-actions {
+    order: 0;
+    align-items: start;
+    flex-direction: column;
+  }
+  .catalog-menu .client-account > div {
+    position: static;
+  }
+  .registry-page .site-header {
+    min-height: 56px;
+    padding-block: 4px;
+  }
+  .registry-page .client-intro {
+    padding-block: 18px;
+  }
+}
+.registry-page .rental-grid {
+  gap: 12px;
+}
+
+.registry-page .rental-image {
+  height: 128px;
+}
+
+.registry-page .rental-body {
+  padding: 10px 12px;
+}
+
+.registry-page .rental-body h3 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.registry-page .rental-description {
+  min-height: 0;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+@media (min-width: 1150px) {
+  .registry-page .rental-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .registry-page .rental-grid {
+    grid-template-columns: 1fr;
+  }
+  .registry-page .rental-open {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    width: 100%;
+    align-items: stretch;
+  }
+  .registry-page .rental-image {
+    height: 100%;
+    min-height: 96px;
+  }
+  .registry-page .rental-description {
+    -webkit-line-clamp: 1;
+  }
+  .registry-page .type-badge {
+    left: 4px;
+    top: 4px;
+    padding: 3px;
+    font-size: 10px;
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/resource-dashboard/resource-dashboard.component.scss"],"names":[],"mappings":"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","sourcesContent":[":host{display:block;background:#f6f7f1;min-height:100vh}\n\n.publication-dialog{width:min(480px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid #dce5df;border-radius:22px;padding:36px;color:#173b36;background:#fffdf8;font-family:Inter,'Segoe UI',Arial,sans-serif;box-shadow:0 22px 75px #173b3633}.publication-dialog::backdrop{background:#102d28a6}.publication-close{position:absolute;right:16px;top:12px;border:0;background:transparent;color:#173b36;font-size:27px;cursor:pointer}.publication-brand{font-size:18px;font-weight:750}.publication-dialog h2{font:400 31px/1.2 Georgia,serif;margin:24px 0 14px}.publication-dialog p{font-size:14px;line-height:1.7;color:#64776f}.publication-actions{display:grid;gap:12px;margin:26px 0 18px}.publication-actions button{padding:14px 18px;border:1px solid #173b36;border-radius:100px;background:#173b36;color:white;font:600 14px Inter,Arial,sans-serif;cursor:pointer}.publication-actions button+button{background:transparent;color:#173b36}.publication-cancel{display:block;margin:auto;border:0;background:transparent;color:#64776f;font:13px Inter,Arial,sans-serif;cursor:pointer}.publication-dialog button:focus-visible{outline:3px solid #7fac61;outline-offset:4px}@media(max-width:480px){.publication-dialog{padding:28px 23px}.publication-dialog h2{font-size:28px}}\n\n.account-identity{display:flex;flex-direction:column;text-align:right;max-width:230px;font-size:13px;overflow-wrap:anywhere;margin-left:auto}.account-identity small{font-size:12px;color:#64776f}.account-menu{margin-left:8px}.account-panel{max-height:75vh;overflow:auto}.account-panel a[href=\"#rentals\"]{display:block;padding:12px}@media(max-width:600px){.account-identity{max-width:140px;font-size:12px}}\n\n.registry-page .account-text{display:inline}.registry-page .language-switch{margin-left:auto}.registry-page .account-identity{margin-left:0}@media(max-width:440px){.registry-page .site-header{height:auto;min-height:76px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}}\n\n.registry-page .site-header{height:auto;min-height:90px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}.account-panel strong{display:block;padding:10px;font-size:12px;border-top:1px solid #ddd}.account-menu summary{white-space:nowrap}@media(max-width:600px){.registry-page .account-identity{max-width:none;flex-basis:100%}}\n\n.workspace-view-switch{border:1px solid #94aaa0;border-radius:999px;background:white;color:#173b36;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer}.workspace-view-switch:disabled{opacity:.55}.account-identity strong{display:block;color:#173b36;font-size:14px;font-weight:700}.account-identity{display:flex!important;visibility:visible!important;flex-direction:column;gap:2px;overflow-wrap:anywhere}.account-identity small{font-size:11px}@media(max-width:600px){.workspace-view-switch{padding:8px;font-size:11px}}\n\n.direct-types{font-weight:700;line-height:1.8;color:#123e57}.direct-rental-story{margin:32px auto 60px;padding:36px clamp(20px,4vw,56px);max-width:1440px;background:#eef4ef;border-radius:24px;color:#123e57}.direct-rental-story>p{max-width:850px;line-height:1.7}.direct-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:28px}.direct-steps article{padding:24px;background:#fff;border-radius:16px}.direct-steps article>span{font-weight:700;color:#637b69}.direct-steps p{line-height:1.65}.direct-rental-story h2{font-size:clamp(26px,3vw,40px)}@media(max-width:760px){.direct-steps{grid-template-columns:1fr}.direct-rental-story{margin:24px 16px;padding:24px}}\n\n.stripe-trust-badge{display:inline-flex;align-items:center;gap:8px;color:#5142a1;font-weight:700;font-size:14px}.stripe-payment-story{margin:32px auto 60px;max-width:1440px;padding:36px clamp(20px,4vw,56px);border:1px solid #dedaf2;border-radius:24px;background:#f6f5fc;color:#173b36}.stripe-payment-label{display:inline-block;color:#635bff;font-size:28px;font-weight:800;letter-spacing:-1px}.stripe-payment-story h2{font-size:clamp(26px,3vw,40px);line-height:1.2;margin:14px 0}.stripe-payment-intro{max-width:850px;line-height:1.7}.stripe-payment-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:28px}.stripe-payment-grid article{padding:24px;background:#fff;border-radius:16px;min-width:0}.stripe-payment-grid h3{font-size:19px;line-height:1.4;margin:0 0 12px}.stripe-payment-grid p{line-height:1.65;margin:0}.stripe-payment-note{font-size:13px;line-height:1.65;margin-top:24px;max-width:1000px}@media(max-width:760px){.stripe-payment-grid{grid-template-columns:1fr}.stripe-payment-story{margin:24px 16px;padding:24px}}\n\n.registry-page .hero-art.rental-carousel{display:block;position:relative;overflow:hidden;background:#e9f3fb;isolation:isolate}.rental-carousel .hero-photo{transform:none}.carousel-caption{position:absolute;left:20px;right:20px;bottom:75px;z-index:1;color:white;text-shadow:0 1px 8px #000}.carousel-caption span{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}.carousel-caption strong{font:600 clamp(20px,2vw,28px)/1.3 Georgia,serif}.rental-carousel:after{content:'';position:absolute;inset:40% 0 0;background:linear-gradient(transparent,#071e32bb);pointer-events:none}.carousel-controls{position:absolute;z-index:2;bottom:16px;left:16px;right:16px;display:flex;align-items:center;justify-content:center;gap:10px}.registry-page .carousel-controls button{border:1px solid #ffffff88;background:#143d50e6;color:white;border-radius:50%;width:44px;height:44px;display:grid;place-items:center;font-size:23px;padding:0}.carousel-dots{display:flex;gap:3px}.registry-page .carousel-dots button{width:30px;height:44px;border:0;background:transparent;border-radius:8px}.carousel-dots button:after{content:'';width:8px;height:8px;border-radius:50%;background:#ffffff88}.carousel-dots button.active:after{background:#fff;box-shadow:0 0 0 3px #ffffff40}@media(max-width:760px){.registry-page .hero-art.rental-carousel{display:block;min-height:300px;aspect-ratio:4/3;margin-top:12px}.carousel-caption{bottom:80px}}\n\n.registry-page .client-intro{box-sizing:border-box;max-width:1440px;margin:auto;padding:clamp(24px,4vw,54px) 5vw 24px}\n.client-intro h1{margin:0 0 .45em;line-height:1.15}.client-intro p{max-width:70ch;line-height:1.55;margin:0}\n.registry-page #rentals .search-panel{margin-top:0;transform:none}\n.registry-page .site-header{height:auto;min-height:76px;flex-wrap:wrap;padding-block:12px}\n.client-actions{display:flex;align-items:center;flex-wrap:wrap;gap:1rem;margin-inline-start:auto}\n.registry-page .client-actions .client-login{display:inline-flex;align-items:center;background:#103f64;color:white;padding:.65em 1.2em;border-radius:.6em}\n.client-account{position:relative}.client-account summary{cursor:pointer}.client-account>div{position:absolute;right:0;z-index:10;display:grid;gap:.75rem;padding:1rem;background:white;border:1px solid #ccd9de;border-radius:.6rem;min-width:10rem}\n@media(max-width:640px){.client-actions{order:1;width:100%;margin:0}.client-account>div{right:auto;left:0}}\n\n.registry-page .site-header select,.client-account summary{background:#fff;color:#103f64;border:1px solid #c9dbe3;border-radius:12px;padding:9px 12px;min-height:44px;box-sizing:border-box}.client-account summary{cursor:pointer}\n\n.catalog-wide{display:flex;align-items:center;gap:18px;flex:1}.catalog-menu{display:none}.registry-page .site-header{flex-wrap:nowrap}\n@media(max-width:800px){.catalog-wide{display:none}.catalog-menu{display:block;margin-left:auto;position:relative}.catalog-menu>summary{padding:12px;cursor:pointer;list-style:none}.catalog-menu>div{position:absolute;z-index:20;right:0;top:100%;width:min(270px,85vw);background:white;padding:16px;border:1px solid #cadbe2;border-radius:14px;display:grid;gap:12px}.catalog-menu .client-actions{order:0;align-items:start;flex-direction:column}.catalog-menu .client-account>div{position:static}.registry-page .site-header{min-height:56px;padding-block:4px}.registry-page .client-intro{padding-block:18px}}\n\n.registry-page .rental-grid{gap:12px}.registry-page .rental-image{height:128px}.registry-page .rental-body{padding:10px 12px}.registry-page .rental-body h3{font-size:18px;margin-bottom:4px}.registry-page .rental-description{min-height:0;margin-bottom:6px;line-height:1.4}\n@media(min-width:1150px){.registry-page .rental-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}\n@media(max-width:600px){.registry-page .rental-grid{grid-template-columns:1fr}.registry-page .rental-open{display:grid;grid-template-columns:90px minmax(0,1fr);width:100%;align-items:stretch}.registry-page .rental-image{height:100%;min-height:96px}.registry-page .rental-description{-webkit-line-clamp:1}.registry-page .type-badge{left:4px;top:4px;padding:3px;font-size:10px}}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -63593,7 +68809,7 @@ __webpack_require__.r(__webpack_exports__);
 
 let AssetUrlSerializer = class AssetUrlSerializer extends _angular_router__WEBPACK_IMPORTED_MODULE_1__.DefaultUrlSerializer {
   parse(url) {
-    return super.parse((0,_asset_domain__WEBPACK_IMPORTED_MODULE_0__.internalAssetUrl)(url));
+    return super.parse(/^\/(?:[?#]|$)/.test(url) ? url : (0,_asset_domain__WEBPACK_IMPORTED_MODULE_0__.internalAssetUrl)(url));
   }
   serialize(tree) {
     return (0,_asset_domain__WEBPACK_IMPORTED_MODULE_0__.externalAssetUrl)(super.serialize(tree));
@@ -63752,6 +68968,80 @@ module.exports = ___CSS_LOADER_EXPORT___.toString();
 
 /***/ }),
 
+/***/ 83644:
+/*!*********************************************************************!*\
+  !*** ./src/app/workspace/site-management.component.html?ngResource ***!
+  \*********************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = "<main class=\"portfolio\" *ngIf=\"!ctx || ctx.ownsAsset; else delegated\">\n<header><div><small>ESPACE PROPRIÉTAIRE</small><h1>Mes biens en location</h1></div><a *ngIf=\"ctx\" href=\"/\" (click)=\"access.rememberSiteMode('client')\">Voir mon site en locataire ↗</a></header>\n<p role=\"status\" *ngIf=\"status\">{{status}}</p><a *ngIf=\"failed&&!ctx\" href=\"/account/login?returnUrl=/site-management\">Se connecter</a>\n<ng-container *ngIf=\"ctx\"><nav aria-label=\"Mon activité\"><a routerLink=\"/owner/customers\">Mes clients</a><a routerLink=\"/owner/activity/reservations\">Toutes mes réservations</a><a routerLink=\"/messages\">Messagerie</a><a routerLink=\"/owner/listings\" [queryParams]=\"{create:1}\">Créer une annonce</a></nav>\n<p *ngIf=\"ready&&!managed.length\">Vous n’avez pas encore de bien. Créez votre première annonce pour commencer.</p>\n<article *ngFor=\"let a of managed\"><div class=\"identity\"><img *ngIf=\"cover(a) as photo\" [src]=\"photo\" alt=\"\" loading=\"lazy\"><div><small>{{a.public?'En ligne':'Hors ligne'}}</small><h2>{{a.name}}</h2><span>{{a.location?.city}}</span></div></div>\n<div class=\"actions\"><a [href]=\"path(a,'admin/reservations')\">Réservations</a><a [href]=\"path(a,'admin/calendar')\">Calendrier et tarifs</a><details><summary>Actions du bien</summary><div class=\"options\">\n<a routerLink=\"/owner/listings\" [queryParams]=\"{editType:a.assetType,editId:a.id}\">Modifier l’annonce : textes, photos et prix de base</a>\n<a [href]=\"path(a,'admin/calendar')\">Modifier les disponibilités et les tarifs par période</a>\n<a routerLink=\"/owner/activity/ratings\" [queryParams]=\"{type:a.assetType,id:a.id}\">Voir les avis</a>\n<a routerLink=\"/messages\" [queryParams]=\"{kind:'subscription',audience:'management',type:a.assetType,assetId:a.id,open:1}\">Contacter l’administration GoDirect pour ce bien</a>\n<a [routerLink]=\"['/owner/listings',a.assetType,a.id,'documents']\">Justificatifs</a><a routerLink=\"/owner/listings\" [queryParams]=\"{asset:a.id,action:'subscription'}\">Abonnement</a></div></details></div></article>\n</ng-container></main><ng-template #delegated><main class=\"gd-mobile-space\"><p>GoDirect</p><h1>{{title}}</h1><p role=\"status\">{{status}}</p><ng-container *ngIf=\"ctx\"><h2>{{name}}</h2><label *ngIf=\"managed.length>1\">Bien à gérer <select (change)=\"changeAsset($event)\"><option *ngFor=\"let a of managed\" [value]=\"a.assetType+'/'+a.id\" [selected]=\"base==='/'+a.assetType+'/'+a.id\">{{a.name}}</option></select></label><nav><a href=\"/\" (click)=\"access.rememberSiteMode('client')\">Voir le site client</a><a *ngIf=\"ctx.managementPermissions.bookings\" [routerLink]=\"[base+'/admin/reservations']\">Réservations</a><a *ngIf=\"ctx.managementPermissions.bookings\" [routerLink]=\"['/asset-calendar',scope?.assetType,scope?.assetId]\">Calendrier et tarifs</a><a *ngIf=\"ctx.ownsAsset\" routerLink=\"/owner/activity/reservations\" [queryParams]=\"{type:scope?.assetType,id:scope?.assetId}\">Laisser un avis après une réservation</a><a *ngIf=\"ctx.ownsAsset\" routerLink=\"/owner/activity/ratings\" [queryParams]=\"{type:scope?.assetType,id:scope?.assetId}\">Avis</a><a *ngIf=\"ctx.managementPermissions.content\" [routerLink]=\"[base+'/admin/site-content']\">Contenu</a><a routerLink=\"/messages\">Messages</a><a [href]=\"ctx.ownsAsset?'/owner/listings':'https://godirect.fr/managed-portfolio'\">Gérer mes annonces</a><a *ngIf=\"ctx.ownsAsset\" routerLink=\"/owner/customers\">Mes clients</a><a *ngIf=\"ctx.ownsAsset\" routerLink=\"/owner/activity/reservations\">Réservations de mes biens</a></nav></ng-container><a *ngIf=\"!ctx&&failed\" href=\"/account/login?returnUrl=/site-management\">Se connecter sur ce site</a></main></ng-template>";
+
+/***/ }),
+
+/***/ 84168:
+/*!***********************************************************!*\
+  !*** ./src/app/calendar/asset-calendar-link.component.ts ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AssetCalendarLinkComponent: () => (/* binding */ AssetCalendarLinkComponent)
+/* harmony export */ });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_calendar_asset_calendar_link_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2s7bWFyZ2luOjRweCA4cHggNHB4IDB9YXtkaXNwbGF5OmlubGluZS1ibG9jaztjb2xvcjojMTI1NjZhO3RleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7dGV4dC11bmRlcmxpbmUtb2Zmc2V0OjNweDtwYWRkaW5nOjVweCAwfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0OjJweH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_calendar_asset_calendar_link_component_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./src/app/calendar/asset-calendar-link.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2s7bWFyZ2luOjRweCA4cHggNHB4IDB9YXtkaXNwbGF5OmlubGluZS1ibG9jaztjb2xvcjojMTI1NjZhO3RleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7dGV4dC11bmRlcmxpbmUtb2Zmc2V0OjNweDtwYWRkaW5nOjVweCAwfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0OjJweH0%3D!./src/app/calendar/asset-calendar-link.component.ts */ 75663);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_calendar_asset_calendar_link_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2s7bWFyZ2luOjRweCA4cHggNHB4IDB9YXtkaXNwbGF5OmlubGluZS1ibG9jaztjb2xvcjojMTI1NjZhO3RleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7dGV4dC11bmRlcmxpbmUtb2Zmc2V0OjNweDtwYWRkaW5nOjVweCAwfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0OjJweH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_calendar_asset_calendar_link_component_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_calendar_asset_calendar_link_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2s7bWFyZ2luOjRweCA4cHggNHB4IDB9YXtkaXNwbGF5OmlubGluZS1ibG9jaztjb2xvcjojMTI1NjZhO3RleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7dGV4dC11bmRlcmxpbmUtb2Zmc2V0OjNweDtwYWRkaW5nOjVweCAwfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0OjJweH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_calendar_asset_calendar_link_component_ts__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/language.service */ 48756);
+
+
+
+
+
+let AssetCalendarLinkComponent = class AssetCalendarLinkComponent {
+  language;
+  type = '';
+  assetId = '';
+  constructor(language) {
+    this.language = language;
+  }
+  get label() {
+    return {
+      fr: 'Calendrier',
+      en: 'Calendar',
+      es: 'Calendario',
+      it: 'Calendario',
+      de: 'Kalender',
+      nl: 'Kalender',
+      ru: 'Календарь'
+    }[this.language.currentLanguage] || 'Calendar';
+  }
+  static ctorParameters = () => [{
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_1__.LanguageService
+  }];
+  static propDecorators = {
+    type: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input
+    }],
+    assetId: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_2__.Input
+    }]
+  };
+};
+AssetCalendarLinkComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_2__.Component)({
+  selector: 'app-asset-calendar-link',
+  standalone: true,
+  imports: [_angular_router__WEBPACK_IMPORTED_MODULE_4__.RouterModule],
+  template: `<a [routerLink]="['/asset-calendar',type,assetId]">{{label}}</a>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_calendar_asset_calendar_link_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Omhvc3R7ZGlzcGxheTppbmxpbmUtYmxvY2s7bWFyZ2luOjRweCA4cHggNHB4IDB9YXtkaXNwbGF5OmlubGluZS1ibG9jaztjb2xvcjojMTI1NjZhO3RleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7dGV4dC11bmRlcmxpbmUtb2Zmc2V0OjNweDtwYWRkaW5nOjVweCAwfWE6Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjNweCBzb2xpZCAjYjQ3YTIyO291dGxpbmUtb2Zmc2V0OjJweH0_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_calendar_asset_calendar_link_component_ts__WEBPACK_IMPORTED_MODULE_0___default())]
+})], AssetCalendarLinkComponent);
+
+
+/***/ }),
+
 /***/ 84429:
 /*!*********************!*\
   !*** ./src/main.ts ***!
@@ -63782,14 +69072,25 @@ function start() {
 }
 function _start() {
   _start = (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-    if ((0,_app_services_asset_domain__WEBPACK_IMPORTED_MODULE_1__.assetDomainSlug)(window.location.hostname)) {
-      const response = yield fetch('/api/asset-domain', {
-        credentials: 'same-origin'
-      });
-      if (!response.ok) throw new Error('asset_domain_lookup_failed:' + response.status);
-      const asset = yield response.json();
-      if (!['boat', 'car', 'property', 'parking', 'pool'].includes(asset.assetType) || !/^[a-z0-9][a-z0-9_-]*$/.test(asset.assetId)) throw new Error('Invalid asset domain');
-      (0,_app_services_asset_domain__WEBPACK_IMPORTED_MODULE_1__.setDomainAsset)(asset);
+    if ((0,_app_services_asset_domain__WEBPACK_IMPORTED_MODULE_1__.assetDomainSlug)(window.location.hostname) && !/^\/account\/(bookings|login|signup|forgotpwd|accept-terms)\/?$/.test(window.location.pathname)) {
+      const q = new URLSearchParams(location.search),
+        parts = location.pathname.split('/');
+      const type = location.pathname === '/site-management' ? q.get('type') : parts[1],
+        id = location.pathname === '/site-management' ? q.get('id') : parts[2];
+      if (type && id && ['boat', 'car', 'property', 'pool', 'parking'].includes(type) && /^[a-z0-9][a-z0-9_-]*$/.test(id)) {
+        (0,_app_services_asset_domain__WEBPACK_IMPORTED_MODULE_1__.setDomainAsset)({
+          assetType: type,
+          assetId: id
+        });
+      } else {
+        const response = yield fetch('/api/asset-domain', {
+          credentials: 'same-origin'
+        });
+        if (!response.ok) throw new Error('asset_domain_lookup_failed:' + response.status);
+        const asset = yield response.json();
+        if (!['boat', 'car', 'property', 'parking', 'pool'].includes(asset.assetType) || !/^[a-z0-9][a-z0-9_-]*$/.test(asset.assetId)) throw new Error('Invalid asset domain');
+        (0,_app_services_asset_domain__WEBPACK_IMPORTED_MODULE_1__.setDomainAsset)(asset);
+      }
     }
     (0,_app_services_boat_routing__WEBPACK_IMPORTED_MODULE_2__.initializeBoatRouting)();
     yield (0,_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_3__.platformBrowserDynamic)().bootstrapModule(_app_app_module__WEBPACK_IMPORTED_MODULE_4__.AppModule);
@@ -63818,24 +69119,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   PlatformLayoutComponent: () => (/* binding */ PlatformLayoutComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _platform_layout_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./platform-layout.component.html?ngResource */ 93009);
 /* harmony import */ var _platform_layout_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./platform-layout.component.scss?ngResource */ 98481);
 /* harmony import */ var _platform_layout_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_platform_layout_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _services_account_header__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/account-header */ 1768);
-/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../home/site-text.pipe */ 99343);
-/* harmony import */ var _platform_admin_platform_admin_text__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../platform-admin/platform-admin.text */ 45440);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! godigital-lib */ 22464);
-/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../services/asset-access.service */ 16379);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../services/language.service */ 48756);
-/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../home/site-content-service/site-content.service */ 73196);
-/* harmony import */ var _services_marketplace_translations__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../services/marketplace-translations */ 45237);
-/* harmony import */ var _services_discovery_text__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../services/discovery-text */ 40617);
+/* harmony import */ var _messaging_message_badge_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../messaging/message-badge.component */ 16101);
+/* harmony import */ var _messaging_messaging_text__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../messaging/messaging-text */ 17289);
+/* harmony import */ var _services_account_header__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../services/account-header */ 1768);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../home/site-text.pipe */ 99343);
+/* harmony import */ var _platform_admin_platform_admin_text__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../platform-admin/platform-admin.text */ 45440);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../services/asset-access.service */ 16379);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../services/language.service */ 48756);
+/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../home/site-content-service/site-content.service */ 73196);
+/* harmony import */ var _services_marketplace_translations__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../services/marketplace-translations */ 45237);
+/* harmony import */ var _services_discovery_text__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../services/discovery-text */ 40617);
+
+
 
 
 
@@ -63860,18 +69165,25 @@ let PlatformLayoutComponent = class PlatformLayoutComponent {
   text;
   router;
   main;
+  showFooter = true;
+  messageLabel() {
+    return (0,_messaging_messaging_text__WEBPACK_IMPORTED_MODULE_4__.messagingText)(this.language.currentLanguage, 0);
+  }
   get adminLabel() {
     return this.text.tFromContent(this.content, 'ui.platformAdmin.title', this.language.currentLanguage, this.language.currentLanguage === 'fr' ? 'Administration GoDirect' : 'GoDirect administration');
   }
   adminNav(key) {
     const lang = this.language.currentLanguage;
-    return this.text.tFromContent(this.content, 'ui.platformAdmin.' + key, lang, _platform_admin_platform_admin_text__WEBPACK_IMPORTED_MODULE_5__.PLATFORM_ADMIN_TEXT[lang]?.[key] || _platform_admin_platform_admin_text__WEBPACK_IMPORTED_MODULE_5__.PLATFORM_ADMIN_TEXT.en[key] || key);
+    return this.text.tFromContent(this.content, 'ui.platformAdmin.' + key, lang, _platform_admin_platform_admin_text__WEBPACK_IMPORTED_MODULE_7__.PLATFORM_ADMIN_TEXT[lang]?.[key] || _platform_admin_platform_admin_text__WEBPACK_IMPORTED_MODULE_7__.PLATFORM_ADMIN_TEXT.en[key] || key);
   }
   languages = ['fr', 'en', 'es', 'it', 'de', 'nl', 'ru'];
   year = new Date().getFullYear();
   content;
   leaving = false;
   error = '';
+  get onListingsPage() {
+    return this.router.url.split(/[?#;]/, 1)[0].replace(/\/$/, '') === '/owner/listings';
+  }
   constructor(access, language, text, router, main) {
     this.access = access;
     this.language = language;
@@ -63888,7 +69200,7 @@ let PlatformLayoutComponent = class PlatformLayoutComponent {
     })();
   }
   accountText(key) {
-    return (0,_services_account_header__WEBPACK_IMPORTED_MODULE_3__.accountHeaderText)(this.language.currentLanguage, key);
+    return (0,_services_account_header__WEBPACK_IMPORTED_MODULE_5__.accountHeaderText)(this.language.currentLanguage, key);
   }
   get authenticated() {
     return this.access.isAuthenticated;
@@ -63916,15 +69228,16 @@ let PlatformLayoutComponent = class PlatformLayoutComponent {
       listings: 'manage'
     };
     const field = discovery[key] || key;
-    const fallback = discovery[key] ? _services_discovery_text__WEBPACK_IMPORTED_MODULE_10__.DISCOVERY_TEXT[lang]?.[field] || _services_discovery_text__WEBPACK_IMPORTED_MODULE_10__.DISCOVERY_TEXT.en[field] : _services_marketplace_translations__WEBPACK_IMPORTED_MODULE_9__.MARKETPLACE_TRANSLATIONS[lang]?.[field] || _services_marketplace_translations__WEBPACK_IMPORTED_MODULE_9__.MARKETPLACE_TRANSLATIONS.en[field];
+    const fallback = discovery[key] ? _services_discovery_text__WEBPACK_IMPORTED_MODULE_12__.DISCOVERY_TEXT[lang]?.[field] || _services_discovery_text__WEBPACK_IMPORTED_MODULE_12__.DISCOVERY_TEXT.en[field] : _services_marketplace_translations__WEBPACK_IMPORTED_MODULE_11__.MARKETPLACE_TRANSLATIONS[lang]?.[field] || _services_marketplace_translations__WEBPACK_IMPORTED_MODULE_11__.MARKETPLACE_TRANSLATIONS.en[field];
     return this.text.tFromContent(this.content, `ui.${discovery[key] ? 'discovery' : 'marketplace'}.${field}`, lang, fallback || key);
   }
   authenticate(mode) {
-    const current = this.router.url || '/owner/listings';
-    const returnUrl = mode === 'signup' ? '/owner/listings' : current.startsWith('/') && !current.startsWith('//') ? current : '/owner/listings';
+    const customer = typeof window !== 'undefined' && window.location.hostname === 'client.godirect.fr';
+    const current = this.router.url || '/';
+    const returnUrl = mode === 'signup' && !customer ? '/owner/listings' : current.startsWith('/') && !current.startsWith('//') ? current : '/owner/listings';
     void this.router.navigate(['/account/' + mode], {
       queryParams: {
-        role: 'assetOwner',
+        role: customer ? 'customer' : 'assetOwner',
         returnUrl
       }
     });
@@ -63951,6 +69264,10 @@ let PlatformLayoutComponent = class PlatformLayoutComponent {
           localStorage.removeItem('loggedUser');
           sessionStorage.removeItem('loggedUser');
         } catch {}
+        if (window.location.hostname === 'admin.godirect.fr') {
+          window.location.replace('https://godirect.fr/');
+          return;
+        }
         yield _this2.router.navigateByUrl('/');
       } catch {
         _this2.error = _this2.text.tFromContent(_this2.content, 'common.error', _this2.language.currentLanguage, _this2.language.currentLanguage === 'fr' ? 'Impossible de vous déconnecter. Réessayez.' : 'Unable to log out. Please try again.');
@@ -63960,25 +69277,117 @@ let PlatformLayoutComponent = class PlatformLayoutComponent {
     })();
   }
   static ctorParameters = () => [{
-    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_6__.AssetAccessService
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_8__.AssetAccessService
   }, {
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_7__.LanguageService
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_9__.LanguageService
   }, {
-    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_8__.SiteContentService
+    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_10__.SiteContentService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_11__.Router
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_13__.Router
   }, {
-    type: godigital_lib__WEBPACK_IMPORTED_MODULE_12__.ServicesService
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_14__.ServicesService
   }];
+  static propDecorators = {
+    showFooter: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_15__.Input
+    }]
+  };
 };
-PlatformLayoutComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_13__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_14__.Component)({
+PlatformLayoutComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_16__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_15__.Component)({
   selector: 'app-platform-layout',
   standalone: true,
-  imports: [_home_site_text_pipe__WEBPACK_IMPORTED_MODULE_4__.SiteTextPipe, _angular_common__WEBPACK_IMPORTED_MODULE_15__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_16__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_17__.RouterModule],
+  imports: [_messaging_message_badge_component__WEBPACK_IMPORTED_MODULE_3__.MessageBadgeComponent, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_6__.SiteTextPipe, _angular_common__WEBPACK_IMPORTED_MODULE_17__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_18__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_19__.RouterModule],
   template: _platform_layout_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_platform_layout_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], PlatformLayoutComponent);
 
+
+/***/ }),
+
+/***/ 87461:
+/*!**********************************************!*\
+  !*** ./src/app/shared/asset-list-filters.ts ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   creationTime: () => (/* binding */ creationTime),
+/* harmony export */   emptyAssetFilters: () => (/* binding */ emptyAssetFilters),
+/* harmony export */   matchesAssetFilters: () => (/* binding */ matchesAssetFilters),
+/* harmony export */   searchText: () => (/* binding */ searchText),
+/* harmony export */   sortAssetRows: () => (/* binding */ sortAssetRows)
+/* harmony export */ });
+function emptyAssetFilters() {
+  return {
+    type: '',
+    state: '',
+    location: ''
+  };
+}
+function searchText(value) {
+  return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().trim();
+}
+function creationTime(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const n = typeof value === 'number' ? value < 1e12 ? value * 1000 : value : Date.parse(value);
+  return Number.isFinite(n) ? n : null;
+}
+function matchesAssetFilters(asset, f) {
+  if (!asset) return !f.type && !f.state && !f.location;
+  if (f.type && asset.assetType !== f.type) return false;
+  const archived = asset.archived === true || !!asset.deletedAt,
+    pending = !archived && asset.moderation?.status === 'pending',
+    online = !archived && asset.public === true,
+    offline = !archived && !pending && asset.public !== true;
+  if (f.state && !(f.state === 'archived' ? archived : f.state === 'pending' ? pending : f.state === 'online' ? online : offline)) return false;
+  const l = asset.location || {};
+  if (f.location && !searchText([l.city, l.area, l.country, l.postalCode].filter(Boolean).join(' ')).includes(searchText(f.location))) return false;
+  return true;
+}
+function sortAssetRows(rows, asset = r => r) {
+  return [...rows].sort((a, b) => {
+    const aa = asset(a),
+      bb = asset(b),
+      at = creationTime(aa?.createdAt),
+      bt = creationTime(bb?.createdAt);
+    if (at === null) return bt === null ? String(aa?.name || '').localeCompare(String(bb?.name || '')) : 1;
+    if (bt === null) return -1;
+    return bt - at;
+  });
+}
+
+/***/ }),
+
+/***/ 87516:
+/*!*********************************************!*\
+  !*** ./src/app/messaging/message-unread.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   messagesPage: () => (/* binding */ messagesPage),
+/* harmony export */   readAllowed: () => (/* binding */ readAllowed),
+/* harmony export */   unreadConversation: () => (/* binding */ unreadConversation),
+/* harmony export */   unreadCount: () => (/* binding */ unreadCount)
+/* harmony export */ });
+function unreadCount(summary, type = '', assetId = '') {
+  if (!summary) return 0;
+  if (!type || !assetId) return Math.max(0, Number(summary.unreadMessages) || 0);
+  return (summary.latest || []).filter(t => t.type === type && t.assetId === assetId).reduce((sum, t) => sum + Math.max(0, Number(t.count) || 0), 0);
+}
+function unreadConversation(summary, type = '', assetId = '') {
+  return (summary?.latest || []).find(t => !type || !assetId || t.type === type && t.assetId === assetId) || null;
+}
+function messagesPage(url) {
+  return /^\/messages(?:[/?#]|$)/.test(url);
+}
+function readAllowed(input) {
+  return messagesPage(input.url) && input.visible && input.focused && !!input.threadId && input.threadId === input.selectedId && input.streamVisible && input.atBottom;
+}
 
 /***/ }),
 
@@ -64022,6 +69431,453 @@ AssetOwnerReadInterceptor = (0,tslib__WEBPACK_IMPORTED_MODULE_3__.__decorate)([(
 
 /***/ }),
 
+/***/ 88052:
+/*!*********************************************************************!*\
+  !*** ./src/app/workspace/asset-documents.component.scss?ngResource ***!
+  \*********************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `.document-shell {
+  max-width: 980px;
+  margin: 2rem auto;
+  padding: 1rem;
+  color: #173642;
+}
+
+section {
+  border: 1px solid #d3dfe4;
+  border-radius: 18px;
+  background: white;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+h1 {
+  font-size: 1.8rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+article {
+  padding: 1rem;
+  background: #f3f6f6;
+  border-radius: 12px;
+  margin: 1rem 0;
+  overflow-wrap: anywhere;
+}
+
+.notice {
+  padding: 1rem;
+  background: #e8f1ef;
+  border-radius: 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin: 0.8rem 0;
+}
+
+label {
+  display: block;
+  margin: 0.7rem 0;
+}
+
+input, textarea {
+  display: block;
+  max-width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.3rem;
+}
+
+textarea {
+  width: 100%;
+  min-height: 5rem;
+}
+
+button {
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 8px;
+  background: #15546a;
+  color: white;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+fieldset {
+  border: 1px solid #d3dfe4;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+summary {
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+[role=alert] {
+  color: #992d25;
+}
+
+.waiver-reason {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.document-shell.embedded {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}`, "",{"version":3,"sources":["webpack://./src/app/workspace/asset-documents.component.scss"],"names":[],"mappings":"AAAA;EAAgB,gBAAA;EAAgB,iBAAA;EAAiB,aAAA;EAAa,cAAA;AAK9D;;AAL4E;EAAQ,yBAAA;EAAyB,mBAAA;EAAmB,iBAAA;EAAiB,eAAA;EAAe,gBAAA;AAahK;;AAbgL;EAAG,iBAAA;AAiBnL;;AAjBoM;EAAG,kBAAA;AAqBvM;;AArByN;EAAQ,aAAA;EAAa,mBAAA;EAAmB,mBAAA;EAAmB,cAAA;EAAc,uBAAA;AA6BlS;;AA7ByT;EAAQ,aAAA;EAAa,mBAAA;EAAmB,mBAAA;AAmCjW;;AAnCoX;EAAS,aAAA;EAAa,WAAA;EAAU,eAAA;EAAe,gBAAA;AA0Cna;;AA1Ckb;EAAM,cAAA;EAAc,gBAAA;AA+Ctc;;AA/Cqd;EAAe,cAAA;EAAc,eAAA;EAAe,eAAA;EAAc,kBAAA;AAsD/gB;;AAtDgiB;EAAS,WAAA;EAAW,gBAAA;AA2DpjB;;AA3DokB;EAAO,oBAAA;EAAmB,SAAA;EAAS,kBAAA;EAAkB,mBAAA;EAAmB,YAAA;EAAY,eAAA;AAoExpB;;AApEuqB;EAAgB,YAAA;EAAW,eAAA;AAyElsB;;AAzEitB;EAAS,yBAAA;EAAyB,mBAAA;EAAmB,aAAA;AA+EtwB;;AA/EmxB;EAAQ,eAAA;EAAe,gBAAA;AAoF1yB;;AApF0zB;EAAa,cAAA;AAwFv0B;;AAtFA;EAAe,qBAAA;EAAqB,uBAAA;AA2FpC;;AAzFA;EAAyB,eAAA;EAAe,SAAA;EAAS,UAAA;AA+FjD","sourcesContent":[".document-shell{max-width:980px;margin:2rem auto;padding:1rem;color:#173642}section{border:1px solid #d3dfe4;border-radius:18px;background:white;padding:1.5rem;margin:1.5rem 0}h1{font-size:1.8rem}h2{font-size:1.25rem}article{padding:1rem;background:#f3f6f6;border-radius:12px;margin:1rem 0;overflow-wrap:anywhere}.notice{padding:1rem;background:#e8f1ef;border-radius:10px}.actions{display:flex;gap:.7rem;flex-wrap:wrap;margin:.8rem 0}label{display:block;margin:.7rem 0}input,textarea{display:block;max-width:100%;padding:.6rem;margin-top:.3rem}textarea{width:100%;min-height:5rem}button{padding:.7rem 1rem;border:0;border-radius:8px;background:#15546a;color:white;cursor:pointer}button:disabled{opacity:.5;cursor:default}fieldset{border:1px solid #d3dfe4;border-radius:10px;padding:1rem}summary{cursor:pointer;margin-top:1rem}[role=alert]{color:#992d25}\n\n.waiver-reason{white-space:pre-wrap;overflow-wrap:anywhere}\n\n.document-shell.embedded{max-width:none;margin:0;padding:0}\n"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
+
+/***/ }),
+
+/***/ 88246:
+/*!********************************************************!*\
+  !*** ./src/app/workspace/asset-documents.component.ts ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   AssetDocumentsComponent: () => (/* binding */ AssetDocumentsComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _asset_documents_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./asset-documents.component.html?ngResource */ 52278);
+/* harmony import */ var _asset_documents_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./asset-documents.component.scss?ngResource */ 88052);
+/* harmony import */ var _asset_documents_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_asset_documents_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _shared_admin_success_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../shared/admin-success.component */ 62834);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/language.service */ 48756);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let AssetDocumentsComponent = class AssetDocumentsComponent {
+  http;
+  auth;
+  route;
+  language;
+  success = '';
+  scope = null;
+  embedded = false;
+  summaryChanged = new _angular_core__WEBPACK_IMPORTED_MODULE_7__.EventEmitter();
+  busyChanged = new _angular_core__WEBPACK_IMPORTED_MODULE_7__.EventEmitter();
+  ngOnChanges() {
+    if (this.scope) {
+      this.data = null;
+      this.summaryChanged.emit(null);
+      void this.refresh();
+    }
+  }
+  exemptionReason = '';
+  exemptionExpires = '';
+  data = null;
+  busy = false;
+  dossierReason = '';
+  error = '';
+  files = {};
+  expires = {};
+  reasons = {};
+  readChecks = {};
+  sub;
+  generation = 0;
+  uid = '';
+  constructor(http, auth, route, language) {
+    this.http = http;
+    this.auth = auth;
+    this.route = route;
+    this.language = language;
+  }
+  get base() {
+    const scope = this.scope || {
+      type: this.route.snapshot.paramMap.get('type') || '',
+      id: this.route.snapshot.paramMap.get('id') || ''
+    };
+    return '/api/manage/assets/' + [scope.type, scope.id].map(encodeURIComponent).join('/') + '/documents';
+  }
+  t(k) {
+    return this.data?.labels?.[k] || {
+      title: 'Documents',
+      error: 'Impossible de charger le dossier. Réessayez.',
+      back: 'Retour'
+    }[k] || k;
+  }
+  ngOnInit() {
+    this.sub = this.language.language$.subscribe(() => void this.refresh());
+  }
+  ngOnDestroy() {
+    this.generation++;
+    this.sub?.unsubscribe();
+    this.busyChanged.emit(false);
+  }
+  refresh() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const n = ++_this.generation;
+      _this.error = '';
+      try {
+        const uid = (yield _this.auth.user()).uid;
+        const data = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this.http.get(_this.base, {
+          headers: yield _this.auth.headers(),
+          params: {
+            language: _this.language.currentLanguage
+          }
+        }));
+        if (n !== _this.generation || uid !== (yield _this.auth.user()).uid) return;
+        _this.uid = uid;
+        _this.data = data;
+        _this.summaryChanged.emit(data.summary);
+      } catch {
+        if (n === _this.generation) {
+          _this.error = _this.t('error');
+          _this.data = null;
+          _this.summaryChanged.emit(null);
+        }
+      }
+    })();
+  }
+  select(id, event) {
+    const input = event.target,
+      file = input.files?.[0];
+    input.value = '';
+    if (file && file.size <= 10485760 && ['application/pdf', 'image/jpeg', 'image/png'].includes(file.type)) {
+      this.files[id] = file;
+      this.error = '';
+    } else {
+      delete this.files[id];
+      this.error = this.t('formats');
+    }
+  }
+  run(work, success = '') {
+    var _this2 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this2.busy) return;
+      _this2.busy = true;
+      _this2.busyChanged.emit(true);
+      _this2.error = '';
+      try {
+        if ((yield _this2.auth.user()).uid !== _this2.uid) throw Error('identity_changed');
+        const generation = _this2.generation;
+        yield work();
+        if (generation !== _this2.generation) return;
+        if (success && _this2.data?.canReview && !_this2.embedded) {
+          _this2.success = success;
+          return;
+        }
+        yield _this2.refresh();
+      } catch (e) {
+        const message = _this2.t(e?.error?.error === 'document_read_required' ? 'readFirst' : e?.error?.error === 'document_dossier_incomplete' ? 'incomplete' : e?.error?.error === 'invalid_expiry' ? 'expiryRequired' : e?.error?.error === 'private_document_bucket_required' ? 'storageError' : 'error');
+        yield _this2.refresh();
+        _this2.error = message;
+      } finally {
+        _this2.busy = false;
+        _this2.busyChanged.emit(false);
+      }
+    })();
+  }
+  exempt(active) {
+    var _this3 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (!_this3.data?.canReview || _this3.exemptionReason.trim().length < 10) {
+        _this3.error = _this3.t('requiredReason');
+        return;
+      }
+      yield _this3.run(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        return (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this3.http.post(_this3.base + '/admin-exemption', {
+          active,
+          reason: _this3.exemptionReason,
+          expiresOn: _this3.exemptionExpires,
+          fingerprint: _this3.data.summary.fingerprint
+        }, {
+          headers: yield _this3.auth.headers()
+        }));
+      }), active ? 'Dispense de justificatifs enregistrée.' : '');
+    })();
+  }
+  submit() {
+    var _this4 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      yield _this4.run(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        return (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this4.http.post(_this4.base + '/submit', {}, {
+          headers: yield _this4.auth.headers()
+        }));
+      }));
+    })();
+  }
+  decision(status) {
+    var _this5 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (status === 'rejected' && _this5.dossierReason.trim().length < 10) {
+        _this5.error = _this5.t('requiredReason');
+        return;
+      }
+      yield _this5.run(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        return (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this5.http.post(_this5.base + '/decision', {
+          status,
+          reason: _this5.dossierReason,
+          fingerprint: _this5.data.summary.fingerprint
+        }, {
+          headers: yield _this5.auth.headers()
+        }));
+      }), status === 'approved' ? 'Dossier de justificatifs accepté.' : '');
+    })();
+  }
+  upload(r) {
+    var _this6 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (!_this6.files[r.id]) return;
+      yield _this6.run(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        const body = new FormData();
+        body.append('requirementId', r.id);
+        body.append('expiresOn', _this6.expires[r.id] || '');
+        body.append('file', _this6.files[r.id]);
+        yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this6.http.post(_this6.base, body, {
+          headers: yield _this6.auth.headers()
+        }));
+        delete _this6.files[r.id];
+      }));
+    })();
+  }
+  download(d) {
+    var _this7 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      yield _this7.run(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        const blob = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this7.http.get(_this7.base + '/' + d.id + '/download', {
+          headers: yield _this7.auth.headers(),
+          responseType: 'blob'
+        }));
+        const url = URL.createObjectURL(blob),
+          a = document.createElement('a');
+        a.href = url;
+        a.download = d.filename;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }));
+    })();
+  }
+  remove(d) {
+    var _this8 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (!confirm(_this8.t('deleteConfirm'))) return;
+      yield _this8.run(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        return (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this8.http.delete(_this8.base + '/' + d.id, {
+          headers: yield _this8.auth.headers(),
+          params: {
+            revision: d.revision
+          }
+        }));
+      }));
+    })();
+  }
+  waiver(r) {
+    var _this9 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if ((_this9.reasons[r.id] || '').trim().length < 10) {
+        _this9.error = _this9.t('requiredReason');
+        return;
+      }
+      yield _this9.run(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        return (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this9.http.post(_this9.base + '/waivers/' + r.id, {
+          reason: _this9.reasons[r.id]
+        }, {
+          headers: yield _this9.auth.headers()
+        }));
+      }));
+    })();
+  }
+  review(kind, id, d, status) {
+    var _this10 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const reason = _this10.reasons[kind + id] || '';
+      if (status === 'rejected' && reason.trim().length < 10) {
+        _this10.error = _this10.t('requiredReason');
+        return;
+      }
+      yield _this10.run(/*#__PURE__*/(0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+        return (0,rxjs__WEBPACK_IMPORTED_MODULE_8__.firstValueFrom)(_this10.http.post(_this10.base + '/' + kind + '/' + id + '/review', {
+          status,
+          reason,
+          readConfirmed: _this10.readChecks[id] === true,
+          revision: d.revision,
+          expiresOn: _this10.expires[kind + id] || ''
+        }, {
+          headers: yield _this10.auth.headers()
+        }));
+      }), status === 'approved' ? kind === 'files' ? 'Justificatif accepté.' : 'Demande de dispense acceptée.' : '');
+    })();
+  }
+  static ctorParameters = () => [{
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_9__.HttpClient
+  }, {
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_5__.ReservationAuthService
+  }, {
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_10__.ActivatedRoute
+  }, {
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_6__.LanguageService
+  }];
+  static propDecorators = {
+    scope: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_7__.Input
+    }],
+    embedded: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_7__.Input
+    }],
+    summaryChanged: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_7__.Output
+    }],
+    busyChanged: [{
+      type: _angular_core__WEBPACK_IMPORTED_MODULE_7__.Output
+    }]
+  };
+};
+AssetDocumentsComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.Component)({
+  selector: 'app-asset-documents',
+  standalone: true,
+  imports: [_shared_admin_success_component__WEBPACK_IMPORTED_MODULE_3__.AdminSuccessComponent, _angular_common__WEBPACK_IMPORTED_MODULE_12__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_13__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_14__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_4__.PlatformLayoutComponent],
+  template: _asset_documents_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [(_asset_documents_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
+})], AssetDocumentsComponent);
+
+
+/***/ }),
+
 /***/ 88504:
 /*!**************************************************************!*\
   !*** ./src/app/owner-dashboard/owner-dashboard.component.ts ***!
@@ -64042,7 +69898,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _services_owner_offer_text__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/owner-offer-text */ 61407);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @angular/router */ 99585);
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/common/http */ 93262);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! rxjs */ 56196);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! rxjs */ 72354);
@@ -64051,6 +69908,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../home/site-content-service/site-content.service */ 73196);
 /* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
 /* harmony import */ var _owner_dashboard_text__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./owner-dashboard.text */ 80);
+
 
 
 
@@ -64079,6 +69937,9 @@ let OwnerDashboardComponent = class OwnerDashboardComponent {
   loading = false;
   listError = false;
   stripeError = false;
+  assetTypeFilter = '';
+  assetStateFilter = '';
+  assetLocationFilter = '';
   request = 0;
   destroyed = false;
   constructor(http, auth, language, texts) {
@@ -64142,6 +70003,13 @@ let OwnerDashboardComponent = class OwnerDashboardComponent {
   get current() {
     return this.assets.filter(a => !a.deletedAt);
   }
+  get assetTypes() {
+    return [...new Set(this.current.map(a => String(a.assetType || '')).filter(Boolean))].sort();
+  }
+  get visibleAssets() {
+    const location = this.normalized(this.assetLocationFilter);
+    return this.current.filter(a => (!this.assetTypeFilter || a.assetType === this.assetTypeFilter) && (!this.assetStateFilter || (this.assetStateFilter === 'online' ? a.public === true : a.public !== true)) && (!location || this.normalized([a.location?.city, a.location?.area, a.location?.country].filter(Boolean).join(' ')).includes(location)));
+  }
   get online() {
     return this.current.filter(a => a.public === true).length;
   }
@@ -64164,6 +70032,9 @@ let OwnerDashboardComponent = class OwnerDashboardComponent {
   get stripeReady() {
     return this.stripe?.connected === true && this.stripe?.chargesEnabled === true;
   }
+  normalized(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
   path(a, tail) {
     return `/${encodeURIComponent(a.assetType)}/${encodeURIComponent(a.id)}/${tail}`;
   }
@@ -64185,7 +70056,7 @@ let OwnerDashboardComponent = class OwnerDashboardComponent {
 OwnerDashboardComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_14__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_10__.Component)({
   selector: 'app-owner-dashboard',
   standalone: true,
-  imports: [_home_site_text_pipe__WEBPACK_IMPORTED_MODULE_3__.SiteTextPipe, _angular_common__WEBPACK_IMPORTED_MODULE_15__.CommonModule, _angular_router__WEBPACK_IMPORTED_MODULE_16__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_8__.PlatformLayoutComponent],
+  imports: [_home_site_text_pipe__WEBPACK_IMPORTED_MODULE_3__.SiteTextPipe, _angular_common__WEBPACK_IMPORTED_MODULE_15__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_16__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_17__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_8__.PlatformLayoutComponent],
   template: _owner_dashboard_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_owner_dashboard_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], OwnerDashboardComponent);
@@ -65402,7 +71273,120 @@ dd {
   max-width: 100%;
   overflow-wrap: anywhere;
   text-underline-offset: 3px;
-}`, "",{"version":3,"sources":["webpack://./src/app/platform-admin/platform-admin.component.scss"],"names":[],"mappings":"AAAA;EAAM,cAAA;AAEN;;AAFoB;EAAiB,iBAAA;EAAiB,uBAAA;EAAuB,YAAA;EAAY,cAAA;AASzF;;AATuG;EAAqD,aAAA;EAAa,8BAAA;EAA8B,mBAAA;EAAmB,SAAA;AAgB1N;;AAhBmO;EAAS,yBAAA;EAAyB,eAAA;EAAe,mBAAA;EAAmB,gBAAA;AAuBvS;;AAvBuT;EAAG,mDAAA;EAAgD,cAAA;AA4B1W;;AA5BwX;EAAG,eAAA;EAAe,gBAAA;AAiC1Y;;AAjC0Z;EAAG,eAAA;EAAe,SAAA;AAsC5a;;AAtCqb;EAAE,gBAAA;EAAgB,cAAA;AA2Cvc;;AA3Cqd;EAAmB,aAAA;EAAa,SAAA;EAAS,mBAAA;EAAmB,eAAA;AAkDjhB;;AAlDgiB;EAAE,cAAA;AAsDliB;;AAtDgjB;EAAe,qBAAA;EAAqB,SAAA;EAAS,kBAAA;EAAkB,mBAAA;EAAmB,YAAA;EAAY,kBAAA;EAAkB,qBAAA;EAAqB,oCAAA;EAAmC,eAAA;AAkExtB;;AAlEuuB;EAAW,iBAAA;EAAiB,cAAA;EAAc,yBAAA;AAwEjxB;;AAxE0yB;EAAS,aAAA;EAAa,qCAAA;EAAoC,SAAA;EAAS,cAAA;AA+E72B;;AA/E23B;EAAW,aAAA;EAAa,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;EAAmB,qBAAA;AAuFh9B;;AAvFq+B;EAAc,eAAA;AA2Fn/B;;AA3FkgC;EAAgB,cAAA;EAAc,eAAA;EAAe,gBAAA;AAiG/iC;;AAjG+jC;EAAO,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;EAAmB,aAAA;EAAa,mBAAA;AAyGhpC;;AAzGmqC;EAAiB,aAAA;EAAa,8BAAA;EAA8B,SAAA;AA+G/tC;;AA/GwuC;EAAW,aAAA;EAAa,mBAAA;EAAmB,yBAAA;EAAyB,mBAAA;EAAmB,mBAAA;AAuH/zC;;AAvHk1C;EAAa,aAAA;AA2H/1C;;AA3H42C;EAAc,cAAA;AA+H13C;;AA/Hw4C;EAAa,cAAA;EAAc,aAAA;EAAa,cAAA;AAqIh7C;;AArI87C;EAAe,gBAAA;AAyI78C;;AAzI69C;EAAa,cAAA;AA6I1+C;;AA7Iw/C;EAAiB,eAAA;EAAe,6BAAA;AAkJxhD;;AAlJqjD;EAAyB,aAAA;AAsJ9kD;;AAtJ2lD;EAAc,cAAA;AA0JzmD;;AA1JunD;EAAM,yBAAA;EAAyB,gBAAA;EAAgB,WAAA;EAAW,eAAA;AAiKjrD;;AAjKgsD;EAAM,gBAAA;EAAgB,kBAAA;EAAkB,gCAAA;EAAgC,gBAAA;AAwKxwD;;AAxKwxD;EAAO,mBAAA;EAAmB,cAAA;EAAc,aAAA;EAAa,kBAAA;AA+K70D;;AA/K+1D;EAAgB,YAAA;EAAW,YAAA;AAoL13D;;AApLs4D;EAAqC,0BAAA;EAA0B,mBAAA;AAyLr8D;;AAzLw9D;EAAoB,wBAAA;AA6L5+D;;AA7LogE;EAAwB;IAAS,8BAAA;EAkMniE;EAlMikE;IAAqD,uBAAA;IAAuB,sBAAA;EAsM7oE;EAtMmqE;IAAiB,0BAAA;IAA0B,MAAA;EA0M9sE;AACF;AA3MutE;EAAwB;IAAiB,kBAAA;EA+M9vE;EA/MgxE;IAAS,SAAA;EAkNzxE;EAlNkyE;IAAW,aAAA;EAqN7yE;EArN0zE;IAAO,kBAAA;EAwNj0E;AACF;AAxNA;EAAa,iBAAA;EAAiB,YAAA;EAAY,uBAAA;EAAuB,cAAA;AA8NjE;;AA9N+E;EAAoB,aAAA;EAAa,8BAAA;EAA8B,mBAAA;EAAmB,SAAA;AAqOjK;;AArO0K;EAAa,aAAA;EAAa,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;AA4O9O;;AA5OiQ;EAA2B,aAAA;EAAa,SAAA;EAAS,eAAA;EAAe,cAAA;EAAc,mBAAA;AAoP/U;;AApPkW;EAAgC,mBAAA;AAwPlY;;AAxPqZ;EAA+B,aAAA;EAAa,yBAAA;EAAyB,kBAAA;EAAkB,aAAA;EAAa,YAAA;AAgQzf;;AAhQqgB;EAAe,OAAA;AAoQphB;;AApQ2hB;EAAc,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;EAAmB,aAAA;AA2QtmB;;AA3QmnB;EAAS,cAAA;EAAc,cAAA;EAAc,uBAAA;AAiRxpB;;AAjR+qB;EAAQ,aAAA;EAAa,mBAAA;EAAmB,mBAAA;AAuRvtB;;AAvR0uB;EAAwB;IAAa,kBAAA;EA4R7wB;EA5R+xB;IAAoB,sBAAA;IAAsB,kBAAA;EAgSz0B;EAhS21B;IAAS,oBAAA;IAAoB,sBAAA;EAoSx3B;AACF;AAnSA;EAAoB,qBAAA;AAsSpB;;AAtSyC;EAAe,aAAA;EAAa,SAAA;EAAS,eAAA;AA4S9E;;AA5S6F;EAAmB,YAAA;EAAY,aAAA;EAAa,iBAAA;EAAiB,kBAAA;AAmT1J;;AAnT4K;EAAgB,cAAA;EAAc,WAAA;EAAW,sBAAA;EAAsB,gBAAA;EAAgB,eAAA;EAAe,aAAA;AA4T1Q;;AA5TuR;EAAQ,mBAAA;AAgU/R;;AAhUkT;EAAG,aAAA;EAAa,+BAAA;EAA+B,aAAA;AAsUjW;;AAtU8W;EAAG,SAAA;AA0UjX;;AAxUA;EAAgB,aAAA;EAAa,QAAA;EAAQ,mBAAA;EAAmB,cAAA;AA+UxD;;AA7UA,gFAAA;AACA;EACE,aAAA;EACA,eAAA;EACA,qBAAA;EACA,aAAA;EACA,eAAA;AAgVF;;AA9UA;EACE,qBAAA;EACA,eAAA;EACA,uBAAA;EACA,0BAAA;AAiVF","sourcesContent":[":host{display:block}.owner-dashboard{max-width:1200px;padding:36px 24px 60px;margin:auto;color:#103f68}.dashboard-heading,.section-heading,.reservation-row{display:flex;justify-content:space-between;align-items:center;gap:24px}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:2px;font-weight:700}h1{font:400 clamp(30px,4vw,48px)/1.2 Georgia,serif;margin:12px 0}h2{font-size:20px;margin:0 0 14px}h3{font-size:16px;margin:0}p{line-height:1.6;color:#526b80}.dashboard-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}a{color:#103f68}button,.button{display:inline-block;border:0;border-radius:9px;background:#103f68;color:white;padding:12px 16px;text-decoration:none;font:600 13px/1.4 Arial,sans-serif;cursor:pointer}.secondary{background:white;color:#103f68;border:1px solid #c9d8e5}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:28px 0}.metrics a{padding:24px;background:white;border:1px solid #dbe5ed;border-radius:14px;text-decoration:none}.metrics span{font-size:13px}.metrics strong{display:block;font-size:36px;margin-top:14px}.panel{background:white;border:1px solid #dbe5ed;border-radius:14px;padding:25px;margin-bottom:24px}.management-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.attention{padding:24px;background:#fff3e5;border:1px solid #edc295;border-radius:14px;margin-bottom:24px}.attention p{margin:8px 0}.attention h2{color:#854309}.panel small{display:block;margin:6px 0;color:#526b80}.panel .button{margin-top:15px}.needs-setup{color:#854309}.reservation-row{padding:18px 0;border-top:1px solid #dbe5ed}.reservation-row .button{margin-top:0}.table-scroll{overflow:auto}table{border-collapse:collapse;min-width:680px;width:100%;font-size:13px}td,th{text-align:left;padding:18px 12px;border-bottom:1px solid #dbe5ed;line-height:1.6}.error{background:#fff0ed;color:#862c20;padding:14px;border-radius:8px}button:disabled{opacity:.6;cursor:wait}a:focus-visible,button:focus-visible{outline:3px solid #c0641b;outline-offset:3px}#owner-reservations{scroll-margin-top:140px}@media(max-width:800px){.metrics{grid-template-columns:1fr 1fr}.dashboard-heading,.section-heading,.reservation-row{align-items:flex-start;flex-direction:column}.management-grid{grid-template-columns:1fr;gap:0}}@media(max-width:440px){.owner-dashboard{padding:24px 16px}.metrics{gap:10px}.metrics a{padding:16px}.panel{padding:20px 16px}}\n.admin-shell{max-width:1280px;margin:auto;padding:35px 24px 60px;color:#103f68}.admin-shell>header{display:flex;justify-content:space-between;align-items:center;gap:20px}.metrics>div{padding:24px;background:white;border:1px solid #dbe5ed;border-radius:14px}.tabs,.filters,.pagination{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0;align-items:center}.tabs button[aria-pressed=true]{background:#a64c11}.filters input,.filters select{padding:12px;border:1px solid #c9d8e5;border-radius:8px;font:inherit;min-width:0}.filters input{flex:1}.table-scroll{background:white;border:1px solid #dbe5ed;border-radius:14px;padding:12px}td small{display:block;color:#526b80;overflow-wrap:anywhere}.notice{padding:16px;background:#edf4fa;border-radius:10px}@media(max-width:650px){.admin-shell{padding:24px 16px}.admin-shell>header{flex-direction:column;align-items:start}.filters{align-items:stretch;flex-direction:column}}\n\n.review-description{white-space:pre-wrap}.review-photos{display:flex;gap:12px;flex-wrap:wrap}.review-photos img{width:220px;height:150px;object-fit:cover;border-radius:8px}.panel textarea{display:block;width:100%;box-sizing:border-box;min-height:90px;margin-top:8px;padding:12px}.reject{background:#9a3027}dl{display:grid;grid-template-columns:auto 1fr;gap:8px 18px}dd{margin:0}\n\n.archive-toggle{display:flex;gap:8px;align-items:center;margin:14px 0}\n\n/* Keep each asset action distinct, including when Angular removes whitespace. */\n.asset-links {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: baseline;\n  gap: 8px 16px;\n  margin-top: 6px;\n}\n.asset-links > a {\n  display: inline-block;\n  max-width: 100%;\n  overflow-wrap: anywhere;\n  text-underline-offset: 3px;\n}\n"],"sourceRoot":""}]);
+}
+
+.filters select {
+  max-width: 100%;
+  flex: 0 1 420px;
+}
+
+.table-scroll td small {
+  font-size: 12px;
+}
+
+.table-scroll td strong {
+  font-weight: 600;
+}
+
+@media (max-width: 650px) {
+  .filters select {
+    flex: initial;
+    width: 100%;
+  }
+}
+.owner-link {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.mobile-actions {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .admin-shell {
+    padding-inline: 16px;
+    padding-bottom: 88px;
+  }
+  .admin-shell .table-scroll {
+    overflow: visible;
+    border: 0;
+    padding: 0;
+    background: transparent;
+  }
+  .admin-shell table, .admin-shell tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+  .admin-shell thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .admin-shell tr {
+    display: grid;
+    gap: 0;
+    border: 1px solid #dbe5ed;
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .admin-shell td {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4px 12px;
+    padding: 8px 0;
+    overflow-wrap: anywhere;
+  }
+  .admin-shell td:not(:first-child)[data-label]::before {
+    content: attr(data-label);
+    grid-column: 1;
+    grid-row: 1/span 3;
+    font-weight: 600;
+    color: #526b80;
+  }
+  .admin-shell td:not(:first-child)[data-label] > small {
+    grid-column: 2;
+  }
+  .admin-shell td:first-child, .admin-shell td.row-action {
+    display: block;
+  }
+  .admin-shell td:first-child > a, .admin-shell td:first-child > strong {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .admin-shell td:last-child {
+    border-bottom: 0;
+  }
+  .admin-shell .desktop-actions {
+    display: none;
+  }
+  .admin-shell .mobile-actions {
+    display: block;
+    margin-top: 8px;
+  }
+  .admin-shell .mobile-actions summary {
+    padding: 10px 0;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .admin-shell .asset-links > a {
+    padding-block: 8px;
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/platform-admin/platform-admin.component.scss"],"names":[],"mappings":"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","sourcesContent":[":host{display:block}.owner-dashboard{max-width:1200px;padding:36px 24px 60px;margin:auto;color:#103f68}.dashboard-heading,.section-heading,.reservation-row{display:flex;justify-content:space-between;align-items:center;gap:24px}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:2px;font-weight:700}h1{font:400 clamp(30px,4vw,48px)/1.2 Georgia,serif;margin:12px 0}h2{font-size:20px;margin:0 0 14px}h3{font-size:16px;margin:0}p{line-height:1.6;color:#526b80}.dashboard-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}a{color:#103f68}button,.button{display:inline-block;border:0;border-radius:9px;background:#103f68;color:white;padding:12px 16px;text-decoration:none;font:600 13px/1.4 Arial,sans-serif;cursor:pointer}.secondary{background:white;color:#103f68;border:1px solid #c9d8e5}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:28px 0}.metrics a{padding:24px;background:white;border:1px solid #dbe5ed;border-radius:14px;text-decoration:none}.metrics span{font-size:13px}.metrics strong{display:block;font-size:36px;margin-top:14px}.panel{background:white;border:1px solid #dbe5ed;border-radius:14px;padding:25px;margin-bottom:24px}.management-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.attention{padding:24px;background:#fff3e5;border:1px solid #edc295;border-radius:14px;margin-bottom:24px}.attention p{margin:8px 0}.attention h2{color:#854309}.panel small{display:block;margin:6px 0;color:#526b80}.panel .button{margin-top:15px}.needs-setup{color:#854309}.reservation-row{padding:18px 0;border-top:1px solid #dbe5ed}.reservation-row .button{margin-top:0}.table-scroll{overflow:auto}table{border-collapse:collapse;min-width:680px;width:100%;font-size:13px}td,th{text-align:left;padding:18px 12px;border-bottom:1px solid #dbe5ed;line-height:1.6}.error{background:#fff0ed;color:#862c20;padding:14px;border-radius:8px}button:disabled{opacity:.6;cursor:wait}a:focus-visible,button:focus-visible{outline:3px solid #c0641b;outline-offset:3px}#owner-reservations{scroll-margin-top:140px}@media(max-width:800px){.metrics{grid-template-columns:1fr 1fr}.dashboard-heading,.section-heading,.reservation-row{align-items:flex-start;flex-direction:column}.management-grid{grid-template-columns:1fr;gap:0}}@media(max-width:440px){.owner-dashboard{padding:24px 16px}.metrics{gap:10px}.metrics a{padding:16px}.panel{padding:20px 16px}}\n.admin-shell{max-width:1280px;margin:auto;padding:35px 24px 60px;color:#103f68}.admin-shell>header{display:flex;justify-content:space-between;align-items:center;gap:20px}.metrics>div{padding:24px;background:white;border:1px solid #dbe5ed;border-radius:14px}.tabs,.filters,.pagination{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0;align-items:center}.tabs button[aria-pressed=true]{background:#a64c11}.filters input,.filters select{padding:12px;border:1px solid #c9d8e5;border-radius:8px;font:inherit;min-width:0}.filters input{flex:1}.table-scroll{background:white;border:1px solid #dbe5ed;border-radius:14px;padding:12px}td small{display:block;color:#526b80;overflow-wrap:anywhere}.notice{padding:16px;background:#edf4fa;border-radius:10px}@media(max-width:650px){.admin-shell{padding:24px 16px}.admin-shell>header{flex-direction:column;align-items:start}.filters{align-items:stretch;flex-direction:column}}\n\n.review-description{white-space:pre-wrap}.review-photos{display:flex;gap:12px;flex-wrap:wrap}.review-photos img{width:220px;height:150px;object-fit:cover;border-radius:8px}.panel textarea{display:block;width:100%;box-sizing:border-box;min-height:90px;margin-top:8px;padding:12px}.reject{background:#9a3027}dl{display:grid;grid-template-columns:auto 1fr;gap:8px 18px}dd{margin:0}\n\n.archive-toggle{display:flex;gap:8px;align-items:center;margin:14px 0}\n\n/* Keep each asset action distinct, including when Angular removes whitespace. */\n.asset-links {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: baseline;\n  gap: 8px 16px;\n  margin-top: 6px;\n}\n.asset-links > a {\n  display: inline-block;\n  max-width: 100%;\n  overflow-wrap: anywhere;\n  text-underline-offset: 3px;\n}\n\n.filters select{max-width:100%;flex:0 1 420px}.table-scroll td small{font-size:12px}.table-scroll td strong{font-weight:600}@media(max-width:650px){.filters select{flex:initial;width:100%}}\n\n.owner-link{border:0;background:transparent;color:inherit;padding:0;text-align:left;font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}\n\n.mobile-actions{display:none}\n@media(max-width:760px){\n .admin-shell{padding-inline:16px;padding-bottom:88px}\n .admin-shell .table-scroll{overflow:visible;border:0;padding:0;background:transparent}\n .admin-shell table,.admin-shell tbody{display:block;width:100%;min-width:0}\n .admin-shell thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}\n .admin-shell tr{display:grid;gap:0;border:1px solid #dbe5ed;background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:12px}\n .admin-shell td{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 12px;padding:8px 0;overflow-wrap:anywhere}\n .admin-shell td:not(:first-child)[data-label]::before{content:attr(data-label);grid-column:1;grid-row:1 / span 3;font-weight:600;color:#526b80}\n .admin-shell td:not(:first-child)[data-label]>small{grid-column:2}\n .admin-shell td:first-child,.admin-shell td.row-action{display:block}\n .admin-shell td:first-child>a,.admin-shell td:first-child>strong{font-size:1rem;font-weight:700}\n .admin-shell td:last-child{border-bottom:0}\n .admin-shell .desktop-actions{display:none}\n .admin-shell .mobile-actions{display:block;margin-top:8px}\n .admin-shell .mobile-actions summary{padding:10px 0;font-weight:600;cursor:pointer}\n .admin-shell .asset-links>a{padding-block:8px}\n}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -65416,7 +71400,25 @@ module.exports = ___CSS_LOADER_EXPORT___.toString();
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<div class=\"platform-shell\" data-godirect-layout=\"R22.15.1-boat-outings\">\n  <a class=\"skip-link\" href=\"#platform-content\">{{t('skip')}}</a>\n  <header class=\"platform-header\"><div class=\"platform-header-inner\">\n    <a class=\"platform-brand\" routerLink=\"/\" aria-label=\"GoDirect\"><span class=\"brand-mark\" aria-hidden=\"true\">G↗</span><span>GoDirect<span class=\"brand-dot\">.</span></span></a>\n    <div class=\"platform-controls\"><span class=\"account-identity\" *ngIf=\"access.isAuthenticated\"><strong>{{access.displayName}}</strong><small>{{accountText(access.accountMode)}}</small><small *ngIf=\"access.isManager\">{{accountText(access.viewMode==='client'?'clientViewMode':(access.accountMode==='concierge'?'conciergeView':'ownerViewMode'))}}</small></span><button class=\"workspace-view-switch\" type=\"button\" *ngIf=\"access.isManager\" (click)=\"access.switchView()\" [disabled]=\"access.switchingView\">⇄ {{accountText(access.viewMode==='client'?(access.accountMode==='concierge'?'conciergeView':'ownerViewMode'):'clientViewMode')}}</button><label><span class=\"sr-only\">{{ \"ui.pages.t62d442269a5e\" | siteText }}</span><select [ngModel]=\"language.currentLanguage\" (ngModelChange)=\"setLanguage($event)\"><option *ngFor=\"let lang of languages\" [value]=\"lang\">{{lang.toUpperCase()}}</option></select></label>\n      <details #assetMenu class=\"platform-account\" *ngIf=\"authenticated && access.isManager && access.viewMode==='owner'\"><summary>{{accountText('assets')}}</summary><div class=\"account-options\" (click)=\"assetMenu.open=false\"><ng-container *ngIf=\"access.isPlatformAdmin; else ownedLinks\"><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'owners'}\">{{adminNav('owners')}}</a><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'assets'}\">{{adminNav('assets')}}</a><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'subscriptions'}\">{{adminNav('subscriptions')}}</a><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'requests'}\">{{adminNav('requests')}}</a></ng-container><ng-template #ownedLinks><a *ngIf=\"access.isOwner\" routerLink=\"/owner/listings\">{{t('listings')}}</a><a *ngIf=\"access.isConcierge\" routerLink=\"/concierge\">{{accountText('concierge')}}</a><a *ngIf=\"access.isOwner\" routerLink=\"/owner/delegations\">{{accountText('delegations')}}</a></ng-template></div></details>\n      <details #bookingMenu class=\"platform-account\" *ngIf=\"authenticated && !access.isPlatformAdmin\"><summary>{{accountText('reservations')}}</summary><div class=\"account-options\" (click)=\"bookingMenu.open=false\"><ng-container *ngIf=\"access.isOwner && access.viewMode==='owner'\"><strong class=\"menu-heading\">{{accountText('bookingManagement')}}</strong><a routerLink=\"/owner/activity/reservations\">{{accountText('reservations')}}</a><a routerLink=\"/owner/activity/ratings\">{{accountText('ratings')}}</a><a routerLink=\"/owner/activity/payments\">{{accountText('payments')}}</a><a routerLink=\"/owner/customers\">{{accountText('customers')}}</a></ng-container><ng-container *ngIf=\"access.isConcierge && access.viewMode==='owner'\"><strong>{{accountText('concierge')}}</strong><a *ngIf=\"access.canConcierge('bookings')\" routerLink=\"/concierge/activity/reservations\">{{accountText('reservations')}}</a><a *ngIf=\"access.canConcierge('customers')\" routerLink=\"/concierge/customers\">{{accountText('customers')}}</a><a *ngIf=\"access.canConcierge('payments')\" routerLink=\"/concierge\" fragment=\"payments\">{{accountText('payments')}}</a></ng-container><strong class=\"menu-heading\">{{accountText('customerBookings')}}</strong><a routerLink=\"/account/bookings\">{{t('bookings')}}</a><a routerLink=\"/account/ratings\">{{accountText('ratings')}}</a><a routerLink=\"/account/payments\">{{accountText('payments')}}</a></div></details>\n      <details #accountMenu class=\"platform-account\"><summary>{{accountText('account')}}</summary><div class=\"account-options\" (click)=\"accountMenu.open=false\"><ng-container *ngIf=\"authenticated\"><a routerLink=\"/account/profile\">{{t('profile')}}</a><a *ngIf=\"access.isOwner && !access.isPlatformAdmin\" routerLink=\"/owner/payments\">{{accountText('stripe')}}</a><button type=\"button\" (click)=\"logout()\" [disabled]=\"leaving\">{{t('logout')}}</button></ng-container><ng-container *ngIf=\"!authenticated\"><button type=\"button\" (click)=\"authenticate('login')\">{{t('login')}}</button><button type=\"button\" (click)=\"authenticate('signup')\">{{t('signup')}}</button></ng-container></div></details>\n\n\n    </div>\n  </div></header>\n  <p *ngIf=\"error\" class=\"platform-error\" role=\"alert\">{{ error | siteText }}</p>\n  <div id=\"platform-content\" class=\"platform-content\" tabindex=\"-1\"><ng-content></ng-content><router-outlet></router-outlet></div>\n  <footer class=\"platform-footer\"><a *ngIf=\"access.isPlatformAdmin\" routerLink=\"/platform/admin/documents\">{{ 'ui.documents.adminTitle' | siteText }}</a><a *ngIf=\"access.isPlatformAdmin\" routerLink=\"/platform/admin/terms\">{{ 'ui.legal.manage' | siteText }}</a><div><a class=\"platform-brand footer-brand\" routerLink=\"/\">GoDirect<span class=\"brand-dot\">.</span></a><p>{{access.isPlatformAdmin?adminNav('intro'):t('tagline')}}</p></div><nav aria-label=\"GoDirect\"><ng-container *ngIf=\"access.isPlatformAdmin; else customerFooter\"><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'owners'}\">{{adminNav('owners')}}</a><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'subscriptions'}\">{{adminNav('subscriptions')}}</a><a routerLink=\"/platform/admin\" [queryParams]=\"{tab:'requests'}\">{{adminNav('requests')}}</a></ng-container><ng-template #customerFooter><a routerLink=\"/\" [queryParams]=\"{view:'rentals'}\" fragment=\"rentals\">{{t('find')}}</a><a routerLink=\"/owner/listings\">{{t('listings')}}</a></ng-template><a routerLink=\"/legal\">{{'ui.legal.conditions' | siteText}}</a><a routerLink=\"/faq\">{{'ui.legal.faq' | siteText}}</a></nav></footer>\n</div>";
+module.exports = "<div class=\"platform-shell\" data-godirect-layout=\"R22.15.1-boat-outings\">\n  <a class=\"skip-link\" href=\"#platform-content\">{{t('skip')}}</a>\n  \n  <p *ngIf=\"error\" class=\"platform-error\" role=\"alert\">{{ error | siteText }}</p>\n  <div id=\"platform-content\" class=\"platform-content\" tabindex=\"-1\"><ng-content></ng-content><router-outlet></router-outlet></div>\n\n</div>";
+
+/***/ }),
+
+/***/ 93842:
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./src/app/shared/asset-list-filters.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Omhvc3R7ZGlzcGxheTpibG9jazttYXJnaW46MThweCAwfS5hc3NldC1maWx0ZXJze2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDMsbWlubWF4KDE2MHB4LDFmcikpIGF1dG87Z2FwOjE0cHg7YWxpZ24taXRlbXM6ZW5kO3BhZGRpbmc6MThweDtiYWNrZ3JvdW5kOiNmMGY1ZjY7Ym9yZGVyLXJhZGl1czoxNHB4fS5hc3NldC1maWx0ZXJzIGxhYmVse2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjdweDtmb250LXNpemU6MTRweDtmb250LXdlaWdodDo2MDA7bWluLXdpZHRoOjB9LmFzc2V0LWZpbHRlcnMgaW5wdXQsLmFzc2V0LWZpbHRlcnMgc2VsZWN0LC5hc3NldC1maWx0ZXJzIGJ1dHRvbntib3gtc2l6aW5nOmJvcmRlci1ib3g7d2lkdGg6MTAwJTttaW4taGVpZ2h0OjQ0cHg7cGFkZGluZzoxMHB4O2JvcmRlcjoxcHggc29saWQgI2JjY2RkNTtib3JkZXItcmFkaXVzOjhweDtmb250OmluaGVyaXQ7YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTIzZTU5fS5hc3NldC1maWx0ZXJzIGJ1dHRvbntjdXJzb3I6cG9pbnRlcjtmb250LXdlaWdodDo3MDA7d2hpdGUtc3BhY2U6bm93cmFwfUBtZWRpYShtYXgtd2lkdGg6NzYwcHgpey5hc3NldC1maWx0ZXJze2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnIgMWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjoxLy0xfX1AbWVkaWEobWF4LXdpZHRoOjUwMHB4KXsuYXNzZXQtZmlsdGVyc3tncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyfS5hc3NldC1maWx0ZXJzIGxhYmVsOmxhc3Qtb2YtdHlwZXtncmlkLWNvbHVtbjphdXRvfX0%3D!./src/app/shared/asset-list-filters.component.ts ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Imports
+var ___CSS_LOADER_API_SOURCEMAP_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ 53142);
+var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ 35950);
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `:host{display:block;margin:18px 0}.asset-filters{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr)) auto;gap:14px;align-items:end;padding:18px;background:#f0f5f6;border-radius:14px}.asset-filters label{display:flex;flex-direction:column;gap:7px;font-size:14px;font-weight:600;min-width:0}.asset-filters input,.asset-filters select,.asset-filters button{box-sizing:border-box;width:100%;min-height:44px;padding:10px;border:1px solid #bccdd5;border-radius:8px;font:inherit;background:white;color:#123e59}.asset-filters button{cursor:pointer;font-weight:700;white-space:nowrap}@media(max-width:760px){.asset-filters{grid-template-columns:1fr 1fr}.asset-filters label:last-of-type{grid-column:1/-1}}@media(max-width:500px){.asset-filters{grid-template-columns:1fr}.asset-filters label:last-of-type{grid-column:auto}}`, "",{"version":3,"sources":["webpack://./src/app/shared/asset-list-filters.component.ts"],"names":[],"mappings":"AAAA,MAAM,aAAa,CAAC,aAAa,CAAC,eAAe,YAAY,CAAC,sDAAsD,CAAC,QAAQ,CAAC,eAAe,CAAC,YAAY,CAAC,kBAAkB,CAAC,kBAAkB,CAAC,qBAAqB,YAAY,CAAC,qBAAqB,CAAC,OAAO,CAAC,cAAc,CAAC,eAAe,CAAC,WAAW,CAAC,iEAAiE,qBAAqB,CAAC,UAAU,CAAC,eAAe,CAAC,YAAY,CAAC,wBAAwB,CAAC,iBAAiB,CAAC,YAAY,CAAC,gBAAgB,CAAC,aAAa,CAAC,sBAAsB,cAAc,CAAC,eAAe,CAAC,kBAAkB,CAAC,wBAAwB,eAAe,6BAA6B,CAAC,kCAAkC,gBAAgB,CAAC,CAAC,wBAAwB,eAAe,yBAAyB,CAAC,kCAAkC,gBAAgB,CAAC","sourcesContent":[":host{display:block;margin:18px 0}.asset-filters{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr)) auto;gap:14px;align-items:end;padding:18px;background:#f0f5f6;border-radius:14px}.asset-filters label{display:flex;flex-direction:column;gap:7px;font-size:14px;font-weight:600;min-width:0}.asset-filters input,.asset-filters select,.asset-filters button{box-sizing:border-box;width:100%;min-height:44px;padding:10px;border:1px solid #bccdd5;border-radius:8px;font:inherit;background:white;color:#123e59}.asset-filters button{cursor:pointer;font-weight:700;white-space:nowrap}@media(max-width:760px){.asset-filters{grid-template-columns:1fr 1fr}.asset-filters label:last-of-type{grid-column:1/-1}}@media(max-width:500px){.asset-filters{grid-template-columns:1fr}.asset-filters label:last-of-type{grid-column:auto}}"],"sourceRoot":""}]);
+// Exports
+module.exports = ___CSS_LOADER_EXPORT___.toString();
+
 
 /***/ }),
 
@@ -65431,21 +71433,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   AppRoutingModule: () => (/* binding */ AppRoutingModule)
 /* harmony export */ });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! tslib */ 27824);
-/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./home/site-text.pipe */ 99343);
-/* harmony import */ var _platform_admin_platform_admin_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./platform-admin/platform-admin.component */ 25928);
-/* harmony import */ var _services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./services/platform-admin.guard */ 249);
-/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./layout/platform-layout/platform-layout.component */ 86075);
-/* harmony import */ var _owner_listings_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./owner-listings.component */ 22314);
-/* harmony import */ var _services_listing_publication_guard__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./services/listing-publication.guard */ 60087);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _layout_home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./layout/home/homelayout/homelayout.component */ 14211);
-/* harmony import */ var _page404_page404_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./page404/page404.component */ 27044);
-/* harmony import */ var _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./legacy-route-redirect/legacy-route-redirect.component */ 19924);
-/* harmony import */ var _resource_dashboard_resource_dashboard_component__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./resource-dashboard/resource-dashboard.component */ 45792);
-/* harmony import */ var _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./resource-list/resource-list.component */ 65416);
-/* harmony import */ var _owner_payments_component__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./owner-payments.component */ 17620);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _portals_portal_home_component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./portals/portal-home.component */ 51749);
+/* harmony import */ var _services_portal_guard__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./services/portal.guard */ 78534);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./home/site-text.pipe */ 99343);
+/* harmony import */ var _platform_admin_platform_admin_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./platform-admin/platform-admin.component */ 25928);
+/* harmony import */ var _services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./services/platform-admin.guard */ 249);
+/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./layout/platform-layout/platform-layout.component */ 86075);
+/* harmony import */ var _owner_listings_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./owner-listings.component */ 22314);
+/* harmony import */ var _services_listing_publication_guard__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./services/listing-publication.guard */ 60087);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var _layout_home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./layout/home/homelayout/homelayout.component */ 14211);
+/* harmony import */ var _page404_page404_component__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./page404/page404.component */ 27044);
+/* harmony import */ var _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./legacy-route-redirect/legacy-route-redirect.component */ 19924);
+/* harmony import */ var _resource_dashboard_resource_dashboard_component__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./resource-dashboard/resource-dashboard.component */ 45792);
+/* harmony import */ var _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./resource-list/resource-list.component */ 65416);
+/* harmony import */ var _owner_payments_component__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./owner-payments.component */ 17620);
+
+
 
 
 
@@ -65463,9 +71469,53 @@ __webpack_require__.r(__webpack_exports__);
 
 const legacy = ['home', 'sorties', 'bateau', 'galerie', 'reserver', 'book-online', 'contact', 'crew', 'terms', 'safety', 'deposit', 'booking-process', 'sea-toys', 'faq', 'how-it-works', 'my-bookings', 'calendar', 'my-offers', 'my-proposals', 'my-payments', 'my-profile', 'my-feedbacks', 'leave-feedback', 'my-external-bookings', 'signup', 'login', 'forgotpwd'];
 const routes = [{
+  path: 'espaces',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_workspace_spaces_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/spaces.component */ 95324)).then(m => m.SpacesComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
+}, {
+  path: 'managed-portfolio',
+  loadComponent: () => Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/concierge.component */ 866)).then(m => m.ConciergeComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
+}, {
+  path: 'site-management',
+  loadComponent: () => Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/site-management.component */ 37068)).then(m => m.SiteManagementComponent)
+}, {
+  path: 'owner/client-view',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_workspace_client-space_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/client-space.component */ 36455)).then(m => m.ClientSpaceComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.OwnerWorkspaceGuard]
+}, {
+  path: 'site-client',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_workspace_client-space_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/client-space.component */ 36455)).then(m => m.ClientSpaceComponent)
+}, {
+  path: 'owner/alerts',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_workspace_mobile-alerts_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/mobile-alerts.component */ 72159)).then(m => m.MobileAlertsComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
+}, {
+  path: 'concierge/alerts',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_workspace_mobile-alerts_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/mobile-alerts.component */ 72159)).then(m => m.MobileAlertsComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
+}, {
+  path: 'concierge-role',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_portals_concierge-role_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./portals/concierge-role.component */ 26059)).then(m => m.ConciergeRoleComponent)
+}, {
+  path: 'messages',
+  pathMatch: 'full',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_messaging_messaging_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./messaging/messaging.component */ 71976)).then(m => m.MessagingComponent)
+}, {
+  path: 'asset-calendar/:type/:id',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_calendar_asset-calendar_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./calendar/asset-calendar.component */ 78477)).then(m => m.AssetCalendarComponent)
+}, {
+  path: 'admin-access',
+  pathMatch: 'full',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_platform-admin_admin-access_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./platform-admin/admin-access.component */ 43429)).then(m => m.AdminAccessComponent)
+}, {
+  path: 'contact',
+  pathMatch: 'full',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_contact-page_contact-page_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./contact-page/contact-page.component */ 25558)).then(m => m.ContactPageComponent)
+}, {
   path: 'legal',
   pathMatch: 'full',
-  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_legal_legal-page_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./legal/legal-page.component */ 12456)).then(m => m.LegalPageComponent)
+  loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_legal_legal-page_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./legal/legal-page.component */ 12456)).then(m => m.LegalPageComponent)
 }, {
   path: 'faq',
   pathMatch: 'full',
@@ -65473,10 +71523,18 @@ const routes = [{
 }, {
   path: 'account/accept-terms',
   pathMatch: 'full',
-  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_legal_legal-page_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./legal/legal-page.component */ 12456)).then(m => m.LegalPageComponent),
+  loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_legal_legal-page_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./legal/legal-page.component */ 12456)).then(m => m.LegalPageComponent),
   data: {
     accept: true
   }
+}, {
+  path: 'account/rental-history',
+  component: _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_5__.PlatformLayoutComponent,
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard],
+  children: [{
+    path: '',
+    loadComponent: () => Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/rental-history.component */ 98800)).then(m => m.RentalHistoryComponent)
+  }]
 }, {
   path: 'account',
   children: [{
@@ -65505,32 +71563,32 @@ const routes = [{
     }
   }, {
     path: '',
-    component: _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_3__.PlatformLayoutComponent,
-    loadChildren: () => __webpack_require__.e(/*! import() */ "src_app_login_login_module_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./login/login.module */ 91307)).then(m => m.LoginModule)
+    component: _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_5__.PlatformLayoutComponent,
+    loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_login_login_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./login/login.module */ 91307)).then(m => m.LoginModule)
   }]
 }, {
   path: 'owner/listings/:type/:id/documents',
-  loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_workspace_asset-documents_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/asset-documents.component */ 88246)).then(m => m.AssetDocumentsComponent),
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.ManagementWorkspaceGuard]
+  loadComponent: () => Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/asset-documents.component */ 88246)).then(m => m.AssetDocumentsComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
 }, {
   path: 'owner/delegations',
   loadComponent: () => Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/concierge.component */ 866)).then(m => m.ConciergeComponent),
   data: {
     delegations: true
   },
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.ManagementWorkspaceGuard]
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
 }, {
   path: 'concierge',
   pathMatch: 'full',
   loadComponent: () => Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/concierge.component */ 866)).then(m => m.ConciergeComponent),
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.ManagementWorkspaceGuard]
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
 }, {
   path: 'concierge/customers',
   loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_services_owner-customers-text_ts"), __webpack_require__.e("src_app_workspace_owner-customers_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/owner-customers.component */ 67690)).then(m => m.OwnerCustomersComponent),
   data: {
     concierge: true
   },
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.ManagementWorkspaceGuard]
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
 }, {
   path: 'concierge/activity/:section',
   loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_workspace_workspace_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/workspace.component */ 18816)).then(m => m.WorkspaceComponent),
@@ -65538,11 +71596,15 @@ const routes = [{
     owner: true,
     concierge: true
   },
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.ManagementWorkspaceGuard]
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
+}, {
+  path: 'owner/site-settings',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_workspace_owner-site-settings_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/owner-site-settings.component */ 78464)).then(m => m.OwnerSiteSettingsComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.OwnerWorkspaceGuard]
 }, {
   path: 'owner/customers',
   loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_services_owner-customers-text_ts"), __webpack_require__.e("src_app_workspace_owner-customers_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/owner-customers.component */ 67690)).then(m => m.OwnerCustomersComponent),
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.OwnerWorkspaceGuard]
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.OwnerWorkspaceGuard]
 }, {
   path: 'owner/activity/:section',
   loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_workspace_workspace_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/workspace.component */ 18816)).then(m => m.WorkspaceComponent),
@@ -65555,18 +71617,18 @@ const routes = [{
 }, {
   path: 'platform/admin/assets/:type/:id',
   loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_platform-admin_platform-asset_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./platform-admin/platform-asset.component */ 27231)).then(m => m.PlatformAssetComponent),
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.PlatformAdminGuard]
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.PlatformAdminGuard]
 }, {
   path: 'platform/admin/documents/:type/:id',
-  loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_workspace_asset-documents_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/asset-documents.component */ 88246)).then(m => m.AssetDocumentsComponent),
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.PlatformAdminGuard],
+  loadComponent: () => Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/asset-documents.component */ 88246)).then(m => m.AssetDocumentsComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.PlatformAdminGuard],
   data: {
     documentReview: true
   }
 }, {
   path: 'platform/admin/documents',
-  loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_workspace_document-review_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/document-review.component */ 36317)).then(m => m.DocumentReviewComponent),
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.PlatformAdminGuard]
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_workspace_document-review_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./workspace/document-review.component */ 36317)).then(m => m.DocumentReviewComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.PlatformAdminGuard]
 }, {
   path: 'platform/admin/legal',
   pathMatch: 'full',
@@ -65574,30 +71636,44 @@ const routes = [{
 }, {
   path: 'platform/admin/terms',
   loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_legal_legal-admin_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./legal/legal-admin.component */ 61690)).then(m => m.LegalAdminComponent),
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.PlatformAdminGuard]
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.PlatformAdminGuard]
+}, {
+  path: 'platform/admin/notifications',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_notifications_notification-admin_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./notifications/notification-admin.component */ 77277)).then(m => m.NotificationAdminComponent),
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.PlatformAdminGuard]
 }, {
   path: 'platform/admin',
-  component: _platform_admin_platform_admin_component__WEBPACK_IMPORTED_MODULE_1__.PlatformAdminComponent,
-  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.PlatformAdminGuard]
+  component: _platform_admin_platform_admin_component__WEBPACK_IMPORTED_MODULE_3__.PlatformAdminComponent,
+  canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.PlatformAdminGuard]
 }, {
   path: 'owner',
-  component: _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_3__.PlatformLayoutComponent,
+  component: _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_5__.PlatformLayoutComponent,
   children: [{
     path: '',
     redirectTo: 'listings',
     pathMatch: 'full'
   }, {
+    path: 'start',
+    component: _owner_listings_component__WEBPACK_IMPORTED_MODULE_6__.OwnerListingsComponent,
+    data: {
+      firstListing: true
+    },
+    canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.ManagementWorkspaceGuard]
+  }, {
     path: 'listings',
-    component: _owner_listings_component__WEBPACK_IMPORTED_MODULE_4__.OwnerListingsComponent,
-    canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.OwnerWorkspaceGuard]
+    component: _owner_listings_component__WEBPACK_IMPORTED_MODULE_6__.OwnerListingsComponent,
+    canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.OwnerWorkspaceGuard]
   }, {
     path: 'payments',
-    component: _owner_payments_component__WEBPACK_IMPORTED_MODULE_11__.OwnerPaymentsComponent,
-    canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_2__.OwnerWorkspaceGuard]
+    component: _owner_payments_component__WEBPACK_IMPORTED_MODULE_13__.OwnerPaymentsComponent,
+    canActivate: [_services_platform_admin_guard__WEBPACK_IMPORTED_MODULE_4__.OwnerWorkspaceGuard]
   }]
 }, {
+  path: 'locations',
+  component: _resource_dashboard_resource_dashboard_component__WEBPACK_IMPORTED_MODULE_11__.ResourceDashboardComponent
+}, {
   path: '',
-  component: _resource_dashboard_resource_dashboard_component__WEBPACK_IMPORTED_MODULE_9__.ResourceDashboardComponent,
+  component: _portals_portal_home_component__WEBPACK_IMPORTED_MODULE_0__.PortalHomeComponent,
   pathMatch: 'full'
 }, ...['login', 'signup', 'forgotpwd'].map(path => ({
   path,
@@ -65625,76 +71701,82 @@ const routes = [{
 // resourceType=admin/resourceId=reservations.
 ...legacy.map(path => ({
   path,
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 })), {
   path: 'sorties/:slug',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 }, {
   path: 'bateau/:page',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 }, {
   path: 'bookings/:bookingId',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 }, {
   path: 'bookings/:bookingId/invoice',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 }, {
   path: 'payment/:bookingId',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 }, {
   path: 'admin/:page',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 }, {
   path: 'admin/:page/:id',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 }, {
   path: 'admin/:page/:id/invoice',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 }, {
   path: 'offer/:offerId',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 }, {
   path: 'proposal/:proposalId',
-  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_8__.LegacyRouteRedirectComponent
+  component: _legacy_route_redirect_legacy_route_redirect_component__WEBPACK_IMPORTED_MODULE_10__.LegacyRouteRedirectComponent
 },
 // GoDirect owner Stripe Connect settings must be resolved before generic asset routes.
 // Asset-specific Stripe settings must precede the lazy-loaded asset routes.
 {
   path: ':assetType/:assetId/owner/payments',
-  component: _owner_payments_component__WEBPACK_IMPORTED_MODULE_11__.OwnerPaymentsComponent
+  component: _owner_payments_component__WEBPACK_IMPORTED_MODULE_13__.OwnerPaymentsComponent
 },
 // Asset-type catalogue pages remain available at /boat, /car, etc.
 {
+  path: ':type/:id/calendar',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_calendar_asset-calendar_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./calendar/asset-calendar.component */ 78477)).then(m => m.AssetCalendarComponent)
+}, {
+  path: ':type/:id/admin/calendar',
+  loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_calendar_asset-calendar_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./calendar/asset-calendar.component */ 78477)).then(m => m.AssetCalendarComponent)
+}, {
   path: 'boat',
-  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_10__.ResourceListComponent,
+  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_12__.ResourceListComponent,
   pathMatch: 'full',
   data: {
     assetType: 'boat'
   }
 }, {
   path: 'car',
-  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_10__.ResourceListComponent,
+  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_12__.ResourceListComponent,
   pathMatch: 'full',
   data: {
     assetType: 'car'
   }
 }, {
   path: 'property',
-  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_10__.ResourceListComponent,
+  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_12__.ResourceListComponent,
   pathMatch: 'full',
   data: {
     assetType: 'property'
   }
 }, {
   path: 'parking',
-  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_10__.ResourceListComponent,
+  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_12__.ResourceListComponent,
   pathMatch: 'full',
   data: {
     assetType: 'parking'
   }
 }, {
   path: 'pool',
-  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_10__.ResourceListComponent,
+  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_12__.ResourceListComponent,
   pathMatch: 'full',
   data: {
     assetType: 'pool'
@@ -65708,7 +71790,7 @@ const routes = [{
   loadChildren: () => __webpack_require__.e(/*! import() */ "src_app_assets_boat_boat_module_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./assets/boat/boat.module */ 56341)).then(m => m.BoatModule)
 }, {
   path: 'car',
-  loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_assets_car_car_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./assets/car/car.module */ 5523)).then(m => m.CarModule)
+  loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_assets_car_pages_booking_car-booking_component_ts"), __webpack_require__.e("src_app_assets_car_car_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./assets/car/car.module */ 5523)).then(m => m.CarModule)
 }, {
   path: 'property',
   loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_services_asset-admin-i18n_ts-src_app_services_asset-page-i18n_ts-src_app_shar-2b9260"), __webpack_require__.e("src_app_assets_property_property_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./assets/property/property.module */ 32311)).then(m => m.PropertyModule)
@@ -65722,32 +71804,35 @@ const routes = [{
 // Asset-type indexes and an extensibility fallback for future asset types.
 {
   path: ':assetType',
-  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_10__.ResourceListComponent,
+  component: _resource_list_resource_list_component__WEBPACK_IMPORTED_MODULE_12__.ResourceListComponent,
   pathMatch: 'full'
 }, {
   path: ':assetType/:assetId',
-  component: _layout_home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_6__.HomelayoutComponent,
-  canActivateChild: [_services_listing_publication_guard__WEBPACK_IMPORTED_MODULE_5__.ListingPublicationGuard],
+  component: _layout_home_homelayout_homelayout_component__WEBPACK_IMPORTED_MODULE_8__.HomelayoutComponent,
+  canActivateChild: [_services_listing_publication_guard__WEBPACK_IMPORTED_MODULE_7__.ListingPublicationGuard],
   children: [{
     path: '',
-    loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_services_owner-customers-text_ts"), __webpack_require__.e("default-src_app_home_home_module_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_services_asset-page-i18n_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./home/home.module */ 45055)).then(m => m.HomeModule)
+    loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_services_owner-customers-text_ts"), __webpack_require__.e("default-src_app_home_home_module_ts"), __webpack_require__.e("default-src_app_assets_car_pages_booking_car-booking_component_ts"), __webpack_require__.e("src_app_services_asset-page-i18n_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./home/home.module */ 45055)).then(m => m.HomeModule)
   }, {
     path: '',
-    loadChildren: () => __webpack_require__.e(/*! import() */ "src_app_login_login_module_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./login/login.module */ 91307)).then(m => m.LoginModule)
+    loadChildren: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_login_login_module_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./login/login.module */ 91307)).then(m => m.LoginModule)
   }]
 }, {
   path: '**',
-  component: _page404_page404_component__WEBPACK_IMPORTED_MODULE_7__.Page404Component
+  component: _page404_page404_component__WEBPACK_IMPORTED_MODULE_9__.Page404Component
 }];
 let AppRoutingModule = class AppRoutingModule {};
-AppRoutingModule = (0,tslib__WEBPACK_IMPORTED_MODULE_12__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_13__.NgModule)({
-  imports: [_home_site_text_pipe__WEBPACK_IMPORTED_MODULE_0__.SiteTextPipe, _angular_router__WEBPACK_IMPORTED_MODULE_14__.RouterModule.forRoot(routes, {
-    preloadingStrategy: _angular_router__WEBPACK_IMPORTED_MODULE_14__.PreloadAllModules,
+AppRoutingModule = (0,tslib__WEBPACK_IMPORTED_MODULE_14__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_15__.NgModule)({
+  imports: [_home_site_text_pipe__WEBPACK_IMPORTED_MODULE_2__.SiteTextPipe, _angular_router__WEBPACK_IMPORTED_MODULE_16__.RouterModule.forRoot(routes.map(route => route.redirectTo !== undefined ? route : {
+    ...route,
+    canActivate: [_services_portal_guard__WEBPACK_IMPORTED_MODULE_1__.PortalGuard, ...(route.canActivate || [])]
+  }), {
+    preloadingStrategy: _angular_router__WEBPACK_IMPORTED_MODULE_16__.PreloadAllModules,
     onSameUrlNavigation: 'reload',
     anchorScrolling: 'enabled',
     scrollPositionRestoration: 'enabled'
   })],
-  exports: [_angular_router__WEBPACK_IMPORTED_MODULE_14__.RouterModule]
+  exports: [_angular_router__WEBPACK_IMPORTED_MODULE_16__.RouterModule]
 })], AppRoutingModule);
 
 
@@ -65777,12 +71862,16 @@ function dedicatedAsset() {
 }
 function assetDomainSlug(hostname) {
   const match = /^([a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\.godirect\.fr$/i.exec(hostname);
-  return match && match[1].toLowerCase() !== 'www' ? match[1].toLowerCase() : null;
+  return match && !['www', 'owner', 'client', 'concierge', 'admin'].includes(match[1].toLowerCase()) ? match[1].toLowerCase() : null;
 }
 function internalAssetUrl(url) {
   const a = domainAsset;
   if (!a) return url;
-  if (/^\/(?:__asset_unavailable|account|owner|platform|concierge|legal|faq)(?:[/?#]|$)/.test(url)) return url;
+  // Angular Location normalizes the initial '/' to an empty string.
+  if (/^\/(?:espaces|(?:boat|car|property|parking|pool)\/[^/]+\/espaces)\/?(?:[?#].*)?$/.test(url)) return '/';
+  if (!url || url.startsWith('?') || url.startsWith('#')) return '/' + (url || '');
+  if (/^\/(?:[?#]|$)/.test(url)) return url;
+  if (/^\/(?:__asset_unavailable|site-management|site-client|messages|asset-calendar|admin-access|account|owner|platform|concierge-role|concierge|legal|faq|contact)(?:[/?#]|$)/.test(url)) return url;
   const base = `/${a.assetType}/${a.assetId}`;
   if (url === base || url.startsWith(base + '/') || url.startsWith(base + '?') || url.startsWith(base + '#')) return url;
   if (/^\/(boat|car|property|parking|pool)\//.test(url)) return url;
@@ -65793,7 +71882,8 @@ function externalAssetUrl(url) {
   const a = domainAsset;
   if (!a) return url;
   const base = `/${a.assetType}/${a.assetId}`;
-  if (url === base || url === base + '/home') return '/';
+  if (typeof location !== 'undefined' && location.pathname.startsWith(base + '/')) return url;
+  if (url === base || url.startsWith(base + '/')) return url;
   if (url.startsWith(base + '/home?') || url.startsWith(base + '/home#')) return '/' + url.slice((base + '/home').length);
   if (url.startsWith(base + '/')) return url.slice(base.length);
   return url;
@@ -65920,6 +72010,221 @@ let PendingOfferLoginModalService = class PendingOfferLoginModalService {
 PendingOfferLoginModalService = (0,tslib__WEBPACK_IMPORTED_MODULE_7__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_8__.Injectable)({
   providedIn: 'root'
 })], PendingOfferLoginModalService);
+
+
+/***/ }),
+
+/***/ 97390:
+/*!*******************************************************************!*\
+  !*** ./src/app/layout/platform-layout/shared-header.component.ts ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SharedHeaderComponent: () => (/* binding */ SharedHeaderComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _shared_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./shared-header.component.html?ngResource */ 11142);
+/* harmony import */ var _platform_layout_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./platform-layout.component.scss?ngResource */ 98481);
+/* harmony import */ var _platform_layout_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_platform_layout_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _services_workspace_navigation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/workspace-navigation */ 91613);
+/* harmony import */ var _messaging_message_badge_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../messaging/message-badge.component */ 16101);
+/* harmony import */ var _messaging_messaging_text__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../messaging/messaging-text */ 17289);
+/* harmony import */ var _services_account_header__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../services/account-header */ 1768);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../home/site-text.pipe */ 99343);
+/* harmony import */ var _platform_admin_platform_admin_text__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../platform-admin/platform-admin.text */ 45440);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var godigital_lib__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! godigital-lib */ 22464);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../services/asset-access.service */ 16379);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../services/language.service */ 48756);
+/* harmony import */ var _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../home/site-content-service/site-content.service */ 73196);
+/* harmony import */ var _services_marketplace_translations__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../services/marketplace-translations */ 45237);
+/* harmony import */ var _services_discovery_text__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../../services/discovery-text */ 40617);
+/* harmony import */ var _services_asset_domain__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../../services/asset-domain */ 94984);
+/* harmony import */ var _services_boat_routing__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../../services/boat-routing */ 91682);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** Platform navigation for owner pages, independent of any asset's branding. */
+let SharedHeaderComponent = class SharedHeaderComponent {
+  access;
+  language;
+  text;
+  router;
+  main;
+  closeAfterLink(event) {
+    const el = event.target;
+    if (el.closest('a')) el.closest('header')?.querySelectorAll('details[open]').forEach(d => d.removeAttribute('open'));
+  }
+  get site() {
+    return (0,_services_workspace_navigation__WEBPACK_IMPORTED_MODULE_3__.explicitAsset)(this.router.url) || (0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_14__.dedicatedAsset)();
+  }
+  get assetActionPath() {
+    const s = this.site;
+    return s ? (0,_services_boat_routing__WEBPACK_IMPORTED_MODULE_15__.boatPath)(this.access.isManager && this.access.viewMode === 'owner' ? '/admin/reservations' : '/reserver', s.assetId, s.assetType) : '/';
+  }
+  get calendarPath() {
+    const s = this.site;
+    return s ? (0,_services_boat_routing__WEBPACK_IMPORTED_MODULE_15__.boatPath)('/admin/calendar', s.assetId, s.assetType) : '/';
+  }
+  get bookingPath() {
+    const s = this.site;
+    return s ? (0,_services_boat_routing__WEBPACK_IMPORTED_MODULE_15__.boatPath)(this.access.viewMode === 'owner' && this.access.isManager ? '/admin/reservations' : '/my-bookings', s.assetId, s.assetType) : this.access.viewMode === 'owner' && this.access.isManager ? this.access.isOwner ? '/owner/activity/reservations' : '/concierge/activity/reservations' : '/account/bookings';
+  }
+  messageLabel() {
+    return (0,_messaging_messaging_text__WEBPACK_IMPORTED_MODULE_5__.messagingText)(this.language.currentLanguage, 0);
+  }
+  get adminLabel() {
+    return this.text.tFromContent(this.content, 'ui.platformAdmin.title', this.language.currentLanguage, this.language.currentLanguage === 'fr' ? 'Administration GoDirect' : 'GoDirect administration');
+  }
+  adminNav(key) {
+    const lang = this.language.currentLanguage;
+    return this.text.tFromContent(this.content, 'ui.platformAdmin.' + key, lang, _platform_admin_platform_admin_text__WEBPACK_IMPORTED_MODULE_8__.PLATFORM_ADMIN_TEXT[lang]?.[key] || _platform_admin_platform_admin_text__WEBPACK_IMPORTED_MODULE_8__.PLATFORM_ADMIN_TEXT.en[key] || key);
+  }
+  languages = ['fr', 'en', 'es', 'it', 'de', 'nl', 'ru'];
+  year = new Date().getFullYear();
+  content;
+  leaving = false;
+  error = '';
+  constructor(access, language, text, router, main) {
+    this.access = access;
+    this.language = language;
+    this.text = text;
+    this.router = router;
+    this.main = main;
+  }
+  ngOnInit() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        _this.content = yield _this.text.getContent();
+      } catch {}
+    })();
+  }
+  accountText(key) {
+    return (0,_services_account_header__WEBPACK_IMPORTED_MODULE_6__.accountHeaderText)(this.language.currentLanguage, key);
+  }
+  get authenticated() {
+    return this.access.isAuthenticated;
+  }
+  setLanguage(value) {
+    if (this.language.isSupportedLanguage(value)) this.language.setLanguage(value);
+  }
+  t(key) {
+    const lang = this.language.currentLanguage;
+    if (key === 'skip') {
+      const copy = {
+        fr: 'Aller au contenu',
+        en: 'Skip to content',
+        es: 'Ir al contenido',
+        it: 'Vai al contenuto',
+        de: 'Zum Inhalt springen',
+        nl: 'Naar inhoud',
+        ru: 'Перейти к содержимому'
+      };
+      return this.text.tFromContent(this.content, 'common.skipToContent', lang, copy[lang] || copy.en);
+    }
+    const discovery = {
+      home: 'back',
+      find: 'find',
+      listings: 'manage'
+    };
+    const field = discovery[key] || key;
+    const fallback = discovery[key] ? _services_discovery_text__WEBPACK_IMPORTED_MODULE_13__.DISCOVERY_TEXT[lang]?.[field] || _services_discovery_text__WEBPACK_IMPORTED_MODULE_13__.DISCOVERY_TEXT.en[field] : _services_marketplace_translations__WEBPACK_IMPORTED_MODULE_12__.MARKETPLACE_TRANSLATIONS[lang]?.[field] || _services_marketplace_translations__WEBPACK_IMPORTED_MODULE_12__.MARKETPLACE_TRANSLATIONS.en[field];
+    return this.text.tFromContent(this.content, `ui.${discovery[key] ? 'discovery' : 'marketplace'}.${field}`, lang, fallback || key);
+  }
+  authenticate(mode) {
+    const customer = typeof window !== 'undefined' && window.location.hostname === 'client.godirect.fr';
+    const current = this.router.url || '/';
+    const returnUrl = this.access.onOwnerSite ? current : current === '/' ? '/espaces' : mode === 'signup' && !customer ? '/owner/listings' : current.startsWith('/') && !current.startsWith('//') ? current : '/owner/listings';
+    void this.router.navigate(['/account/' + mode], {
+      queryParams: {
+        role: current.startsWith('/owner') ? 'assetOwner' : 'customer',
+        returnUrl
+      }
+    });
+  }
+  profile() {
+    void this.router.navigateByUrl('/account/profile');
+  }
+  bookings() {
+    void this.router.navigateByUrl(this.access.isOwner ? '/owner/activity/reservations' : '/account/bookings');
+  }
+  logout() {
+    var _this2 = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this2.leaving) return;
+      _this2.leaving = true;
+      _this2.error = '';
+      try {
+        yield _this2.access.signOut();
+        const svc = _this2.main;
+        try {
+          if (typeof svc.setLoggedUser === 'function') yield svc.setLoggedUser(undefined);else svc.bnUserO?.next(null);
+        } catch {}
+        try {
+          localStorage.removeItem('loggedUser');
+          sessionStorage.removeItem('loggedUser');
+        } catch {}
+        if (window.location.hostname === 'admin.godirect.fr') {
+          window.location.replace('https://godirect.fr/');
+          return;
+        }
+        yield _this2.router.navigateByUrl('/', {
+          replaceUrl: true
+        });
+      } catch {
+        _this2.error = _this2.text.tFromContent(_this2.content, 'common.error', _this2.language.currentLanguage, _this2.language.currentLanguage === 'fr' ? 'Impossible de vous déconnecter. Réessayez.' : 'Unable to log out. Please try again.');
+      } finally {
+        _this2.leaving = false;
+      }
+    })();
+  }
+  static ctorParameters = () => [{
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_9__.AssetAccessService
+  }, {
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_10__.LanguageService
+  }, {
+    type: _home_site_content_service_site_content_service__WEBPACK_IMPORTED_MODULE_11__.SiteContentService
+  }, {
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_16__.Router
+  }, {
+    type: godigital_lib__WEBPACK_IMPORTED_MODULE_17__.ServicesService
+  }];
+};
+SharedHeaderComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_18__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_19__.Component)({
+  selector: 'app-shared-header',
+  standalone: true,
+  imports: [_messaging_message_badge_component__WEBPACK_IMPORTED_MODULE_4__.MessageBadgeComponent, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_7__.SiteTextPipe, _angular_common__WEBPACK_IMPORTED_MODULE_20__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_21__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_22__.RouterModule],
+  template: _shared_header_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
+  styles: [(_platform_layout_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
+})], SharedHeaderComponent);
 
 
 /***/ }),
@@ -66305,7 +72610,121 @@ button:disabled {
     padding: 8px;
     font-size: 11px;
   }
-}`, "",{"version":3,"sources":["webpack://./src/app/layout/platform-layout/platform-layout.component.scss"],"names":[],"mappings":"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","sourcesContent":[":host{display:block}.platform-shell{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;background:#f8f6f1;color:#173b36;font-family:Inter,'Segoe UI',Arial,sans-serif}.platform-header{position:sticky;top:0;z-index:30;background:#f8f6f1;border-bottom:1px solid #dce5df}.platform-header-inner{max-width:1200px;margin:auto;padding:20px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}.platform-brand{display:inline-flex;align-items:center;gap:8px;color:#173b36;text-decoration:none;font-weight:800;font-size:26px;letter-spacing:-1px}.brand-mark{padding:7px;background:#173b36;color:#e3edb1;border-radius:11px;font-size:17px;letter-spacing:0}.brand-dot{color:#829d3b}.platform-nav{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-left:auto}.platform-nav a,.platform-footer nav a{font-size:13px;color:#173b36;text-decoration:none;padding:8px 0}.platform-nav a.active{border-bottom:2px solid #7c9650;font-weight:700}.platform-controls{display:flex;align-items:center;gap:10px}.platform-controls select{font:inherit;font-size:12px;background:transparent;border:1px solid #c4d1c5;border-radius:8px;padding:8px;color:#173b36}.platform-account{position:relative}.platform-account summary{font-size:13px;cursor:pointer;padding:9px}.account-options{position:absolute;right:0;top:38px;min-width:190px;padding:8px;background:white;border:1px solid #dce5df;border-radius:12px;box-shadow:0 12px 28px #173b361a}.account-options button{display:block;width:100%;padding:12px;text-align:left;border:0;background:transparent;color:#173b36;font:inherit;font-size:13px;cursor:pointer}.account-options button:hover{background:#eef1e8}.auth-button{border:0;background:transparent;color:#173b36;font:inherit;font-size:12px;padding:9px;cursor:pointer}.create-account{border:1px solid #173b36;border-radius:100px}.platform-content{flex:1;min-width:0;outline:none}.platform-footer{width:100%;max-width:1200px;box-sizing:border-box;margin:32px auto 0;padding:30px 24px;border-top:1px solid #dce5df;display:flex;align-items:center;justify-content:space-between;gap:25px}.footer-brand{font-size:23px;gap:0}.platform-footer p,.platform-footer small{font-size:12px;color:#64776f;line-height:1.7}.platform-footer nav{display:flex;gap:24px;flex-wrap:wrap}.platform-error{margin:15px auto;padding:14px;max-width:1120px;background:#fff0ed;color:#862c20;border-radius:8px}.sr-only,.skip-link{position:absolute;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0)}.skip-link:focus{position:fixed;top:5px;left:5px;width:auto;height:auto;clip:auto;z-index:40;background:white;color:#173b36;padding:12px}a:focus-visible,button:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid #7fac61;outline-offset:3px}button:disabled{opacity:.5;cursor:wait}@media(max-width:900px){.platform-nav{order:3;width:100%;margin:0;gap:20px}.platform-controls{margin-left:auto}.platform-header-inner{gap:10px 20px;padding:16px 20px}.platform-footer{align-items:start;flex-direction:column}}@media(max-width:480px){.platform-brand{font-size:22px}.brand-mark{display:none}.platform-nav{gap:14px}.platform-nav a{font-size:12px}.platform-controls{gap:3px}.auth-button{font-size:11px;padding:7px}.platform-footer nav{gap:16px}}\n\n.platform-controls{margin-left:auto}.account-identity{display:flex;flex-direction:column;text-align:right;max-width:240px;font-size:13px;overflow-wrap:anywhere}.account-identity small{font-size:12px;color:#64776f}.account-options a{display:block;color:#173b36;text-decoration:none;font-size:13px;padding:12px}.account-options a:hover{background:#eef1e8}.account-options{top:100%;max-height:75vh;overflow:auto;z-index:40}@media(max-width:480px){.account-identity{max-width:145px;font-size:12px}}\n\n.menu-heading{display:block;padding:10px 12px 4px;font-size:11px;color:#64776f;border-top:1px solid #e4eae5}.platform-controls{flex-wrap:wrap;justify-content:flex-end}.account-options{min-width:230px}@media(max-width:600px){.platform-controls .account-identity{flex-basis:100%;max-width:none}}\n\n.workspace-view-switch{border:1px solid #94aaa0;border-radius:999px;background:white;color:#173b36;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer}.workspace-view-switch:disabled{opacity:.55}.account-identity strong{display:block;color:#173b36;font-size:14px;font-weight:700}.account-identity{display:flex!important;visibility:visible!important;flex-direction:column;gap:2px;overflow-wrap:anywhere}.account-identity small{font-size:11px}@media(max-width:600px){.workspace-view-switch{padding:8px;font-size:11px}}\n"],"sourceRoot":""}]);
+}
+.platform-header-inner {
+  max-width: 1520px;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.wide-controls {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.compact-menu {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .platform-header-inner {
+    padding: 8px 16px;
+  }
+  .wide-controls {
+    display: none;
+  }
+  .compact-menu {
+    display: block;
+    position: relative;
+  }
+  .compact-menu > summary {
+    cursor: pointer;
+    padding: 12px;
+    list-style: none;
+  }
+  .compact-panel {
+    position: absolute;
+    z-index: 50;
+    right: 0;
+    top: 100%;
+    width: min(290px, 85vw);
+    max-height: 72vh;
+    overflow: auto;
+    box-sizing: border-box;
+    background: white;
+    border: 1px solid #cedbd5;
+    border-radius: 14px;
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+    box-shadow: 0 10px 26px rgba(23, 59, 54, 0.1333333333);
+  }
+  .compact-panel .account-options {
+    position: static;
+    min-width: 0;
+    box-shadow: none;
+  }
+  .compact-panel summary, .compact-panel a {
+    padding-block: 10px;
+  }
+}
+:host(app-shared-header) {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  color: #173b36;
+}
+
+.platform-header-inner > .account-identity {
+  margin-left: auto;
+  min-width: 0;
+}
+
+.platform-header-inner > .account-identity strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.platform-header-inner > label select {
+  min-height: 38px;
+  border: 1px solid #c4d1c5;
+  border-radius: 8px;
+  background: transparent;
+  color: #173b36;
+}
+
+.platform-header-inner .wide-controls {
+  margin-left: 0;
+}
+
+.reservation-entry, .platform-account > summary {
+  color: #173b36;
+  font-size: 13px;
+}
+
+.reservation-entry {
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  .platform-header-inner {
+    gap: 8px;
+  }
+  .platform-header-inner > .account-identity {
+    max-width: 32vw;
+  }
+  .platform-header-inner > .platform-brand {
+    font-size: 20px;
+  }
+}
+@media print {
+  :host(app-shared-header) {
+    display: none;
+  }
+}`, "",{"version":3,"sources":["webpack://./src/app/layout/platform-layout/platform-layout.component.scss"],"names":[],"mappings":"AAAA;EAAM,cAAA;AAEN;;AAFoB;EAAgB,aAAA;EAAa,sBAAA;EAAsB,iBAAA;EAAiB,kBAAA;EAAkB,mBAAA;EAAmB,cAAA;EAAc,iDAAA;AAY3I;;AAZyL;EAAiB,gBAAA;EAAgB,MAAA;EAAM,WAAA;EAAW,mBAAA;EAAmB,gCAAA;AAoB9P;;AApB8R;EAAuB,iBAAA;EAAiB,YAAA;EAAY,kBAAA;EAAkB,aAAA;EAAa,mBAAA;EAAmB,SAAA;EAAS,eAAA;AA8B7Y;;AA9B4Z;EAAgB,oBAAA;EAAoB,mBAAA;EAAmB,QAAA;EAAQ,cAAA;EAAc,qBAAA;EAAqB,gBAAA;EAAgB,eAAA;EAAe,oBAAA;AAyC7hB;;AAzCijB;EAAY,YAAA;EAAY,mBAAA;EAAmB,cAAA;EAAc,mBAAA;EAAmB,eAAA;EAAe,iBAAA;AAkD5oB;;AAlD6pB;EAAW,cAAA;AAsDxqB;;AAtDsrB;EAAc,aAAA;EAAa,mBAAA;EAAmB,SAAA;EAAS,eAAA;EAAe,iBAAA;AA8D5vB;;AA9D6wB;EAAuC,eAAA;EAAe,cAAA;EAAc,qBAAA;EAAqB,cAAA;AAqEt2B;;AArEo3B;EAAuB,gCAAA;EAAgC,gBAAA;AA0E36B;;AA1E27B;EAAmB,aAAA;EAAa,mBAAA;EAAmB,SAAA;AAgF9+B;;AAhFu/B;EAA0B,aAAA;EAAa,eAAA;EAAe,uBAAA;EAAuB,yBAAA;EAAyB,kBAAA;EAAkB,YAAA;EAAY,cAAA;AA0F3nC;;AA1FyoC;EAAkB,kBAAA;AA8F3pC;;AA9F6qC;EAA0B,eAAA;EAAe,eAAA;EAAe,YAAA;AAoGruC;;AApGivC;EAAiB,kBAAA;EAAkB,QAAA;EAAQ,SAAA;EAAS,gBAAA;EAAgB,YAAA;EAAY,iBAAA;EAAiB,yBAAA;EAAyB,mBAAA;EAAmB,sDAAA;AAgH93C;;AAhH+5C;EAAwB,cAAA;EAAc,WAAA;EAAW,aAAA;EAAa,gBAAA;EAAgB,SAAA;EAAS,uBAAA;EAAuB,cAAA;EAAc,aAAA;EAAa,eAAA;EAAe,eAAA;AA6HvjD;;AA7HskD;EAA8B,mBAAA;AAiIpmD;;AAjIunD;EAAa,SAAA;EAAS,uBAAA;EAAuB,cAAA;EAAc,aAAA;EAAa,eAAA;EAAe,YAAA;EAAY,eAAA;AA2I1tD;;AA3IyuD;EAAgB,yBAAA;EAAyB,oBAAA;AAgJlxD;;AAhJsyD;EAAkB,OAAA;EAAO,YAAA;EAAY,aAAA;AAsJ30D;;AAtJw1D;EAAiB,WAAA;EAAW,iBAAA;EAAiB,sBAAA;EAAsB,mBAAA;EAAmB,kBAAA;EAAkB,6BAAA;EAA6B,aAAA;EAAa,mBAAA;EAAmB,8BAAA;EAA8B,SAAA;AAmK3hE;;AAnKoiE;EAAc,eAAA;EAAe,MAAA;AAwKjkE;;AAxKukE;EAA0C,eAAA;EAAe,cAAA;EAAc,gBAAA;AA8K9oE;;AA9K8pE;EAAqB,aAAA;EAAa,SAAA;EAAS,eAAA;AAoLzsE;;AApLwtE;EAAgB,iBAAA;EAAiB,aAAA;EAAa,iBAAA;EAAiB,mBAAA;EAAmB,cAAA;EAAc,kBAAA;AA6LxzE;;AA7L00E;EAAoB,kBAAA;EAAkB,WAAA;EAAW,UAAA;EAAU,gBAAA;EAAgB,sBAAA;AAqMr5E;;AArMw6E;EAAiB,eAAA;EAAe,QAAA;EAAQ,SAAA;EAAS,WAAA;EAAW,YAAA;EAAY,UAAA;EAAU,WAAA;EAAW,iBAAA;EAAiB,cAAA;EAAc,aAAA;AAkNpiF;;AAlNijF;EAAgF,0BAAA;EAA0B,mBAAA;AAuN3pF;;AAvN8qF;EAAgB,YAAA;EAAW,YAAA;AA4NzsF;;AA5NqtF;EAAwB;IAAc,QAAA;IAAQ,WAAA;IAAW,SAAA;IAAS,SAAA;EAoOrxF;EApO8xF;IAAmB,iBAAA;EAuOjzF;EAvOk0F;IAAuB,cAAA;IAAc,kBAAA;EA2Ov2F;EA3Oy3F;IAAiB,kBAAA;IAAkB,sBAAA;EA+O55F;AACF;AAhPq7F;EAAwB;IAAgB,eAAA;EAoP39F;EApP0+F;IAAY,aAAA;EAuPt/F;EAvPmgG;IAAc,SAAA;EA0PjhG;EA1P0hG;IAAgB,eAAA;EA6P1iG;EA7PyjG;IAAmB,QAAA;EAgQ5kG;EAhQolG;IAAa,eAAA;IAAe,YAAA;EAoQhnG;EApQ4nG;IAAqB,SAAA;EAuQjpG;AACF;AAtQA;EAAmB,iBAAA;AAyQnB;;AAzQoC;EAAkB,aAAA;EAAa,sBAAA;EAAsB,iBAAA;EAAiB,gBAAA;EAAgB,eAAA;EAAe,uBAAA;AAkRzI;;AAlRgK;EAAwB,eAAA;EAAe,cAAA;AAuRvM;;AAvRqN;EAAmB,cAAA;EAAc,cAAA;EAAc,qBAAA;EAAqB,eAAA;EAAe,aAAA;AA+RxS;;AA/RqT;EAAyB,mBAAA;AAmS9U;;AAnSiW;EAAiB,SAAA;EAAS,gBAAA;EAAgB,cAAA;EAAc,WAAA;AA0SzZ;;AA1Soa;EAAwB;IAAkB,gBAAA;IAAgB,eAAA;EAgT5d;AACF;AA/SA;EAAc,cAAA;EAAc,sBAAA;EAAsB,eAAA;EAAe,cAAA;EAAc,6BAAA;AAsT/E;;AAtT4G;EAAmB,eAAA;EAAe,yBAAA;AA2T9I;;AA3TuK;EAAiB,gBAAA;AA+TxL;;AA/TwM;EAAwB;IAAqC,gBAAA;IAAgB,eAAA;EAqUnR;AACF;AApUA;EAAuB,yBAAA;EAAyB,oBAAA;EAAoB,iBAAA;EAAiB,cAAA;EAAc,iBAAA;EAAiB,aAAA;EAAa,eAAA;EAAe,eAAA;AA8UhJ;;AA9U+J;EAAgC,aAAA;AAkV/L;;AAlV2M;EAAyB,cAAA;EAAc,cAAA;EAAc,eAAA;EAAe,gBAAA;AAyV/Q;;AAzV+R;EAAkB,wBAAA;EAAuB,8BAAA;EAA6B,sBAAA;EAAsB,QAAA;EAAQ,uBAAA;AAiWnY;;AAjW0Z;EAAwB,eAAA;AAqWlb;;AArWic;EAAwB;IAAuB,YAAA;IAAY,eAAA;EA2W1f;AACF;AA1WA;EAAuB,iBAAA;EAAiB,iBAAA;EAAiB,8BAAA;AA+WzD;;AA/WuF;EAAe,iBAAA;EAAiB,mBAAA;AAoXvH;;AApX0I;EAAc,aAAA;AAwXxJ;;AAvXA;EAAyB;IAAuB,iBAAA;EA4X9C;EA5X+D;IAAe,aAAA;EA+X9E;EA/X2F;IAAc,cAAA;IAAc,kBAAA;EAmYvH;EAnYyI;IAAsB,eAAA;IAAe,aAAA;IAAa,gBAAA;EAwY3L;EAxY2M;IAAe,kBAAA;IAAkB,WAAA;IAAW,QAAA;IAAQ,SAAA;IAAS,uBAAA;IAAsB,gBAAA;IAAgB,cAAA;IAAc,sBAAA;IAAsB,iBAAA;IAAiB,yBAAA;IAAyB,mBAAA;IAAmB,aAAA;IAAa,aAAA;IAAa,SAAA;IAAS,sDAAA;EAyZlb;EAzZmd;IAAgC,gBAAA;IAAgB,YAAA;IAAY,gBAAA;EA8Z/gB;EA9Z+hB;IAAwC,mBAAA;EAiavkB;AACF;AAhaA;EAAyB,cAAA;EAAc,gBAAA;EAAgB,MAAA;EAAM,YAAA;EAAY,iDAAA;EAA8C,cAAA;AAwavH;;AAvaA;EAAyC,iBAAA;EAAiB,YAAA;AA4a1D;;AA5asE;EAAgD,mBAAA;EAAmB,gBAAA;EAAgB,uBAAA;AAkbzJ;;AAjbA;EAAoC,gBAAA;EAAgB,yBAAA;EAAyB,kBAAA;EAAkB,uBAAA;EAAuB,cAAA;AAybtH;;AAxbA;EAAsC,cAAA;AA4btC;;AA5boD;EAA6C,cAAA;EAAc,eAAA;AAic/G;;AAjc8H;EAAmB,qBAAA;AAqcjJ;;AApcA;EAAwB;IAAuB,QAAA;EAyc7C;EAzcqD;IAAyC,eAAA;EA4c9F;EA5c6G;IAAuC,eAAA;EA+cpJ;AACF;AA/cA;EAAa;IAAyB,aAAA;EAmdpC;AACF","sourcesContent":[":host{display:block}.platform-shell{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;background:#f8f6f1;color:#173b36;font-family:Inter,'Segoe UI',Arial,sans-serif}.platform-header{position:sticky;top:0;z-index:30;background:#f8f6f1;border-bottom:1px solid #dce5df}.platform-header-inner{max-width:1200px;margin:auto;padding:20px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}.platform-brand{display:inline-flex;align-items:center;gap:8px;color:#173b36;text-decoration:none;font-weight:800;font-size:26px;letter-spacing:-1px}.brand-mark{padding:7px;background:#173b36;color:#e3edb1;border-radius:11px;font-size:17px;letter-spacing:0}.brand-dot{color:#829d3b}.platform-nav{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-left:auto}.platform-nav a,.platform-footer nav a{font-size:13px;color:#173b36;text-decoration:none;padding:8px 0}.platform-nav a.active{border-bottom:2px solid #7c9650;font-weight:700}.platform-controls{display:flex;align-items:center;gap:10px}.platform-controls select{font:inherit;font-size:12px;background:transparent;border:1px solid #c4d1c5;border-radius:8px;padding:8px;color:#173b36}.platform-account{position:relative}.platform-account summary{font-size:13px;cursor:pointer;padding:9px}.account-options{position:absolute;right:0;top:38px;min-width:190px;padding:8px;background:white;border:1px solid #dce5df;border-radius:12px;box-shadow:0 12px 28px #173b361a}.account-options button{display:block;width:100%;padding:12px;text-align:left;border:0;background:transparent;color:#173b36;font:inherit;font-size:13px;cursor:pointer}.account-options button:hover{background:#eef1e8}.auth-button{border:0;background:transparent;color:#173b36;font:inherit;font-size:12px;padding:9px;cursor:pointer}.create-account{border:1px solid #173b36;border-radius:100px}.platform-content{flex:1;min-width:0;outline:none}.platform-footer{width:100%;max-width:1200px;box-sizing:border-box;margin:32px auto 0;padding:30px 24px;border-top:1px solid #dce5df;display:flex;align-items:center;justify-content:space-between;gap:25px}.footer-brand{font-size:23px;gap:0}.platform-footer p,.platform-footer small{font-size:12px;color:#64776f;line-height:1.7}.platform-footer nav{display:flex;gap:24px;flex-wrap:wrap}.platform-error{margin:15px auto;padding:14px;max-width:1120px;background:#fff0ed;color:#862c20;border-radius:8px}.sr-only,.skip-link{position:absolute;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0)}.skip-link:focus{position:fixed;top:5px;left:5px;width:auto;height:auto;clip:auto;z-index:40;background:white;color:#173b36;padding:12px}a:focus-visible,button:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid #7fac61;outline-offset:3px}button:disabled{opacity:.5;cursor:wait}@media(max-width:900px){.platform-nav{order:3;width:100%;margin:0;gap:20px}.platform-controls{margin-left:auto}.platform-header-inner{gap:10px 20px;padding:16px 20px}.platform-footer{align-items:start;flex-direction:column}}@media(max-width:480px){.platform-brand{font-size:22px}.brand-mark{display:none}.platform-nav{gap:14px}.platform-nav a{font-size:12px}.platform-controls{gap:3px}.auth-button{font-size:11px;padding:7px}.platform-footer nav{gap:16px}}\n\n.platform-controls{margin-left:auto}.account-identity{display:flex;flex-direction:column;text-align:right;max-width:240px;font-size:13px;overflow-wrap:anywhere}.account-identity small{font-size:12px;color:#64776f}.account-options a{display:block;color:#173b36;text-decoration:none;font-size:13px;padding:12px}.account-options a:hover{background:#eef1e8}.account-options{top:100%;max-height:75vh;overflow:auto;z-index:40}@media(max-width:480px){.account-identity{max-width:145px;font-size:12px}}\n\n.menu-heading{display:block;padding:10px 12px 4px;font-size:11px;color:#64776f;border-top:1px solid #e4eae5}.platform-controls{flex-wrap:wrap;justify-content:flex-end}.account-options{min-width:230px}@media(max-width:600px){.platform-controls .account-identity{flex-basis:100%;max-width:none}}\n\n.workspace-view-switch{border:1px solid #94aaa0;border-radius:999px;background:white;color:#173b36;padding:9px 13px;font:inherit;font-size:12px;cursor:pointer}.workspace-view-switch:disabled{opacity:.55}.account-identity strong{display:block;color:#173b36;font-size:14px;font-weight:700}.account-identity{display:flex!important;visibility:visible!important;flex-direction:column;gap:2px;overflow-wrap:anywhere}.account-identity small{font-size:11px}@media(max-width:600px){.workspace-view-switch{padding:8px;font-size:11px}}\n\n.platform-header-inner{max-width:1520px;flex-wrap:nowrap;justify-content:space-between}.wide-controls{flex-wrap:nowrap;white-space:nowrap}.compact-menu{display:none}\n@media(max-width:1100px){.platform-header-inner{padding:8px 16px}.wide-controls{display:none}.compact-menu{display:block;position:relative}.compact-menu>summary{cursor:pointer;padding:12px;list-style:none}.compact-panel{position:absolute;z-index:50;right:0;top:100%;width:min(290px,85vw);max-height:72vh;overflow:auto;box-sizing:border-box;background:white;border:1px solid #cedbd5;border-radius:14px;padding:16px;display:grid;gap:10px;box-shadow:0 10px 26px #173b3622}.compact-panel .account-options{position:static;min-width:0;box-shadow:none}.compact-panel summary,.compact-panel a{padding-block:10px}}\n\n:host(app-shared-header){display:block;position:sticky;top:0;z-index:100;font-family:Inter,\"Segoe UI\",Arial,sans-serif;color:#173b36}\n.platform-header-inner>.account-identity{margin-left:auto;min-width:0}.platform-header-inner>.account-identity strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n.platform-header-inner>label select{min-height:38px;border:1px solid #c4d1c5;border-radius:8px;background:transparent;color:#173b36}\n.platform-header-inner .wide-controls{margin-left:0}.reservation-entry,.platform-account>summary{color:#173b36;font-size:13px}.reservation-entry{text-decoration:none}\n@media(max-width:600px){.platform-header-inner{gap:8px}.platform-header-inner>.account-identity{max-width:32vw}.platform-header-inner>.platform-brand{font-size:20px}}\n@media print{:host(app-shared-header){display:none}}\n"],"sourceRoot":""}]);
 // Exports
 module.exports = ___CSS_LOADER_EXPORT___.toString();
 
@@ -66326,7 +72745,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   listingStepValid: () => (/* binding */ listingStepValid),
 /* harmony export */   sanitizedListingForm: () => (/* binding */ sanitizedListingForm)
 /* harmony export */ });
-const LISTING_WIZARD_STEPS = ['details', 'photos', 'pricing'];
+const LISTING_WIZARD_STEPS = ['details', 'photos', 'pricing', 'documents'];
 const numeric = v => typeof v === 'number' && Number.isFinite(v);
 function listingStepValid(form, step) {
   if (step === 0) return ['boat', 'car', 'property', 'parking', 'pool'].includes(form.assetType) && !!String(form.name || '').trim() && String(form.name).trim().length <= 120 && String(form.description || '').length <= 10000 && Object.values(form.properties || {}).every(v => v === null || v === undefined || typeof v === 'boolean' || typeof v === 'string' && v.length <= 1000 || numeric(v) && Number(v) >= 0) && (!['parking', 'pool', 'property'].includes(form.assetType) || !!String(form.location?.city || '').trim() && !!String(form.location?.country || '').trim());
@@ -66345,6 +72764,103 @@ function sanitizedListingForm(form) {
 
 /***/ }),
 
+/***/ 98800:
+/*!*******************************************************!*\
+  !*** ./src/app/workspace/rental-history.component.ts ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   RentalHistoryComponent: () => (/* binding */ RentalHistoryComponent)
+/* harmony export */ });
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_workspace_rental_history_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Cjpob3N0e2Rpc3BsYXk6YmxvY2s7Ym94LXNpemluZzpib3JkZXItYm94O21heC13aWR0aDoxNDQwcHg7bWFyZ2luOmF1dG87cGFkZGluZzowIDV2d30Kc2VjdGlvbntiYWNrZ3JvdW5kOiNlZGY0ZjY7Y29sb3I6IzEwM2Y2NDtib3JkZXI6MXB4IHNvbGlkICNkNGUzZTk7Ym9yZGVyLXJhZGl1czoyMHB4O3BhZGRpbmc6Y2xhbXAoMTZweCwydncsMjhweCk7bWFyZ2luLWJvdHRvbToyNHB4fQpoZWFkZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcH0KaDJ7Zm9udDo2MDAgY2xhbXAoMjFweCwydncsMjhweCkvMS4yIEdlb3JnaWEsc2VyaWY7bWFyZ2luOjB9cHttYXJnaW46NnB4IDAgMDtjb2xvcjojNDM1ZTcwfQpidXR0b257YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTAzZjY0O2JvcmRlcjoxcHggc29saWQgI2E1YmJjODtib3JkZXItcmFkaXVzOjEycHg7bWluLWhlaWdodDo0NHB4O3BhZGRpbmc6MCAxNnB4O2ZvbnQ6aW5oZXJpdDtjdXJzb3I6cG9pbnRlcn0KdWx7bGlzdC1zdHlsZTpub25lO2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KGF1dG8tZml0LG1pbm1heChtaW4oMTAwJSwyMzBweCksMWZyKSk7Z2FwOjEycHg7bWFyZ2luOjE2cHggMCAwO3BhZGRpbmc6MH0KbGl7bWluLXdpZHRoOjB9YSwub2ZmbGluZXtib3gtc2l6aW5nOmJvcmRlci1ib3g7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTZweDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxMDNmNjQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkZGU1O3BhZGRpbmc6MTRweCAxOHB4O2JvcmRlci1yYWRpdXM6MTJweDt0ZXh0LWRlY29yYXRpb246bm9uZTttYXgtd2lkdGg6NDQwcHh9CnN0cm9uZ3tvdmVyZmxvdy13cmFwOmFueXdoZXJlfXNtYWxse2Rpc3BsYXk6YmxvY2s7bWFyZ2luLXRvcDozcHg7Y29sb3I6IzQ5Njc3YX0ub2ZmbGluZXtkaXNwbGF5OmJsb2NrfWE6aG92ZXJ7Ym9yZGVyLWNvbG9yOiM0OTc4OTV9YTpmb2N1cy12aXNpYmxlLGJ1dHRvbjpmb2N1cy12aXNpYmxle291dGxpbmU6M3B4IHNvbGlkICMxNzZkOTg7b3V0bGluZS1vZmZzZXQ6MnB4fQo_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_workspace_rental_history_component_ts__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./src/app/workspace/rental-history.component.ts.css?ngResource!=!./node_modules/@ngtools/webpack/src/loaders/inline-resource.js?data=Cjpob3N0e2Rpc3BsYXk6YmxvY2s7Ym94LXNpemluZzpib3JkZXItYm94O21heC13aWR0aDoxNDQwcHg7bWFyZ2luOmF1dG87cGFkZGluZzowIDV2d30Kc2VjdGlvbntiYWNrZ3JvdW5kOiNlZGY0ZjY7Y29sb3I6IzEwM2Y2NDtib3JkZXI6MXB4IHNvbGlkICNkNGUzZTk7Ym9yZGVyLXJhZGl1czoyMHB4O3BhZGRpbmc6Y2xhbXAoMTZweCwydncsMjhweCk7bWFyZ2luLWJvdHRvbToyNHB4fQpoZWFkZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcH0KaDJ7Zm9udDo2MDAgY2xhbXAoMjFweCwydncsMjhweCkvMS4yIEdlb3JnaWEsc2VyaWY7bWFyZ2luOjB9cHttYXJnaW46NnB4IDAgMDtjb2xvcjojNDM1ZTcwfQpidXR0b257YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTAzZjY0O2JvcmRlcjoxcHggc29saWQgI2E1YmJjODtib3JkZXItcmFkaXVzOjEycHg7bWluLWhlaWdodDo0NHB4O3BhZGRpbmc6MCAxNnB4O2ZvbnQ6aW5oZXJpdDtjdXJzb3I6cG9pbnRlcn0KdWx7bGlzdC1zdHlsZTpub25lO2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KGF1dG8tZml0LG1pbm1heChtaW4oMTAwJSwyMzBweCksMWZyKSk7Z2FwOjEycHg7bWFyZ2luOjE2cHggMCAwO3BhZGRpbmc6MH0KbGl7bWluLXdpZHRoOjB9YSwub2ZmbGluZXtib3gtc2l6aW5nOmJvcmRlci1ib3g7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTZweDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxMDNmNjQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkZGU1O3BhZGRpbmc6MTRweCAxOHB4O2JvcmRlci1yYWRpdXM6MTJweDt0ZXh0LWRlY29yYXRpb246bm9uZTttYXgtd2lkdGg6NDQwcHh9CnN0cm9uZ3tvdmVyZmxvdy13cmFwOmFueXdoZXJlfXNtYWxse2Rpc3BsYXk6YmxvY2s7bWFyZ2luLXRvcDozcHg7Y29sb3I6IzQ5Njc3YX0ub2ZmbGluZXtkaXNwbGF5OmJsb2NrfWE6aG92ZXJ7Ym9yZGVyLWNvbG9yOiM0OTc4OTV9YTpmb2N1cy12aXNpYmxlLGJ1dHRvbjpmb2N1cy12aXNpYmxle291dGxpbmU6M3B4IHNvbGlkICMxNzZkOTg7b3V0bGluZS1vZmZzZXQ6MnB4fQo%3D!./src/app/workspace/rental-history.component.ts */ 14995);
+/* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_src_app_workspace_rental_history_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Cjpob3N0e2Rpc3BsYXk6YmxvY2s7Ym94LXNpemluZzpib3JkZXItYm94O21heC13aWR0aDoxNDQwcHg7bWFyZ2luOmF1dG87cGFkZGluZzowIDV2d30Kc2VjdGlvbntiYWNrZ3JvdW5kOiNlZGY0ZjY7Y29sb3I6IzEwM2Y2NDtib3JkZXI6MXB4IHNvbGlkICNkNGUzZTk7Ym9yZGVyLXJhZGl1czoyMHB4O3BhZGRpbmc6Y2xhbXAoMTZweCwydncsMjhweCk7bWFyZ2luLWJvdHRvbToyNHB4fQpoZWFkZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcH0KaDJ7Zm9udDo2MDAgY2xhbXAoMjFweCwydncsMjhweCkvMS4yIEdlb3JnaWEsc2VyaWY7bWFyZ2luOjB9cHttYXJnaW46NnB4IDAgMDtjb2xvcjojNDM1ZTcwfQpidXR0b257YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTAzZjY0O2JvcmRlcjoxcHggc29saWQgI2E1YmJjODtib3JkZXItcmFkaXVzOjEycHg7bWluLWhlaWdodDo0NHB4O3BhZGRpbmc6MCAxNnB4O2ZvbnQ6aW5oZXJpdDtjdXJzb3I6cG9pbnRlcn0KdWx7bGlzdC1zdHlsZTpub25lO2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KGF1dG8tZml0LG1pbm1heChtaW4oMTAwJSwyMzBweCksMWZyKSk7Z2FwOjEycHg7bWFyZ2luOjE2cHggMCAwO3BhZGRpbmc6MH0KbGl7bWluLXdpZHRoOjB9YSwub2ZmbGluZXtib3gtc2l6aW5nOmJvcmRlci1ib3g7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTZweDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxMDNmNjQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkZGU1O3BhZGRpbmc6MTRweCAxOHB4O2JvcmRlci1yYWRpdXM6MTJweDt0ZXh0LWRlY29yYXRpb246bm9uZTttYXgtd2lkdGg6NDQwcHh9CnN0cm9uZ3tvdmVyZmxvdy13cmFwOmFueXdoZXJlfXNtYWxse2Rpc3BsYXk6YmxvY2s7bWFyZ2luLXRvcDozcHg7Y29sb3I6IzQ5Njc3YX0ub2ZmbGluZXtkaXNwbGF5OmJsb2NrfWE6aG92ZXJ7Ym9yZGVyLWNvbG9yOiM0OTc4OTV9YTpmb2N1cy12aXNpYmxlLGJ1dHRvbjpmb2N1cy12aXNpYmxle291dGxpbmU6M3B4IHNvbGlkICMxNzZkOTg7b3V0bGluZS1vZmZzZXQ6MnB4fQo_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_workspace_rental_history_component_ts__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_Users_faycalamrani_data_ADN_boatify_app_src_app_workspace_rental_history_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Cjpob3N0e2Rpc3BsYXk6YmxvY2s7Ym94LXNpemluZzpib3JkZXItYm94O21heC13aWR0aDoxNDQwcHg7bWFyZ2luOmF1dG87cGFkZGluZzowIDV2d30Kc2VjdGlvbntiYWNrZ3JvdW5kOiNlZGY0ZjY7Y29sb3I6IzEwM2Y2NDtib3JkZXI6MXB4IHNvbGlkICNkNGUzZTk7Ym9yZGVyLXJhZGl1czoyMHB4O3BhZGRpbmc6Y2xhbXAoMTZweCwydncsMjhweCk7bWFyZ2luLWJvdHRvbToyNHB4fQpoZWFkZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcH0KaDJ7Zm9udDo2MDAgY2xhbXAoMjFweCwydncsMjhweCkvMS4yIEdlb3JnaWEsc2VyaWY7bWFyZ2luOjB9cHttYXJnaW46NnB4IDAgMDtjb2xvcjojNDM1ZTcwfQpidXR0b257YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTAzZjY0O2JvcmRlcjoxcHggc29saWQgI2E1YmJjODtib3JkZXItcmFkaXVzOjEycHg7bWluLWhlaWdodDo0NHB4O3BhZGRpbmc6MCAxNnB4O2ZvbnQ6aW5oZXJpdDtjdXJzb3I6cG9pbnRlcn0KdWx7bGlzdC1zdHlsZTpub25lO2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KGF1dG8tZml0LG1pbm1heChtaW4oMTAwJSwyMzBweCksMWZyKSk7Z2FwOjEycHg7bWFyZ2luOjE2cHggMCAwO3BhZGRpbmc6MH0KbGl7bWluLXdpZHRoOjB9YSwub2ZmbGluZXtib3gtc2l6aW5nOmJvcmRlci1ib3g7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTZweDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxMDNmNjQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkZGU1O3BhZGRpbmc6MTRweCAxOHB4O2JvcmRlci1yYWRpdXM6MTJweDt0ZXh0LWRlY29yYXRpb246bm9uZTttYXgtd2lkdGg6NDQwcHh9CnN0cm9uZ3tvdmVyZmxvdy13cmFwOmFueXdoZXJlfXNtYWxse2Rpc3BsYXk6YmxvY2s7bWFyZ2luLXRvcDozcHg7Y29sb3I6IzQ5Njc3YX0ub2ZmbGluZXtkaXNwbGF5OmJsb2NrfWE6aG92ZXJ7Ym9yZGVyLWNvbG9yOiM0OTc4OTV9YTpmb2N1cy12aXNpYmxlLGJ1dHRvbjpmb2N1cy12aXNpYmxle291dGxpbmU6M3B4IHNvbGlkICMxNzZkOTg7b3V0bGluZS1vZmZzZXQ6MnB4fQo_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_workspace_rental_history_component_ts__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/common/http */ 93262);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! rxjs */ 56196);
+/* harmony import */ var _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/reservation-auth.service */ 46709);
+/* harmony import */ var _services_asset_access_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/asset-access.service */ 16379);
+
+
+
+
+
+
+
+
+
+let RentalHistoryComponent = class RentalHistoryComponent {
+  http;
+  auth;
+  access;
+  rows = [];
+  uid = '';
+  busy = false;
+  status = '';
+  constructor(http, auth, access) {
+    this.http = http;
+    this.auth = auth;
+    this.access = access;
+  }
+  ngOnInit() {
+    void this.load();
+  }
+  load() {
+    var _this = this;
+    return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (_this.busy) return;
+      _this.busy = true;
+      _this.rows = [];
+      _this.status = '';
+      try {
+        const u = yield _this.auth.user();
+        const rows = yield (0,rxjs__WEBPACK_IMPORTED_MODULE_4__.firstValueFrom)(_this.http.get('/api/me/rented-assets', {
+          headers: yield _this.auth.headers()
+        }));
+        if (u.uid === _this.access.authenticatedUid) {
+          _this.uid = u.uid;
+          _this.rows = rows;
+          _this.status = rows.length ? '' : 'Aucun bien déjà loué.';
+        }
+      } catch {
+        _this.status = 'Historique indisponible.';
+      } finally {
+        _this.busy = false;
+      }
+    })();
+  }
+  static ctorParameters = () => [{
+    type: _angular_common_http__WEBPACK_IMPORTED_MODULE_5__.HttpClient
+  }, {
+    type: _services_reservation_auth_service__WEBPACK_IMPORTED_MODULE_2__.ReservationAuthService
+  }, {
+    type: _services_asset_access_service__WEBPACK_IMPORTED_MODULE_3__.AssetAccessService
+  }];
+};
+RentalHistoryComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_6__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_7__.Component)({
+  standalone: true,
+  selector: 'app-rental-history',
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_8__.CommonModule],
+  template: `
+<section *ngIf="access.authenticatedUid" id="mes-locations" aria-labelledby="history-title">
+<header><div><h2 id="history-title">Mes biens déjà loués</h2><p>Retrouvez vos locations terminées et leurs dates.</p></div>
+<button type="button" (click)="load()" [disabled]="busy">{{busy ? 'Chargement…' : 'Actualiser'}}</button></header>
+<p *ngIf="status" role="status">{{status}}</p>
+<ul *ngIf="uid===access.authenticatedUid && rows.length"><li *ngFor="let a of rows">
+<a *ngIf="a.origin;else offline" [href]="a.origin" target="_blank" rel="noopener noreferrer"><span><strong>{{a.name}}</strong><small>Ouvrir le site du propriétaire</small></span><b aria-hidden="true">↗</b></a>
+<ng-template #offline><div class="offline"><strong>{{a.name}}</strong><small>Site indisponible</small></div></ng-template><small class="stay" *ngFor="let stay of a.stays">Du {{stay.startAt | date:'dd/MM/yyyy HH:mm'}} au {{stay.endAt | date:'dd/MM/yyyy HH:mm'}}</small></li></ul>
+</section>`,
+  styles: [(_Users_faycalamrani_data_ADN_boatify_app_src_app_workspace_rental_history_component_ts_css_ngResource_Users_faycalamrani_data_ADN_boatify_app_node_modules_ngtools_webpack_src_loaders_inline_resource_js_data_Cjpob3N0e2Rpc3BsYXk6YmxvY2s7Ym94LXNpemluZzpib3JkZXItYm94O21heC13aWR0aDoxNDQwcHg7bWFyZ2luOmF1dG87cGFkZGluZzowIDV2d30Kc2VjdGlvbntiYWNrZ3JvdW5kOiNlZGY0ZjY7Y29sb3I6IzEwM2Y2NDtib3JkZXI6MXB4IHNvbGlkICNkNGUzZTk7Ym9yZGVyLXJhZGl1czoyMHB4O3BhZGRpbmc6Y2xhbXAoMTZweCwydncsMjhweCk7bWFyZ2luLWJvdHRvbToyNHB4fQpoZWFkZXJ7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDtmbGV4LXdyYXA6d3JhcH0KaDJ7Zm9udDo2MDAgY2xhbXAoMjFweCwydncsMjhweCkvMS4yIEdlb3JnaWEsc2VyaWY7bWFyZ2luOjB9cHttYXJnaW46NnB4IDAgMDtjb2xvcjojNDM1ZTcwfQpidXR0b257YmFja2dyb3VuZDp3aGl0ZTtjb2xvcjojMTAzZjY0O2JvcmRlcjoxcHggc29saWQgI2E1YmJjODtib3JkZXItcmFkaXVzOjEycHg7bWluLWhlaWdodDo0NHB4O3BhZGRpbmc6MCAxNnB4O2ZvbnQ6aW5oZXJpdDtjdXJzb3I6cG9pbnRlcn0KdWx7bGlzdC1zdHlsZTpub25lO2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KGF1dG8tZml0LG1pbm1heChtaW4oMTAwJSwyMzBweCksMWZyKSk7Z2FwOjEycHg7bWFyZ2luOjE2cHggMCAwO3BhZGRpbmc6MH0KbGl7bWluLXdpZHRoOjB9YSwub2ZmbGluZXtib3gtc2l6aW5nOmJvcmRlci1ib3g7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTZweDtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOiMxMDNmNjQ7Ym9yZGVyOjFweCBzb2xpZCAjY2NkZGU1O3BhZGRpbmc6MTRweCAxOHB4O2JvcmRlci1yYWRpdXM6MTJweDt0ZXh0LWRlY29yYXRpb246bm9uZTttYXgtd2lkdGg6NDQwcHh9CnN0cm9uZ3tvdmVyZmxvdy13cmFwOmFueXdoZXJlfXNtYWxse2Rpc3BsYXk6YmxvY2s7bWFyZ2luLXRvcDozcHg7Y29sb3I6IzQ5Njc3YX0ub2ZmbGluZXtkaXNwbGF5OmJsb2NrfWE6aG92ZXJ7Ym9yZGVyLWNvbG9yOiM0OTc4OTV9YTpmb2N1cy12aXNpYmxlLGJ1dHRvbjpmb2N1cy12aXNpYmxle291dGxpbmU6M3B4IHNvbGlkICMxNzZkOTg7b3V0bGluZS1vZmZzZXQ6MnB4fQo_3D_Users_faycalamrani_data_ADN_boatify_app_src_app_workspace_rental_history_component_ts__WEBPACK_IMPORTED_MODULE_1___default())]
+})], RentalHistoryComponent);
+
+
+/***/ }),
+
 /***/ 99266:
 /*!**********************************************************!*\
   !*** ./src/app/owner-listings.component.html?ngResource ***!
@@ -66352,7 +72868,7 @@ function sanitizedListingForm(form) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<main class=\"listings-shell\">\n  <header class=\"page-header\" *ngIf=\"!adminScope\">\n    <div><h1>{{'ui.labels.t85f3d8ebb393' | siteText:'Mes annonces et abonnements'}}</h1><p>{{wx('intro')}}</p></div>\n    <button *ngIf=\"!creating && !deleting\" type=\"button\" (click)=\"toggleCreate()\" [disabled]=\"busy\">{{'ui.labels.te9129d054a5a' | siteText:'Créer une annonce'}}</button>\n  </header>\n  <p *ngIf=\"error\" class=\"error\" role=\"alert\">{{error | siteText}}</p>\n  <p *ngIf=\"message\" role=\"status\">{{message | siteText}}</p>\n  <p *ngIf=\"busy\" role=\"status\">{{uploadProgress || ('ui.labels.t01cba1dfba2e' | siteText:'Chargement…')}}</p>\n\n  <section id=\"listing-editor\" class=\"wizard\" tabindex=\"-1\" *ngIf=\"creating\" aria-labelledby=\"wizard-title\">\n    <header><h2 id=\"wizard-title\">{{editing ? wx('manage') : wx('new')}}</h2><button class=\"quiet\" type=\"button\" (click)=\"closeEditor()\" [disabled]=\"busy\">{{wx('close')}}</button></header>\n    <nav class=\"steps\" [attr.aria-label]=\"wx('steps')\"><button *ngFor=\"let key of steps;let i=index\" type=\"button\" [class.current]=\"step===i\" [attr.aria-current]=\"step===i?'step':null\" [disabled]=\"busy || i>step\" (click)=\"step=i\"><span>{{i+1}}</span>{{wx(key)}}</button></nav>\n    <form (ngSubmit)=\"create()\" (input)=\"wizardDirty=true\" (change)=\"wizardDirty=true\">\n      <fieldset [disabled]=\"busy\">\n        <div *ngIf=\"step===0\">\n          <h3>{{wx('details')}}</h3>\n          <div class=\"fields\">\n            <label>{{'ui.labels.t3deb74565196' | siteText:'Type de bien'}}<select name=\"assetType\" [(ngModel)]=\"form.assetType\" [disabled]=\"!!editing\" (ngModelChange)=\"changeType()\"><option *ngFor=\"let type of types\" [value]=\"type.id\">{{type.label | siteText}}</option></select></label>\n            <label>{{wx('title')}} *<input name=\"name\" [(ngModel)]=\"form.name\" required maxlength=\"120\" [placeholder]=\"wx(form.assetType==='car'?'carTitle':'titleExample')\"><small>{{wx('titleHint')}}</small></label>\n          </div>\n          <p *ngIf=\"editing?.prefix\">{{prefixText('Adresse actuelle','Current address')}} : <a [href]=\"'https://'+editing.prefix+'.godirect.fr'\" target=\"_blank\" rel=\"noopener\">{{editing.prefix}}.godirect.fr</a></p>\n          <section class=\"prefix-picker\" aria-labelledby=\"prefix-label\">\n            <h3 id=\"prefix-label\">{{prefixText('Adresse de votre annonce','Your listing address')}}</h3>\n            <label>{{prefixText('Saisissez au moins six lettres','Enter at least six letters')}}<input name=\"prefixQuery\" (blur)=\"prefixTouched=true\" [class.prefix-invalid]=\"prefixInvalid\" [attr.aria-invalid]=\"prefixInvalid\" [ngModel]=\"prefixInput\" (ngModelChange)=\"prefixChanged($event)\" maxlength=\"63\" autocomplete=\"off\" placeholder=\"monbien\" aria-describedby=\"prefix-hint prefix-error\"></label>\n            <small id=\"prefix-hint\">{{prefixText('Choisissez une proposition disponible. Vous pourrez modifier cette adresse.','Select an available suggestion. You can change this address later.')}}</small>\n            <p *ngIf=\"prefixReady && !prefixLoading && !prefixError && !prefixChoices.length\" role=\"status\">{{prefixText('Aucune proposition disponible. Essayez un nom plus précis.','No suggestions available. Try a more specific name.')}}</p>\n            <p *ngIf=\"prefixLoading\" role=\"status\">{{prefixText('Recherche…','Searching…')}}</p>\n            <p *ngIf=\"prefixValidation\" id=\"prefix-error\" class=\"prefix-error\" role=\"alert\">{{prefixValidation}} <button *ngIf=\"prefixError\" type=\"button\" (click)=\"prefixChanged(prefixInput)\">{{prefixText('Réessayer','Retry')}}</button></p>\n            <label *ngIf=\"prefixChoices.length\">{{prefixText('Choisir un préfixe disponible','Select an available prefix')}}<select name=\"prefix\" [ngModel]=\"form.prefix\" (ngModelChange)=\"choosePrefix($event)\" [disabled]=\"prefixLoading\"><option value=\"\" disabled>{{prefixText('Choisissez une proposition','Choose a suggestion')}}</option><option *ngFor=\"let prefix of prefixChoices\" [value]=\"prefix\">{{prefix}}.godirect.fr</option></select></label>\n            <p *ngIf=\"form.prefix\" role=\"status\">https://{{form.prefix}}.godirect.fr</p>\n          </section>\n          <label>{{'ui.labels.t55f8ebc805e6' | siteText:'Description'}}<textarea name=\"description\" [(ngModel)]=\"form.description\" maxlength=\"10000\" [placeholder]=\"wx('descriptionHint')\"></textarea></label>\n          <details class=\"optional\"><summary>{{wx('subtitle')}}</summary><label>{{wx('subtitle')}}<input name=\"headline\" [(ngModel)]=\"form.headline\" maxlength=\"240\"></label></details>\n          <h3>{{wx('characteristics')}}</h3>\n          <div class=\"fields\"><ng-container *ngFor=\"let field of fields[form.assetType]\"><label *ngIf=\"field.key!=='rangeKm'\" [class.checkbox]=\"field.type==='checkbox'\">{{field.label | siteText}}<input [name]=\"field.key\" [type]=\"field.type\" [(ngModel)]=\"form.properties[field.key]\" [attr.min]=\"field.type==='number'?0:null\"></label></ng-container></div>\n          <details *ngIf=\"form.assetType==='car'\" class=\"optional\"><summary>{{wx('moreCharacteristics')}}</summary><label>{{'ui.labels.t43a4bb274dfb' | siteText:'Autonomie (km)'}}<input name=\"rangeKm\" type=\"number\" min=\"0\" [(ngModel)]=\"form.properties.rangeKm\"></label></details>\n          <h3>{{wx('location')}}</h3><p class=\"muted\">{{wx('locationHint')}}</p>\n          <div class=\"fields\">\n            <label>{{'ui.labels.td834cabd1c16' | siteText:'Ville / commune'}} {{locationRequired?'*':''}}<input name=\"city\" [(ngModel)]=\"form.location.city\" [required]=\"locationRequired\" maxlength=\"120\"></label>\n            <label>{{'ui.labels.tafb1b10b1a8f' | siteText:'Quartier / secteur (facultatif)'}}<input name=\"area\" [(ngModel)]=\"form.location.area\" maxlength=\"160\"></label>\n            <label>{{'ui.labels.t2a78f0e9eeb4' | siteText:'Pays'}} {{locationRequired?'*':''}}<input name=\"country\" [(ngModel)]=\"form.location.country\" [required]=\"locationRequired\" maxlength=\"120\"></label>\n          </div>\n        </div>\n        <div *ngIf=\"step===1\">\n          <h3>{{wx('photos')}}</h3><p>{{wx('photosHint')}}</p>\n          <button *ngIf=\"!photosLoaded && editing\" type=\"button\" (click)=\"loadWizardPhotos(editing)\">{{'ui.labels.t9d3b2a7d8b0d' | siteText:'Actualiser'}}</button><label class=\"upload-zone\" *ngIf=\"photosLoaded\">{{wx('addPhotos')}}<input type=\"file\" multiple accept=\"image/jpeg,image/png,image/webp,image/avif,image/gif\" (change)=\"addPhotos($event)\"><small>{{wx('photoLimits')}}</small></label>\n          <p *ngIf=\"!photos.length\" class=\"muted\">{{wx('noPhotos')}}</p>\n          <div class=\"photo-grid\"><figure *ngFor=\"let photo of photos;let i=index\">\n            <img [src]=\"photo.preview\" [alt]=\"form.name+' — '+(i+1)\"><figcaption>{{i===0?wx('cover'):wx('photos')+' '+(i+1)}}</figcaption>\n            <div class=\"photo-actions\"><button type=\"button\" class=\"quiet\" [disabled]=\"i===0\" (click)=\"movePhoto(i,-1)\" [attr.aria-label]=\"wx('earlier')\">←</button><button type=\"button\" class=\"quiet\" [disabled]=\"i===photos.length-1\" (click)=\"movePhoto(i,1)\" [attr.aria-label]=\"wx('later')\">→</button><button type=\"button\" class=\"quiet danger-text\" (click)=\"removePhoto(i)\">{{wx('removePhoto')}}</button></div>\n          </figure></div>\n        </div>\n        <div *ngIf=\"step===2\">\n          <h3>{{wx('pricing')}}</h3>\n          <div class=\"fields\">\n            <label>{{wx('rentalPrice')}} *<input name=\"basePrice\" type=\"number\" min=\"0.01\" max=\"1000000\" step=\"0.01\" [(ngModel)]=\"form.pricing.basePrice\" required></label>\n            <label>{{'ui.labels.t0b6c4a3b107b' | siteText:'Unité de location'}}<select name=\"unit\" [(ngModel)]=\"form.pricing.pricingUnit\"><option value=\"hour\">{{'ui.labels.t5073129fadb8' | siteText:'Heure'}}</option><option value=\"day\">{{'ui.labels.t240ce85d68f5' | siteText:'Jour'}}</option><option value=\"night\">{{'ui.labels.t3359902f0d42' | siteText:'Nuit'}}</option></select></label>\n          </div>\n          <h3>{{wx('deposit')}}</h3><p class=\"muted\">{{wx('depositHint')}}</p>\n          <div class=\"fields\"><label>{{lx('depositType')}}<select name=\"depositType\" [(ngModel)]=\"form.depositType\"><option value=\"percentage\">{{lx('percent')}}</option><option value=\"fixed\">{{lx('fixed')}}</option></select></label><label>{{form.depositType==='percentage'?wx('depositPercent'):wx('depositFixed')}}<input name=\"deposit\" type=\"number\" min=\"0\" [max]=\"form.depositType==='percentage'?100:1000000\" step=\"0.01\" [(ngModel)]=\"form.depositPercent\"></label></div>\n          <label>{{'ui.labels.t83e815fcfbdc' | siteText:'Montant maximal de caution (EUR)'}}<input name=\"security\" type=\"number\" min=\"0\" max=\"1000000\" step=\"0.01\" [(ngModel)]=\"form.securityDeposit\"><small>{{wx('warrantyHint')}}</small></label>\n          <aside class=\"subscription-note\"><strong>{{wx('subscription')}}</strong><p>{{prices[form.assetType]/100 | number:'1.2-2'}} {{'ui.labels.t1eaf20795f2f' | siteText:'€ HT/an'}} · {{wx('commission')}}</p><p>{{wx('publicationHint')}}</p></aside>\n          <ng-container *ngIf=\"editing\"><ng-container *ngTemplateOutlet=\"impactWarning\"></ng-container></ng-container>\n        </div>\n      </fieldset>\n      <footer class=\"wizard-footer\"><button type=\"button\" class=\"quiet\" *ngIf=\"step>0\" (click)=\"previousStep()\" [disabled]=\"busy\">{{wx('previous')}}</button><span>{{step+1}} / 3</span><button type=\"submit\" *ngIf=\"step<2\" [disabled]=\"busy || !stepValid(step)\">{{wx('next')}}</button><button type=\"submit\" *ngIf=\"step===2\" [disabled]=\"busy || !photosLoaded || !stepValid(2) || (!!editing && (!impact || (impact.active>0 && !acknowledged)))\">{{wx('save')}}</button></footer>\n    </form>\n  </section>\n\n  <section id=\"listing-delete\" *ngIf=\"deleting\"><h2>{{lx('deleteTitle')}} — {{deleting.name}}</h2><p>{{lx('deleteInfo')}}</p><ng-container *ngTemplateOutlet=\"impactWarning\"></ng-container><div class=\"actions\"><button class=\"danger\" type=\"button\" (click)=\"commitListing()\" [disabled]=\"busy || !impact || !acknowledged\">{{lx('confirmDelete')}}</button><button class=\"quiet\" type=\"button\" (click)=\"closeEditor()\" [disabled]=\"busy\">{{lx('cancel')}}</button></div></section>\n  <ng-template #impactWarning><div class=\"reservation-warning\" *ngIf=\"impact\"><strong *ngIf=\"impact.active>0\">{{lx('warning')}}</strong><p>{{lx('pending')}} {{impact.pending}} · {{lx('confirmed')}} {{impact.confirmed}}</p><p>{{lx('preserve')}}</p><p *ngIf=\"impact.subscriptionContinues && deleting\">{{lx('subscription')}}</p><label class=\"checkbox\" *ngIf=\"deleting || impact.active>0\"><input type=\"checkbox\" [(ngModel)]=\"acknowledged\" [ngModelOptions]=\"{standalone:true}\" [disabled]=\"busy\">{{lx('acknowledge')}}</label></div><button class=\"quiet\" type=\"button\" *ngIf=\"!impact\" (click)=\"reloadImpact()\" [disabled]=\"busy\">{{lx('review')}}</button></ng-template>\n\n  <ng-container *ngIf=\"!adminScope && !creating && !deleting\">\n  <nav class=\"list-toolbar\"><label class=\"checkbox\"><input type=\"checkbox\" [(ngModel)]=\"showArchived\" [disabled]=\"busy\">{{lx('showArchived')}}</label><button class=\"quiet\" type=\"button\" (click)=\"refresh()\" [disabled]=\"busy\">{{'ui.labels.t9d3b2a7d8b0d' | siteText:'Actualiser'}}</button></nav>\n  <p *ngIf=\"!busy && !error && !visibleRows.length\">{{'ui.labels.t8a71f9afe03f' | siteText:'Vous n’avez pas encore d’annonce.'}}</p>\n  <article *ngFor=\"let a of visibleRows\">\n    <header><div><h2>{{a.name}}</h2><p>{{label(a.assetType) | siteText}} · {{a.public?('ui.labels.t2810e213c9b3' | siteText:'En ligne'):('ui.labels.t2b3e7dcedd58' | siteText:'Hors ligne')}}</p><p *ngIf=\"a.moderation\">{{moderationLabel(a)}}<span *ngIf=\"a.moderation.reason\"> — {{a.moderation.reason}}</span></p></div><span class=\"status\">{{('ui.billingStatus.'+(a.billing?.status || 'required')) | siteText}}</span></header>\n    <p *ngIf=\"a.documents\">{{ 'ui.documents.title' | siteText }} : {{ ('ui.documents.status_'+a.documents.status) | siteText }} · {{a.documents.validated}} / {{a.documents.total}}</p>\n    <p *ngIf=\"a.prefix\"><a [href]=\"'https://'+a.prefix+'.godirect.fr'\" target=\"_blank\" rel=\"noopener\">{{a.prefix}}.godirect.fr</a></p>\n    <p *ngIf=\"a.location?.city\">{{a.location.city}} · {{a.location.country}}</p>\n    <p *ngIf=\"a.billing?.paidUntil\">{{'ui.labels.t0d63aefb4029' | siteText:'Échéance :'}} {{a.billing.paidUntil*1000 | date:'dd/MM/yyyy'}}</p>\n    <p class=\"reservation-warning\" *ngIf=\"a.reservationSummary?.active>0\">{{lx('pending')}} {{a.reservationSummary.pending}} · {{lx('confirmed')}} {{a.reservationSummary.confirmed}}</p>\n    <div class=\"actions\"><a [routerLink]=\"['/owner/listings',a.assetType,a.id,'documents']\">{{ 'ui.documents.title' | siteText }}</a>\n      <button *ngIf=\"!a.deletedAt\" type=\"button\" (click)=\"prepare(a,'edit')\" [disabled]=\"busy\">{{wx('manage')}}</button>\n      <a *ngIf=\"!a.deletedAt\" class=\"secondary\" [routerLink]=\"path(a,'home')\">{{'ui.labels.ta79cb6e52048' | siteText:'Voir l’annonce'}}</a>\n      <button type=\"button\" class=\"quiet\" (click)=\"openSubscription(a)\" [disabled]=\"busy\" [attr.aria-expanded]=\"subscriptionAsset?.id===a.id\">{{wx('subscription')}}</button>\n      <details class=\"more-actions\"><summary>{{wx('more')}}</summary><div>\n        <a [routerLink]=\"path(a,'admin/reservations')\">{{'ui.labels.t3571ba76f535' | siteText:'Réservations'}}</a>\n        <a *ngIf=\"!a.deletedAt\" [routerLink]=\"path(a,'admin/site-content')\">{{'ui.labels.te24fcb33acb4' | siteText:'Contenu du site'}}</a>\n        <a routerLink=\"/owner/payments\">{{'ui.labels.te24a6c779d71' | siteText:'Compte Stripe pour les locations'}}</a>\n        <button type=\"button\" *ngIf=\"!a.deletedAt\" (click)=\"action(a,a.moderation?.status==='rejected'?'resubmit':'publication')\" [disabled]=\"busy\">{{a.moderation?.status==='rejected'?wx('requestPublication'):(a.published?('ui.labels.tadb05f2ba3e9' | siteText:'Masquer'):('ui.labels.tac3d5933ad45' | siteText:'Demander la publication'))}}</button>\n        <button type=\"button\" class=\"danger-text\" *ngIf=\"!a.deletedAt\" (click)=\"prepare(a,'delete')\" [disabled]=\"busy\">{{lx('remove')}}</button>\n      </div></details>\n    </div>\n    <div class=\"subscription-panel\" *ngIf=\"subscriptionAsset?.id===a.id\">\n      <h3>{{wx('subscription')}}</h3><p>{{(a.annualPrice || prices[a.assetType])/100 | number:'1.2-2'}} {{'ui.labels.t1eaf20795f2f' | siteText:'€ HT/an'}} · {{wx('commission')}}</p>\n      <p *ngIf=\"a.billing?.startedAt\">{{wx('subscribedOn')}} {{a.billing.startedAt*1000 | date:'dd/MM/yyyy'}}</p>\n      <p *ngIf=\"a.billing?.paidUntil\">{{'ui.labels.t0d63aefb4029' | siteText:'Échéance :'}} {{a.billing.paidUntil*1000 | date:'dd/MM/yyyy'}} · {{a.billing.cancelAtPeriodEnd?('ui.labels.tebe23409c76a' | siteText:'Renouvellement arrêté'):('ui.labels.tebd3fe7f150b' | siteText:'Renouvellement automatique')}}</p>\n      <div class=\"actions\"><button *ngIf=\"!a.deletedAt && (!a.billing || ['required','not_subscribed','checkout_pending','checkout_expired','canceled','incomplete_expired'].includes(a.billing.status))\" (click)=\"action(a,'checkout')\" [disabled]=\"busy\">{{'ui.labels.ta12aebe73a3a' | siteText:'Souscrire pour cette annonce'}}</button><button *ngIf=\"a.billing?.canReconcile && a.billing.status!=='active'\" class=\"quiet\" (click)=\"action(a,'reconcile')\" [disabled]=\"busy\">{{'ui.labels.t5345fd6297bf' | siteText:'Vérifier le paiement'}}</button><button *ngIf=\"a.billing?.canOpenPortal\" (click)=\"action(a,'portal')\" [disabled]=\"busy\">{{'ui.labels.t4d8a96c1796f' | siteText:'Factures et paiement'}}</button><button *ngIf=\"a.billing?.status==='active'\" class=\"quiet\" (click)=\"action(a,'renewal')\" [disabled]=\"busy\">{{a.billing.cancelAtPeriodEnd?('ui.labels.tc3b2220545fa' | siteText:'Réactiver le renouvellement'):('ui.labels.tfb388938ad82' | siteText:'Arrêter le renouvellement')}}</button></div>\n    </div>\n  </article>\n</ng-container>\n</main>\n";
+module.exports = "<main class=\"listings-shell\">\n  <p *ngIf=\"error\" class=\"error\" role=\"alert\">{{error | siteText}}</p>\n  <p *ngIf=\"message\" role=\"status\">{{message | siteText}}</p>\n  <p *ngIf=\"busy\" role=\"status\">{{uploadProgress || ('ui.labels.t01cba1dfba2e' | siteText:'Chargement…')}}</p>\n\n\n  <section class=\"listing-import wizard\" *ngIf=\"creationChoice && !creating && !adminScope\" aria-labelledby=\"import-title\">\n    <h2 id=\"import-title\">{{ix('title')}}</h2><p>{{ix('introExpanded')}}</p>\n    <form (ngSubmit)=\"previewImport()\"><fieldset [disabled]=\"importBusy\">\n      <label>{{ix('url')}}<input type=\"url\" name=\"importUrl\" [(ngModel)]=\"importUrl\" required maxlength=\"2048\" placeholder=\"https://…\"></label>\n      <label>{{ix('assetType')}}<select name=\"importAssetType\" [(ngModel)]=\"importAssetType\"><option value=\"\">{{ix('automaticType')}}</option><option *ngFor=\"let type of ['boat','car','property','parking','pool']\" [value]=\"type\">{{('ui.assetTypes.'+type) | siteText:type}}</option></select><small>{{ix('typeHint')}}</small></label>\n      <label>{{ix('rights')}}<input type=\"checkbox\" name=\"importRights\" [(ngModel)]=\"importRights\" required></label>\n      <details><summary>{{ix('paste')}}</summary><p>{{ix('pasteHint')}}</p><textarea name=\"importText\" [(ngModel)]=\"importText\" maxlength=\"30000\" rows=\"8\"></textarea></details>\n      <div class=\"wizard-actions\"><button type=\"submit\" [disabled]=\"!importRights || !importUrl.trim()\">{{ix('analyze')}}</button><button type=\"button\" class=\"quiet\" (click)=\"startManual()\">{{ix('manual')}}</button></div>\n    </fieldset></form>\n    <p *ngIf=\"importBusy\" role=\"status\">{{ix('loading')}}</p><p class=\"error\" role=\"alert\" *ngIf=\"importError\">{{importError}}</p>\n    <section *ngIf=\"importResult\" class=\"import-review\"><h3>{{ix('preview')}}</h3><p *ngIf=\"importResult.needsManualInput\">{{ix('incomplete')}}</p>\n      <h4>{{importResult.draft.name}}</h4><p class=\"import-description\">{{importResult.draft.description}}</p><p>{{importResult.draft.location.city}} {{importResult.draft.location.country}}</p>\n      <p *ngIf=\"importResult.draft.referencePrice\">{{ix('referencePrice')}} : {{importResult.draft.referencePrice.amount}} {{importResult.draft.referencePrice.currency}}</p><p>{{ix('priceNoticeExpanded')}}</p>\n      <fieldset [disabled]=\"importBusy\"><legend>{{ix('photos')}}</legend><p>{{ix('photosHint')}}</p><p *ngIf=\"!importPreviews.length\">{{ix('noPhotos')}}</p>\n      <div class=\"import-photo-grid\"><label class=\"import-photo-card\" *ngFor=\"let photo of importPreviews; let i=index\" [class.selected]=\"importPhotoChoices[i]\">\n        <img *ngIf=\"photo.url\" [src]=\"photo.url\" [alt]=\"ix('photo')+' '+(i+1)\" (error)=\"importPreviewFailed(i)\" decoding=\"async\">\n        <span class=\"import-photo-placeholder\" *ngIf=\"!photo.url\" role=\"status\">{{ix(photo.state==='error'?'photoUnavailable':'photoLoading')}}</span>\n        <span class=\"import-photo-choice\"><input type=\"checkbox\" [(ngModel)]=\"importPhotoChoices[i]\" [ngModelOptions]=\"{standalone:true}\" [disabled]=\"photo.state!=='ready'\"> {{ix('photo')}} {{i+1}}</span>\n      </label></div>\n      <button type=\"button\" class=\"quiet\" (click)=\"loadImportPreviews()\" [disabled]=\"importPreviewsLoading || !importRights\" *ngIf=\"importPreviews.length\">{{ix('retryPhotos')}}</button>\n      <button type=\"button\" (click)=\"applyImport()\" [disabled]=\"!importRights\">{{ix('useDraft')}}</button></fieldset><p>{{ix('reviewNotice')}}</p>\n    </section>\n  </section>\n\n  <section id=\"listing-editor\" class=\"wizard\" tabindex=\"-1\" *ngIf=\"creating\" aria-labelledby=\"wizard-title\">\n    <header><h2 id=\"wizard-title\">{{editing ? wx('manage') : wx('new')}}</h2><button class=\"quiet\" type=\"button\" (click)=\"closeEditor()\" [disabled]=\"busy||documentBusy||stripeConnecting\">{{wx('close')}}</button></header>\n    <nav class=\"steps\" [attr.aria-label]=\"wx('steps')\"><button *ngFor=\"let key of steps;let i=index\" type=\"button\" [class.current]=\"step===i\" [attr.aria-current]=\"step===i?'step':null\" [disabled]=\"busy || documentBusy || stripeConnecting\" (click)=\"goToStep(i)\"><span>{{i+1}}</span>{{key==='stripe'?sx('step'):wx(key)}}</button></nav>\n    <form *ngIf=\"step<3\" (ngSubmit)=\"create()\" (input)=\"wizardDirty=true\" (change)=\"wizardDirty=true\">\n      <fieldset [disabled]=\"busy\">\n        <div *ngIf=\"step===0\">\n          <h3>{{wx('details')}}</h3>\n          <div class=\"fields\">\n            <label>{{'ui.labels.t3deb74565196' | siteText:'Type de bien'}}<select name=\"assetType\" [(ngModel)]=\"form.assetType\" [disabled]=\"!!editing\" (ngModelChange)=\"changeType()\"><option *ngFor=\"let type of types\" [value]=\"type.id\">{{type.label | siteText}}</option></select></label>\n            <label>{{wx('title')}} *<input name=\"name\" [(ngModel)]=\"form.name\" required maxlength=\"120\" [placeholder]=\"wx(form.assetType==='car'?'carTitle':'titleExample')\"><small>{{wx('titleHint')}}</small></label>\n          </div>\n          <p *ngIf=\"editing?.prefix\">{{prefixText('Adresse actuelle','Current address')}} : <a [href]=\"'/b/'+editing.prefix\" target=\"_blank\" rel=\"noopener\">{{editing.prefix}}.godirect.fr</a></p>\n          <p *ngIf=\"sitePrefix || editing?.prefix\">Site du propriétaire : {{sitePrefix || editing?.prefix}}.godirect.fr · Un abonnement par bien.</p>\n          <section *ngIf=\"!sitePrefix && !editing?.prefix\" class=\"prefix-picker\" aria-labelledby=\"prefix-label\">\n            <h3 id=\"prefix-label\">{{prefixText('Préfixe du site de tous vos biens','Your listing address')}}</h3>\n            <label>{{prefixText('Saisissez au moins six lettres','Enter at least six letters')}}<input name=\"prefixQuery\" (blur)=\"prefixTouched=true\" [class.prefix-invalid]=\"prefixInvalid\" [attr.aria-invalid]=\"prefixInvalid\" [ngModel]=\"prefixInput\" (ngModelChange)=\"prefixChanged($event)\" maxlength=\"63\" autocomplete=\"off\" placeholder=\"monbien\" aria-describedby=\"prefix-hint prefix-error\"></label>\n            <small id=\"prefix-hint\">{{prefixText('Choisissez une proposition disponible. Ce préfixe sera partagé par vos prochains biens.','Select an available suggestion. You can change this address later.')}}</small>\n            <p *ngIf=\"prefixReady && !prefixLoading && !prefixError && !prefixChoices.length\" role=\"status\">{{prefixText('Aucune proposition disponible. Essayez un nom plus précis.','No suggestions available. Try a more specific name.')}}</p>\n            <p *ngIf=\"prefixLoading\" role=\"status\">{{prefixText('Recherche…','Searching…')}}</p>\n            <p *ngIf=\"prefixValidation\" id=\"prefix-error\" class=\"prefix-error\" role=\"alert\">{{prefixValidation}} <button *ngIf=\"prefixError\" type=\"button\" (click)=\"prefixChanged(prefixInput)\">{{prefixText('Réessayer','Retry')}}</button></p>\n            <label *ngIf=\"prefixChoices.length\">{{prefixText('Choisir un préfixe disponible','Select an available prefix')}}<select name=\"prefix\" [ngModel]=\"form.prefix\" (ngModelChange)=\"choosePrefix($event)\" [disabled]=\"prefixLoading\"><option value=\"\" disabled>{{prefixText('Choisissez une proposition','Choose a suggestion')}}</option><option *ngFor=\"let prefix of prefixChoices\" [value]=\"prefix\">{{prefix}}.godirect.fr</option></select></label>\n            <p *ngIf=\"form.prefix\" role=\"status\">https://{{form.prefix}}.godirect.fr</p>\n          </section>\n          <div class=\"description-field\"><label for=\"listing-description\">{{'ui.labels.t55f8ebc805e6' | siteText:'Description'}}</label><app-listing-description-editor [value]=\"form.description\" (valueChange)=\"form.description=$event;wizardDirty=true\" [lang]=\"language.currentLanguage\" [placeholder]=\"wx('descriptionHint')\" [disabled]=\"busy\"></app-listing-description-editor></div>\n          <details class=\"optional\"><summary>{{wx('subtitle')}}</summary><label>{{wx('subtitle')}}<input name=\"headline\" [(ngModel)]=\"form.headline\" maxlength=\"240\"></label></details>\n          <h3>{{wx('characteristics')}}</h3>\n          <div class=\"fields\"><ng-container *ngFor=\"let field of fields[form.assetType]\"><label *ngIf=\"field.key!=='rangeKm'\" [class.checkbox]=\"field.type==='checkbox'\">{{field.label | siteText}}<input [name]=\"field.key\" [type]=\"field.type\" [(ngModel)]=\"form.properties[field.key]\" [attr.min]=\"field.type==='number'?0:null\"></label></ng-container></div>\n          <details *ngIf=\"form.assetType==='car'\" class=\"optional\"><summary>{{wx('moreCharacteristics')}}</summary><label>{{'ui.labels.t43a4bb274dfb' | siteText:'Autonomie (km)'}}<input name=\"rangeKm\" type=\"number\" min=\"0\" [(ngModel)]=\"form.properties.rangeKm\"></label></details>\n          <h3>{{wx('location')}}</h3><p class=\"muted\">{{wx('locationHint')}}</p>\n          <div class=\"fields\">\n            <label>{{'ui.labels.td834cabd1c16' | siteText:'Ville / commune'}} {{locationRequired?'*':''}}<input name=\"city\" [(ngModel)]=\"form.location.city\" [required]=\"locationRequired\" maxlength=\"120\"></label>\n            <label>{{'ui.labels.tafb1b10b1a8f' | siteText:'Quartier / secteur (facultatif)'}}<input name=\"area\" [(ngModel)]=\"form.location.area\" maxlength=\"160\"></label>\n            <label>{{'ui.labels.t2a78f0e9eeb4' | siteText:'Pays'}} {{locationRequired?'*':''}}<input name=\"country\" [(ngModel)]=\"form.location.country\" [required]=\"locationRequired\" maxlength=\"120\"></label>\n          </div>\n        </div>\n        <div *ngIf=\"step===1\">\n          <h3>{{wx('photos')}}</h3><p>{{wx('photosHint')}}</p>\n          <button *ngIf=\"!photosLoaded && editing\" type=\"button\" (click)=\"loadWizardPhotos(editing)\">{{'ui.labels.t9d3b2a7d8b0d' | siteText:'Actualiser'}}</button><label class=\"upload-zone\" *ngIf=\"photosLoaded\">{{wx('selectMultiplePhotos')}}<input type=\"file\" multiple accept=\"image/jpeg,image/png,image/webp,image/avif,image/gif\" (change)=\"addPhotos($event)\"><small>{{wx('photoLimits')}}</small><small>{{wx('multiPhotoHint')}}</small></label><p *ngIf=\"photos.length\">{{photos.length}} {{wx('selectedPhotos')}}</p>\n          <p *ngIf=\"!photos.length\" class=\"muted\">{{wx('noPhotos')}}</p>\n          <div class=\"photo-grid\"><figure *ngFor=\"let photo of photos;let i=index\">\n            <img [src]=\"photo.preview\" [alt]=\"form.name+' — '+(i+1)\"><figcaption>{{i===0?wx('cover'):wx('photos')+' '+(i+1)}}</figcaption>\n            <div class=\"photo-actions\"><button type=\"button\" class=\"quiet\" [disabled]=\"i===0\" (click)=\"movePhoto(i,-1)\" [attr.aria-label]=\"wx('earlier')\">←</button><button type=\"button\" class=\"quiet\" [disabled]=\"i===photos.length-1\" (click)=\"movePhoto(i,1)\" [attr.aria-label]=\"wx('later')\">→</button><button type=\"button\" class=\"quiet danger-text\" (click)=\"removePhoto(i)\">{{wx('removePhoto')}}</button></div>\n          </figure></div>\n        </div>\n        <div *ngIf=\"step===2\">\n          <h3>{{wx('pricing')}}</h3>\n          <div class=\"fields\">\n            <label>{{wx('rentalPrice')}} *<input name=\"basePrice\" type=\"number\" min=\"0.01\" max=\"1000000\" step=\"0.01\" [(ngModel)]=\"form.pricing.basePrice\" required></label>\n            <label>{{'ui.labels.t0b6c4a3b107b' | siteText:'Unité de location'}}<select name=\"unit\" [(ngModel)]=\"form.pricing.pricingUnit\"><option value=\"hour\">{{'ui.labels.t5073129fadb8' | siteText:'Heure'}}</option><option value=\"day\">{{'ui.labels.t240ce85d68f5' | siteText:'Jour'}}</option><option value=\"night\">{{'ui.labels.t3359902f0d42' | siteText:'Nuit'}}</option></select></label>\n          </div>\n          <h3>{{wx('deposit')}}</h3><p class=\"muted\">{{wx('depositHint')}}</p>\n          <div class=\"fields\"><label>{{lx('depositType')}}<select name=\"depositType\" [(ngModel)]=\"form.depositType\"><option value=\"percentage\">{{lx('percent')}}</option><option value=\"fixed\">{{lx('fixed')}}</option></select></label><label>{{form.depositType==='percentage'?wx('depositPercent'):wx('depositFixed')}}<input name=\"deposit\" type=\"number\" min=\"0\" [max]=\"form.depositType==='percentage'?100:1000000\" step=\"0.01\" [(ngModel)]=\"form.depositPercent\"></label></div>\n          <label>{{'ui.labels.t83e815fcfbdc' | siteText:'Montant maximal de caution (EUR)'}}<input name=\"security\" type=\"number\" min=\"0\" max=\"1000000\" step=\"0.01\" [(ngModel)]=\"form.securityDeposit\"><small>{{wx('warrantyHint')}}</small></label>\n          <aside class=\"subscription-note\"><strong>{{wx('subscription')}}</strong><p>{{prices[form.assetType]/100 | number:'1.2-2'}} {{language.currentLanguage==='fr'?'€ TTC/an':'€ incl. tax/year'}} · {{wx('commission')}}</p><p>{{wx('publicationHint')}}</p></aside>\n          <ng-container *ngIf=\"editing\"><ng-container *ngTemplateOutlet=\"impactWarning\"></ng-container></ng-container>\n        </div>\n      </fieldset>\n      <footer class=\"wizard-footer\"><button type=\"button\" class=\"quiet\" *ngIf=\"step>0\" (click)=\"previousStep()\" [disabled]=\"busy\">{{wx('previous')}}</button><button type=\"button\" class=\"quiet\" *ngIf=\"step===1\" (click)=\"goToStep(2)\" [disabled]=\"busy\">{{sx('skipPhotos')}}</button><span>{{step+1}} / {{steps.length}}</span><button type=\"submit\" *ngIf=\"step<2\" [disabled]=\"busy || !stepValid(step)\">{{wx('next')}}</button><button type=\"submit\" *ngIf=\"step===2\" [disabled]=\"busy || !photosLoaded || !stepValid(2) || (!!editing && (!impact || (impact.active>0 && !acknowledged)))\">{{wx('saveAndDocuments')}}</button></footer>\n    </form>\n    <div *ngIf=\"step===3 && editing\"><h3>{{wx('documents')}}</h3><p>{{wx('draftBeforeDocuments')}}</p><app-asset-documents [scope]=\"documentScope\" [embedded]=\"true\" (summaryChanged)=\"documentsUpdated($event)\" (busyChanged)=\"documentBusy=$event\"></app-asset-documents><p *ngIf=\"!documentsReady && !adminScope\">{{sx('documentsOptional')}}</p><footer class=\"wizard-footer\"><button type=\"button\" class=\"quiet\" (click)=\"previousStep()\" [disabled]=\"busy||documentBusy\">{{wx('previous')}}</button><span>4 / {{steps.length}}</span><button type=\"button\" class=\"quiet\" *ngIf=\"!adminScope\" (click)=\"skipDocuments()\" [disabled]=\"busy||documentBusy||stripeConnecting\">{{sx('skipDocuments')}}</button><button type=\"button\" (click)=\"finishWizard()\" [disabled]=\"busy||documentBusy||(!adminScope&&!documentsReady)\">{{adminScope?wx('finish'):sx('next')}}</button></footer></div>\n    <section *ngIf=\"step===4 && editing && !adminScope\" class=\"wizard-stripe\" aria-labelledby=\"wizard-stripe-title\">\n      <h3 id=\"wizard-stripe-title\">{{sx(stripeKnown&&stripeStatus.connected?(stripeStatus.chargesEnabled?'alreadyConfigured':'alreadyConnected'):'title')}}</h3>\n      <p *ngIf=\"stripeKnown && stripeStatus.connected\">{{sx(stripeStatus.chargesEnabled?'reuseReady':'reuseIncomplete')}}</p>\n      <p *ngIf=\"stripeKnown && !stripeStatus.connected\">{{sx('intro')}}</p>\n      <p>{{sx('listingSaved')}}</p>\n      <p *ngIf=\"stripeLoading\" role=\"status\">{{sx('checking')}}</p>\n      <p *ngIf=\"stripeError\" role=\"alert\" class=\"error\">{{stripeError}}</p>\n      <ng-container *ngIf=\"stripeKnown\">\n        <button type=\"button\" *ngIf=\"!stripeStatus.connected\" (click)=\"connectWizardStripe()\" [disabled]=\"stripeConnecting||stripeLoading||busy\">{{sx('connect')}}</button>\n      </ng-container>\n      <button *ngIf=\"!stripeKnown || !stripeStatus.connected || !stripeStatus.chargesEnabled\" type=\"button\" class=\"quiet\" (click)=\"loadWizardStripe()\" [disabled]=\"stripeLoading||stripeConnecting\">{{sx('refresh')}}</button>\n      <p *ngIf=\"stripeKnown && !stripeStatus.connected\">{{sx('optional')}}</p>\n      <footer class=\"wizard-footer\"><button type=\"button\" class=\"quiet\" (click)=\"previousStep()\" [disabled]=\"stripeConnecting||stripeLoading\">{{wx('previous')}}</button><span>5 / {{steps.length}}</span><button type=\"button\" (click)=\"completeWizard()\" [disabled]=\"stripeConnecting||busy\">{{sx(stripeKnown&&stripeStatus.connected?'finish':'skip')}}</button></footer>\n    </section>\n  </section>\n\n  <section id=\"listing-delete\" *ngIf=\"deleting\"><h2>{{lx('deleteTitle')}} — {{deleting.name}}</h2><p>{{lx('deleteInfo')}}</p><ng-container *ngTemplateOutlet=\"impactWarning\"></ng-container><div class=\"actions\"><button class=\"danger\" type=\"button\" (click)=\"commitListing()\" [disabled]=\"busy || !impact || !acknowledged\">{{lx('confirmDelete')}}</button><button class=\"quiet\" type=\"button\" (click)=\"closeEditor()\" [disabled]=\"busy\">{{lx('cancel')}}</button></div></section>\n  <ng-template #impactWarning><div class=\"reservation-warning\" *ngIf=\"impact\"><strong *ngIf=\"impact.active>0\">{{lx('warning')}}</strong><p>{{lx('pending')}} {{impact.pending}} · {{lx('confirmed')}} {{impact.confirmed}}</p><p>{{lx('preserve')}}</p><p *ngIf=\"impact.subscriptionContinues && deleting\">{{lx('subscription')}}</p><label class=\"checkbox\" *ngIf=\"deleting || impact.active>0\"><input type=\"checkbox\" [(ngModel)]=\"acknowledged\" [ngModelOptions]=\"{standalone:true}\" [disabled]=\"busy\">{{lx('acknowledge')}}</label></div><button class=\"quiet\" type=\"button\" *ngIf=\"!impact\" (click)=\"reloadImpact()\" [disabled]=\"busy\">{{lx('review')}}</button></ng-template>\n\n  <ng-container *ngIf=\"!adminScope && !creating && !deleting\">\n  <nav class=\"list-toolbar\"><button class=\"quiet\" type=\"button\" (click)=\"refresh()\" [disabled]=\"busy\">{{'ui.labels.t9d3b2a7d8b0d' | siteText:'Actualiser'}}</button></nav>\n  <p *ngIf=\"!busy && !error && !visibleRows.length\">{{'ui.labels.t8a71f9afe03f' | siteText:'Vous n’avez pas encore d’annonce.'}}</p>\n  <article *ngFor=\"let a of visibleRows\">\n    <img class=\"gd-cover\" *ngIf=\"cover(a) as photo\" [src]=\"photo\" alt=\"\" loading=\"lazy\" (error)=\"$any($event.target).hidden=true\"><button *ngIf=\"!adminScope\" type=\"button\" (click)=\"openManaged(a)\">Ouvrir mon site</button><header><div><h2>{{a.name}}</h2><p>{{label(a.assetType) | siteText}} · {{a.public?('ui.labels.t2810e213c9b3' | siteText:'En ligne'):('ui.labels.t2b3e7dcedd58' | siteText:'Hors ligne')}}</p><p *ngIf=\"a.moderation\">{{moderationLabel(a)}}<span *ngIf=\"a.moderation.reason\"> — {{a.moderation.reason}}</span></p></div></header>\n    <nav class=\"listing-checks\" aria-label=\"État du bien\">\n    <button type=\"button\" (click)=\"openSubscription(a)\" [class.ready]=\"a.billing?.active\" [attr.aria-expanded]=\"subscriptionAsset?.id===a.id\">{{a.billing?.active?'✓':'○'}} Abonnement</button>\n    <a [routerLink]=\"['/owner/listings',a.assetType,a.id,'documents']\" [class.ready]=\"['exempted','validated'].includes(a.documents?.status)\">{{['exempted','validated'].includes(a.documents?.status)?'✓':'○'}} Justificatifs</a>\n    <span *ngIf=\"a.moderation?.status==='approved';else needsReview\" class=\"ready\">✓ Modération</span>\n    <ng-template #needsReview><a *ngIf=\"!a.deletedAt;else archived\" routerLink=\"/messages\" [queryParams]=\"{kind:'subscription',audience:'management',type:a.assetType,assetId:a.id,open:'moderation'}\" title=\"Contacter l’administration pour ce bien\">○ Modération ↗</a><ng-template #archived><span>○ Modération</span></ng-template></ng-template>\n    </nav>\n    <p *ngIf=\"a.prefix\"><a [href]=\"'/b/'+a.prefix\" target=\"_blank\" rel=\"noopener\" (click)=\"adminScope ? null : openManagedLink($event,a)\">{{a.prefix}}.godirect.fr</a></p>\n    <p *ngIf=\"a.location?.city\">{{a.location.city}} · {{a.location.country}}</p>\n    <p *ngIf=\"a.billing?.paidUntil\">{{'ui.labels.t0d63aefb4029' | siteText:'Échéance :'}} {{a.billing.paidUntil*1000 | date:'dd/MM/yyyy'}}</p>\n    <p class=\"reservation-warning\" *ngIf=\"a.reservationSummary?.active>0\">{{lx('pending')}} {{a.reservationSummary.pending}} · {{lx('confirmed')}} {{a.reservationSummary.confirmed}}</p>\n    <div class=\"actions\"><app-message-link *ngIf=\"!a.deletedAt\" kind=\"subscription\" audience=\"management\" [type]=\"a.assetType\" [assetId]=\"a.id\"></app-message-link><app-asset-calendar-link *ngIf=\"!a.deletedAt\" [type]=\"a.assetType\" [assetId]=\"a.id\"></app-asset-calendar-link><details #actionsMenu class=\"more-actions\"><summary>{{prefixText('Actions du bien','Listing actions')}}</summary><div (click)=\"actionsMenu.open=false\"><a [routerLink]=\"['/owner/listings',a.assetType,a.id,'documents']\">{{ 'ui.documents.title' | siteText }}</a>\n      <button *ngIf=\"!a.deletedAt\" type=\"button\" (click)=\"prepare(a,'edit')\" [disabled]=\"busy\">{{wx('manage')}}</button>\n      <a *ngIf=\"!a.deletedAt\" class=\"secondary\" [routerLink]=\"path(a,'home')\">{{'ui.labels.ta79cb6e52048' | siteText:'Voir l’annonce'}}</a>\n      <button type=\"button\" class=\"quiet\" (click)=\"openSubscription(a)\" [disabled]=\"busy\" [attr.aria-expanded]=\"subscriptionAsset?.id===a.id\">{{wx('subscription')}}</button>\n      \n        <a routerLink=\"/owner/activity/reservations\" [queryParams]=\"{type:a.assetType,id:a.id}\">{{'ui.labels.t3571ba76f535' | siteText:'Réservations'}}</a>\n        <button type=\"button\" *ngIf=\"!a.deletedAt\" (click)=\"action(a,a.moderation?.status==='rejected'?'resubmit':'publication')\" [disabled]=\"busy\">{{a.moderation?.status==='rejected'?wx('requestPublication'):(a.published?('ui.labels.tadb05f2ba3e9' | siteText:'Masquer'):('ui.labels.tac3d5933ad45' | siteText:'Demander la publication'))}}</button>\n        <button type=\"button\" class=\"danger-text\" *ngIf=\"!a.deletedAt\" (click)=\"prepare(a,'delete')\" [disabled]=\"busy\">{{lx('remove')}}</button>\n      </div></details>\n    </div>\n    <div class=\"subscription-panel\" *ngIf=\"subscriptionAsset?.id===a.id\">\n      <h3>{{wx('subscription')}}</h3><p>{{(a.annualPrice || prices[a.assetType])/100 | number:'1.2-2'}} {{a.annualTaxBehavior==='exclusive'?(language.currentLanguage==='fr'?'€ HT/an':'€ excl. tax/year'):(language.currentLanguage==='fr'?'€ TTC/an':'€ incl. tax/year')}} · {{wx('commission')}}</p>\n      <p *ngIf=\"a.billing?.status==='checkout_expired'\" role=\"status\">{{wx('checkoutExpiredHint')}}</p>\n      <p *ngIf=\"a.billing?.startedAt\">{{wx('subscribedOn')}} {{a.billing.startedAt*1000 | date:'dd/MM/yyyy'}}</p>\n      <p *ngIf=\"a.billing?.paidUntil\">{{'ui.labels.t0d63aefb4029' | siteText:'Échéance :'}} {{a.billing.paidUntil*1000 | date:'dd/MM/yyyy'}} · {{a.billing.cancelAtPeriodEnd?('ui.labels.tebe23409c76a' | siteText:'Renouvellement arrêté'):('ui.labels.tebd3fe7f150b' | siteText:'Renouvellement automatique')}}</p>\n      <div class=\"actions\"><button *ngIf=\"!a.deletedAt && (!a.billing || ['required','not_subscribed','checkout_pending','checkout_expired','canceled','incomplete_expired'].includes(a.billing.status))\" (click)=\"action(a,'checkout')\" [disabled]=\"busy\">{{a.billing?.status==='checkout_expired'?wx('resumeCheckout'):a.billing?.status==='checkout_pending'?wx('continueCheckout'):('ui.labels.ta12aebe73a3a' | siteText:'Souscrire pour cette annonce')}}</button><button *ngIf=\"a.billing?.canReconcile && a.billing.status!=='active'\" class=\"quiet\" (click)=\"action(a,'reconcile')\" [disabled]=\"busy\">{{'ui.labels.t5345fd6297bf' | siteText:'Vérifier le paiement'}}</button><button *ngIf=\"a.billing?.canOpenPortal\" (click)=\"action(a,'portal')\" [disabled]=\"busy\">{{'ui.labels.t4d8a96c1796f' | siteText:'Factures et paiement'}}</button><button *ngIf=\"a.billing?.status==='active'\" class=\"quiet\" (click)=\"action(a,'renewal')\" [disabled]=\"busy\">{{a.billing.cancelAtPeriodEnd?('ui.labels.tc3b2220545fa' | siteText:'Réactiver le renouvellement'):('ui.labels.tfb388938ad82' | siteText:'Arrêter le renouvellement')}}</button></div>\n    </div>\n  </article>\n</ng-container>\n</main>\n";
 
 /***/ }),
 

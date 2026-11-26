@@ -1,3 +1,6 @@
+import {installOwnerStorefront} from '../services/owner-storefront.js';
+import {installManagementEntry} from '../services/management-entry.js';
+import {installPush} from '../services/portal-push.js';
 import {MobileAlerts} from '../services/mobile-alerts.js';
 import {installPortalPages} from '../services/portal-sites.js';
 import {AuthSessionService} from '../services/auth-session.service.js';
@@ -61,6 +64,7 @@ export class WebServerComponent {
           imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
           connectSrc: ["'self'", 'https:', 'wss:'],
           frameSrc: ["'self'", 'https:'],
+          formAction: ["'self'", 'https://*.godirect.fr'],
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
           frameAncestors: ["'self'"],
@@ -93,6 +97,9 @@ export class WebServerComponent {
     this.app.post('/api/contact',express.json({limit:'32kb'}),this.asyncRoute(createContactHandler()));
     this.app.use(express.json({ limit: '2mb' }));
     this.app.use(express.urlencoded({ extended: true }));
+    installManagementEntry(this.app,this.accounts.store,express.urlencoded({extended:false,limit:'1kb'}));
+    installPush(this.app,this.accounts.store,()=>!!this.messaging?.ready);
+    installOwnerStorefront(this.app,this.accounts.store);
     installPortalPages(this.app,this.accounts.store);
     this.notifications?.routes(this.app);
     const mobileAlerts=new MobileAlerts(this.accounts.store);mobileAlerts.routes(this.app);
@@ -135,6 +142,8 @@ export class WebServerComponent {
     this.app.post('/api/me/bookings/:type/:id/:bookingId/warranty-consent',this.asyncRoute(this.stripe.warranty.consent));
     this.app.get('/api/me/bookings/:type/:id/:bookingId/warranty-charges/:requestId/payment',this.asyncRoute(this.stripe.warranty.authenticate));
     this.app.get('/api/owner/listings',this.asyncRoute(this.billing.list));
+    this.app.get('/api/owner/site-settings',this.asyncRoute(this.billing.siteSettings));
+    this.app.put('/api/owner/site-settings',this.asyncRoute(this.billing.siteSettings));
     this.app.get('/api/owner/prefixes',this.asyncRoute(this.billing.prefixes));
     this.app.post('/api/owner/listing-import/preview',this.asyncRoute(this.owners.importListing));
     this.app.post('/api/owner/listing-import/photo',this.asyncRoute(this.owners.importPhoto));
@@ -158,7 +167,10 @@ export class WebServerComponent {
     this.app.get('/api/platform/admin/overview',this.asyncRoute(this.accounts.platformOverview));
     this.app.get('/api/me/context',this.asyncRoute(this.accounts.context));
     this.app.get('/api/me/roles',this.asyncRoute(this.accounts.accountRoles));
+    this.app.get('/api/me/avatar',this.asyncRoute(this.accounts.getAvatar));
+    this.app.put('/api/me/avatar',this.asyncRoute(this.accounts.saveAvatar));
     this.app.get('/api/me/profile',this.asyncRoute(this.accounts.getProfile));
+    this.app.put('/api/stay-reviews/:type/:id/:bookingId',this.asyncRoute(this.accounts.writeStayReview));
     this.app.get('/api/me/feedbacks',this.asyncRoute(this.accounts.myFeedbacks));
     this.app.get('/api/manage/assets/:type/:id/feedbacks',this.asyncRoute(this.accounts.assetFeedbacks));
     this.app.put('/api/me/profile',this.asyncRoute(this.accounts.saveProfile));
@@ -171,13 +183,14 @@ export class WebServerComponent {
     this.app.get('/api/health', (_req, res) =>
       res.json({
         name: 'GoDirect API',
-        version: '22.16.3',
+        version: '22.16.27',
         ok: true,
         timestamp: new Date().toISOString(),
       }),
     );
 
     this.app.get('/api/asset-types', this.asyncRoute(this.assets.assetTypes));
+    this.app.get('/api/listing-content/:type/:id',this.asyncRoute(this.assets.listingContent));
     this.app.get('/api/assets', this.asyncRoute(this.assets.list));
     this.app.get('/api/resources/:type', this.asyncRoute(this.assets.listByType));
     this.app.get('/api/resources/:type/:id', this.asyncRoute(this.assets.getByScope));
@@ -185,6 +198,7 @@ export class WebServerComponent {
     this.app.get('/api/assets/:id', this.asyncRoute(this.assets.get));
     this.app.get('/api/assets/:assetId/faqs', this.asyncRoute(this.assets.faqs));
 
+    this.app.patch('/api/assets/:type/:id/calendar',this.asyncRoute(this.assets.calendar.edit));
     this.app.get('/api/assets/:type/:id/calendar',this.asyncRoute(this.assets.calendar.get));
     this.app.post('/api/bookings', this.asyncRoute(this.bookings.create));
     this.app.post('/api/car-bookings/quote', this.asyncRoute(this.bookings.carQuote));
@@ -197,6 +211,7 @@ export class WebServerComponent {
     this.app.post('/api/pool-bookings', this.asyncRoute(this.bookings.createResource('pool')));
     this.app.post('/api/boat-bookings/quote', this.asyncRoute(this.bookings.resourceQuote('boat')));
     this.app.post('/api/boat-bookings', this.asyncRoute(this.bookings.createResource('boat')));
+    this.app.get('/api/me/rented-assets',this.asyncRoute(this.bookings.rentedAssets));
     this.app.get('/api/me/bookings', this.asyncRoute(this.bookings.customerMyBookings));
     this.app.get('/api/me/bookings/:type/:assetId/:bookingId', this.asyncRoute(this.bookings.customerMyBooking));
     this.app.patch('/api/me/bookings/:type/:assetId/:bookingId', this.asyncRoute(this.bookings.customerBookingPatch));

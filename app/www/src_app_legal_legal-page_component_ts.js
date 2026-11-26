@@ -12,19 +12,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   LegalPageComponent: () => (/* binding */ LegalPageComponent)
 /* harmony export */ });
 /* harmony import */ var _Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 89204);
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! tslib */ 27824);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! tslib */ 27824);
 /* harmony import */ var _legal_page_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./legal-page.component.html?ngResource */ 87208);
 /* harmony import */ var _legal_page_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./legal-page.component.scss?ngResource */ 38768);
 /* harmony import */ var _legal_page_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_legal_page_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/core */ 37580);
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/common */ 35135);
-/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @angular/forms */ 34456);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/router */ 50085);
-/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/router */ 99585);
-/* harmony import */ var _services_legal_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/legal.service */ 5847);
-/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/language.service */ 48756);
-/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
-/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
+/* harmony import */ var _services_site_return__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/site-return */ 50831);
+/* harmony import */ var _services_asset_domain__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/asset-domain */ 94984);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @angular/common */ 35135);
+/* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @angular/forms */ 34456);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @angular/router */ 50085);
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @angular/router */ 99585);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! rxjs */ 19999);
+/* harmony import */ var _services_legal_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/legal.service */ 5847);
+/* harmony import */ var _services_language_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/language.service */ 48756);
+/* harmony import */ var _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../home/site-text.pipe */ 99343);
+/* harmony import */ var _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../layout/platform-layout/platform-layout.component */ 86075);
+
+
+
 
 
 
@@ -43,6 +49,8 @@ let LegalPageComponent = class LegalPageComponent {
   router;
   language;
   catalog;
+  roles = [];
+  loading = false;
   labels = {};
   errorKey = '';
   name = '';
@@ -63,9 +71,25 @@ let LegalPageComponent = class LegalPageComponent {
   }
   ngOnInit() {
     this.sign = this.route.snapshot.data['accept'] === true;
-    this.role = this.route.snapshot.queryParamMap.get('role') || 'customer';
-    this.sub = this.language.language$.subscribe(() => {
+    this.sub = (0,rxjs__WEBPACK_IMPORTED_MODULE_9__.combineLatest)([this.route.queryParamMap, this.language.language$]).subscribe(([params]) => {
+      this.role = this.validRole(params.get('role'));
       void this.load();
+    });
+  }
+  validRole(value) {
+    return value === 'assetOwner' || value === 'concierge' ? value : 'customer';
+  }
+  selectRole(value) {
+    if (this.sign || this.working) return;
+    const role = this.validRole(value);
+    if (role === this.role) return;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        role
+      },
+      queryParamsHandling: 'merge',
+      preserveFragment: true
     });
   }
   ngOnDestroy() {
@@ -75,20 +99,23 @@ let LegalPageComponent = class LegalPageComponent {
   load() {
     var _this = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const n = ++_this.request;
+      const n = ++_this.request,
+        role = _this.role;
+      _this.loading = true;
       _this.catalog = null;
       _this.agreed = false;
       _this.saved = false;
       _this.receipt = null;
       _this.errorKey = '';
       try {
-        const catalog = yield _this.api.catalog(_this.role);
+        const catalog = yield _this.api.catalog(role);
         if (n !== _this.request) return;
         _this.catalog = catalog;
         _this.labels = catalog.labels;
+        _this.roles = catalog.roles || [];
         if (_this.sign) {
           try {
-            const s = yield _this.api.status(_this.role);
+            const s = yield _this.api.status(role);
             if (n !== _this.request) return;
             _this.receipt = s.receipt;
             _this.saved = s.accepted;
@@ -98,13 +125,15 @@ let LegalPageComponent = class LegalPageComponent {
         }
       } catch {
         if (n === _this.request) _this.errorKey = 'error';
+      } finally {
+        if (n === _this.request) _this.loading = false;
       }
     })();
   }
   accept() {
     var _this2 = this;
     return (0,_Users_faycalamrani_data_ADN_boatify_app_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      if (!_this2.catalog?.accepting || !_this2.adult || !_this2.agreed || _this2.name.trim().length < 2) return;
+      if (_this2.loading || _this2.working || !_this2.catalog?.accepting || !_this2.adult || !_this2.agreed || _this2.name.trim().length < 2) return;
       const n = _this2.request,
         catalog = _this2.catalog;
       _this2.working = true;
@@ -122,8 +151,8 @@ let LegalPageComponent = class LegalPageComponent {
     })();
   }
   continue() {
-    const target = this.route.snapshot.queryParamMap.get('returnUrl') || '/account/profile';
-    void this.router.navigateByUrl(target.startsWith('/') && !target.startsWith('//') && !target.startsWith('/account/accept-terms') ? target : '/account/profile');
+    const host = location.hostname;
+    void this.router.navigateByUrl((0,_services_site_return__WEBPACK_IMPORTED_MODULE_3__.siteReturn)(this.route.snapshot.queryParamMap.get('returnUrl'), host, (0,_services_asset_domain__WEBPACK_IMPORTED_MODULE_4__.assetDomainSlug)(host) ? '/' : '/account/profile'));
   }
   downloadDocument(d) {
     var _this3 = this;
@@ -164,18 +193,18 @@ let LegalPageComponent = class LegalPageComponent {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   static ctorParameters = () => [{
-    type: _services_legal_service__WEBPACK_IMPORTED_MODULE_3__.LegalService
+    type: _services_legal_service__WEBPACK_IMPORTED_MODULE_5__.LegalService
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_7__.ActivatedRoute
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_10__.ActivatedRoute
   }, {
-    type: _angular_router__WEBPACK_IMPORTED_MODULE_7__.Router
+    type: _angular_router__WEBPACK_IMPORTED_MODULE_10__.Router
   }, {
-    type: _services_language_service__WEBPACK_IMPORTED_MODULE_4__.LanguageService
+    type: _services_language_service__WEBPACK_IMPORTED_MODULE_6__.LanguageService
   }];
 };
-LegalPageComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_8__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_9__.Component)({
+LegalPageComponent = (0,tslib__WEBPACK_IMPORTED_MODULE_11__.__decorate)([(0,_angular_core__WEBPACK_IMPORTED_MODULE_12__.Component)({
   standalone: true,
-  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_10__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_11__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_12__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_6__.PlatformLayoutComponent, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_5__.SiteTextPipe],
+  imports: [_angular_common__WEBPACK_IMPORTED_MODULE_13__.CommonModule, _angular_forms__WEBPACK_IMPORTED_MODULE_14__.FormsModule, _angular_router__WEBPACK_IMPORTED_MODULE_15__.RouterModule, _layout_platform_layout_platform_layout_component__WEBPACK_IMPORTED_MODULE_8__.PlatformLayoutComponent, _home_site_text_pipe__WEBPACK_IMPORTED_MODULE_7__.SiteTextPipe],
   template: _legal_page_component_html_ngResource__WEBPACK_IMPORTED_MODULE_1__,
   styles: [(_legal_page_component_scss_ngResource__WEBPACK_IMPORTED_MODULE_2___default())]
 })], LegalPageComponent);
@@ -286,7 +315,7 @@ module.exports = ___CSS_LOADER_EXPORT___.toString();
 /***/ ((module) => {
 
 "use strict";
-module.exports = "<app-platform-layout><main class=\"legal-shell\"><p class=\"eyebrow\">GoDirect · All Digital Network</p><h1>{{sign?labels.acceptTitle:labels.conditions}}</h1><p>{{labels.intro}}</p><nav aria-label=\"GoDirect\"><a routerLink=\"/legal\">{{'ui.legal.conditions' | siteText}}</a><a routerLink=\"/faq\">{{'ui.legal.faq' | siteText}}</a><a [href]=\"'mailto:'+labels.contactEmail\">{{'ui.legal.contact' | siteText}}</a></nav><label>{{labels.activity}}<select [(ngModel)]=\"role\" (ngModelChange)=\"load()\" [disabled]=\"sign\"><option *ngFor=\"let r of catalog?.roles\" [value]=\"r.id\">{{r.label}}</option></select></label><p *ngIf=\"errorKey\" role=\"alert\">{{labels[errorKey] || ('ui.legal.contact' | siteText)}}</p><ng-container *ngIf=\"catalog\"><p>{{labels.languageLabel}} : {{catalog.language}}</p><p class=\"draft\" *ngIf=\"!catalog.published\">{{labels.notPublished}} {{catalog.accepting?labels.draftTest:labels.waitPublication}}</p><article *ngFor=\"let d of catalog.documents\" [attr.lang]=\"d.language\"><h2>{{d.title}}</h2><p>{{d.version}}</p><button type=\"button\" (click)=\"downloadDocument(d)\">{{labels.downloadText}}</button><pre>{{d.text}}</pre><details *ngIf=\"d.language!=='fr'\"><summary>{{labels.showFrench}}</summary><pre lang=\"fr\">{{d.referenceText}}</pre></details></article><section *ngIf=\"sign&&!saved\"><h2>{{labels.signTitle}}</h2><p>{{labels.signIntro}}</p><label>{{labels.name}}<input [(ngModel)]=\"name\" autocomplete=\"name\" maxlength=\"240\"></label><label class=\"check\"><input type=\"checkbox\" [(ngModel)]=\"adult\">{{labels.adult}}</label><label class=\"check\"><input type=\"checkbox\" [(ngModel)]=\"agreed\">{{labels.agree}}</label><p>{{labels.noMarketing}}</p><button type=\"button\" (click)=\"accept()\" [disabled]=\"working||!catalog.accepting||!adult||!agreed||name.trim().length<2\">{{working?labels.saving:labels.save}}</button></section><section *ngIf=\"sign&&saved\"><h2>{{labels.saved}}</h2><p>{{receipt?.signerName}} · {{receipt?.acceptedAt | date:'dd/MM/yyyy HH:mm'}} · {{receipt?.language}}</p><button type=\"button\" (click)=\"downloadReceipt()\">{{labels.receipt}}</button><button type=\"button\" (click)=\"continue()\">{{labels.continue}}</button></section></ng-container></main></app-platform-layout>\n";
+module.exports = "<app-platform-layout><main class=\"legal-shell\"><p class=\"eyebrow\">GoDirect · All Digital Network</p><h1>{{sign?labels.acceptTitle:labels.conditions}}</h1><p>{{labels.intro}}</p><nav aria-label=\"GoDirect\"><a routerLink=\"/legal\">{{'ui.legal.conditions' | siteText}}</a><a routerLink=\"/faq\">{{'ui.legal.faq' | siteText}}</a><a [href]=\"'mailto:'+labels.contactEmail\">{{'ui.legal.contact' | siteText}}</a></nav><label>{{labels.activity}}<select [ngModel]=\"role\" (ngModelChange)=\"selectRole($event)\" [disabled]=\"sign||working\"><option *ngFor=\"let r of roles\" [value]=\"r.id\">{{r.label}}</option></select></label><p *ngIf=\"errorKey\" role=\"alert\">{{labels[errorKey] || ('ui.legal.contact' | siteText)}}</p><ng-container *ngIf=\"catalog\"><p>{{labels.languageLabel}} : {{catalog.language}}</p><p class=\"draft\" *ngIf=\"!catalog.published\">{{labels.notPublished}} {{catalog.accepting?labels.draftTest:labels.waitPublication}}</p><article *ngFor=\"let d of catalog.documents\" [attr.lang]=\"d.language\"><h2>{{d.title}}</h2><p>{{d.version}}</p><button type=\"button\" (click)=\"downloadDocument(d)\">{{labels.downloadText}}</button><pre>{{d.text}}</pre><details *ngIf=\"d.language!=='fr'\"><summary>{{labels.showFrench}}</summary><pre lang=\"fr\">{{d.referenceText}}</pre></details></article><section *ngIf=\"sign&&!saved\"><h2>{{labels.signTitle}}</h2><p>{{labels.signIntro}}</p><label>{{labels.name}}<input [(ngModel)]=\"name\" autocomplete=\"name\" maxlength=\"240\"></label><label class=\"check\"><input type=\"checkbox\" [(ngModel)]=\"adult\">{{labels.adult}}</label><label class=\"check\"><input type=\"checkbox\" [(ngModel)]=\"agreed\">{{labels.agree}}</label><p>{{labels.noMarketing}}</p><button type=\"button\" (click)=\"accept()\" [disabled]=\"loading||working||!catalog.accepting||!adult||!agreed||name.trim().length<2\">{{working?labels.saving:labels.save}}</button></section><section *ngIf=\"sign&&saved\"><h2>{{labels.saved}}</h2><p>{{receipt?.signerName}} · {{receipt?.acceptedAt | date:'dd/MM/yyyy HH:mm'}} · {{receipt?.language}}</p><button type=\"button\" (click)=\"downloadReceipt()\">{{labels.receipt}}</button><button type=\"button\" (click)=\"continue()\">{{labels.continue}}</button></section></ng-container></main></app-platform-layout>\n";
 
 /***/ })
 

@@ -2,3 +2,10 @@
 @import url("https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i&amp;display=swap");
 @import url("https://fonts.googleapis.com/css?family=Anton");
 @import url("https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i");
+
+
+@media(max-width:1100px){
+ body:has(app-shared-header .mobile-bottom-nav){--gd-mobile-nav-height:calc(64px + env(safe-area-inset-bottom,0px));padding-bottom:var(--gd-mobile-nav-height)}
+ body:has(app-shared-header .mobile-bottom-nav) .messages-launcher{translate:0 calc(-1 * var(--gd-mobile-nav-height))}
+ body:has(app-shared-header .mobile-bottom-nav) .message-toast{translate:0 calc(-1 * var(--gd-mobile-nav-height))}
+}
